@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Buds.Characters;
 using Buds.Quests;
+using Buds.World;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Buds.Tests
             Assert.IsTrue(shoes.IsGear);
             Assert.IsFalse(Content.Item("outfit-bluza").IsGear, "looks are not gear");
             Assert.AreEqual(8, Content.slots.Length);
-            Assert.AreEqual(3, Content.stats.Length);
+            Assert.AreEqual(4, Content.stats.Length);
             foreach (var item in Content.items)
                 if (item.premium)
                     Assert.IsTrue(item.speed == 0 && item.armor == 0 && item.luck == 0 && item.skillBonus.Length == 0,
@@ -78,6 +79,69 @@ namespace Buds.Tests
             }
             Assert.AreEqual(BudMotor.WalkSpeed * 1.12f, b.x, 1e-3);
             Assert.Greater(b.x, a.x);
+        }
+
+        [Test]
+        public void EveryItemHasALevelAndEveryHeldItemIsAWeapon()
+        {
+            foreach (var item in Content.items)
+            {
+                Assert.GreaterOrEqual(item.minLevel, 1, item.id);
+                if (item.slot == "held") Assert.IsNotEmpty(item.weapon, $"{item.id} is a weapon");
+            }
+            for (var slot = 0; slot < Content.slots.Length; slot++)
+            {
+                var n = 0;
+                foreach (var item in Content.items)
+                    if (item.slot == Content.slots[slot].id) n++;
+                Assert.GreaterOrEqual(n, 10, Content.slots[slot].id);
+            }
+        }
+
+        [Test]
+        public void AddsAttackFromWeapons()
+        {
+            var s = Gear.Stats(Content, new[] { "kij-hejnal", "bransoleta-z-kolcami" }, NoRanks);
+            Assert.AreEqual(Content.Item("kij-hejnal").attack + Content.Item("bransoleta-z-kolcami").attack, s.Attack);
+            StringAssert.StartsWith("+4 Atak", Gear.Describe(Content, Content.Item("kij-hejnal")));
+        }
+    }
+
+    /// <summary>Duels: the game only animates, but its data has to match what the server plays.</summary>
+    public class DuelContentTests
+    {
+        static readonly QuestContent Content = QuestContent.Load();
+        static readonly string[] Anims = { "jab", "hook", "kick", "guard", "thrust", "swing", "spin", "shoot", "spray", "shout", "flip", "dodge", "aim" };
+
+        [Test]
+        public void EveryWeaponKindHasFourKnownMoves()
+        {
+            Assert.AreEqual(6, Content.weapons.Length);
+            foreach (var w in Content.weapons)
+            {
+                Assert.AreEqual(4, w.moves.Length, w.kind);
+                foreach (var id in w.moves)
+                {
+                    var m = Content.Move(id);
+                    Assert.IsNotNull(m, id);
+                    CollectionAssert.Contains(Anims, m.anim, $"{id}: the fight screen knows how to play it");
+                }
+            }
+            CollectionAssert.AreEqual(Content.MovesFor("piesci"), Content.MovesFor("nieznana"), "unknown = fists");
+        }
+
+        [Test]
+        public void OpponentsStandOnFreeGroundWithTheirSheets()
+        {
+            Assert.GreaterOrEqual(Content.enemies.Length, 20);
+            foreach (var e in Content.enemies)
+            {
+                var map = MapFormat.Load(e.district);
+                Assert.IsNotEmpty(e.spots, e.id);
+                foreach (var p in e.spots) Assert.IsTrue(map.IsWalkable(p.x, p.y), $"{e.id} at ({p.x},{p.y})");
+                Assert.IsTrue(Resources.Load<Texture2D>("Enemies/" + e.id), $"{e.id} has a sprite sheet");
+                Assert.IsNotEmpty(e.lines, e.id);
+            }
         }
     }
 }

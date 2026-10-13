@@ -1,10 +1,16 @@
 import type { CacheInput } from '../caches';
+import { scaledEnemy, type EnemyInput } from '../combat';
 import type { Npc, QuestInput } from '../quests';
 
 /** Las Palmas — tropical district (from level 3). ~1340 XP: enough to reach level 5 and Dwór Carski. */
 const D = 'las-palmas';
 
-export const LAS_PALMAS: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
+export const LAS_PALMAS: {
+  npcs: Npc[];
+  quests: QuestInput[];
+  caches: CacheInput[];
+  enemies: EnemyInput[];
+} = {
   npcs: [
     {
       id: 'kahu',
@@ -340,5 +346,118 @@ export const LAS_PALMAS: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput
       xp: 15,
       text: 'Pod łóżkiem rybaka: skrzynka z oszczędnościami z połowów.',
     },
+  ],
+  // opponents for duels: XP, coins and loot by rarity (stats from the level: combat.ts scaledEnemy)
+  enemies: [
+    scaledEnemy({
+      id: 'plazowy-osilek',
+      name: 'Plażowy Osiłek',
+      district: D,
+      level: 3,
+      weapon: 'piesci',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 2,
+        hair: 'krotkie',
+        hairColor: 3,
+        outfit: 'tshirt',
+        outfitColor: 1,
+        pantsColor: 2,
+      },
+      lines: ['Zasłaniasz mi słońce.', 'Dwieście pompek dziennie. A ty?'],
+      spots: [
+        { x: 30, y: 50 },
+        { x: 25, y: 80 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'surfer-narwaniec',
+      name: 'Surfer Narwaniec',
+      district: D,
+      level: 4,
+      weapon: 'deska',
+      look: {
+        gender: 'ona',
+        mood: 'radosny',
+        skin: 1,
+        hair: 'dlugie',
+        hairColor: 4,
+        outfit: 'tshirt',
+        outfitColor: 5,
+        pantsColor: 3,
+      },
+      lines: ['Fala jest moja, kolego!', 'Deska twardsza niż twoja głowa.'],
+      spots: [
+        { x: 35, y: 65 },
+        { x: 20, y: 35 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'przemytnik',
+      name: 'Przemytnik',
+      district: D,
+      level: 5,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'tajemniczy',
+        skin: 4,
+        hair: 'czapka',
+        hairColor: 0,
+        outfit: 'kurtka',
+        outfitColor: 6,
+        pantsColor: 1,
+      },
+      lines: ['Nic nie widziałeś.', 'Dżungla nie lubi gości.'],
+      spots: [
+        { x: 100, y: 60 },
+        { x: 110, y: 45 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'pirat-z-laguny',
+      name: 'Pirat z laguny',
+      district: D,
+      level: 5,
+      weapon: 'procarka',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 3,
+        hair: 'grzywka',
+        hairColor: 1,
+        outfit: 'kurtka',
+        outfitColor: 3,
+        pantsColor: 0,
+      },
+      lines: ['Arr! Oddawaj muszle!', 'Moja proca nie pudłuje.'],
+      spots: [
+        { x: 15, y: 60 },
+        { x: 68, y: 32 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'dj-z-baru',
+      name: 'DJ z baru',
+      district: D,
+      level: 6,
+      weapon: 'mikrofon',
+      look: {
+        gender: 'ona',
+        mood: 'wyluzowany',
+        skin: 5,
+        hair: 'afro',
+        hairColor: 0,
+        outfit: 'bluza',
+        outfitColor: 2,
+        pantsColor: 1,
+      },
+      lines: ['Ściszę cię na zawsze.', 'Głośniej się nie da. Chyba że ja.'],
+      spots: [
+        { x: 80, y: 75 },
+        { x: 60, y: 82 },
+      ],
+    }),
   ],
 };

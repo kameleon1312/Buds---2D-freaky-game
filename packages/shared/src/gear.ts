@@ -25,6 +25,13 @@ export const slotIdSchema = z.enum(SLOTS.map((s) => s.id) as [SlotId, ...SlotId[
 
 export const STATS = [
   {
+    id: 'attack',
+    name: 'Atak',
+    unit: '',
+    max: 40,
+    description: 'Mocniejsze ciosy w pojedynkach.',
+  },
+  {
     id: 'speed',
     name: 'Szybkość',
     unit: '%',
@@ -36,7 +43,7 @@ export const STATS = [
     name: 'Pancerz',
     unit: '',
     max: 40,
-    description: 'Mniej obrażeń w potyczkach (gdy wejdą walki).',
+    description: 'Mniej obrażeń w pojedynkach.',
   },
   {
     id: 'luck',
@@ -48,6 +55,14 @@ export const STATS = [
 ] as const;
 export type StatId = (typeof STATS)[number]['id'];
 
+/**
+ * What a weapon (an item in the "W ręku" slot) is: it decides the bud's moves in a duel. No weapon = fists.
+ * Moves per kind: packages/shared/src/combat.ts.
+ */
+export const WEAPON_KINDS = ['piesci', 'kij', 'procarka', 'spray', 'mikrofon', 'deska'] as const;
+export type WeaponKind = (typeof WEAPON_KINDS)[number];
+export const weaponKindSchema = z.enum(WEAPON_KINDS);
+
 /** Items can lift a skill this many ranks above what the bud has trained. */
 export const SKILL_GEAR_MAX = 2;
 
@@ -57,6 +72,7 @@ const skillBonus = z.record(
 );
 
 export const gearBonusSchema = z.object({
+  attack: z.number().int().min(1).max(15).optional(),
   speed: z.number().int().min(1).max(15).optional(),
   armor: z.number().int().min(1).max(15).optional(),
   luck: z.number().int().min(1).max(15).optional(),
@@ -70,6 +86,7 @@ export type CharacterStats = Record<StatId, number> & {
 };
 
 export const characterStatsSchema = z.object({
+  attack: z.number().int().nonnegative(),
   speed: z.number().int().nonnegative(),
   armor: z.number().int().nonnegative(),
   luck: z.number().int().nonnegative(),
@@ -81,7 +98,7 @@ export function characterStats(
   worn: readonly { bonus?: GearBonus }[],
   ranks: Partial<Record<SkillId, number>> = {},
 ): CharacterStats {
-  const stats = { speed: 0, armor: 0, luck: 0 } as Record<StatId, number>;
+  const stats = { attack: 0, speed: 0, armor: 0, luck: 0 } as Record<StatId, number>;
   const gearSkills: Partial<Record<SkillId, number>> = {};
   for (const item of worn) {
     for (const s of STATS) stats[s.id] += item.bonus?.[s.id] ?? 0;

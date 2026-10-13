@@ -30,6 +30,11 @@ const question = (cx: number, cy: number) =>
   stroke(`M${cx - 7} ${cy - 6}q0 -9 7 -9q8 0 8 7q0 5 -6 7q-2 1 -2 5`, LINE, 9) +
   stroke(`M${cx - 7} ${cy - 6}q0 -9 7 -9q8 0 8 7q0 5 -6 7q-2 1 -2 5`, '#ffffff', 5) +
   flat(circ(cx, cy + 11, 3.5), '#ffffff', LINE, 2.5);
+/** A small clenched fist for the duel marker. */
+const fist = (cx: number, cy: number) =>
+  flat(rr(cx - 10, cy - 8, 20, 16, 5), '#ffffff', LINE, 2.5) +
+  stroke(`M${cx - 4} ${cy - 8}v8M${cx + 3} ${cy - 8}v8`, LINE, 2) +
+  flat(rr(cx - 13, cy - 3, 6, 9, 3), '#ffffff', LINE, 2);
 const dots = (cx: number, cy: number) =>
   [-8, 0, 8].map((dx) => flat(circ(cx + dx, cy, 3.5), '#ffffff', LINE, 2)).join('');
 
@@ -173,6 +178,8 @@ export const QUEST_PROPS: Record<string, Prop> = {
   'marker-quest': marker(['#ffc93c', '#d98a0b'], bang(0.4 * T, 24)),
   'marker-turnin': marker(['#a3e635', '#5d9a12'], question(0.4 * T, 24)),
   'marker-progress': marker(['#a6b0c3', '#7d8798'], dots(0.4 * T, 24)),
+  // opponents: a red badge with a fist
+  'marker-fight': marker(['#ff3d50', '#bd1c31'], fist(0.4 * T, 24)),
   'target-ring': targetRing(),
   'item-zakupy': bag,
   'item-pomidor': tomato,

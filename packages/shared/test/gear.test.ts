@@ -70,7 +70,9 @@ describe('characterStats', () => {
   });
 
   it('caps every stat', () => {
-    const many = Array.from({ length: 10 }, () => ({ bonus: { speed: 15, armor: 15, luck: 15 } }));
+    const many = Array.from({ length: 10 }, () => ({
+      bonus: { attack: 15, speed: 15, armor: 15, luck: 15 },
+    }));
     const stats = characterStats(many);
     for (const s of STATS) expect(stats[s.id]).toBe(s.max);
   });

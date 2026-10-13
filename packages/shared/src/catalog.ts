@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { HAIR_STYLES, OUTFITS, OUTFIT_LABELS, HAIR_LABELS } from './bud/constants';
 import type { BudLook } from './bud/look';
-import { gearBonusSchema, slotIdSchema, type GearBonus, type SlotId } from './gear';
+import {
+  gearBonusSchema,
+  slotIdSchema,
+  weaponKindSchema,
+  type GearBonus,
+  type SlotId,
+} from './gear';
+import { GEAR_ITEMS, priceOf } from './gear-items';
 
 /**
  * Item catalog — the groundwork for cosmetics and gear that can later be earned or sold.
@@ -61,6 +68,12 @@ export const catalogItemSchema = z.object({
   shop: z.boolean().optional(),
   /** One line about the item (shop, inventory). */
   description: z.string().max(140).optional(),
+  /** The bud's level needed to wear or buy it. */
+  minLevel: z.number().int().min(1).max(30).optional(),
+  /** Weapons (slot "held"): which moves the bud gets in a duel. */
+  weapon: weaponKindSchema.optional(),
+  /** Can drop as loot from duels. */
+  loot: z.boolean().optional(),
   /** Not obtainable yet, but shown in the shop as "wkrótce". */
   preview: z.boolean().optional(),
 });
@@ -144,181 +157,68 @@ export const CATALOG: readonly CatalogItem[] = [
     [
       [
         'deskorolka',
-        'accessory',
         'Deskorolka Kuby',
         'uncommon',
-        400,
+        4,
         'held',
-        { speed: 6, skills: { flow: 1 } },
+        { attack: 3, speed: 6, skills: { flow: 1 } },
+        'deska',
       ],
-      ['spray-zloty', 'accessory', 'Złoty spray', 'rare', 900, 'held', { skills: { graffiti: 2 } }],
+      [
+        'spray-zloty',
+        'Złoty spray',
+        'rare',
+        5,
+        'held',
+        { attack: 3, skills: { graffiti: 2 } },
+        'spray',
+      ],
       [
         'wianek-aloha',
-        'headwear',
         'Wianek Aloha',
         'uncommon',
-        500,
+        3,
         'head',
         { luck: 2, skills: { surfing: 1 } },
+        undefined,
       ],
-      ['muszla-szczescia', 'accessory', 'Muszla szczęścia', 'rare', 1200, 'accessory', { luck: 6 }],
-      ['monokl', 'accessory', 'Monokl', 'rare', 1400, 'face', { skills: { spryt: 1 } }],
-      ['cylinder', 'headwear', 'Cylinder', 'epic', 2500, 'head', { luck: 3, skills: { spryt: 1 } }],
+      ['muszla-szczescia', 'Muszla szczęścia', 'rare', 4, 'accessory', { luck: 6 }, undefined],
+      ['monokl', 'Monokl', 'rare', 5, 'face', { skills: { spryt: 1 } }, undefined],
+      ['cylinder', 'Cylinder', 'epic', 6, 'head', { luck: 3, skills: { spryt: 1 } }, undefined],
       [
         'rekawice-bokserskie',
-        'weapon',
         'Rękawice bokserskie',
         'rare',
-        1800,
+        7,
         'hands',
-        { armor: 1, skills: { walka: 1 } },
+        { attack: 3, armor: 1, skills: { walka: 1 } },
+        undefined,
       ],
       [
         'kurtka-karkos',
-        'outfit',
         'Kurtka z naszywkami',
         'epic',
-        3000,
+        8,
         'torso',
         { armor: 4, skills: { przetrwanie: 1 } },
+        undefined,
       ],
     ] as const
-  ).map(([id, kind, name, rarity, coins, slot, bonus]): CatalogItem => ({
+  ).map(([id, name, rarity, minLevel, slot, bonus, weapon]): CatalogItem => ({
     id,
-    kind,
+    kind: weapon ? 'weapon' : 'gear',
     name,
     rarity,
-    price: { currency: 'coins', amount: coins },
+    price: { currency: 'coins', amount: priceOf(rarity, minLevel) },
     premium: false,
     available: true,
     slot,
     bonus: bonus as GearBonus,
+    minLevel,
+    weapon,
   })),
-  // the coin shop: gear for coins earned in the game (own brands — never real ones)
-  ...(
-    [
-      [
-        'buty-trampki',
-        'Trampki Ziomal',
-        'common',
-        150,
-        'feet',
-        { speed: 3 },
-        'Lekkie trampki na co dzień.',
-      ],
-      [
-        'buty-glany',
-        'Glany Karkos',
-        'uncommon',
-        700,
-        'feet',
-        { speed: 2, armor: 3 },
-        'Ciężkie, ale nic ich nie przebije.',
-      ],
-      [
-        'buty-sprintery',
-        'Sprintery Błysk',
-        'rare',
-        1500,
-        'feet',
-        { speed: 10 },
-        'Najszybsze buty w mieście.',
-      ],
-      [
-        'spodnie-dresy',
-        'Dresy Szybki Lolek',
-        'common',
-        200,
-        'legs',
-        { speed: 2 },
-        'Wygodne na bieganie po osiedlu.',
-      ],
-      [
-        'spodnie-bojowki',
-        'Bojówki Sześć Kieszeni',
-        'uncommon',
-        600,
-        'legs',
-        { armor: 1, luck: 3 },
-        'Zmieszczą każde znalezisko.',
-      ],
-      [
-        'kamizelka-odblaskowa',
-        'Kamizelka Widoczny',
-        'common',
-        250,
-        'torso',
-        { armor: 1, luck: 1 },
-        'Widać cię z daleka.',
-      ],
-      [
-        'bluza-kewlar',
-        'Bluza z kewlaru Pancerniak',
-        'epic',
-        3500,
-        'torso',
-        { armor: 8 },
-        'Wygląda jak zwykła bluza. Nie jest zwykła.',
-      ],
-      [
-        'kask-twardziel',
-        'Kask Twardziel',
-        'uncommon',
-        500,
-        'head',
-        { armor: 3 },
-        'Rowerowy, ale wytrzyma więcej.',
-      ],
-      [
-        'okulary-lisie-oko',
-        'Okulary Lisie Oko',
-        'rare',
-        1200,
-        'face',
-        { luck: 5 },
-        'Widzisz to, czego inni nie widzą.',
-      ],
-      [
-        'rekawiczki-kleks',
-        'Rękawiczki Kleks',
-        'uncommon',
-        600,
-        'hands',
-        { skills: { graffiti: 1 } },
-        'Farba się ich nie ima.',
-      ],
-      [
-        'plecak-szperacz',
-        'Plecak Szperacz',
-        'rare',
-        1400,
-        'accessory',
-        { luck: 4, skills: { spryt: 1 } },
-        'Dla tych, którzy szukają skrytek.',
-      ],
-      [
-        'mikrofon-bit',
-        'Mikrofon Bit',
-        'uncommon',
-        800,
-        'held',
-        { skills: { flow: 1 } },
-        'Bez niego żadna bitwa.',
-      ],
-    ] as const
-  ).map(([id, name, rarity, coins, slot, bonus, description]): CatalogItem => ({
-    id,
-    kind: 'gear',
-    name,
-    rarity,
-    price: { currency: 'coins', amount: coins },
-    premium: false,
-    available: true,
-    slot,
-    bonus: bonus as GearBonus,
-    shop: true,
-    description,
-  })),
+  // the gear of the world: loot from duels, the cheaper half also in the coin shop (own brands, never real ones)
+  ...GEAR_ITEMS,
   // real money, later: looks only, never bonuses (shown in the shop as "wkrótce")
   {
     id: 'buty-sprintery-zlote',
@@ -347,6 +247,10 @@ export function gearProblems(catalog: readonly CatalogItem[] = CATALOG): string[
     if (item.kind === 'gear' && !item.slot) problems.push(`${item.id}: gear needs a slot`);
     if (item.bonus && (item.premium || item.price.currency === 'gems'))
       problems.push(`${item.id}: real-money items are looks only (no bonus)`);
+    if (item.weapon && item.slot !== 'held') problems.push(`${item.id}: weapons are held`);
+    if (item.slot === 'held' && !item.weapon) problems.push(`${item.id}: held items are weapons`);
+    if (item.loot && (item.premium || item.price.currency === 'gems'))
+      problems.push(`${item.id}: real-money items never drop`);
     if (item.shop && (item.price.currency !== 'coins' || item.price.amount <= 0 || !item.available))
       problems.push(`${item.id}: the coin shop sells available items for coins`);
   }
@@ -386,3 +290,6 @@ export function lockedItems(
     return item.price.currency !== 'free' && !owned.has(id);
   });
 }
+
+/** The level an item needs (1 when it has no requirement). */
+export const levelOf = (item: CatalogItem | undefined) => item?.minLevel ?? 1;

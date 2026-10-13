@@ -15,8 +15,11 @@ import {
   SKILLS,
   SKILL_GEAR_MAX,
   SKILL_MAX_RANK,
+  MOVES,
+  MOVES_BY_WEAPON,
   SLOTS,
   STATS,
+  WEAPON_KINDS,
   gearProblems,
   contentProblems,
   type Quest,
@@ -65,6 +68,17 @@ for (const c of CONTENT.caches) {
   set.add(`${c.x},${c.y}`);
   npcCells.set(id, set);
 }
+// opponents stand like NPCs (one per spot)
+for (const en of CONTENT.enemies)
+  for (const p of en.spots) {
+    const m = mapOf(en.district);
+    if (!walkable(m, p.x, p.y))
+      problems.push(`enemy ${en.id} stands on a blocked cell (${p.x},${p.y})`);
+    if (m.props[p.y]?.[p.x]) problems.push(`enemy ${en.id} stands on prop ${m.props[p.y]![p.x]}`);
+    const set = npcCells.get(en.district) ?? new Set<string>();
+    set.add(`${p.x},${p.y}`);
+    npcCells.set(en.district, set);
+  }
 for (const n of CONTENT.npcs) {
   const m = mapOf(n.district);
   if (!walkable(m, n.x, n.y)) problems.push(`npc ${n.id} stands on a blocked cell (${n.x},${n.y})`);
@@ -90,6 +104,10 @@ const nextTo = (district: string, x: number, y: number) =>
 
 for (const n of CONTENT.npcs)
   if (!nextTo(n.district, n.x, n.y)) problems.push(`npc ${n.id} can't be reached`);
+for (const en of CONTENT.enemies)
+  for (const p of en.spots)
+    if (!nextTo(en.district, p.x, p.y))
+      problems.push(`enemy ${en.id} at (${p.x},${p.y}) can't be reached`);
 for (const c of CONTENT.caches)
   if (spawnOf.has(cacheMap(c)) && !nextTo(cacheMap(c), c.x, c.y))
     problems.push(`cache ${c.id} can't be reached`);
@@ -180,6 +198,9 @@ const json = {
     luck: i.bonus?.luck ?? 0,
     skillBonus: Object.entries(i.bonus?.skills ?? {}).map(([id, rank]) => ({ id, rank })),
     coins: i.price.currency === 'coins' ? i.price.amount : 0,
+    minLevel: i.minLevel ?? 1,
+    weapon: i.weapon ?? '',
+    attack: i.bonus?.attack ?? 0,
     shop: !!i.shop,
     premium: i.premium,
     available: i.available,
@@ -201,6 +222,27 @@ const json = {
     district,
   })),
   skillMaxRank: SKILL_MAX_RANK,
+  enemies: CONTENT.enemies.map((en) => ({
+    id: en.id,
+    name: en.name,
+    district: en.district,
+    level: en.level,
+    hp: en.hp,
+    weapon: en.weapon,
+    boss: en.boss,
+    lines: en.lines,
+    spots: en.spots,
+  })),
+  moves: Object.values(MOVES).map((mv) => ({
+    id: mv.id,
+    name: mv.name,
+    anim: mv.anim,
+    description: mv.description,
+    hits: mv.hits ?? 1,
+    effect: mv.effect ?? '',
+    damage: mv.power[1] > 0,
+  })),
+  weapons: WEAPON_KINDS.map((kind) => ({ kind, moves: MOVES_BY_WEAPON[kind] })),
   caches: CONTENT.caches.map((c) => ({
     id: c.id,
     district: c.district,
@@ -229,7 +271,12 @@ for (const f of readdirSync(unity('Npcs')))
   }
 for (const n of CONTENT.npcs) writeFileSync(unity(`Npcs/${n.id}.png`), budSheetPng(n.look, 6));
 
+// opponents: their own folder (same generator)
+mkdirSync(unity('Enemies'), { recursive: true });
+for (const en of CONTENT.enemies)
+  writeFileSync(unity(`Enemies/${en.id}.png`), budSheetPng(en.look, 6));
+
 const xp = CONTENT.quests.reduce((sum, q) => sum + q.xp, 0);
 console.info(
-  `exported ${CONTENT.npcs.length} NPCs, ${CONTENT.quests.length} quests (${xp} XP), ${CONTENT.caches.length} caches`,
+  `exported ${CONTENT.npcs.length} NPCs, ${CONTENT.quests.length} quests (${xp} XP), ${CONTENT.caches.length} caches, ${CONTENT.enemies.length} opponents, ${CATALOG.length} items`,
 );

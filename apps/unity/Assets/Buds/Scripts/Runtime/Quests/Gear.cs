@@ -6,6 +6,7 @@ namespace Buds.Quests
     /// <summary>What a bud's worn gear adds up to (speed %, armor, luck %) and its effective skill ranks.</summary>
     public sealed class GearStats
     {
+        public int Attack;
         public int Speed;
         public int Armor;
         public int Luck;
@@ -15,6 +16,7 @@ namespace Buds.Quests
 
         public int Stat(string id) => id switch
         {
+            "attack" => Attack,
             "speed" => Speed,
             "armor" => Armor,
             "luck" => Luck,
@@ -38,12 +40,14 @@ namespace Buds.Quests
             {
                 var item = id == null ? null : content.Item(id);
                 if (item == null) continue;
+                stats.Attack += item.attack;
                 stats.Speed += item.speed;
                 stats.Armor += item.armor;
                 stats.Luck += item.luck;
                 foreach (var b in item.skillBonus)
                     gearSkills[b.id] = (gearSkills.TryGetValue(b.id, out var n) ? n : 0) + b.rank;
             }
+            stats.Attack = Math.Min(stats.Attack, Max(content, "attack", 40));
             stats.Speed = Math.Min(stats.Speed, Max(content, "speed", 25));
             stats.Armor = Math.Min(stats.Armor, Max(content, "armor", 40));
             stats.Luck = Math.Min(stats.Luck, Max(content, "luck", 50));
@@ -70,6 +74,7 @@ namespace Buds.Quests
         public static string Describe(QuestContent content, ItemData item)
         {
             var parts = new List<string>();
+            if (item.attack > 0) parts.Add($"+{item.attack} Atak");
             if (item.speed > 0) parts.Add($"+{item.speed}% Szybkość");
             if (item.armor > 0) parts.Add($"+{item.armor} Pancerz");
             if (item.luck > 0) parts.Add($"+{item.luck}% Szczęście");

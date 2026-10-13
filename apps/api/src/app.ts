@@ -15,6 +15,19 @@ import {
   type WalletResponse,
   levelFromXp,
   MAX_BUDS_PER_ACCOUNT,
+  REMATCH_SECONDS,
+  budFighter,
+  enemyFighter,
+  fightMoveRequestSchema,
+  fightViewSchema,
+  fightXp,
+  levelOf,
+  newFight,
+  playTurn,
+  rollLoot,
+  startFightRequestSchema,
+  type FightResponse,
+  type FightState,
   SLOTS,
   catalogItem,
   characterStats,
@@ -55,6 +68,8 @@ import {
   type PairCodeResponse,
 } from '@buds/shared';
 import type { Env } from './env.js';
+import { randomInt } from 'node:crypto';
+import { z } from 'zod';
 import { createRemoteJWKSet, type JWTVerifyGetKey } from 'jose';
 import { optionalUser, requireAuth, type AuthKeys, type AuthVariables } from './middleware/auth.js';
 import {
@@ -265,6 +280,14 @@ export function createApp(
           400,
         );
       }
+      if (levelFromXp(bud.xp).level < levelOf(item)) {
+        return c.json<ApiError>(
+          {
+            error: { code: 'level_too_low', message: `${item!.name}: od poziomu ${levelOf(item)}` },
+          },
+          403,
+        );
+      }
       const owned = new Set((await store.items(bud.slug)).map((i) => i.itemId));
       if (item!.price.currency !== 'free' && !owned.has(itemId)) {
         return c.json<ApiError>(
@@ -283,6 +306,12 @@ export function createApp(
     if (!item?.shop || !item.available || item.price.currency !== 'coins') {
       throw new HTTPException(404, { message: 'Tego nie ma w sklepie' });
     }
+    if (levelFromXp(c.get('bud').xp).level < levelOf(item)) {
+      return c.json<ApiError>(
+        { error: { code: 'level_too_low', message: `Dostępne od poziomu ${levelOf(item)}` } },
+        403,
+      );
+    }
     const result = await store.buyItem(c.get('bud').slug, item.id, item.price.amount);
     if (result.status === 'owned') {
       return c.json<ApiError>({ error: { code: 'owned', message: 'Już to masz' } }, 409);
@@ -295,6 +324,136 @@ export function createApp(
       );
     }
     return c.json<BuyResponse>({ itemId: item.id, coins: result.coins });
+  });
+
+  // ---------- duels (pojedynki), resolved here one turn at a time ----------
+
+  const fightIdSchema = z.string().uuid();
+  /** What clients see: everything but the RNG state. */
+  const view = (id: string, s: FightState) => ({
+    ...fightViewSchema.omit({ id: true }).parse(s),
+    id,
+  });
+
+  /** Starts a duel with an opponent of the districts; an unfinished earlier duel counts as fled. */
+  app.post('/v1/fights', requirePlayer(store), async (c) => {
+    const input = startFightRequestSchema.safeParse(await c.req.json().catch(() => null));
+    const enemy = input.success
+      ? content.enemies.find((e) => e.id === input.data.enemyId)
+      : undefined;
+    if (!enemy) throw new HTTPException(404, { message: 'Nie ma takiego przeciwnika' });
+    const bud = c.get('bud');
+    const last = await store.lastWin(bud.slug, enemy.id);
+    const wait = last ? REMATCH_SECONDS - Math.floor((Date.now() - last.getTime()) / 1000) : 0;
+    if (wait > 0) {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'resting',
+            message: `${enemy.name} dochodzi do siebie. Wróć za ${wait} s.`,
+          },
+        },
+        409,
+      );
+    }
+    await store.abandonFights(bud.slug);
+    const slots = await equipmentOf(bud.slug);
+    const stats = await statsOf(bud.slug, slots);
+    const weapon = slots.held ? catalogItem(slots.held, catalog) : undefined;
+    const state = newFight(
+      enemy.id,
+      budFighter(bud.name, bud.xp, stats, weapon),
+      enemyFighter(enemy),
+      randomInt(1, 2 ** 31 - 1),
+    );
+    const id = await store.createFight(bud.slug, state);
+    return c.json<FightResponse>({ fight: view(id, state), events: [], reward: null }, 201);
+  });
+
+  /** One turn: the bud's move, the opponent's answer. A win grants XP, coins and maybe loot, once. */
+  app.post('/v1/fights/:id/move', requirePlayer(store), async (c) => {
+    const id = fightIdSchema.safeParse(c.req.param('id'));
+    const bud = c.get('bud');
+    const before = id.success ? await store.fight(bud.slug, id.data) : null;
+    if (!id.success || !before)
+      throw new HTTPException(404, { message: 'Nie ma takiego pojedynku' });
+    if (before.status !== 'active') {
+      return c.json<ApiError>(
+        { error: { code: 'fight_over', message: 'Ten pojedynek już się skończył' } },
+        409,
+      );
+    }
+    const input = fightMoveRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success || !before.bud.moves.includes(input.data.move)) {
+      return c.json<ApiError>(
+        { error: { code: 'invalid_move', message: 'Nie masz takiego ruchu' } },
+        400,
+      );
+    }
+    const { state, events } = playTurn(before, input.data.move);
+    const conflict = () =>
+      c.json<ApiError>({ error: { code: 'fight_busy', message: 'Ruch już został wykonany' } }, 409);
+
+    if (state.status === 'active') {
+      if (!(await store.saveTurn(bud.slug, id.data, before.turn, state))) return conflict();
+      return c.json<FightResponse>({ fight: view(id.data, state), events, reward: null });
+    }
+    if (state.status === 'lost') {
+      if (!(await store.finishFight(bud.slug, id.data, before.turn, state, 'lost', 0, 0)))
+        return conflict();
+      return c.json<FightResponse>({ fight: view(id.data, state), events, reward: null });
+    }
+
+    // won: XP for the level gap, coins with luck, loot by the opponent's rarity table
+    const enemy = content.enemies.find((e) => e.id === state.enemyId)!;
+    const levelBefore = levelFromXp(bud.xp).level;
+    const xpGained = fightXp(enemy, levelBefore);
+    const owned = new Set((await store.items(bud.slug)).map((i) => i.itemId));
+    const loot = rollLoot(enemy, state.bud.luck, catalog, owned, state.rng);
+    const result = await store.finishFight(
+      bud.slug,
+      id.data,
+      before.turn,
+      state,
+      'won',
+      xpGained,
+      loot.coins,
+    );
+    if (!result) return conflict();
+    if (loot.itemId) await store.grantItem(bud.slug, loot.itemId, 'reward');
+    const level = levelFromXp(result.xp).level;
+    return c.json<FightResponse>({
+      fight: view(id.data, state),
+      events,
+      reward: {
+        xpGained,
+        xp: result.xp,
+        level,
+        levelUp: level > levelBefore,
+        coinsGained: loot.coins,
+        coins: result.coins,
+        item: loot.itemId,
+      },
+    });
+  });
+
+  /** Running away: no reward, no penalty. */
+  app.post('/v1/fights/:id/flee', requirePlayer(store), async (c) => {
+    const id = fightIdSchema.safeParse(c.req.param('id'));
+    const bud = c.get('bud');
+    const before = id.success ? await store.fight(bud.slug, id.data) : null;
+    if (!id.success || !before)
+      throw new HTTPException(404, { message: 'Nie ma takiego pojedynku' });
+    if (before.status === 'active')
+      await store.finishFight(bud.slug, id.data, before.turn, before, 'fled', 0, 0);
+    return c.json<FightResponse>({
+      fight: view(id.data, {
+        ...before,
+        status: before.status === 'active' ? 'fled' : before.status,
+      }),
+      events: [],
+      reward: null,
+    });
   });
 
   // ---------- accounts (signed in on the website) ----------

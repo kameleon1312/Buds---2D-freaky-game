@@ -1,4 +1,12 @@
-import type { BudRecord, CreateBudInput, ItemSource, OwnedItem, SlotId } from '@buds/shared';
+import type {
+  BudRecord,
+  CreateBudInput,
+  FightState,
+  FightStatus,
+  ItemSource,
+  OwnedItem,
+  SlotId,
+} from '@buds/shared';
 
 export type BuyResult = { status: 'ok' | 'owned' | 'poor'; coins: number };
 /** ok = linked now, mine = already this user's, taken = another user's. */
@@ -66,4 +74,26 @@ export interface BudStore {
   ownerOf(slug: string): Promise<string | null>;
   /** Links a guest bud to an account (only if it has no account yet). */
   claimBud(slug: string, userId: string): Promise<ClaimResult>;
+  /** Starts a duel; returns its id. */
+  createFight(slug: string, state: FightState): Promise<string>;
+  /** Ends any duel the bud left unfinished (status "fled", no reward). */
+  abandonFights(slug: string): Promise<void>;
+  fight(slug: string, id: string): Promise<FightState | null>;
+  /** Saves a played turn if the fight is still active at `turn`; false on a race or retry. */
+  saveTurn(slug: string, id: string, turn: number, state: FightState): Promise<boolean>;
+  /**
+   * Ends an active fight at `turn` with its last state, granting XP and coins atomically, once. Returns the new XP
+   * and coin balance, or null when it was not active at that turn.
+   */
+  finishFight(
+    slug: string,
+    id: string,
+    turn: number,
+    state: FightState,
+    status: Exclude<FightStatus, 'active'>,
+    xp: number,
+    coins: number,
+  ): Promise<{ xp: number; coins: number } | null>;
+  /** When the bud last beat this opponent. */
+  lastWin(slug: string, enemyId: string): Promise<Date | null>;
 }

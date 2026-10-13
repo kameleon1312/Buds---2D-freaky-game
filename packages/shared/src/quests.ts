@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { budLookSchema } from './bud/look';
 import { cacheProblems, cacheSchema } from './caches';
+import { enemySchema } from './combat';
 import { catalogItem } from './catalog';
 import { DWOR_CARSKI } from './content/dwor-carski';
 import { LAS_PALMAS } from './content/las-palmas';
@@ -76,6 +77,7 @@ export const districtContentSchema = z.object({
   npcs: z.array(npcSchema),
   quests: z.array(questSchema),
   caches: z.array(cacheSchema).default([]),
+  enemies: z.array(enemySchema).default([]),
 });
 export type DistrictContent = z.infer<typeof districtContentSchema>;
 
@@ -86,11 +88,15 @@ export const CONTENT: DistrictContent = (() => {
     npcs: all.flatMap((c) => c.npcs),
     quests: all.flatMap((c) => c.quests),
     caches: all.flatMap((c) => c.caches),
+    enemies: all.flatMap((c) => c.enemies),
   });
 })();
 
 export const questById = (questId: string, content: DistrictContent = CONTENT) =>
   content.quests.find((q) => q.id === questId);
+
+export const enemyById = (enemyId: string, content: DistrictContent = CONTENT) =>
+  content.enemies.find((e) => e.id === enemyId);
 
 export const npcById = (npcId: string, content: DistrictContent = CONTENT) =>
   content.npcs.find((n) => n.id === npcId);
@@ -147,6 +153,13 @@ export function contentProblems(content: DistrictContent): string[] {
   };
   for (const q of content.quests) if (!visit(q.id)) problems.push(`${q.id}: circular requirements`);
   problems.push(...cacheProblems(content.caches));
+  const enemyIds = new Set<string>();
+  for (const e of content.enemies) {
+    if (enemyIds.has(e.id)) problems.push(`duplicate enemy ${e.id}`);
+    enemyIds.add(e.id);
+    if (npcIds.has(e.id)) problems.push(`enemy ${e.id} has the id of an npc`);
+    if (e.coins[1] < e.coins[0]) problems.push(`enemy ${e.id}: coins range is backwards`);
+  }
   return problems;
 }
 

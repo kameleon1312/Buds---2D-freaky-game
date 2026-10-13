@@ -163,6 +163,82 @@ namespace Buds.Api
     }
 
     [Serializable]
+    public class FighterStatusDto
+    {
+        public int blind;
+        public int weaken;
+        public bool aim;
+    }
+
+    [Serializable]
+    public class FighterDto
+    {
+        public string name;
+        public int level;
+        public int maxHp;
+        public int hp;
+        public int attack;
+        public int armor;
+        public int speed;
+        public int luck;
+        public string weapon;
+        public string weaponItem;
+        public string[] moves;
+        public FighterStatusDto status;
+    }
+
+    [Serializable]
+    public class FightDto
+    {
+        public string id;
+        public string enemyId;
+        public int turn;
+        public string status; // active | won | lost | fled
+        public FighterDto bud;
+        public FighterDto enemy;
+    }
+
+    [Serializable]
+    public class HitDto
+    {
+        public bool hit;
+        public bool crit;
+        public int damage;
+    }
+
+    [Serializable]
+    public class TurnEventDto
+    {
+        public string actor; // bud | enemy
+        public string move;
+        public HitDto[] hits;
+        public string effect; // guard | dodge | aim | blind | weaken | ""
+        public int budHp;
+        public int enemyHp;
+    }
+
+    /// <summary>Only meaningful when the fight was won (JsonUtility can't tell a null object from an empty one).</summary>
+    [Serializable]
+    public class FightRewardDto
+    {
+        public int xpGained;
+        public int xp;
+        public int level;
+        public bool levelUp;
+        public int coinsGained;
+        public int coins;
+        public string item;
+    }
+
+    [Serializable]
+    public class FightResponse
+    {
+        public FightDto fight;
+        public TurnEventDto[] events;
+        public FightRewardDto reward;
+    }
+
+    [Serializable]
     public class ApiErrorBody
     {
         public ApiErrorDetail error;

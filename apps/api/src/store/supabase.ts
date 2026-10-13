@@ -1,5 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import { budLookSchema, ownedItemSchema, type BudRecord, type SlotId } from '@buds/shared';
+import {
+  budLookSchema,
+  fightStateSchema,
+  ownedItemSchema,
+  type BudRecord,
+  type SlotId,
+} from '@buds/shared';
 import { makeSlug } from './slug.js';
 import type { BudStore, BuyResult } from './types.js';
 
@@ -233,6 +239,81 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       if (error) throw error;
       if ((data as unknown[]).length) return 'ok';
       return (await this.ownerOf(slug)) === userId ? 'mine' : 'taken';
+    },
+
+    async createFight(slug, state) {
+      const { data, error } = await db
+        .from('bud_fights')
+        .insert({ bud_id: await idBySlug(slug), enemy_id: state.enemyId, turn: state.turn, state })
+        .select('id')
+        .single();
+      if (error) throw error;
+      return (data as { id: string }).id;
+    },
+
+    async abandonFights(slug) {
+      const { error } = await db
+        .from('bud_fights')
+        .update({ status: 'fled', finished_at: new Date().toISOString() })
+        .eq('bud_id', await idBySlug(slug))
+        .eq('status', 'active');
+      if (error) throw error;
+    },
+
+    async fight(slug, id) {
+      const { data, error } = await db
+        .from('bud_fights')
+        .select('state, status')
+        .eq('id', id)
+        .eq('bud_id', await idBySlug(slug))
+        .maybeSingle();
+      if (error) throw error;
+      const row = data as { state: unknown; status: string } | null;
+      if (!row) return null;
+      const state = fightStateSchema.parse(row.state);
+      return { ...state, status: row.status as typeof state.status };
+    },
+
+    async saveTurn(slug, id, turn, state) {
+      const { data, error } = await db
+        .from('bud_fights')
+        .update({ state, turn: turn + 1 })
+        .eq('id', id)
+        .eq('bud_id', await idBySlug(slug))
+        .eq('status', 'active')
+        .eq('turn', turn)
+        .select('id');
+      if (error) throw error;
+      return (data as unknown[]).length === 1;
+    },
+
+    async finishFight(slug, id, turn, state, status, xp, coins) {
+      const { data, error } = await db.rpc('finish_fight', {
+        p_fight: id,
+        p_bud: await idBySlug(slug),
+        p_turn: turn,
+        p_state: { ...state, status },
+        p_status: status,
+        p_xp: xp,
+        p_coins: coins,
+      });
+      if (error) throw error;
+      return (data as { xp: number; coins: number } | null) ?? null;
+    },
+
+    async lastWin(slug, enemyId) {
+      const { data, error } = await db
+        .from('bud_fights')
+        .select('finished_at')
+        .eq('bud_id', await idBySlug(slug))
+        .eq('enemy_id', enemyId)
+        .eq('status', 'won')
+        .order('finished_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      const at = (data as { finished_at: string | null } | null)?.finished_at;
+      return at ? new Date(at) : null;
     },
 
     async openedCaches(slug) {

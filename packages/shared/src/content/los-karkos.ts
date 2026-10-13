@@ -1,10 +1,16 @@
 import type { CacheInput } from '../caches';
+import { scaledEnemy, type EnemyInput } from '../combat';
 import type { Npc, QuestInput } from '../quests';
 
 /** Los Karkos — the dangerous district (from level 7). ~2600 XP. */
 const D = 'los-karkos';
 
-export const LOS_KARKOS: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
+export const LOS_KARKOS: {
+  npcs: Npc[];
+  quests: QuestInput[];
+  caches: CacheInput[];
+  enemies: EnemyInput[];
+} = {
   npcs: [
     {
       id: 'rysiek',
@@ -343,5 +349,138 @@ export const LOS_KARKOS: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput
       xp: 40,
       text: 'Dzban pod podłogą opuszczonego mieszkania. Ktoś tu kiedyś żył dostatnio.',
     },
+  ],
+  // opponents for duels: XP, coins and loot by rarity (stats from the level: combat.ts scaledEnemy)
+  enemies: [
+    scaledEnemy({
+      id: 'typ-spod-bloku',
+      name: 'Typ spod bloku',
+      district: D,
+      level: 7,
+      weapon: 'piesci',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 3,
+        hair: 'czapka',
+        hairColor: 0,
+        outfit: 'bluza',
+        outfitColor: 6,
+        pantsColor: 1,
+      },
+      lines: ['Czego tu szukasz?', 'Tu się nie przechodzi za darmo.'],
+      spots: [
+        { x: 39, y: 29 },
+        { x: 70, y: 55 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'bokser-z-ringu',
+      name: 'Bokser z ringu',
+      district: D,
+      level: 8,
+      weapon: 'piesci',
+      look: {
+        gender: 'ona',
+        mood: 'zadziorny',
+        skin: 4,
+        hair: 'kok',
+        hairColor: 0,
+        outfit: 'tshirt',
+        outfitColor: 0,
+        pantsColor: 1,
+      },
+      lines: ['Wejdziesz na ring?', 'Garda wyżej, bo zaboli.'],
+      spots: [
+        { x: 112, y: 66 },
+        { x: 104, y: 50 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'zlomiarz',
+      name: 'Złomiarz Wiesiek',
+      district: D,
+      level: 9,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'zaspany',
+        skin: 2,
+        hair: 'daszek',
+        hairColor: 5,
+        outfit: 'ogrodniczki',
+        outfitColor: 6,
+        pantsColor: 1,
+      },
+      lines: ['To mój złom!', 'Wszystko tu ma swoją cenę.'],
+      spots: [
+        { x: 105, y: 15 },
+        { x: 115, y: 25 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'snajper-z-dachu',
+      name: 'Snajper z dachu',
+      district: D,
+      level: 10,
+      weapon: 'procarka',
+      look: {
+        gender: 'ona',
+        mood: 'tajemniczy',
+        skin: 1,
+        hair: 'kucyk',
+        hairColor: 0,
+        outfit: 'kurtka',
+        outfitColor: 6,
+        pantsColor: 1,
+      },
+      lines: ['Widziałam cię z dachu.', 'Nie ruszaj się.'],
+      spots: [
+        { x: 60, y: 25 },
+        { x: 85, y: 65 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'gangster-z-fabryki',
+      name: 'Gangster z fabryki',
+      district: D,
+      level: 11,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'tajemniczy',
+        skin: 5,
+        hair: 'krotkie',
+        hairColor: 0,
+        outfit: 'kurtka',
+        outfitColor: 1,
+        pantsColor: 1,
+      },
+      lines: ['Szef nie lubi wścibskich.', 'Za dużo widziałeś.'],
+      spots: [
+        { x: 105, y: 80 },
+        { x: 118, y: 88 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'szef-gangu',
+      name: 'Szef gangu Bazyl',
+      district: D,
+      level: 12,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 3,
+        hair: 'czapka',
+        hairColor: 0,
+        outfit: 'kurtka',
+        outfitColor: 2,
+        pantsColor: 1,
+      },
+      lines: ['Wiesz, kim jestem?', 'Fabryka jest moja. Los Karkos też.'],
+      spots: [{ x: 109, y: 81 }],
+      boss: true,
+    }),
   ],
 };

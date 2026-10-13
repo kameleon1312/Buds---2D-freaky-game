@@ -1550,6 +1550,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1566,6 +1569,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1582,6 +1588,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1598,6 +1607,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1614,6 +1626,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1630,6 +1645,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1646,6 +1664,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1654,7 +1675,7 @@
     {
       "id": "deskorolka",
       "name": "Deskorolka Kuby",
-      "kind": "accessory",
+      "kind": "weapon",
       "rarity": "uncommon",
       "slot": "held",
       "speed": 6,
@@ -1666,7 +1687,10 @@
           "rank": 1
         }
       ],
-      "coins": 400,
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "deska",
+      "attack": 3,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1675,7 +1699,7 @@
     {
       "id": "spray-zloty",
       "name": "Złoty spray",
-      "kind": "accessory",
+      "kind": "weapon",
       "rarity": "rare",
       "slot": "held",
       "speed": 0,
@@ -1687,7 +1711,10 @@
           "rank": 2
         }
       ],
-      "coins": 900,
+      "coins": 1400,
+      "minLevel": 5,
+      "weapon": "spray",
+      "attack": 3,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1696,7 +1723,7 @@
     {
       "id": "wianek-aloha",
       "name": "Wianek Aloha",
-      "kind": "headwear",
+      "kind": "gear",
       "rarity": "uncommon",
       "slot": "head",
       "speed": 0,
@@ -1708,7 +1735,10 @@
           "rank": 1
         }
       ],
-      "coins": 500,
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1717,14 +1747,17 @@
     {
       "id": "muszla-szczescia",
       "name": "Muszla szczęścia",
-      "kind": "accessory",
+      "kind": "gear",
       "rarity": "rare",
       "slot": "accessory",
       "speed": 0,
       "armor": 0,
       "luck": 6,
       "skillBonus": [],
-      "coins": 1200,
+      "coins": 1280,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1733,7 +1766,7 @@
     {
       "id": "monokl",
       "name": "Monokl",
-      "kind": "accessory",
+      "kind": "gear",
       "rarity": "rare",
       "slot": "face",
       "speed": 0,
@@ -1746,6 +1779,9 @@
         }
       ],
       "coins": 1400,
+      "minLevel": 5,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1754,7 +1790,7 @@
     {
       "id": "cylinder",
       "name": "Cylinder",
-      "kind": "headwear",
+      "kind": "gear",
       "rarity": "epic",
       "slot": "head",
       "speed": 0,
@@ -1766,7 +1802,10 @@
           "rank": 1
         }
       ],
-      "coins": 2500,
+      "coins": 3200,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1775,7 +1814,7 @@
     {
       "id": "rekawice-bokserskie",
       "name": "Rękawice bokserskie",
-      "kind": "weapon",
+      "kind": "gear",
       "rarity": "rare",
       "slot": "hands",
       "speed": 0,
@@ -1787,7 +1826,10 @@
           "rank": 1
         }
       ],
-      "coins": 1800,
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 3,
       "shop": false,
       "premium": false,
       "available": true,
@@ -1796,7 +1838,7 @@
     {
       "id": "kurtka-karkos",
       "name": "Kurtka z naszywkami",
-      "kind": "outfit",
+      "kind": "gear",
       "rarity": "epic",
       "slot": "torso",
       "speed": 0,
@@ -1808,123 +1850,52 @@
           "rank": 1
         }
       ],
-      "coins": 3000,
+      "coins": 3600,
+      "minLevel": 8,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": false,
       "available": true,
       "description": ""
     },
     {
-      "id": "buty-trampki",
-      "name": "Trampki Ziomal",
+      "id": "czapka-mrozik",
+      "name": "Czapka Mrozik",
       "kind": "gear",
       "rarity": "common",
-      "slot": "feet",
-      "speed": 3,
-      "armor": 0,
-      "luck": 0,
-      "skillBonus": [],
-      "coins": 150,
-      "shop": true,
-      "premium": false,
-      "available": true,
-      "description": "Lekkie trampki na co dzień."
-    },
-    {
-      "id": "buty-glany",
-      "name": "Glany Karkos",
-      "kind": "gear",
-      "rarity": "uncommon",
-      "slot": "feet",
-      "speed": 2,
-      "armor": 3,
-      "luck": 0,
-      "skillBonus": [],
-      "coins": 700,
-      "shop": true,
-      "premium": false,
-      "available": true,
-      "description": "Ciężkie, ale nic ich nie przebije."
-    },
-    {
-      "id": "buty-sprintery",
-      "name": "Sprintery Błysk",
-      "kind": "gear",
-      "rarity": "rare",
-      "slot": "feet",
-      "speed": 10,
-      "armor": 0,
-      "luck": 0,
-      "skillBonus": [],
-      "coins": 1500,
-      "shop": true,
-      "premium": false,
-      "available": true,
-      "description": "Najszybsze buty w mieście."
-    },
-    {
-      "id": "spodnie-dresy",
-      "name": "Dresy Szybki Lolek",
-      "kind": "gear",
-      "rarity": "common",
-      "slot": "legs",
-      "speed": 2,
-      "armor": 0,
-      "luck": 0,
-      "skillBonus": [],
-      "coins": 200,
-      "shop": true,
-      "premium": false,
-      "available": true,
-      "description": "Wygodne na bieganie po osiedlu."
-    },
-    {
-      "id": "spodnie-bojowki",
-      "name": "Bojówki Sześć Kieszeni",
-      "kind": "gear",
-      "rarity": "uncommon",
-      "slot": "legs",
+      "slot": "head",
       "speed": 0,
       "armor": 1,
-      "luck": 3,
+      "luck": 0,
       "skillBonus": [],
-      "coins": 600,
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": true,
       "premium": false,
       "available": true,
-      "description": "Zmieszczą każde znalezisko."
+      "description": "Ciepła i miękka. Zawsze coś."
     },
     {
-      "id": "kamizelka-odblaskowa",
-      "name": "Kamizelka Widoczny",
+      "id": "bandana-ziomal",
+      "name": "Bandana Ziomal",
       "kind": "gear",
       "rarity": "common",
-      "slot": "torso",
+      "slot": "head",
       "speed": 0,
-      "armor": 1,
+      "armor": 0,
       "luck": 1,
       "skillBonus": [],
-      "coins": 250,
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": true,
       "premium": false,
       "available": true,
-      "description": "Widać cię z daleka."
-    },
-    {
-      "id": "bluza-kewlar",
-      "name": "Bluza z kewlaru Pancerniak",
-      "kind": "gear",
-      "rarity": "epic",
-      "slot": "torso",
-      "speed": 0,
-      "armor": 8,
-      "luck": 0,
-      "skillBonus": [],
-      "coins": 3500,
-      "shop": true,
-      "premium": false,
-      "available": true,
-      "description": "Wygląda jak zwykła bluza. Nie jest zwykła."
+      "description": "Klasyka podwórka."
     },
     {
       "id": "kask-twardziel",
@@ -1936,11 +1907,277 @@
       "armor": 3,
       "luck": 0,
       "skillBonus": [],
-      "coins": 500,
+      "coins": 420,
+      "minLevel": 2,
+      "weapon": "",
+      "attack": 0,
       "shop": true,
       "premium": false,
       "available": true,
       "description": "Rowerowy, ale wytrzyma więcej."
+    },
+    {
+      "id": "daszek-pro-street",
+      "name": "Daszek Pro Street",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "head",
+      "speed": 2,
+      "armor": 0,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Daszek do tyłu, prędkość do przodu."
+    },
+    {
+      "id": "kaptur-cien",
+      "name": "Kaptur Cień",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "head",
+      "speed": 1,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "przetrwanie",
+          "rank": 1
+        }
+      ],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Nikt cię nie zauważy."
+    },
+    {
+      "id": "beret-artysty",
+      "name": "Beret Artysty",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "head",
+      "speed": 0,
+      "armor": 0,
+      "luck": 2,
+      "skillBonus": [
+        {
+          "id": "graffiti",
+          "rank": 1
+        }
+      ],
+      "coins": 1400,
+      "minLevel": 5,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Natchnienie gwarantowane."
+    },
+    {
+      "id": "kask-rumak",
+      "name": "Kask Rumak",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "head",
+      "speed": 0,
+      "armor": 6,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Motocyklowy, z szybką na pół twarzy."
+    },
+    {
+      "id": "czapka-kapitana",
+      "name": "Czapka Kapitana",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "head",
+      "speed": 0,
+      "armor": 0,
+      "luck": 3,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Z pirackiej laguny."
+    },
+    {
+      "id": "korona-osiedla",
+      "name": "Korona Osiedla",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "head",
+      "speed": 0,
+      "armor": 0,
+      "luck": 6,
+      "skillBonus": [
+        {
+          "id": "flow",
+          "rank": 1
+        }
+      ],
+      "coins": 4000,
+      "minLevel": 10,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Dla króla podwórka."
+    },
+    {
+      "id": "helm-karkos",
+      "name": "Hełm Karkos",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "head",
+      "speed": 0,
+      "armor": 9,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 4200,
+      "minLevel": 11,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Wyklepany z blachy na złomowisku."
+    },
+    {
+      "id": "opaska-mistrza",
+      "name": "Opaska Mistrza",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "head",
+      "speed": 0,
+      "armor": 4,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "walka",
+          "rank": 2
+        }
+      ],
+      "coins": 9600,
+      "minLevel": 14,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Nosił ją mistrz ringu."
+    },
+    {
+      "id": "okulary-sloneczko",
+      "name": "Okulary Słoneczko",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Lato przez cały rok."
+    },
+    {
+      "id": "chusta-na-twarz",
+      "name": "Chusta na Twarz",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "face",
+      "speed": 0,
+      "armor": 1,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 140,
+      "minLevel": 2,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Przed kurzem i wzrokiem patroli."
+    },
+    {
+      "id": "gogle-rafa",
+      "name": "Gogle Rafa",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Widać każdą rybę."
+    },
+    {
+      "id": "okulary-kujon",
+      "name": "Okulary Kujon",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Mądrzejsze spojrzenie."
     },
     {
       "id": "okulary-lisie-oko",
@@ -1952,11 +2189,419 @@
       "armor": 0,
       "luck": 5,
       "skillBonus": [],
-      "coins": 1200,
+      "coins": 1280,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
       "shop": true,
       "premium": false,
       "available": true,
       "description": "Widzisz to, czego inni nie widzą."
+    },
+    {
+      "id": "maska-bramkarz",
+      "name": "Maska Bramkarz",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "face",
+      "speed": 0,
+      "armor": 5,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Hokejowa, wytrzyma krążek i pięść."
+    },
+    {
+      "id": "gogle-szusz",
+      "name": "Gogle Szusz",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "face",
+      "speed": 3,
+      "armor": 0,
+      "luck": 2,
+      "skillBonus": [],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Z nimi każdy zjazd jest szybszy."
+    },
+    {
+      "id": "maska-wenecja",
+      "name": "Maska Wenecja",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 5,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 3800,
+      "minLevel": 9,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Z balu w Dworze Carskim."
+    },
+    {
+      "id": "wizjer-sowa",
+      "name": "Wizjer Sowa",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 2
+        }
+      ],
+      "coins": 4200,
+      "minLevel": 11,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "W nocy widzisz jak w dzień."
+    },
+    {
+      "id": "maska-luchadora",
+      "name": "Maska Luchadora",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "face",
+      "speed": 0,
+      "armor": 3,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "walka",
+          "rank": 2
+        }
+      ],
+      "coins": 9200,
+      "minLevel": 13,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Kto ją założy, walczy jak legenda."
+    },
+    {
+      "id": "okulary-diament",
+      "name": "Okulary Diament",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 8,
+      "skillBonus": [],
+      "coins": 10000,
+      "minLevel": 15,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Błyszczą bardziej niż przyszłość."
+    },
+    {
+      "id": "kamizelka-odblaskowa",
+      "name": "Kamizelka Widoczny",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 1,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Widać cię z daleka."
+    },
+    {
+      "id": "koszulka-ligowa",
+      "name": "Koszulka Ligowa",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "torso",
+      "speed": 2,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Lekka jak na mecz."
+    },
+    {
+      "id": "bluza-kangurka",
+      "name": "Kangurka Ciepło",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 2,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 140,
+      "minLevel": 2,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Z wielką kieszenią na brzuchu."
+    },
+    {
+      "id": "katana-jeans",
+      "name": "Katana Jeans",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 3,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Przetarta w dobrych miejscach."
+    },
+    {
+      "id": "ortalion-retro",
+      "name": "Ortalion Retro",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "torso",
+      "speed": 3,
+      "armor": 1,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Szeleści jak w latach dziewięćdziesiątych."
+    },
+    {
+      "id": "kamizelka-wedkarza",
+      "name": "Kamizelka Wędkarza",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 0,
+      "luck": 3,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 600,
+      "minLevel": 5,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Sto kieszeni na przynęty."
+    },
+    {
+      "id": "puchowka-balwan",
+      "name": "Puchówka Bałwan",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 4,
+      "luck": 2,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Miękka, ale ciosy w niej grzęzną."
+    },
+    {
+      "id": "ramoneska",
+      "name": "Ramoneska",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 6,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Skóra z ćwiekami."
+    },
+    {
+      "id": "bluza-kewlar",
+      "name": "Bluza z kewlaru Pancerniak",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 8,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 3800,
+      "minLevel": 9,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Wygląda jak zwykła bluza. Nie jest zwykła."
+    },
+    {
+      "id": "plaszcz-hrabiego",
+      "name": "Płaszcz Hrabiego",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 5,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 4000,
+      "minLevel": 10,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Z guzikami z prawdziwego złota."
+    },
+    {
+      "id": "zbroja-z-opon",
+      "name": "Zbroja z Opon",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 12,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 9600,
+      "minLevel": 14,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Najtwardsza rzecz w Los Karkos."
+    },
+    {
+      "id": "rekawiczki-pedal",
+      "name": "Rękawiczki Pedał",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "hands",
+      "speed": 1,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Rowerowe, bez palców."
+    },
+    {
+      "id": "rekawice-budowlanca",
+      "name": "Rękawice Budowlańca",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 2,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 140,
+      "minLevel": 2,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Gruba skóra, twarda robota."
+    },
+    {
+      "id": "bransoleta-z-kolcami",
+      "name": "Bransoleta z Kolcami",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 2,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Wygląda groźnie i tak też działa."
     },
     {
       "id": "rekawiczki-kleks",
@@ -1973,11 +2618,738 @@
           "rank": 1
         }
       ],
-      "coins": 600,
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
       "shop": true,
       "premium": false,
       "available": true,
       "description": "Farba się ich nie ima."
+    },
+    {
+      "id": "bandaze-piesciarza",
+      "name": "Bandaże Pięściarza",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "walka",
+          "rank": 1
+        }
+      ],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 2,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Owijasz dłonie i do roboty."
+    },
+    {
+      "id": "rekawiczki-neopren",
+      "name": "Rękawiczki Neopren",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 1,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 600,
+      "minLevel": 5,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Do zimnej wody."
+    },
+    {
+      "id": "rekawice-klatka",
+      "name": "Rękawice Klatka",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 4,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Do walk w klatce, z otwartymi palcami."
+    },
+    {
+      "id": "zegarek-szpan",
+      "name": "Zegarek Szpan",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 0,
+      "luck": 4,
+      "skillBonus": [],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Tyka szczęście."
+    },
+    {
+      "id": "pierscienie-szacunu",
+      "name": "Pierścienie Szacunu",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 0,
+      "luck": 3,
+      "skillBonus": [],
+      "coins": 3800,
+      "minLevel": 9,
+      "weapon": "",
+      "attack": 3,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Na każdym palcu inny."
+    },
+    {
+      "id": "rekawice-bramkarza",
+      "name": "Rękawice Bramkarza",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 6,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 4000,
+      "minLevel": 10,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Złapią wszystko."
+    },
+    {
+      "id": "rekawica-mistrza-ringu",
+      "name": "Rękawica Mistrza Ringu",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "walka",
+          "rank": 1
+        }
+      ],
+      "coins": 9200,
+      "minLevel": 13,
+      "weapon": "",
+      "attack": 6,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Jeden cios, jedna legenda."
+    },
+    {
+      "id": "spodnie-dresy",
+      "name": "Dresy Szybki Lolek",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "legs",
+      "speed": 2,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Wygodne na bieganie po osiedlu."
+    },
+    {
+      "id": "szorty-aloha",
+      "name": "Szorty Aloha",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "legs",
+      "speed": 1,
+      "armor": 0,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "W kwiaty, oczywiście."
+    },
+    {
+      "id": "jeansy-przecierki",
+      "name": "Jeansy Przecierki",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "legs",
+      "speed": 0,
+      "armor": 1,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 140,
+      "minLevel": 2,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Przetarte na kolanach."
+    },
+    {
+      "id": "dres-zlota-era",
+      "name": "Dres Złota Era",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "legs",
+      "speed": 3,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Trzy kolory, zero pasków."
+    },
+    {
+      "id": "spodnie-bojowki",
+      "name": "Bojówki Sześć Kieszeni",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "legs",
+      "speed": 0,
+      "armor": 1,
+      "luck": 3,
+      "skillBonus": [],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Zmieszczą każde znalezisko."
+    },
+    {
+      "id": "spodnie-skejta",
+      "name": "Spodnie Skejta",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "legs",
+      "speed": 2,
+      "armor": 1,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Szerokie, wytrzymałe na upadki."
+    },
+    {
+      "id": "nakolanniki-asfalt",
+      "name": "Nakolanniki Asfalt",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "legs",
+      "speed": 0,
+      "armor": 3,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 600,
+      "minLevel": 5,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Asfalt boli mniej."
+    },
+    {
+      "id": "spodnie-rumak",
+      "name": "Spodnie Rumak",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "legs",
+      "speed": 0,
+      "armor": 5,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Motocyklowe, z ochraniaczami."
+    },
+    {
+      "id": "legginsy-sprint",
+      "name": "Legginsy Sprint",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "legs",
+      "speed": 5,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Opływowe jak u olimpijczyka."
+    },
+    {
+      "id": "spodnie-galowe",
+      "name": "Spodnie Galowe",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "legs",
+      "speed": 0,
+      "armor": 0,
+      "luck": 4,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 3800,
+      "minLevel": 9,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Na bal w dworku."
+    },
+    {
+      "id": "spodnie-cien",
+      "name": "Spodnie Cień",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "legs",
+      "speed": 4,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "przetrwanie",
+          "rank": 1
+        }
+      ],
+      "coins": 4200,
+      "minLevel": 11,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Czarne, ciche, szybkie."
+    },
+    {
+      "id": "spodnie-krola-ringu",
+      "name": "Spodnie Króla Ringu",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "legs",
+      "speed": 4,
+      "armor": 6,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 9600,
+      "minLevel": 14,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Ze złotym pasem w komplecie."
+    },
+    {
+      "id": "buty-trampki",
+      "name": "Trampki Ziomal",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "feet",
+      "speed": 3,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Lekkie trampki na co dzień."
+    },
+    {
+      "id": "klapki-basen",
+      "name": "Klapki Basen",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "feet",
+      "speed": 0,
+      "armor": 0,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Szur, szur."
+    },
+    {
+      "id": "tenisowki-kort",
+      "name": "Tenisówki Kort",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "feet",
+      "speed": 2,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 140,
+      "minLevel": 2,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Białe jak kreda."
+    },
+    {
+      "id": "buty-glany",
+      "name": "Glany Karkos",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "feet",
+      "speed": 2,
+      "armor": 3,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Ciężkie, ale nic ich nie przebije."
+    },
+    {
+      "id": "buty-skejta",
+      "name": "Buty Skejta",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "feet",
+      "speed": 3,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Płaska podeszwa, dobry chwyt."
+    },
+    {
+      "id": "kalosze-bajoro",
+      "name": "Kalosze Bajoro",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "feet",
+      "speed": 0,
+      "armor": 2,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Żadna kałuża nie straszna."
+    },
+    {
+      "id": "traperki-szlak",
+      "name": "Traperki Szlak",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "feet",
+      "speed": 2,
+      "armor": 2,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 600,
+      "minLevel": 5,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Na każdy teren."
+    },
+    {
+      "id": "buty-sprintery",
+      "name": "Sprintery Błysk",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "feet",
+      "speed": 10,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Najszybsze buty w mieście."
+    },
+    {
+      "id": "kolce-biezni",
+      "name": "Kolce Bieżni",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "feet",
+      "speed": 7,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Wbijają się w każdą nawierzchnię."
+    },
+    {
+      "id": "kowbojki",
+      "name": "Kowbojki Dziki Zachód",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "feet",
+      "speed": 0,
+      "armor": 2,
+      "luck": 3,
+      "skillBonus": [],
+      "coins": 1760,
+      "minLevel": 8,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Ostrogi brzęczą przy każdym kroku."
+    },
+    {
+      "id": "oficerki-dworskie",
+      "name": "Oficerki Dworskie",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "feet",
+      "speed": 0,
+      "armor": 4,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 4000,
+      "minLevel": 10,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Wypastowane na błysk."
+    },
+    {
+      "id": "rakiety-turbo",
+      "name": "Rakiety Turbo",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "feet",
+      "speed": 10,
+      "armor": 0,
+      "luck": 2,
+      "skillBonus": [],
+      "coins": 9200,
+      "minLevel": 13,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Podobno same biegną."
+    },
+    {
+      "id": "lancuszek-ziomka",
+      "name": "Łańcuszek Ziomka",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Srebrny, prawie."
+    },
+    {
+      "id": "saszetka",
+      "name": "Saszetka na Biodro",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 2,
+      "skillBonus": [],
+      "coins": 140,
+      "minLevel": 2,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Na drobne i klucze."
+    },
+    {
+      "id": "plecak-szkolny",
+      "name": "Plecak Szkolny",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 1,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Podręczniki amortyzują ciosy."
+    },
+    {
+      "id": "sluchawki-bas",
+      "name": "Słuchawki Bas",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "flow",
+          "rank": 1
+        }
+      ],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Rytm zawsze przy tobie."
+    },
+    {
+      "id": "medalik-szczescia",
+      "name": "Medalik Szczęścia",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 3,
+      "skillBonus": [],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Od babci, na drogę."
     },
     {
       "id": "plecak-szperacz",
@@ -1994,16 +3366,253 @@
           "rank": 1
         }
       ],
-      "coins": 1400,
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
       "shop": true,
       "premium": false,
       "available": true,
       "description": "Dla tych, którzy szukają skrytek."
     },
     {
+      "id": "torba-kuriera",
+      "name": "Torba Kuriera",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "accessory",
+      "speed": 3,
+      "armor": 0,
+      "luck": 2,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Dostawa w pięć minut."
+    },
+    {
+      "id": "peleryna-nocy",
+      "name": "Peleryna Nocy",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "accessory",
+      "speed": 2,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "przetrwanie",
+          "rank": 1
+        }
+      ],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Znikasz w ciemności."
+    },
+    {
+      "id": "pas-mistrzowski",
+      "name": "Pas Mistrzowski",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 3,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "walka",
+          "rank": 1
+        }
+      ],
+      "coins": 1760,
+      "minLevel": 8,
+      "weapon": "",
+      "attack": 0,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Złota klamra wielkości talerza."
+    },
+    {
+      "id": "order-carski",
+      "name": "Order Carski",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 5,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 4000,
+      "minLevel": 10,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Za zasługi, których nikt nie pamięta."
+    },
+    {
+      "id": "tarcza-na-plecy",
+      "name": "Tarcza na Plecy",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 7,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 4200,
+      "minLevel": 11,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Z pokrywy od kosza. Działa."
+    },
+    {
+      "id": "amulet-wulkanu",
+      "name": "Amulet Wulkanu",
+      "kind": "gear",
+      "rarity": "legendary",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 8,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 9600,
+      "minLevel": 14,
+      "weapon": "",
+      "attack": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Gorący, wciąż."
+    },
+    {
+      "id": "kij-od-szczotki",
+      "name": "Kij od Szczotki",
+      "kind": "weapon",
+      "rarity": "common",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "kij",
+      "attack": 2,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Lepszy niż nic."
+    },
+    {
+      "id": "proca-z-galezi",
+      "name": "Proca z Gałęzi",
+      "kind": "weapon",
+      "rarity": "common",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 120,
+      "minLevel": 1,
+      "weapon": "procarka",
+      "attack": 1,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Własnej roboty."
+    },
+    {
+      "id": "spray-zwykly",
+      "name": "Spray Zwykły",
+      "kind": "weapon",
+      "rarity": "common",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "graffiti",
+          "rank": 1
+        }
+      ],
+      "coins": 140,
+      "minLevel": 2,
+      "weapon": "spray",
+      "attack": 1,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Czarny, matowy."
+    },
+    {
+      "id": "kij-hejnal",
+      "name": "Kij Baseballowy Hejnał",
+      "kind": "weapon",
+      "rarity": "uncommon",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "kij",
+      "attack": 4,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Do sportu. Oficjalnie."
+    },
+    {
+      "id": "proca-sportowa",
+      "name": "Proca Sportowa",
+      "kind": "weapon",
+      "rarity": "uncommon",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 540,
+      "minLevel": 4,
+      "weapon": "procarka",
+      "attack": 3,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Z celownikiem i gumą na zapas."
+    },
+    {
       "id": "mikrofon-bit",
       "name": "Mikrofon Bit",
-      "kind": "gear",
+      "kind": "weapon",
       "rarity": "uncommon",
       "slot": "held",
       "speed": 0,
@@ -2015,11 +3624,238 @@
           "rank": 1
         }
       ],
-      "coins": 800,
+      "coins": 480,
+      "minLevel": 3,
+      "weapon": "mikrofon",
+      "attack": 2,
       "shop": true,
       "premium": false,
       "available": true,
       "description": "Bez niego żadna bitwa."
+    },
+    {
+      "id": "megafon",
+      "name": "Megafon",
+      "kind": "weapon",
+      "rarity": "uncommon",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 600,
+      "minLevel": 5,
+      "weapon": "mikrofon",
+      "attack": 3,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Twój diss usłyszy całe osiedle."
+    },
+    {
+      "id": "palka-teleskopowa",
+      "name": "Pałka Teleskopowa",
+      "kind": "weapon",
+      "rarity": "rare",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "kij",
+      "attack": 6,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Klik i gotowe."
+    },
+    {
+      "id": "deska-fala",
+      "name": "Deska Surfingowa Fala",
+      "kind": "weapon",
+      "rarity": "rare",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 1520,
+      "minLevel": 6,
+      "weapon": "deska",
+      "attack": 5,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Ciężka i twarda jak fala."
+    },
+    {
+      "id": "kij-hokejowy",
+      "name": "Kij Hokejowy Krążek",
+      "kind": "weapon",
+      "rarity": "rare",
+      "slot": "held",
+      "speed": 1,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "kij",
+      "attack": 6,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Szybki zamach z nadgarstka."
+    },
+    {
+      "id": "luk-przyssawki",
+      "name": "Łuk na Przyssawki",
+      "kind": "weapon",
+      "rarity": "rare",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1640,
+      "minLevel": 7,
+      "weapon": "procarka",
+      "attack": 5,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Przyssawki, ale lecą jak z armaty."
+    },
+    {
+      "id": "gasnica",
+      "name": "Gaśnica",
+      "kind": "weapon",
+      "rarity": "rare",
+      "slot": "held",
+      "speed": 0,
+      "armor": 1,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1760,
+      "minLevel": 8,
+      "weapon": "spray",
+      "attack": 5,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Biała chmura i po sprawie."
+    },
+    {
+      "id": "laska-hrabiego",
+      "name": "Laska Hrabiego",
+      "kind": "weapon",
+      "rarity": "epic",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 3800,
+      "minLevel": 9,
+      "weapon": "kij",
+      "attack": 7,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Ze srebrną gałką."
+    },
+    {
+      "id": "wioslo-pirata",
+      "name": "Wiosło Pirata",
+      "kind": "weapon",
+      "rarity": "epic",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 4000,
+      "minLevel": 10,
+      "weapon": "kij",
+      "attack": 8,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Z laguny, z historią."
+    },
+    {
+      "id": "boombox",
+      "name": "Boombox Grzmot",
+      "kind": "weapon",
+      "rarity": "epic",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "flow",
+          "rank": 1
+        }
+      ],
+      "coins": 4000,
+      "minLevel": 10,
+      "weapon": "mikrofon",
+      "attack": 6,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Bas, który powala."
+    },
+    {
+      "id": "kusza-mysliwego",
+      "name": "Kusza Myśliwego",
+      "kind": "weapon",
+      "rarity": "epic",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 4200,
+      "minLevel": 11,
+      "weapon": "procarka",
+      "attack": 8,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Na gumowe bełty."
+    },
+    {
+      "id": "zloty-kij-szefa",
+      "name": "Złoty Kij Szefa",
+      "kind": "weapon",
+      "rarity": "legendary",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 9600,
+      "minLevel": 14,
+      "weapon": "kij",
+      "attack": 12,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": "Szef gangu go nie oddał. Do teraz."
     },
     {
       "id": "buty-sprintery-zlote",
@@ -2032,6 +3868,9 @@
       "luck": 0,
       "skillBonus": [],
       "coins": 0,
+      "minLevel": 1,
+      "weapon": "",
+      "attack": 0,
       "shop": false,
       "premium": true,
       "available": false,
@@ -2039,6 +3878,13 @@
     }
   ],
   "stats": [
+    {
+      "id": "attack",
+      "name": "Atak",
+      "unit": "",
+      "max": 40,
+      "description": "Mocniejsze ciosy w pojedynkach."
+    },
     {
       "id": "speed",
       "name": "Szybkość",
@@ -2051,7 +3897,7 @@
       "name": "Pancerz",
       "unit": "",
       "max": 40,
-      "description": "Mniej obrażeń w potyczkach (gdy wejdą walki)."
+      "description": "Mniej obrażeń w pojedynkach."
     },
     {
       "id": "luck",
@@ -2135,6 +3981,703 @@
     }
   ],
   "skillMaxRank": 5,
+  "enemies": [
+    {
+      "id": "dresiarz-z-bramy",
+      "name": "Dresiarz z bramy",
+      "district": "miasto-ziomkow",
+      "level": 1,
+      "hp": 34,
+      "weapon": "piesci",
+      "boss": false,
+      "lines": [
+        "Ej, ty! Masz jakiś problem?",
+        "To moja brama. Płać albo walcz."
+      ],
+      "spots": [
+        {
+          "x": 29,
+          "y": 89
+        },
+        {
+          "x": 52,
+          "y": 70
+        }
+      ]
+    },
+    {
+      "id": "kibol-mirek",
+      "name": "Kibol Mirek",
+      "district": "miasto-ziomkow",
+      "level": 2,
+      "hp": 44,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "Nasz klub, nasze tory!",
+        "Pokaż, co umiesz."
+      ],
+      "spots": [
+        {
+          "x": 85,
+          "y": 88
+        },
+        {
+          "x": 110,
+          "y": 84
+        }
+      ]
+    },
+    {
+      "id": "ziomal-z-proca",
+      "name": "Ziomal z procą",
+      "district": "miasto-ziomkow",
+      "level": 2,
+      "hp": 44,
+      "weapon": "procarka",
+      "boss": false,
+      "lines": [
+        "Trafię cię z drugiego końca parku!",
+        "Jeden strzał, jedna szansa."
+      ],
+      "spots": [
+        {
+          "x": 20,
+          "y": 40
+        },
+        {
+          "x": 89,
+          "y": 11
+        }
+      ]
+    },
+    {
+      "id": "grafficiarz-rywal",
+      "name": "Grafficiarz Rywal",
+      "district": "miasto-ziomkow",
+      "level": 3,
+      "hp": 54,
+      "weapon": "spray",
+      "boss": false,
+      "lines": [
+        "Ta ściana jest moja.",
+        "Zobaczymy, kto ma lepszy styl."
+      ],
+      "spots": [
+        {
+          "x": 97,
+          "y": 35
+        },
+        {
+          "x": 100,
+          "y": 90
+        }
+      ]
+    },
+    {
+      "id": "raper-z-osiedla",
+      "name": "Raper z osiedla",
+      "district": "miasto-ziomkow",
+      "level": 4,
+      "hp": 64,
+      "weapon": "mikrofon",
+      "boss": false,
+      "lines": [
+        "Bitwa? Bitwa!",
+        "Mój flow cię zgasi."
+      ],
+      "spots": [
+        {
+          "x": 93,
+          "y": 41
+        },
+        {
+          "x": 114,
+          "y": 49
+        }
+      ]
+    },
+    {
+      "id": "plazowy-osilek",
+      "name": "Plażowy Osiłek",
+      "district": "las-palmas",
+      "level": 3,
+      "hp": 54,
+      "weapon": "piesci",
+      "boss": false,
+      "lines": [
+        "Zasłaniasz mi słońce.",
+        "Dwieście pompek dziennie. A ty?"
+      ],
+      "spots": [
+        {
+          "x": 30,
+          "y": 50
+        },
+        {
+          "x": 25,
+          "y": 80
+        }
+      ]
+    },
+    {
+      "id": "surfer-narwaniec",
+      "name": "Surfer Narwaniec",
+      "district": "las-palmas",
+      "level": 4,
+      "hp": 64,
+      "weapon": "deska",
+      "boss": false,
+      "lines": [
+        "Fala jest moja, kolego!",
+        "Deska twardsza niż twoja głowa."
+      ],
+      "spots": [
+        {
+          "x": 35,
+          "y": 65
+        },
+        {
+          "x": 20,
+          "y": 35
+        }
+      ]
+    },
+    {
+      "id": "przemytnik",
+      "name": "Przemytnik",
+      "district": "las-palmas",
+      "level": 5,
+      "hp": 74,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "Nic nie widziałeś.",
+        "Dżungla nie lubi gości."
+      ],
+      "spots": [
+        {
+          "x": 100,
+          "y": 60
+        },
+        {
+          "x": 110,
+          "y": 45
+        }
+      ]
+    },
+    {
+      "id": "pirat-z-laguny",
+      "name": "Pirat z laguny",
+      "district": "las-palmas",
+      "level": 5,
+      "hp": 74,
+      "weapon": "procarka",
+      "boss": false,
+      "lines": [
+        "Arr! Oddawaj muszle!",
+        "Moja proca nie pudłuje."
+      ],
+      "spots": [
+        {
+          "x": 15,
+          "y": 60
+        },
+        {
+          "x": 68,
+          "y": 32
+        }
+      ]
+    },
+    {
+      "id": "dj-z-baru",
+      "name": "DJ z baru",
+      "district": "las-palmas",
+      "level": 6,
+      "hp": 84,
+      "weapon": "mikrofon",
+      "boss": false,
+      "lines": [
+        "Ściszę cię na zawsze.",
+        "Głośniej się nie da. Chyba że ja."
+      ],
+      "spots": [
+        {
+          "x": 80,
+          "y": 75
+        },
+        {
+          "x": 60,
+          "y": 82
+        }
+      ]
+    },
+    {
+      "id": "lokaj",
+      "name": "Lokaj Antoni",
+      "district": "dwor-carski",
+      "level": 5,
+      "hp": 74,
+      "weapon": "piesci",
+      "boss": false,
+      "lines": [
+        "Pan hrabia nie przyjmuje.",
+        "Proszę opuścić aleję."
+      ],
+      "spots": [
+        {
+          "x": 54,
+          "y": 44
+        },
+        {
+          "x": 74,
+          "y": 46
+        }
+      ]
+    },
+    {
+      "id": "straznik-dworu",
+      "name": "Strażnik dworu",
+      "district": "dwor-carski",
+      "level": 6,
+      "hp": 84,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "Stój! Kto idzie?",
+        "Rozkaz to rozkaz."
+      ],
+      "spots": [
+        {
+          "x": 60,
+          "y": 26
+        },
+        {
+          "x": 64,
+          "y": 62
+        }
+      ]
+    },
+    {
+      "id": "mysliwy",
+      "name": "Myśliwy",
+      "district": "dwor-carski",
+      "level": 7,
+      "hp": 94,
+      "weapon": "procarka",
+      "boss": false,
+      "lines": [
+        "Polowanie trwa.",
+        "Ciii… spłoszysz zwierzynę."
+      ],
+      "spots": [
+        {
+          "x": 59,
+          "y": 85
+        },
+        {
+          "x": 107,
+          "y": 77
+        }
+      ]
+    },
+    {
+      "id": "urzednik-z-parasolem",
+      "name": "Urzędnik z parasolem",
+      "district": "dwor-carski",
+      "level": 7,
+      "hp": 94,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "Ma pan zaległą opłatę!",
+        "Parasol to też argument."
+      ],
+      "spots": [
+        {
+          "x": 95,
+          "y": 30
+        },
+        {
+          "x": 115,
+          "y": 40
+        }
+      ]
+    },
+    {
+      "id": "hrabia",
+      "name": "Hrabia Pompejusz II",
+      "district": "dwor-carski",
+      "level": 9,
+      "hp": 161,
+      "weapon": "kij",
+      "boss": true,
+      "lines": [
+        "Śmiesz wchodzić do mojego ogrodu?",
+        "Ród Pompejuszy nie przegrywa."
+      ],
+      "spots": [
+        {
+          "x": 72,
+          "y": 58
+        }
+      ]
+    },
+    {
+      "id": "typ-spod-bloku",
+      "name": "Typ spod bloku",
+      "district": "los-karkos",
+      "level": 7,
+      "hp": 94,
+      "weapon": "piesci",
+      "boss": false,
+      "lines": [
+        "Czego tu szukasz?",
+        "Tu się nie przechodzi za darmo."
+      ],
+      "spots": [
+        {
+          "x": 39,
+          "y": 29
+        },
+        {
+          "x": 70,
+          "y": 55
+        }
+      ]
+    },
+    {
+      "id": "bokser-z-ringu",
+      "name": "Bokser z ringu",
+      "district": "los-karkos",
+      "level": 8,
+      "hp": 104,
+      "weapon": "piesci",
+      "boss": false,
+      "lines": [
+        "Wejdziesz na ring?",
+        "Garda wyżej, bo zaboli."
+      ],
+      "spots": [
+        {
+          "x": 112,
+          "y": 66
+        },
+        {
+          "x": 104,
+          "y": 50
+        }
+      ]
+    },
+    {
+      "id": "zlomiarz",
+      "name": "Złomiarz Wiesiek",
+      "district": "los-karkos",
+      "level": 9,
+      "hp": 114,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "To mój złom!",
+        "Wszystko tu ma swoją cenę."
+      ],
+      "spots": [
+        {
+          "x": 105,
+          "y": 15
+        },
+        {
+          "x": 115,
+          "y": 25
+        }
+      ]
+    },
+    {
+      "id": "snajper-z-dachu",
+      "name": "Snajper z dachu",
+      "district": "los-karkos",
+      "level": 10,
+      "hp": 124,
+      "weapon": "procarka",
+      "boss": false,
+      "lines": [
+        "Widziałam cię z dachu.",
+        "Nie ruszaj się."
+      ],
+      "spots": [
+        {
+          "x": 60,
+          "y": 25
+        },
+        {
+          "x": 85,
+          "y": 65
+        }
+      ]
+    },
+    {
+      "id": "gangster-z-fabryki",
+      "name": "Gangster z fabryki",
+      "district": "los-karkos",
+      "level": 11,
+      "hp": 134,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "Szef nie lubi wścibskich.",
+        "Za dużo widziałeś."
+      ],
+      "spots": [
+        {
+          "x": 105,
+          "y": 80
+        },
+        {
+          "x": 118,
+          "y": 88
+        }
+      ]
+    },
+    {
+      "id": "szef-gangu",
+      "name": "Szef gangu Bazyl",
+      "district": "los-karkos",
+      "level": 12,
+      "hp": 200,
+      "weapon": "kij",
+      "boss": true,
+      "lines": [
+        "Wiesz, kim jestem?",
+        "Fabryka jest moja. Los Karkos też."
+      ],
+      "spots": [
+        {
+          "x": 109,
+          "y": 81
+        }
+      ]
+    }
+  ],
+  "moves": [
+    {
+      "id": "garda",
+      "name": "Garda",
+      "anim": "guard",
+      "description": "Zasłaniasz się: połowa obrażeń w tej turze.",
+      "hits": 1,
+      "effect": "guard",
+      "damage": false
+    },
+    {
+      "id": "prosty",
+      "name": "Prosty",
+      "anim": "jab",
+      "description": "Szybki, pewny cios.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "sierpowy",
+      "name": "Sierpowy",
+      "anim": "hook",
+      "description": "Mocny cios z boku.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "kopniak",
+      "name": "Kopniak",
+      "anim": "kick",
+      "description": "Z obrotu. Boli, jeśli trafi.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "pchniecie",
+      "name": "Pchnięcie",
+      "anim": "thrust",
+      "description": "Krótko, prosto, końcem kija.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "zamach",
+      "name": "Zamach",
+      "anim": "swing",
+      "description": "Szeroki zamach z całej siły.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "mlyniec",
+      "name": "Młyniec",
+      "anim": "spin",
+      "description": "Obrót z kijem. Ryzykowny.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "strzal",
+      "name": "Strzał",
+      "anim": "shoot",
+      "description": "Kamyk prosto w cel.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "seria",
+      "name": "Seria",
+      "anim": "shoot",
+      "description": "Dwa szybkie strzały.",
+      "hits": 2,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "celowanie",
+      "name": "Celowanie",
+      "anim": "aim",
+      "description": "Następny cios na pewno krytyczny.",
+      "hits": 1,
+      "effect": "aim",
+      "damage": false
+    },
+    {
+      "id": "psik",
+      "name": "Psik w oczy",
+      "anim": "spray",
+      "description": "Rywal gorzej trafia przez 2 tury.",
+      "hits": 1,
+      "effect": "blind",
+      "damage": true
+    },
+    {
+      "id": "chmura",
+      "name": "Chmura",
+      "anim": "spray",
+      "description": "Gęsta chmura farby.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "diss",
+      "name": "Diss",
+      "anim": "shout",
+      "description": "Rywal słabiej bije przez 2 tury.",
+      "hits": 1,
+      "effect": "weaken",
+      "damage": true
+    },
+    {
+      "id": "bit",
+      "name": "Bit",
+      "anim": "shout",
+      "description": "Fala basu prosto w twarz.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "drop",
+      "name": "Drop",
+      "anim": "shout",
+      "description": "Bas, który powala.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "deska",
+      "name": "Uderzenie deską",
+      "anim": "swing",
+      "description": "Płasko, z rozmachem.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "kickflip",
+      "name": "Kickflip",
+      "anim": "flip",
+      "description": "Deska w powietrzu, rywal na ziemi.",
+      "hits": 1,
+      "effect": "",
+      "damage": true
+    },
+    {
+      "id": "slizg",
+      "name": "Ślizg",
+      "anim": "dodge",
+      "description": "Łatwiej uniknąć ciosu w tej turze.",
+      "hits": 1,
+      "effect": "dodge",
+      "damage": false
+    }
+  ],
+  "weapons": [
+    {
+      "kind": "piesci",
+      "moves": [
+        "prosty",
+        "sierpowy",
+        "kopniak",
+        "garda"
+      ]
+    },
+    {
+      "kind": "kij",
+      "moves": [
+        "pchniecie",
+        "zamach",
+        "mlyniec",
+        "garda"
+      ]
+    },
+    {
+      "kind": "procarka",
+      "moves": [
+        "strzal",
+        "seria",
+        "celowanie",
+        "garda"
+      ]
+    },
+    {
+      "kind": "spray",
+      "moves": [
+        "psik",
+        "chmura",
+        "prosty",
+        "garda"
+      ]
+    },
+    {
+      "kind": "mikrofon",
+      "moves": [
+        "diss",
+        "bit",
+        "drop",
+        "garda"
+      ]
+    },
+    {
+      "kind": "deska",
+      "moves": [
+        "deska",
+        "kickflip",
+        "slizg",
+        "garda"
+      ]
+    }
+  ],
   "caches": [
     {
       "id": "mz-wzgorze",

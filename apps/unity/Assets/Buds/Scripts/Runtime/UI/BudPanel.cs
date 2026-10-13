@@ -47,9 +47,6 @@ namespace Buds.UI
             ["mythic"] = ("Mityczny", UiKit.Hex("#ff3d7a")),
         };
 
-        /// <summary>Paper doll: left column top to bottom, then the right column.</summary>
-        static readonly string[] DollLeft = { "head", "face", "torso", "hands" };
-        static readonly string[] DollRight = { "accessory", "held", "legs", "feet" };
         const int Tabs = 4;
 
         readonly QuestContent content;
@@ -97,6 +94,8 @@ namespace Buds.UI
         Text shopBuyLabel;
         Text shopWallet;
         string selectedShop;
+        string shopSlot = "feet";
+        readonly List<(string slot, Button chip)> shopFilters = new();
 
         public bool IsOpen => root.activeSelf;
 
@@ -248,59 +247,72 @@ namespace Buds.UI
             statsText.text = sb.ToString();
         }
 
-        // ---------- gear: paper doll, stats, picker ----------
+        // ---------- gear: paper doll laid out like the body, stats, picker ----------
+
+        /// <summary>Where each slot's tile sits on the body: (column, row); column 0 left, 1 centre, 2 right.</summary>
+        static readonly Dictionary<string, Vector2Int> BodyLayout = new()
+        {
+            ["head"] = new Vector2Int(1, 0),
+            ["face"] = new Vector2Int(1, 1),
+            ["accessory"] = new Vector2Int(2, 1),
+            ["hands"] = new Vector2Int(0, 2),
+            ["torso"] = new Vector2Int(1, 2),
+            ["held"] = new Vector2Int(2, 2),
+            ["legs"] = new Vector2Int(1, 3),
+            ["feet"] = new Vector2Int(1, 4),
+        };
+
+        const float Tile = 84;
+        const float RowH = 106;
 
         void BuildGear(RectTransform page)
         {
-            // the bud in the middle, slots around it head to toe
+            // the bud's silhouette behind the tiles, so every tile sits on its part of the body
             var card = UiKit.OutlinedBox("Doll", page, UiKit.Paper300, UiKit.RadiusL);
-            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(112, 0), new Vector2(250, 540),
-                new Vector2(0, 1));
+            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), Vector2.zero, new Vector2(470, 540), new Vector2(0, 1));
             dollPortrait = UiKit.Rect("Portrait", card.transform).gameObject.AddComponent<Image>();
             dollPortrait.preserveAspect = true;
             dollPortrait.raycastTarget = false;
-            UiKit.Stretch(dollPortrait.rectTransform, 12);
-            for (var i = 0; i < 4; i++)
-            {
-                DollSlot(page, DollLeft[i], new Vector2(0, -i * 140));
-                DollSlot(page, DollRight[i], new Vector2(378, -i * 140));
-            }
+            dollPortrait.color = new Color(1, 1, 1, 0.32f);
+            UiKit.Place(dollPortrait.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -6), new Vector2(360, 540));
+            float[] columns = { 40, 193, 346 };
+            foreach (var (slot, at) in BodyLayout)
+                DollSlot(page, slot, new Vector2(columns[at.x], -8 - at.y * RowH));
 
             // stats
             var stats = UiKit.OutlinedBox("Stats", page, UiKit.Paper300, UiKit.RadiusM);
-            var statsRt = (RectTransform)stats.transform.parent;
-            UiKit.Place(statsRt, new Vector2(0, 1), new Vector2(500, 0), new Vector2(576, 206), new Vector2(0, 1));
+            UiKit.Place((RectTransform)stats.transform.parent, new Vector2(0, 1), new Vector2(500, 0), new Vector2(576, 238), new Vector2(0, 1));
             var title = UiKit.Label("Title", stats.transform, "Statystyki", 26, UiKit.Ink, true, TextAnchor.UpperLeft);
-            UiKit.Place(title.rectTransform, new Vector2(0, 1), new Vector2(18, -10), new Vector2(300, 34), new Vector2(0, 1));
+            UiKit.Place(title.rectTransform, new Vector2(0, 1), new Vector2(18, -8), new Vector2(300, 34), new Vector2(0, 1));
             for (var i = 0; i < content.stats.Length; i++)
             {
                 var s = content.stats[i];
-                var y = -52 - i * 40;
+                var y = -46 - i * 38;
                 var label = UiKit.Label("Name", stats.transform, s.name, 22, UiKit.Ink, false, TextAnchor.MiddleLeft);
                 UiKit.Place(label.rectTransform, new Vector2(0, 1), new Vector2(18, y), new Vector2(140, 32), new Vector2(0, 1));
-                var fill = UiKit.Bar("Bar", stats.transform, s.id == "armor" ? UiKit.Rep400 : s.id == "luck" ? UiKit.Gold400 : UiKit.Buds400,
-                    out var bar);
+                var color = s.id switch { "attack" => UiKit.Alert500, "armor" => UiKit.Rep400, "luck" => UiKit.Gold400, _ => UiKit.Buds400 };
+                var fill = UiKit.Bar("Bar", stats.transform, color, out var bar);
                 UiKit.Place(bar, new Vector2(0, 1), new Vector2(160, y - 2), new Vector2(300, 28), new Vector2(0, 1));
                 var value = UiKit.Label("Value", stats.transform, "", 22, UiKit.Ink, true, TextAnchor.MiddleRight);
                 UiKit.Place(value.rectTransform, new Vector2(0, 1), new Vector2(470, y), new Vector2(88, 32), new Vector2(0, 1));
                 statRows.Add((s.id, fill, value));
             }
             skillBonusText = UiKit.Label("Skills", stats.transform, "", 19, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-            UiKit.Place(skillBonusText.rectTransform, new Vector2(0, 1), new Vector2(18, -174), new Vector2(540, 28), new Vector2(0, 1));
+            UiKit.Place(skillBonusText.rectTransform, new Vector2(0, 1), new Vector2(18, -200), new Vector2(540, 30), new Vector2(0, 1));
 
             // what can go into the selected slot
             pickerTitle = UiKit.Label("PickerTitle", page, "", 26, UiKit.Ink, true, TextAnchor.UpperLeft);
-            UiKit.Place(pickerTitle.rectTransform, new Vector2(0, 1), new Vector2(500, -222), new Vector2(576, 34), new Vector2(0, 1));
+            UiKit.Place(pickerTitle.rectTransform, new Vector2(0, 1), new Vector2(500, -246), new Vector2(576, 34), new Vector2(0, 1));
             pickerGrid = UiKit.Rect("Picker", page);
-            UiKit.Place(pickerGrid, new Vector2(0, 1), new Vector2(500, -262), new Vector2(576, 180), new Vector2(0, 1));
+            UiKit.Place(pickerGrid, new Vector2(0, 1), new Vector2(500, -284), new Vector2(576, 184), new Vector2(0, 1));
 
             var details = UiKit.OutlinedBox("Details", page, UiKit.Paper300, UiKit.RadiusM);
-            UiKit.Place((RectTransform)details.transform.parent, new Vector2(0, 1), new Vector2(500, -444), new Vector2(576, 96),
+            UiKit.Place((RectTransform)details.transform.parent, new Vector2(0, 1), new Vector2(500, -474), new Vector2(576, 88),
                 new Vector2(0, 1));
             gearDetails = UiKit.Label("Text", details.transform, "", 20, UiKit.Ink, false, TextAnchor.MiddleLeft);
-            UiKit.Stretch(gearDetails.rectTransform, 16, 6, 190, 6);
-            gearAction = UiKit.Button("Action", details.transform, "Załóż", new Vector2(164, 64), GearAction, UiKit.Tone.Gold, 28);
-            UiKit.Place((RectTransform)gearAction.transform, new Vector2(1, 0.5f), new Vector2(-14, 2), new Vector2(164, 64),
+            UiKit.Stretch(gearDetails.rectTransform, 16, 4, 190, 4);
+            gearAction = UiKit.Button("Action", details.transform, "Załóż", new Vector2(164, 62), GearAction, UiKit.Tone.Gold, 28);
+            UiKit.Place((RectTransform)gearAction.transform, new Vector2(1, 0.5f), new Vector2(-14, 2), new Vector2(164, 62),
                 new Vector2(1, 0.5f));
             gearActionLabel = gearAction.GetComponentInChildren<Text>();
         }
@@ -308,18 +320,17 @@ namespace Buds.UI
         void DollSlot(RectTransform page, string slot, Vector2 at)
         {
             var root = UiKit.Rect("Slot " + slot, page);
-            UiKit.Place(root, new Vector2(0, 1), at, new Vector2(92, 122), new Vector2(0, 1));
+            UiKit.Place(root, new Vector2(0, 1), at, new Vector2(Tile, Tile + 20), new Vector2(0, 1));
             var frame = UiKit.OutlinedBox("Frame", root, UiKit.Surface700, UiKit.RadiusM);
-            UiKit.Place((RectTransform)frame.transform.parent, new Vector2(0.5f, 1), Vector2.zero, new Vector2(92, 92),
-                new Vector2(0.5f, 1));
+            UiKit.Place((RectTransform)frame.transform.parent, new Vector2(0.5f, 1), Vector2.zero, new Vector2(Tile, Tile), new Vector2(0.5f, 1));
             var inner = UiKit.Shape("Inner", frame.transform, UiKit.Surface800, UiKit.RadiusM - 6);
             UiKit.Stretch(inner.rectTransform, 5);
             var icon = UiKit.Rect("Icon", inner.transform).gameObject.AddComponent<Image>();
             icon.preserveAspect = true;
             icon.raycastTarget = false;
-            UiKit.Stretch(icon.rectTransform, 8);
-            var label = UiKit.Label("Label", root, SlotName(slot), 18, UiKit.InkSoft, true, TextAnchor.LowerCenter);
-            UiKit.Stretch(label.rectTransform);
+            UiKit.Stretch(icon.rectTransform, 7);
+            var label = UiKit.Label("Label", root, SlotName(slot), 17, UiKit.InkSoft, true, TextAnchor.LowerCenter);
+            UiKit.Stretch(label.rectTransform, -10, 0, -10, 0);
             frame.raycastTarget = true;
             var button = root.gameObject.AddComponent<Button>();
             button.targetGraphic = frame;
@@ -354,7 +365,7 @@ namespace Buds.UI
                 bonuses.Add($"+{n} {Array.Find(content.skills, s => s.id == id)?.name ?? id}");
             skillBonusText.text = bonuses.Count > 0 ? "Umiejętności z ekwipunku: " + string.Join(", ", bonuses) : "Ekwipunek nie dodaje jeszcze umiejętności.";
 
-            // owned items for the selected slot
+            // owned items for the selected slot, those the bud is too young for dimmed
             pickerTitle.text = $"{SlotName(selectedSlot)}: twoje przedmioty";
             for (var i = pickerGrid.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(pickerGrid.GetChild(i).gameObject);
             var fits = new List<ItemData>();
@@ -363,6 +374,7 @@ namespace Buds.UI
                 var item = content.Item(id);
                 if (item != null && item.slot == selectedSlot && !fits.Contains(item)) fits.Add(item);
             }
+            fits.Sort((a, b) => a.minLevel.CompareTo(b.minLevel));
             for (var i = 0; i < fits.Count && i < 12; i++)
             {
                 var item = fits[i];
@@ -371,14 +383,14 @@ namespace Buds.UI
                 {
                     selectedGear = item.id;
                     RefreshGear();
-                });
+                }, item.minLevel > data.Level);
             }
             if (fits.Count == 0)
             {
                 var empty = UiKit.Label("Empty", pickerGrid,
                     data.Guest
                         ? "Połącz Buda ze strony, żeby zbierać i zakładać przedmioty."
-                        : "Nic tu jeszcze nie masz. Przedmioty dają zadania, skrytki i sklep za monety.", 21, UiKit.InkSoft, false,
+                        : "Nic tu jeszcze nie masz. Przedmioty dają pojedynki, zadania, skrytki i sklep.", 21, UiKit.InkSoft, false,
                     TextAnchor.UpperLeft);
                 UiKit.Stretch(empty.rectTransform);
             }
@@ -390,10 +402,12 @@ namespace Buds.UI
             if (selected != null)
             {
                 var r = RarityOf(selected);
-                gearDetails.text = $"<b>{selected.name}</b>  ·  <color=#{Hex(r.color)}>{r.label}</color>\n{Gear.Describe(content, selected)}";
+                var tooYoung = selected.minLevel > data.Level;
+                gearDetails.text = $"<b>{selected.name}</b>  ·  <color=#{Hex(r.color)}>{r.label}</color>  ·  poz. {selected.minLevel}\n" +
+                                   (tooYoung ? $"<color=#bd1c31>Założysz od poziomu {selected.minLevel}</color>" : Gear.Describe(content, selected));
                 var isWorn = wornNow == selected.id;
                 gearActionLabel.text = isWorn ? "Zdejmij" : "Załóż";
-                gearAction.interactable = !data.Guest && !data.Loading;
+                gearAction.interactable = !data.Guest && !data.Loading && (isWorn || !tooYoung);
                 gearAction.gameObject.SetActive(true);
             }
             else
@@ -411,8 +425,9 @@ namespace Buds.UI
             onEquip(selectedSlot, wornNow == target ? null : target);
         }
 
-        /// <summary>An item tile with its rarity frame; <paramref name="worn"/> adds a lime tick bar.</summary>
-        void ItemBox(RectTransform parent, ItemData item, Vector2 at, float size, bool selected, bool worn, Action onClick)
+        /// <summary>An item tile with its rarity frame; <paramref name="worn"/> adds a lime bar, <paramref name="locked"/> dims it.</summary>
+        void ItemBox(RectTransform parent, ItemData item, Vector2 at, float size, bool selected, bool worn, Action onClick,
+            bool locked = false)
         {
             var rarity = RarityOf(item);
             var slot = UiKit.Rect("Item " + item.id, parent);
@@ -426,11 +441,17 @@ namespace Buds.UI
             icon.enabled = icon.sprite;
             icon.preserveAspect = true;
             icon.raycastTarget = false;
+            if (locked) icon.color = new Color(1, 1, 1, 0.35f);
             UiKit.Stretch(icon.rectTransform, 7);
             if (worn)
             {
                 var tag = UiKit.Shape("Worn", inner.transform, UiKit.Buds400, 4);
                 UiKit.Place(tag.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 2), new Vector2(size * 0.5f, 8), new Vector2(0.5f, 0));
+            }
+            if (locked)
+            {
+                var lvl = UiKit.Outlined("Level", inner.transform, $"poz. {item.minLevel}", 18, UiKit.Gold400);
+                UiKit.Stretch(lvl.rectTransform);
             }
             frame.raycastTarget = true;
             var button = slot.gameObject.AddComponent<Button>();
@@ -517,12 +538,26 @@ namespace Buds.UI
 
         void BuildShop(RectTransform page)
         {
+            // slot filter: two rows of four
+            for (var i = 0; i < content.slots.Length && i < 8; i++)
+            {
+                var slot = content.slots[i].id;
+                var chip = UiKit.Button("Filter " + slot, page, content.slots[i].name, new Vector2(136, 46), () =>
+                {
+                    shopSlot = slot;
+                    selectedShop = null;
+                    RefreshShop();
+                }, UiKit.Tone.Rep, 20);
+                UiKit.Place((RectTransform)chip.transform, new Vector2(0, 1), new Vector2((i % 4) * 146, -(i / 4) * 56), new Vector2(136, 46),
+                    new Vector2(0, 1));
+                shopFilters.Add((slot, chip));
+            }
             shopGrid = UiKit.Rect("Grid", page);
-            UiKit.Place(shopGrid, new Vector2(0, 1), Vector2.zero, new Vector2(580, 440), new Vector2(0, 1));
+            UiKit.Place(shopGrid, new Vector2(0, 1), new Vector2(0, -122), new Vector2(580, 400), new Vector2(0, 1));
             var premium = UiKit.Label("Premium", page,
-                "<b>Wkrótce:</b> stroje premium za prawdziwe pieniądze. Tylko wygląd: nigdy nie dają przewagi.", 19,
-                UiKit.InkSoft, false, TextAnchor.UpperLeft);
-            UiKit.Place(premium.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(560, 60), Vector2.zero);
+                "<b>Wkrótce:</b> stroje premium za prawdziwe pieniądze. Tylko wygląd: nigdy nie dają przewagi.", 18,
+                UiKit.InkSoft, false, TextAnchor.LowerLeft);
+            UiKit.Place(premium.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(570, 44), Vector2.zero);
 
             var card = UiKit.OutlinedBox("Card", page, UiKit.Paper300, UiKit.RadiusL);
             UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(600, 0), new Vector2(476, 562),
@@ -539,7 +574,7 @@ namespace Buds.UI
             shopTitle.resizeTextMinSize = 18;
             shopTitle.resizeTextMaxSize = 30;
             shopDetails = UiKit.Label("Details", card.transform, "", 21, UiKit.Ink, false, TextAnchor.UpperCenter);
-            UiKit.Place(shopDetails.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -232), new Vector2(430, 180), new Vector2(0.5f, 1));
+            UiKit.Place(shopDetails.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -232), new Vector2(430, 200), new Vector2(0.5f, 1));
             shopDetails.lineSpacing = 1.1f;
             shopWallet = UiKit.Label("Wallet", card.transform, "", 21, UiKit.InkSoft, true, TextAnchor.LowerCenter);
             UiKit.Place(shopWallet.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 96), new Vector2(430, 30), new Vector2(0.5f, 0));
@@ -555,20 +590,27 @@ namespace Buds.UI
 
         void RefreshShop()
         {
+            foreach (var (slot, chip) in shopFilters)
+            {
+                var face = chip.transform.Find("Face/Fill")?.GetComponent<Image>();
+                if (face) face.color = slot == shopSlot ? UiKit.Buds400 : UiKit.Rep400;
+            }
             for (var i = shopGrid.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(shopGrid.GetChild(i).gameObject);
             var items = new List<ItemData>();
             foreach (var item in content.items)
-                if (item.shop && item.available) items.Add(item);
+                if (item.shop && item.available && item.slot == shopSlot) items.Add(item);
+            items.Sort((a, b) => a.minLevel != b.minLevel ? a.minLevel.CompareTo(b.minLevel) : a.coins.CompareTo(b.coins));
             selectedShop ??= items.Count > 0 ? items[0].id : null;
             for (var i = 0; i < items.Count && i < 15; i++)
             {
                 var item = items[i];
-                var at = new Vector2((i % 5) * 116, -(i / 5) * 140);
+                var at = new Vector2((i % 5) * 116, -(i / 5) * 132);
                 var owned = data.Owned.Contains(item.id);
-                ItemBox(shopGrid, item, at, 104, item.id == selectedShop, owned, () => SelectShopItem(item.id));
-                var price = UiKit.Label("Price", shopGrid, owned ? "Masz" : item.coins.ToString(), 20, owned ? UiKit.Buds600 : UiKit.Ink,
-                    true, TextAnchor.UpperCenter);
-                UiKit.Place(price.rectTransform, new Vector2(0, 1), at + new Vector2(0, -106), new Vector2(104, 28), new Vector2(0, 1));
+                var locked = item.minLevel > data.Level;
+                ItemBox(shopGrid, item, at, 100, item.id == selectedShop, owned, () => SelectShopItem(item.id), locked && !owned);
+                var price = UiKit.Label("Price", shopGrid, owned ? "Masz" : item.coins.ToString(), 19,
+                    owned ? UiKit.Buds600 : UiKit.Ink, true, TextAnchor.UpperCenter);
+                UiKit.Place(price.rectTransform, new Vector2(0, 1), at + new Vector2(0, -102), new Vector2(100, 26), new Vector2(0, 1));
             }
 
             var selected = selectedShop != null ? content.Item(selectedShop) : null;
@@ -585,12 +627,22 @@ namespace Buds.UI
             shopIcon.sprite = Icon("Items/" + selected.id);
             shopIcon.enabled = shopIcon.sprite;
             shopTitle.text = selected.name;
+            var weapon = string.IsNullOrEmpty(selected.weapon) ? "" : $"\nRuchy: {MovesText(selected.weapon)}";
             shopDetails.text =
-                $"<color=#{Hex(r.color)}><b>{r.label}</b></color>  ·  {SlotName(selected.slot)}\n<b>{Gear.Describe(content, selected)}</b>\n<color=#55514a>{selected.description}</color>";
+                $"<color=#{Hex(r.color)}><b>{r.label}</b></color>  ·  {SlotName(selected.slot)}  ·  od poz. {selected.minLevel}\n<b>{Gear.Describe(content, selected)}</b>{weapon}\n<color=#55514a>{selected.description}</color>";
             var have = data.Owned.Contains(selected.id);
+            var tooYoung = selected.minLevel > data.Level;
             shopBuy.gameObject.SetActive(true);
-            shopBuyLabel.text = have ? "Już masz" : $"Kup za {selected.coins}";
-            shopBuy.interactable = !data.Guest && !data.Loading && !have && data.Coins >= selected.coins;
+            shopBuyLabel.text = have ? "Już masz" : tooYoung ? $"Od poziomu {selected.minLevel}" : $"Kup za {selected.coins}";
+            shopBuy.interactable = !data.Guest && !data.Loading && !have && !tooYoung && data.Coins >= selected.coins;
+        }
+
+        string MovesText(string weapon)
+        {
+            var names = new List<string>();
+            foreach (var id in content.MovesFor(weapon))
+                if (id != "garda") names.Add(content.Move(id)?.name ?? id);
+            return string.Join(", ", names);
         }
 
         Sprite Icon(string path)

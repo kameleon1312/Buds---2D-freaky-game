@@ -1,5 +1,6 @@
 import type { BudLook } from '../bud/look';
 import type { CacheInput } from '../caches';
+import { scaledEnemy, type EnemyInput } from '../combat';
 import type { Npc, QuestInput } from '../quests';
 
 /**
@@ -14,7 +15,12 @@ const D = 'miasto-ziomkow';
 
 const look = (l: BudLook) => l;
 
-export const MIASTO_ZIOMKOW: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
+export const MIASTO_ZIOMKOW: {
+  npcs: Npc[];
+  quests: QuestInput[];
+  caches: CacheInput[];
+  enemies: EnemyInput[];
+} = {
   npcs: [
     {
       id: 'wiktor',
@@ -406,5 +412,118 @@ export const MIASTO_ZIOMKOW: { npcs: Npc[]; quests: QuestInput[]; caches: CacheI
       xp: 10,
       text: 'Skrzynka Rysia: śrubki, stary walkman i trochę drobnych.',
     },
+  ],
+  // opponents for duels: XP, coins and loot by rarity (stats from the level: combat.ts scaledEnemy)
+  enemies: [
+    scaledEnemy({
+      id: 'dresiarz-z-bramy',
+      name: 'Dresiarz z bramy',
+      district: D,
+      level: 1,
+      weapon: 'piesci',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 1,
+        hair: 'krotkie',
+        hairColor: 0,
+        outfit: 'bluza',
+        outfitColor: 6,
+        pantsColor: 1,
+      },
+      lines: ['Ej, ty! Masz jakiś problem?', 'To moja brama. Płać albo walcz.'],
+      spots: [
+        { x: 29, y: 89 },
+        { x: 52, y: 70 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'kibol-mirek',
+      name: 'Kibol Mirek',
+      district: D,
+      level: 2,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 0,
+        hair: 'czapka',
+        hairColor: 1,
+        outfit: 'kurtka',
+        outfitColor: 3,
+        pantsColor: 1,
+      },
+      lines: ['Nasz klub, nasze tory!', 'Pokaż, co umiesz.'],
+      spots: [
+        { x: 85, y: 88 },
+        { x: 110, y: 84 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'ziomal-z-proca',
+      name: 'Ziomal z procą',
+      district: D,
+      level: 2,
+      weapon: 'procarka',
+      look: {
+        gender: 'on',
+        mood: 'radosny',
+        skin: 3,
+        hair: 'daszek',
+        hairColor: 2,
+        outfit: 'tshirt',
+        outfitColor: 4,
+        pantsColor: 0,
+      },
+      lines: ['Trafię cię z drugiego końca parku!', 'Jeden strzał, jedna szansa.'],
+      spots: [
+        { x: 20, y: 40 },
+        { x: 89, y: 11 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'grafficiarz-rywal',
+      name: 'Grafficiarz Rywal',
+      district: D,
+      level: 3,
+      weapon: 'spray',
+      look: {
+        gender: 'ona',
+        mood: 'tajemniczy',
+        skin: 2,
+        hair: 'kucyk',
+        hairColor: 6,
+        outfit: 'bluza',
+        outfitColor: 2,
+        pantsColor: 1,
+      },
+      lines: ['Ta ściana jest moja.', 'Zobaczymy, kto ma lepszy styl.'],
+      spots: [
+        { x: 97, y: 35 },
+        { x: 100, y: 90 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'raper-z-osiedla',
+      name: 'Raper z osiedla',
+      district: D,
+      level: 4,
+      weapon: 'mikrofon',
+      look: {
+        gender: 'on',
+        mood: 'wyluzowany',
+        skin: 4,
+        hair: 'sluchawki',
+        hairColor: 0,
+        outfit: 'bluza',
+        outfitColor: 7,
+        pantsColor: 1,
+      },
+      lines: ['Bitwa? Bitwa!', 'Mój flow cię zgasi.'],
+      spots: [
+        { x: 93, y: 41 },
+        { x: 114, y: 49 },
+      ],
+    }),
   ],
 };

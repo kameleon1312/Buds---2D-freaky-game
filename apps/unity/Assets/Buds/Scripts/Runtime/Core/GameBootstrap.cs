@@ -158,6 +158,7 @@ namespace Buds.Core
             SetUpPanel();
             SetUpCaches();
             SetUpMap();
+            SetUpFights();
             // dev/test: start in another district (-buds-district las-palmas)
             LoadDistrict(CommandLine.Get("-buds-district") ?? Districts.Start, null);
             ui.HideLoading();
@@ -180,6 +181,7 @@ namespace Buds.Core
             world = WorldView.Create(map);
             questWorld = QuestWorld.Create(world, quests);
             cacheWorld = CacheWorld.Create(world, caches);
+            enemyWorld = EnemyWorld.Create(world, quests.Content);
             UpdateTracker();
             var at = fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
             player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
@@ -207,7 +209,9 @@ namespace Buds.Core
             ui.Tick();
             if (travelling) return;
             var input = player.Input;
-            input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false);
+            input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
+                            (fightScreen?.IsOpen ?? false);
+            if (UpdateFight()) return;
             ui.UpdateStick(input);
 
             if (UpdateMapScreen(input)) return;
@@ -227,14 +231,16 @@ namespace Buds.Core
             CheckQuestProgress(cell);
             Explore(cell);
 
-            // what the bud can interact with: a person first, then a cache, a door, a sign
+            // what the bud can interact with: a person first, then an opponent, a cache, a door, a sign
             var feet = (Vector2)player.transform.position;
             var (mx, my) = FeetOnMap();
             nearbyNpc = questWorld.NearestNpc(feet, InteractRange);
-            nearbyCache = nearbyNpc ? null : caches.Nearest(world.Map.Id, mx, my, CacheWorld.SearchRange);
-            nearbyDoor = nearbyNpc || nearbyCache != null ? null : FindNearbyDoor(feet);
-            nearby = nearbyNpc || nearbyCache != null || nearbyDoor != null ? null : FindNearbySign();
+            nearbyEnemy = nearbyNpc ? null : enemyWorld.Nearest(feet, InteractRange);
+            nearbyCache = nearbyNpc || nearbyEnemy ? null : caches.Nearest(world.Map.Id, mx, my, CacheWorld.SearchRange);
+            nearbyDoor = nearbyNpc || nearbyEnemy || nearbyCache != null ? null : FindNearbyDoor(feet);
+            nearby = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyDoor != null ? null : FindNearbySign();
             ui.SetHint(nearbyNpc ? $"Rozmawiaj: {nearbyNpc.Data.name}  [E]"
+                : nearbyEnemy ? $"Walcz: {nearbyEnemy.Data.name} (poz. {nearbyEnemy.Data.level})  [E]"
                 : nearbyCache != null ? "Przeszukaj  [E]"
                 : nearbyDoor != null ? $"Wejdź: {nearbyDoor.Name}  [E]"
                 : nearby != null ? "Czytaj  [E]"
@@ -244,6 +250,7 @@ namespace Buds.Core
             if (!input.InteractPressed) return;
             if (ui.DialogOpen) ui.HideDialog();
             else if (nearbyNpc) TalkTo(nearbyNpc);
+            else if (nearbyEnemy) Challenge(nearbyEnemy);
             else if (nearbyCache != null) _ = OpenCache(nearbyCache);
             else if (nearbyDoor != null) EnterDoor(nearbyDoor);
             else if (nearby != null) ui.ShowDialog(nearby.Title, nearby.Text);
@@ -392,6 +399,11 @@ namespace Buds.Core
                 }
 
                 if (CommandLine.Has("-buds-gear-demo") && session != null) await GearDemo(Shot);
+                if (CommandLine.Has("-buds-fight-demo") && session != null)
+                {
+                    if (world.Map.Id != Districts.Start) LoadDistrict(Districts.Start, null);
+                    await FightDemo(Shot);
+                }
 
                 // travel: walk north out of the start district (development builds skip the level gate)
                 if (CommandLine.Has("-buds-tour"))

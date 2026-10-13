@@ -1282,6 +1282,16 @@
       ]
     },
     {
+      "name": "marker-fight",
+      "pivotX": 0.4987,
+      "pivotY": 0.0625,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
       "name": "target-ring",
       "pivotX": 0.4987,
       "pivotY": 0.393,

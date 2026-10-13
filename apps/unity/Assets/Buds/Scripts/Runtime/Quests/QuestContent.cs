@@ -75,12 +75,50 @@ namespace Buds.Quests
         public int luck;
         public SkillBonusData[] skillBonus;
         public int coins; // price in the coin shop (the server charges)
+        public int minLevel; // the bud's level needed to wear or buy it
+        public string weapon; // held items: piesci | kij | procarka | spray | mikrofon | deska
+        public int attack;
         public bool shop;
         public bool premium; // real money: looks only
         public bool available;
         public string description;
 
         public bool IsGear => !string.IsNullOrEmpty(slot);
+    }
+
+    /// <summary>An opponent for duels; the server holds its stats and resolves the fight.</summary>
+    [Serializable]
+    public sealed class EnemyData
+    {
+        public string id;
+        public string name;
+        public string district;
+        public int level;
+        public int hp;
+        public string weapon;
+        public bool boss;
+        public string[] lines;
+        public CellData[] spots;
+    }
+
+    /// <summary>A duel move: the animation the game plays for it (jab, hook, kick, swing, shoot…).</summary>
+    [Serializable]
+    public sealed class MoveData
+    {
+        public string id;
+        public string name;
+        public string anim;
+        public string description;
+        public int hits;
+        public string effect;
+        public bool damage;
+    }
+
+    [Serializable]
+    public sealed class WeaponData
+    {
+        public string kind;
+        public string[] moves;
     }
 
     [Serializable]
@@ -138,6 +176,9 @@ namespace Buds.Quests
         public StatData[] stats;
         public SlotData[] slots;
         public int skillGearMax;
+        public EnemyData[] enemies;
+        public MoveData[] moves;
+        public WeaponData[] weapons;
 
         public static QuestContent Parse(string json)
         {
@@ -149,11 +190,21 @@ namespace Buds.Quests
             content.caches ??= Array.Empty<CacheData>();
             content.stats ??= Array.Empty<StatData>();
             content.slots ??= Array.Empty<SlotData>();
+            content.enemies ??= Array.Empty<EnemyData>();
+            content.moves ??= Array.Empty<MoveData>();
+            content.weapons ??= Array.Empty<WeaponData>();
+            foreach (var e in content.enemies)
+            {
+                e.lines ??= Array.Empty<string>();
+                e.spots ??= Array.Empty<CellData>();
+            }
             foreach (var i in content.items)
             {
                 i.slot ??= "";
                 i.skillBonus ??= Array.Empty<SkillBonusData>();
                 i.description ??= "";
+                i.weapon ??= "";
+                if (i.minLevel < 1) i.minLevel = 1;
             }
             foreach (var c in content.caches)
             {
@@ -177,6 +228,17 @@ namespace Buds.Quests
         }
 
         public NpcData Npc(string id) => Array.Find(npcs, n => n.id == id);
+
+        public EnemyData Enemy(string id) => Array.Find(enemies, e => e.id == id);
+
+        public MoveData Move(string id) => Array.Find(moves, m => m.id == id);
+
+        /// <summary>The moves a weapon kind gives (fists when unknown).</summary>
+        public string[] MovesFor(string weapon)
+        {
+            var w = Array.Find(weapons, x => x.kind == weapon) ?? Array.Find(weapons, x => x.kind == "piesci");
+            return w?.moves ?? Array.Empty<string>();
+        }
 
         public QuestData Quest(string id) => Array.Find(quests, q => q.id == id);
 

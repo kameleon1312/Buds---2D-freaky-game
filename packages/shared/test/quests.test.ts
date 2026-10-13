@@ -32,6 +32,7 @@ describe('quest content', () => {
       npcs: [CONTENT.npcs[0]!, CONTENT.npcs[0]!],
       quests: [{ ...CONTENT.quests[0]!, giver: 'ghost', requires: [CONTENT.quests[0]!.id] }],
       caches: [],
+      enemies: [],
     };
     const problems = contentProblems(broken);
     expect(problems.some((p) => p.includes('duplicate npc'))).toBe(true);

@@ -1,10 +1,16 @@
 import type { CacheInput } from '../caches';
+import { scaledEnemy, type EnemyInput } from '../combat';
 import type { Npc, QuestInput } from '../quests';
 
 /** Dwór Carski — aristocratic district (from level 5). ~2020 XP: enough to reach level 7 and Los Karkos. */
 const D = 'dwor-carski';
 
-export const DWOR_CARSKI: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
+export const DWOR_CARSKI: {
+  npcs: Npc[];
+  quests: QuestInput[];
+  caches: CacheInput[];
+  enemies: EnemyInput[];
+} = {
   npcs: [
     {
       id: 'alfred',
@@ -357,5 +363,116 @@ export const DWOR_CARSKI: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInpu
       xp: 30,
       text: 'Skrzynka obok sejfu: „pomyłkowo” pobrane opłaty. Wracają do ludzi.',
     },
+  ],
+  // opponents for duels: XP, coins and loot by rarity (stats from the level: combat.ts scaledEnemy)
+  enemies: [
+    scaledEnemy({
+      id: 'lokaj',
+      name: 'Lokaj Antoni',
+      district: D,
+      level: 5,
+      weapon: 'piesci',
+      look: {
+        gender: 'on',
+        mood: 'zaspany',
+        skin: 0,
+        hair: 'krotkie',
+        hairColor: 8,
+        outfit: 'kurtka',
+        outfitColor: 5,
+        pantsColor: 1,
+      },
+      lines: ['Pan hrabia nie przyjmuje.', 'Proszę opuścić aleję.'],
+      spots: [
+        { x: 54, y: 44 },
+        { x: 74, y: 46 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'straznik-dworu',
+      name: 'Strażnik dworu',
+      district: D,
+      level: 6,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 2,
+        hair: 'czapka',
+        hairColor: 1,
+        outfit: 'kurtka',
+        outfitColor: 1,
+        pantsColor: 1,
+      },
+      lines: ['Stój! Kto idzie?', 'Rozkaz to rozkaz.'],
+      spots: [
+        { x: 60, y: 26 },
+        { x: 64, y: 62 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'mysliwy',
+      name: 'Myśliwy',
+      district: D,
+      level: 7,
+      weapon: 'procarka',
+      look: {
+        gender: 'on',
+        mood: 'tajemniczy',
+        skin: 1,
+        hair: 'daszek',
+        hairColor: 2,
+        outfit: 'ogrodniczki',
+        outfitColor: 4,
+        pantsColor: 0,
+      },
+      lines: ['Polowanie trwa.', 'Ciii… spłoszysz zwierzynę.'],
+      spots: [
+        { x: 59, y: 85 },
+        { x: 107, y: 77 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'urzednik-z-parasolem',
+      name: 'Urzędnik z parasolem',
+      district: D,
+      level: 7,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'niesmialy',
+        skin: 0,
+        hair: 'grzywka',
+        hairColor: 8,
+        outfit: 'kurtka',
+        outfitColor: 7,
+        pantsColor: 2,
+      },
+      lines: ['Ma pan zaległą opłatę!', 'Parasol to też argument.'],
+      spots: [
+        { x: 95, y: 30 },
+        { x: 115, y: 40 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'hrabia',
+      name: 'Hrabia Pompejusz II',
+      district: D,
+      level: 9,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 0,
+        hair: 'krotkie',
+        hairColor: 7,
+        outfit: 'kurtka',
+        outfitColor: 2,
+        pantsColor: 1,
+      },
+      lines: ['Śmiesz wchodzić do mojego ogrodu?', 'Ród Pompejuszy nie przegrywa.'],
+      spots: [{ x: 72, y: 58 }],
+      boss: true,
+    }),
   ],
 };

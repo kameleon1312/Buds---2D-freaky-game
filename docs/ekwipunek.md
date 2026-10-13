@@ -7,18 +7,29 @@ jeden przedmiot. Zakładasz w grze: panel „Twój Bud” → Ekwipunek → klik
 
 ## Statystyki
 
-| Statystyka | Co robi                                                      | Limit |
-| ---------- | ------------------------------------------------------------ | ----- |
-| Szybkość   | +1% prędkości chodu i biegu za punkt (działa od razu w grze) | 25    |
-| Pancerz    | mniej obrażeń w potyczkach (gdy wejdą walki)                 | 40    |
-| Szczęście  | +1% monet ze skrytek za punkt (liczy serwer)                 | 50    |
+| Statystyka | Co robi                                                             | Limit |
+| ---------- | ------------------------------------------------------------------- | ----- |
+| Atak       | mocniejsze ciosy w pojedynkach                                      | 40    |
+| Szybkość   | +1% prędkości chodu i biegu za punkt, pierwszy ruch i uniki w walce | 25    |
+| Pancerz    | mniej obrażeń w pojedynkach                                         | 40    |
+| Szczęście  | +1% monet ze skrytek i z walk za punkt, ciosy krytyczne             | 50    |
 
 Przedmioty mogą też dodawać poziomy umiejętności (np. Monokl: +1 Spryt). Ekwipunek dokłada najwyżej
 **+2** do każdej umiejętności ponad wytrenowane poziomy. Spryt z ekwipunku wydłuża zasięg odkrywania skrytek.
 
+## Poziomy i broń
+
+Ponad 100 przedmiotów, od 12 do 19 w każdym miejscu, każdy z wymaganym poziomem (1–15): zakładasz i kupujesz go
+dopiero od tego poziomu. Przedmioty „W ręku” to broń: jej rodzaj (kij, proca, spray, mikrofon, deska) daje
+ruchy w pojedynkach (`docs/pojedynki.md`). Pełna lista: `packages/shared/src/gear-items.ts`.
+
+W grze kafelki ekwipunku są ułożone jak na ciele: Głowa, Twarz, Tułów, Nogi i Stopy pośrodku, Dłonie z lewej,
+W ręku z prawej, Dodatek przy ramieniu.
+
 ## Skąd przedmioty
 
 - **Zadania:** nagrody (deskorolka, monokl, cylinder, kurtka z naszywkami…).
+- **Pojedynki:** łup o rzadkości zależnej od rywala (bossowie: epickie i legendarne).
 - **Sklep za monety:** monety ze skrytek, kupujesz w grze (panel → Sklep). Serwer sprawdza cenę i portfel
   (`POST /v1/shop/:itemId/buy`, funkcja SQL `buy_item`).
 - **Prawdziwe pieniądze (później):** tylko wygląd. Przedmiot premium nie może mieć bonusów, pilnuje tego test

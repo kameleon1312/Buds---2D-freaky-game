@@ -11,6 +11,8 @@ import {
   type BuyResponse,
   type CreateBudResponse,
   type EquipmentResponse,
+  type FightResponse,
+  MOVES_BY_WEAPON,
   type OpenCacheResponse,
   type PairCodeResponse,
 } from '@buds/shared';
@@ -72,6 +74,10 @@ function setup(store: BudStore = createMemoryStore()) {
 
 const auth = (token: string) => ({ headers: { Authorization: `Bearer ${token}` } });
 
+/** Gives a bud the XP of a level (through the quest grant, the only XP door of the memory store). */
+const reachLevel = (store: BudStore, slug: string, level: number) =>
+  store.completeQuest(slug, `test-level-${level}`, 100 * (level - 1) ** 2);
+
 describe('gear', () => {
   it('starts empty, wears owned items and computes stats', async () => {
     const { app, store, json, create } = setup();
@@ -91,6 +97,14 @@ describe('gear', () => {
     expect(res.status).toBe(403);
 
     await store.grantItem(body.bud.slug, 'buty-sprintery', 'reward');
+    // owned, but the bud is too young for it
+    res = await app.request('/v1/buds/me/equipment/feet', {
+      method: 'PUT',
+      ...json({ itemId: 'buty-sprintery' }, t),
+    });
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as ApiError).error.code).toBe('level_too_low');
+    await reachLevel(store, body.bud.slug, 6);
     res = await app.request('/v1/buds/me/equipment/feet', {
       method: 'PUT',
       ...json({ itemId: 'buty-sprintery' }, t),
@@ -131,6 +145,7 @@ describe('gear', () => {
     const { app, store, json, create } = setup();
     const { body } = await create();
     await store.grantItem(body.bud.slug, 'monokl', 'reward');
+    await reachLevel(store, body.bud.slug, 5);
     const eq = (await (
       await app.request('/v1/buds/me/equipment/face', {
         method: 'PUT',
@@ -181,6 +196,7 @@ describe('coin shop', () => {
     const { app, store, json, create } = setup();
     const { body } = await create();
     await store.grantItem(body.bud.slug, 'muszla-szczescia', 'reward');
+    await reachLevel(store, body.bud.slug, 4);
     await app.request('/v1/buds/me/equipment/accessory', {
       method: 'PUT',
       ...json({ itemId: 'muszla-szczescia' }, body.token),
@@ -285,5 +301,111 @@ describe('accounts', () => {
       headers: { 'Content-Type': 'application/json' },
     });
     expect(paired.status).toBe(201);
+  });
+});
+
+describe('duels', () => {
+  async function ready(level = 1) {
+    const ctx = setup();
+    const { body } = await ctx.create();
+    if (level > 1) await reachLevel(ctx.store, body.bud.slug, level);
+    const post = (path: string, data?: unknown) =>
+      ctx.app.request(path, { method: 'POST', ...ctx.json(data ?? {}, body.token) });
+    return { ...ctx, body, post };
+  }
+  const read = async (res: Response) => (await res.json()) as FightResponse;
+
+  it('needs the player token and a known opponent', async () => {
+    const { app, post } = await ready();
+    expect((await app.request('/v1/fights', { method: 'POST' })).status).toBe(401);
+    expect((await post('/v1/fights', { enemyId: 'nikt' })).status).toBe(404);
+    expect((await post('/v1/fights/not-a-uuid/move', { move: 'prosty' })).status).toBe(404);
+  });
+
+  it('starts with fists and full health, without leaking the RNG', async () => {
+    const { post } = await ready();
+    const res = await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' });
+    expect(res.status).toBe(201);
+    const { fight } = await read(res);
+    expect(fight.bud.moves).toEqual(MOVES_BY_WEAPON.piesci);
+    expect(fight.bud.hp).toBe(fight.bud.maxHp);
+    expect('rng' in fight).toBe(false);
+  });
+
+  it('uses the moves of the worn weapon and refuses others', async () => {
+    const { app, store, json, body, post } = await ready(3);
+    await store.grantItem(body.bud.slug, 'kij-hejnal', 'reward');
+    await app.request('/v1/buds/me/equipment/held', {
+      method: 'PUT',
+      ...json({ itemId: 'kij-hejnal' }, body.token),
+    });
+    const { fight } = await read(await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' }));
+    expect(fight.bud.weapon).toBe('kij');
+    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'prosty' })).status).toBe(400);
+    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'zamach' })).status).toBe(200);
+  });
+
+  it('plays to the end on the server, grants XP and coins once, then rests the opponent', async () => {
+    const { store, body, post } = await ready(4);
+    const { fight } = await read(await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' }));
+    let last: FightResponse | null = null;
+    for (let i = 0; i < 40; i++) {
+      last = await read(await post(`/v1/fights/${fight.id}/move`, { move: 'sierpowy' }));
+      if (last.fight.status !== 'active') break;
+    }
+    expect(last!.fight.status).toBe('won'); // a level 4 bud beats the level 1 doorman
+    const reward = last!.reward!;
+    expect(reward.xpGained).toBeGreaterThan(0);
+    expect(reward.coinsGained).toBeGreaterThan(0);
+    expect((await store.getBySlug(body.bud.slug))!.xp).toBe(reward.xp);
+    expect((await store.wallet(body.bud.slug)).coins).toBe(reward.coins);
+    if (reward.item)
+      expect((await store.items(body.bud.slug)).some((i) => i.itemId === reward.item)).toBe(true);
+    // no second reward, no instant rematch
+    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'prosty' })).status).toBe(409);
+    const again = await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' });
+    expect(again.status).toBe(409);
+    expect(((await again.json()) as ApiError).error.code).toBe('resting');
+  });
+
+  it('lets the bud run away without a reward', async () => {
+    const { store, body, post } = await ready();
+    const { fight } = await read(await post('/v1/fights', { enemyId: 'szef-gangu' }));
+    const fled = await read(await post(`/v1/fights/${fight.id}/flee`));
+    expect(fled.fight.status).toBe('fled');
+    expect((await store.getBySlug(body.bud.slug))!.xp).toBe(0);
+    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'prosty' })).status).toBe(409);
+  });
+
+  it('a new duel abandons the unfinished one', async () => {
+    const { post } = await ready();
+    const first = (await read(await post('/v1/fights', { enemyId: 'kibol-mirek' }))).fight;
+    await post('/v1/fights', { enemyId: 'ziomal-z-proca' });
+    expect((await post(`/v1/fights/${first.id}/move`, { move: 'prosty' })).status).toBe(409);
+  });
+
+  it('keeps fights private to their bud', async () => {
+    const ctx = await ready();
+    const { fight } = await read(await ctx.post('/v1/fights', { enemyId: 'kibol-mirek' }));
+    const other = await ctx.create('Inny');
+    const res = await ctx.app.request(`/v1/fights/${fight.id}/move`, {
+      method: 'POST',
+      ...ctx.json({ move: 'prosty' }, other.body.token),
+    });
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('level requirements', () => {
+  it('the shop sells only what the bud is old enough for', async () => {
+    const { app, store, create } = setup();
+    const { body } = await create();
+    for (const c of CONTENT.caches) await store.openCache(body.bud.slug, c.id, c.coins, 0);
+    const res = await app.request('/v1/shop/buty-sprintery/buy', {
+      method: 'POST',
+      ...auth(body.token),
+    });
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as ApiError).error.code).toBe('level_too_low');
   });
 });

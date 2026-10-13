@@ -8,5 +8,7 @@ export * from './districts';
 export * from './quests';
 export * from './caches';
 export * from './gear';
+export * from './gear-items';
+export * from './combat';
 export * from './account';
 export * from './skills';

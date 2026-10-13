@@ -1,4 +1,5 @@
-import type { BudRecord, OwnedItem, SlotId } from '@buds/shared';
+import { randomUUID } from 'node:crypto';
+import type { BudRecord, FightState, OwnedItem, SlotId } from '@buds/shared';
 import { makeSlug } from './slug.js';
 import type { BudStore } from './types.js';
 
@@ -14,6 +15,7 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const coins = new Map<string, number>(); // slug -> coin balance
   const gear = new Map<string, Map<SlotId, string>>(); // slug -> slot -> item
   const owners = new Map<string, string>(); // slug -> user id
+  const fights = new Map<string, { slug: string; state: FightState; finishedAt?: Date }>();
   const copy = (bud: BudRecord | undefined) => (bud ? { ...bud, look: { ...bud.look } } : null);
 
   return {
@@ -128,6 +130,58 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
       if (owner) return owner === userId ? 'mine' : 'taken';
       owners.set(slug, userId);
       return 'ok';
+    },
+
+    async createFight(slug, state) {
+      const id = randomUUID();
+      fights.set(id, { slug, state: structuredClone(state) });
+      return id;
+    },
+
+    async abandonFights(slug) {
+      for (const f of fights.values())
+        if (f.slug === slug && f.state.status === 'active') {
+          f.state.status = 'fled';
+          f.finishedAt = now();
+        }
+    },
+
+    async fight(slug, id) {
+      const f = fights.get(id);
+      return f && f.slug === slug ? structuredClone(f.state) : null;
+    },
+
+    async saveTurn(slug, id, turn, state) {
+      const f = fights.get(id);
+      if (!f || f.slug !== slug || f.state.status !== 'active' || f.state.turn !== turn)
+        return false;
+      f.state = structuredClone(state);
+      return true;
+    },
+
+    async finishFight(slug, id, turn, state, status, xp, gained) {
+      const f = fights.get(id);
+      const bud = buds.get(slug);
+      if (!f || !bud || f.slug !== slug || f.state.status !== 'active' || f.state.turn !== turn)
+        return null;
+      f.state = { ...structuredClone(state), status };
+      f.finishedAt = now();
+      bud.xp += Math.max(0, xp);
+      coins.set(slug, (coins.get(slug) ?? 0) + Math.max(0, gained));
+      return { xp: bud.xp, coins: coins.get(slug)! };
+    },
+
+    async lastWin(slug, enemyId) {
+      let last: Date | null = null;
+      for (const f of fights.values())
+        if (
+          f.slug === slug &&
+          f.state.enemyId === enemyId &&
+          f.state.status === 'won' &&
+          f.finishedAt
+        )
+          if (!last || f.finishedAt > last) last = f.finishedAt;
+      return last;
     },
 
     async openedCaches(slug) {

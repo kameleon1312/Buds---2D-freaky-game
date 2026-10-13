@@ -144,6 +144,32 @@ namespace Buds.Api
             return Parse<BuyResponse>(req);
         }
 
+        /// <summary>Starts a duel; the server builds both fighters from its own data.</summary>
+        public Awaitable<FightResponse> StartFight(string token, string enemyId) =>
+            Post<FightResponse>("/v1/fights", token, $"{{\"enemyId\":\"{enemyId}\"}}");
+
+        /// <summary>Plays one turn; the server answers with what happened (and the reward on a win).</summary>
+        public Awaitable<FightResponse> FightMove(string token, string fightId, string move) =>
+            Post<FightResponse>($"/v1/fights/{Uri.EscapeDataString(fightId)}/move", token, $"{{\"move\":\"{move}\"}}");
+
+        public Awaitable<FightResponse> Flee(string token, string fightId) =>
+            Post<FightResponse>($"/v1/fights/{Uri.EscapeDataString(fightId)}/flee", token, "{}");
+
+        /// <summary>POST with a small JSON body (ids are [a-z0-9-], safe to inline).</summary>
+        async Awaitable<T> Post<T>(string path, string token, string json)
+        {
+            using var req = new UnityWebRequest(baseUrl + path, UnityWebRequest.kHttpVerbPOST)
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json)),
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await req.SendWebRequest();
+            return Parse<T>(req);
+        }
+
         async Awaitable<T> Get<T>(string path, string token)
         {
             using var req = UnityWebRequest.Get(baseUrl + path);
