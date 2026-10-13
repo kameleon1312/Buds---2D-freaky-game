@@ -7,14 +7,15 @@ using UnityEngine.Tilemaps;
 namespace Buds.World
 {
     /// <summary>
-    /// Shows a WorldMap: smooth flat-coloured ground (rounded paths, a layered pond, garden bed) built as meshes,
-    /// vector props (trees, cottages, fence…) as y-sorted sprites, and invisible tilemaps for collision.
-    /// 1 tile = 1 world unit.
+    /// Shows a WorldMap: smooth flat-coloured ground (styles from the map file) built as chunked meshes,
+    /// props as y-sorted sprites from one atlas, and invisible tilemaps for collision. 1 tile = 1 world unit.
+    /// Chunks and sprites outside the camera are culled, so big districts stay cheap on phones.
     /// </summary>
     public sealed class WorldView : MonoBehaviour
     {
         const int SortGround = -1000; // ground layers count up from here
-        const int SortDecor = -100; // flat decorations: flowers, tufts, pebbles, lily pads
+        const int SortDecor = -100; // flat decorations: flowers, tufts, road markings…
+        public const int ChunkTiles = 32;
 
         public WorldMap Map { get; private set; }
 
@@ -23,21 +24,13 @@ namespace Buds.World
 
         public static WorldView Create(WorldMap map)
         {
-            var root = new GameObject("World", typeof(Grid));
+            var root = new GameObject("World " + map.Id, typeof(Grid));
             var view = root.AddComponent<WorldView>();
             view.Map = map;
 
-            Colliders(root.transform, "Ground", map.Ground, map);
-            Colliders(root.transform, "Objects", map.Objects, map);
-            // the map's outline: road exits lead to other districts, never into the void
-            root.AddComponent<EdgeCollider2D>().points = new[]
-            {
-                new Vector2(0, 0), new Vector2(map.Width, 0), new Vector2(map.Width, map.Height), new Vector2(0, map.Height),
-                new Vector2(0, 0),
-            };
-            var material = SpriteMaterial();
-            Ground(root.transform, map, material);
-            Props(root.transform, map, PropArt.Load());
+            Colliders(root.transform, map);
+            Ground(root.transform, map, SpriteMaterial());
+            Props(root.transform, map);
             return view;
         }
 
@@ -48,82 +41,69 @@ namespace Buds.World
 
         // ---------- collision ----------
 
-        static void Colliders(Transform parent, string name, int[,] data, WorldMap map)
+        static void Colliders(Transform parent, WorldMap map)
         {
-            var go = new GameObject(name + "Collision", typeof(Tilemap));
+            var go = new GameObject("Collision", typeof(Tilemap));
             go.transform.SetParent(parent, false);
-            var tilemap = go.GetComponent<Tilemap>();
             var solid = ScriptableObject.CreateInstance<Tile>();
             solid.colliderType = Tile.ColliderType.Grid;
-
             var positions = new List<Vector3Int>();
             for (var y = 0; y < map.Height; y++)
             for (var x = 0; x < map.Width; x++)
-                if (Tiles.IsSolid(data[y, x])) positions.Add(ToCell(x, y, map.Height));
+                if (map.Solid[y, x]) positions.Add(ToCell(x, y, map.Height));
             var tiles = new TileBase[positions.Count];
             Array.Fill(tiles, solid);
-            tilemap.SetTiles(positions.ToArray(), tiles);
-            go.AddComponent<TilemapCollider2D>();
+            go.GetComponent<Tilemap>().SetTiles(positions.ToArray(), tiles);
+            var collider = go.AddComponent<TilemapCollider2D>();
+            collider.compositeOperation = Collider2D.CompositeOperation.Merge; // one shape instead of thousands
+            go.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+            go.AddComponent<CompositeCollider2D>();
+
+            // the map's outline: exits lead to other districts, never into the void
+            parent.gameObject.AddComponent<EdgeCollider2D>().points = new[]
+            {
+                new Vector2(0, 0), new Vector2(map.Width, 0), new Vector2(map.Width, map.Height), new Vector2(0, map.Height),
+                new Vector2(0, 0),
+            };
         }
 
         // ---------- ground ----------
-
-        static readonly Color Grass = Hex("#86c95a");
-        static readonly Color GrassPatch = Hex("#7bbf51");
 
         static void Ground(Transform parent, WorldMap map, Material material)
         {
             var w = map.Width;
             var h = map.Height;
+            var root = new GameObject("Ground").transform;
+            root.SetParent(parent, false);
             var order = SortGround;
 
-            // grass base, a little bigger than the map
             var baseMesh = new GroundMesh();
             baseMesh.Vertices.AddRange(new[]
             {
-                new Vector3(-2, -2), new Vector3(w + 2, -2), new Vector3(w + 2, h + 2), new Vector3(-2, h + 2),
+                new Vector3(-4, -4), new Vector3(w + 4, -4), new Vector3(w + 4, h + 4), new Vector3(-4, h + 4),
             });
             baseMesh.Triangles.AddRange(new[] { 0, 2, 1, 0, 3, 2 });
-            Layer(parent, "Grass", baseMesh, Grass, order++, material);
+            Layer(root, "Base", baseMesh, map.BaseColor, order++, material);
 
-            bool Is(int x, int y, int tile) => map.Ground[y, x] == tile;
-
-            // soft darker patches where the grass varies
-            var patches = GroundShapes.Field((x, y) => Is(x, y, Tiles.Grass2), w, h, 2.2f);
-            Layer(parent, "GrassPatches", GroundShapes.Contour(patches, 0.3f, h), GrassPatch, order++, material);
-
-            var path = GroundShapes.Field((x, y) => Is(x, y, Tiles.Path), w, h);
-            Bands(parent, "Path", path, h, material, ref order, (0.36f, "#d8b878"), (0.48f, "#ecd3a0"));
-
-            // the pond is a tile ellipse: a wide radius turns its staircase into a smooth curve
-            var shore = GroundShapes.Field((x, y) => Is(x, y, Tiles.Shore) || Is(x, y, Tiles.Water), w, h, 2.4f);
-            Bands(parent, "Shore", shore, h, material, ref order, (0.42f, "#e2c98f"), (0.5f, "#f1dfae"));
-
-            var water = GroundShapes.Field((x, y) => Is(x, y, Tiles.Water), w, h, 2.4f);
-            Bands(parent, "Water", water, h, material, ref order,
-                (0.44f, "#3f93c9"), (0.5f, "#c4ecfc"), (0.56f, "#5cbdeb"), (0.88f, "#48a8de"));
-
-            // the garden bed: only flower cells with flower neighbours (scattered single clumps stay on grass)
-            bool Bed(int x, int y)
+            var chunk = ChunkTiles * GroundShapes.SamplesPerTile;
+            var nx = w * GroundShapes.SamplesPerTile;
+            var ny = h * GroundShapes.SamplesPerTile;
+            foreach (var style in map.GroundStyles)
             {
-                if (!Is(x, y, Tiles.Flowers)) return false;
-                var n = 0;
-                if (x > 0 && Is(x - 1, y, Tiles.Flowers)) n++;
-                if (x < w - 1 && Is(x + 1, y, Tiles.Flowers)) n++;
-                if (y > 0 && Is(x, y - 1, Tiles.Flowers)) n++;
-                if (y < h - 1 && Is(x, y + 1, Tiles.Flowers)) n++;
-                return n >= 2;
+                var kinds = new HashSet<string>(style.Kinds);
+                var field = GroundShapes.Field((x, y) => kinds.Contains(map.GroundAt(x, y)), w, h, style.Radius);
+                foreach (var (threshold, color) in style.Bands)
+                {
+                    for (var j0 = 0; j0 < ny; j0 += chunk)
+                    for (var i0 = 0; i0 < nx; i0 += chunk)
+                    {
+                        var mesh = GroundShapes.Contour(field, threshold, h, i0, j0, Mathf.Min(i0 + chunk, nx),
+                            Mathf.Min(j0 + chunk, ny));
+                        Layer(root, $"{style.Name} {threshold:0.00} [{i0 / chunk},{j0 / chunk}]", mesh, color, order, material);
+                    }
+                    order++;
+                }
             }
-            var bed = GroundShapes.Field(Bed, w, h);
-            Bands(parent, "GardenBed", bed, h, material, ref order, (0.52f, "#7a5236"), (0.58f, "#9c6b45"));
-        }
-
-        static void Bands(Transform parent, string name, float[,] field, int mapHeight, Material material, ref int order,
-            params (float threshold, string color)[] bands)
-        {
-            foreach (var (threshold, color) in bands)
-                Layer(parent, $"{name}{threshold:0.00}", GroundShapes.Contour(field, threshold, mapHeight), Hex(color), order++,
-                    material);
         }
 
         static void Layer(Transform parent, string name, GroundMesh data, Color color, int order, Material material)
@@ -157,78 +137,68 @@ namespace Buds.World
 
         // ---------- props ----------
 
-        static void Props(Transform parent, WorldMap map, PropArt art)
+        /// <summary>Every prop the map shows: placed ones plus scattered decorations. Deterministic.</summary>
+        public static List<PropSpot> AllProps(WorldMap map)
         {
-            var root = new GameObject("Props").transform;
-            root.SetParent(parent, false);
-            var h = map.Height;
-
-            void Place(string name, float x, float y, bool flat = false)
+            var all = new List<PropSpot>(map.Props);
+            var occupied = new HashSet<long>();
+            var byCell = new Dictionary<long, string>();
+            foreach (var p in map.Props)
             {
-                var sprite = art.Get(name);
-                if (!sprite) return;
-                var go = new GameObject(name);
-                go.transform.SetParent(root, false);
-                go.transform.localPosition = new Vector3(x, y, 0);
-                var r = go.AddComponent<SpriteRenderer>();
-                r.sprite = sprite;
-                r.sortingOrder = flat ? SortDecor : SortOrderFor(y);
+                occupied.Add(p.Y * (long)map.Width + p.X);
+                byCell[p.Y * (long)map.Width + p.X] = p.Name;
             }
-
-            var houses = 0;
-            for (var y = 0; y < h; y++)
+            // fences: "x-post" cells get "x-h" rails to an east neighbour and "x-v" rails up to a north neighbour
+            foreach (var p in map.Props)
+            {
+                if (!p.Name.EndsWith("-post")) continue;
+                var kit = p.Name.Substring(0, p.Name.Length - 5);
+                if (byCell.TryGetValue(p.Y * (long)map.Width + p.X + 1, out var east) && east == p.Name)
+                    all.Add(new PropSpot { Name = kit + "-h", X = p.X, Y = p.Y });
+                if (p.Y > 0 && byCell.TryGetValue((p.Y - 1) * (long)map.Width + p.X, out var north) && north == p.Name)
+                    all.Add(new PropSpot { Name = kit + "-v", X = p.X, Y = p.Y });
+            }
+            for (var y = 0; y < map.Height; y++)
             for (var x = 0; x < map.Width; x++)
             {
-                var o = map.Objects[y, x];
-                var g = map.Ground[y, x];
-                var r = Noise(x, y);
-                var baseY = h - 1 - y; // bottom edge of the cell in world units
-                var jitter = (Noise(y, x) - 0.5f) * 0.2f;
-                switch (o)
+                if (map.Solid[y, x] || occupied.Contains(y * (long)map.Width + x)) continue;
+                var ground = map.GroundAt(x, y);
+                for (var r = 0; r < map.Scatter.Count; r++)
                 {
-                    case Tiles.TreeTrunk:
-                        Place(r < 0.5f ? "tree-a" : r < 0.85f ? "tree-b" : "tree-c", x + 0.5f + jitter, baseY + 0.05f);
-                        break;
-                    case Tiles.Bush:
-                        Place(r < 0.6f ? "bush-a" : "bush-b", x + 0.5f, baseY + 0.1f);
-                        break;
-                    case Tiles.Rock:
-                        Place(r < 0.5f ? "rock-a" : "rock-b", x + 0.5f, baseY + 0.12f);
-                        break;
-                    case Tiles.Door:
-                        Place(new[] { "house-red", "house-blue", "house-teal" }[houses++ % 3], x + 0.5f, baseY);
-                        break;
-                    case Tiles.Sign:
-                        Place("sign", x + 0.5f, baseY + 0.1f);
-                        break;
-                    case Tiles.Fence:
-                        Place("fence-post", x + 0.5f, baseY + 0.2f);
-                        if (x + 1 < map.Width && map.Objects[y, x + 1] == Tiles.Fence)
-                            Place("fence-h", x + 0.5f, baseY + 0.2f);
-                        if (y > 0 && map.Objects[y - 1, x] == Tiles.Fence) Place("fence-v", x + 0.5f, baseY + 0.2f);
-                        break;
+                    var rule = map.Scatter[r];
+                    if (rule.Ground != ground || MapFormat.Hash(x, y, 7 + r) >= rule.Chance) continue;
+                    all.Add(new PropSpot { Name = MapFormat.Pick(rule.Props, x, y, 13 + r), X = x, Y = y, Scattered = true });
+                    break;
                 }
-
-                if (o != Tiles.Empty) continue;
-                if (g == Tiles.Flowers)
-                    Place(r < 0.34f ? "flowers-a" : r < 0.67f ? "flowers-b" : "flowers-c", x + 0.5f + jitter, baseY + 0.3f, true);
-                else if (g == Tiles.Grass2 && r < 0.3f) Place("tuft", x + 0.3f + jitter * 3, baseY + 0.4f, true);
-                else if (g == Tiles.Path && r < 0.05f) Place("pebbles", x + 0.5f + jitter * 2, baseY + 0.4f, true);
-                else if (g == Tiles.Water && r < 0.12f) Place("lily", x + 0.5f + jitter * 2, baseY + 0.3f, true);
             }
+            return all;
         }
 
-        /// <summary>Deterministic 0..1 hash of a cell, so the decoration is the same every run.</summary>
-        static float Noise(int x, int y)
+        static void Props(Transform parent, WorldMap map)
         {
-            unchecked
+            var spots = AllProps(map);
+            var names = new HashSet<string>();
+            foreach (var s in spots) names.Add(s.Name);
+            var art = PropArt.Load(names);
+
+            var root = new GameObject("Props").transform;
+            root.SetParent(parent, false);
+            foreach (var spot in spots)
             {
-                var n = (uint)(x * 374761393 + y * 668265263);
-                n = (n ^ (n >> 13)) * 1274126177;
-                return ((n ^ (n >> 16)) & 0xffffff) / (float)0x1000000;
+                var sprite = art.Get(spot.Name);
+                if (!sprite) continue;
+                var flat = art.IsFlat(spot.Name);
+                var baseY = map.Height - 1 - spot.Y; // bottom edge of the cell in world units
+                // scattered decorations wander a little inside their cell so they don't look planted in rows
+                var jx = spot.Scattered ? (MapFormat.Hash(spot.X, spot.Y, 3) - 0.5f) * 0.5f : 0;
+                var jy = spot.Scattered ? MapFormat.Hash(spot.X, spot.Y, 5) * 0.4f : 0;
+                var go = new GameObject(spot.Name);
+                go.transform.SetParent(root, false);
+                go.transform.localPosition = new Vector3(spot.X + 0.5f + jx, baseY + 0.1f + jy, 0);
+                var r = go.AddComponent<SpriteRenderer>();
+                r.sprite = sprite;
+                r.sortingOrder = flat ? SortDecor : SortOrderFor(baseY + 0.1f);
             }
         }
-
-        static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
     }
 }

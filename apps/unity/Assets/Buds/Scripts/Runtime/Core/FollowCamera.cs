@@ -10,8 +10,8 @@ namespace Buds.Core
     public sealed class FollowCamera : MonoBehaviour
     {
         /// <summary>At least this many tiles are visible along each axis.</summary>
-        public const float TargetTilesX = 14f;
-        public const float TargetTilesY = 10.5f;
+        public const float TargetTilesX = 15f;
+        public const float TargetTilesY = 12f;
 
         public Transform target;
         public Rect bounds; // world units

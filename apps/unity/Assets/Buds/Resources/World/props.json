@@ -4,102 +4,1252 @@
     {
       "name": "tree-a",
       "pivotX": 0.5009,
-      "pivotY": 0.0521
+      "pivotY": 0.0521,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "tree-b",
       "pivotX": 0.5009,
-      "pivotY": 0.0521
+      "pivotY": 0.0521,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "tree-c",
       "pivotX": 0.5009,
-      "pivotY": 0.0521
+      "pivotY": 0.0521,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "bush-a",
       "pivotX": 0.5015,
-      "pivotY": 0.1055
+      "pivotY": 0.1055,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "bush-b",
       "pivotX": 0.5015,
-      "pivotY": 0.1055
+      "pivotY": 0.1055,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "rock-a",
       "pivotX": 0.4992,
-      "pivotY": 0.1094
+      "pivotY": 0.1094,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "rock-b",
       "pivotX": 0.5,
-      "pivotY": 0.139
+      "pivotY": 0.139,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "house-red",
       "pivotX": 0.4998,
-      "pivotY": 0.0275
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
     },
     {
       "name": "house-blue",
       "pivotX": 0.4998,
-      "pivotY": 0.0275
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
     },
     {
       "name": "house-teal",
       "pivotX": 0.4998,
-      "pivotY": 0.0275
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
     },
     {
       "name": "sign",
       "pivotX": 0.4987,
-      "pivotY": 0.0705
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "fence-post",
       "pivotX": 0.5,
-      "pivotY": 0.1154
+      "pivotY": 0.1154,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "fence-h",
       "pivotX": 0.0556,
-      "pivotY": 0.1154
+      "pivotY": 0.1154,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "fence-v",
       "pivotX": 0.5,
-      "pivotY": 0.0517
+      "pivotY": 0.0517,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "flowers-a",
       "pivotX": 0.4987,
-      "pivotY": 0.1621
+      "pivotY": 0.1621,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "flowers-b",
       "pivotX": 0.4987,
-      "pivotY": 0.1621
+      "pivotY": 0.1621,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "flowers-c",
       "pivotX": 0.4987,
-      "pivotY": 0.1621
+      "pivotY": 0.1621,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "tuft",
       "pivotX": 0.5,
-      "pivotY": 0.1818
+      "pivotY": 0.1818,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "pebbles",
       "pivotX": 0.5,
-      "pivotY": 0.2
+      "pivotY": 0.2,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
     },
     {
       "name": "lily",
       "pivotX": 0.5,
-      "pivotY": 0.1667
+      "pivotY": 0.1667,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lamp",
+      "pivotX": 0.3541,
+      "pivotY": 0.0496,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "bench",
+      "pivotX": 0.4994,
+      "pivotY": 0.117,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "bin",
+      "pivotX": 0.4987,
+      "pivotY": 0.0887,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "planter",
+      "pivotX": 0.4981,
+      "pivotY": 0.0887,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "hydrant",
+      "pivotX": 0.5015,
+      "pivotY": 0.1,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "blok-a",
+      "pivotX": 0.4999,
+      "pivotY": 0.0196,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "blok-b",
+      "pivotX": 0.4999,
+      "pivotY": 0.0196,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "blok-c",
+      "pivotX": 0.4999,
+      "pivotY": 0.0196,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "kamienica-a",
+      "pivotX": 0.4998,
+      "pivotY": 0.0227,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "kamienica-b",
+      "pivotX": 0.4998,
+      "pivotY": 0.0227,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "kamienica-c",
+      "pivotX": 0.4998,
+      "pivotY": 0.0227,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "sklep-ciuchy",
+      "pivotX": 0.4998,
+      "pivotY": 0.0334,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "sklep-kiosk",
+      "pivotX": 0.4998,
+      "pivotY": 0.0334,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "kawiarnia",
+      "pivotX": 0.4998,
+      "pivotY": 0.0334,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "komisariat",
+      "pivotX": 0.4999,
+      "pivotY": 0.0295,
+      "flat": false,
+      "foot": [
+        7,
+        3
+      ]
+    },
+    {
+      "name": "skate-ramp",
+      "pivotX": 0.5006,
+      "pivotY": 0.0496,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "kosz",
+      "pivotX": 0.5015,
+      "pivotY": 0.0376,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "graffiti-a",
+      "pivotX": 0.4997,
+      "pivotY": 0.0559,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "graffiti-b",
+      "pivotX": 0.4997,
+      "pivotY": 0.0559,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "graffiti-c",
+      "pivotX": 0.4997,
+      "pivotY": 0.0559,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "przystanek",
+      "pivotX": 0.5006,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "auto-a",
+      "pivotX": 0.5003,
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "auto-b",
+      "pivotX": 0.5003,
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "auto-c",
+      "pivotX": 0.5003,
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "radiowoz",
+      "pivotX": 0.5003,
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "garaze",
+      "pivotX": 0.4997,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "altanka-a",
+      "pivotX": 0.4994,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "altanka-b",
+      "pivotX": 0.4994,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "fontanna",
+      "pivotX": 0.5006,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "road-dash",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "road-dash-v",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "zebra",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "zebra-v",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "manhole",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "rails-h",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "rails-v",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "palm-a",
+      "pivotX": 0.5006,
+      "pivotY": 0.0315,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "palm-b",
+      "pivotX": 0.5006,
+      "pivotY": 0.0315,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "palm-c",
+      "pivotX": 0.5006,
+      "pivotY": 0.0315,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "chatka-a",
+      "pivotX": 0.5,
+      "pivotY": 0.0281,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "chatka-b",
+      "pivotX": 0.5,
+      "pivotY": 0.0281,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "chatka-c",
+      "pivotX": 0.5,
+      "pivotY": 0.0281,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "bar-plaza",
+      "pivotX": 0.4998,
+      "pivotY": 0.031,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "stragan-owoce",
+      "pivotX": 0.4997,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "parasol-a",
+      "pivotX": 0.5006,
+      "pivotY": 0.0465,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "parasol-b",
+      "pivotX": 0.5006,
+      "pivotY": 0.0465,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lezak-a",
+      "pivotX": 0.5009,
+      "pivotY": 0.0938,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lezak-b",
+      "pivotX": 0.5009,
+      "pivotY": 0.0938,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "deski-surf",
+      "pivotX": 0.4987,
+      "pivotY": 0.0469,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lodz",
+      "pivotX": 0.5003,
+      "pivotY": 0.0805,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "pochodnia",
+      "pivotX": 0.5015,
+      "pivotY": 0.0469,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jungle-a",
+      "pivotX": 0.4996,
+      "pivotY": 0.0385,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jungle-b",
+      "pivotX": 0.4996,
+      "pivotY": 0.0385,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "paproc",
+      "pivotX": 0.5015,
+      "pivotY": 0.0887,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "hibiskus",
+      "pivotX": 0.5,
+      "pivotY": 0.15,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "muszle",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "rozgwiazda",
+      "pivotX": 0.5,
+      "pivotY": 0.1875,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "krab",
+      "pivotX": 0.5023,
+      "pivotY": 0.1103,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "zolw",
+      "pivotX": 0.4981,
+      "pivotY": 0.0833,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "papuga",
+      "pivotX": 0.5023,
+      "pivotY": 0.0469,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "flaming",
+      "pivotX": 0.5023,
+      "pivotY": 0.0473,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ruiny-swiatyni",
+      "pivotX": 0.4996,
+      "pivotY": 0.0332,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "rock-dark",
+      "pivotX": 0.4992,
+      "pivotY": 0.1094,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "rock-dark-b",
+      "pivotX": 0.5,
+      "pivotY": 0.139,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dworek",
+      "pivotX": 0.4998,
+      "pivotY": 0.0167,
+      "flat": false,
+      "foot": [
+        13,
+        6
+      ]
+    },
+    {
+      "name": "kamienica-cegla-a",
+      "pivotX": 0.4998,
+      "pivotY": 0.0224,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "kamienica-cegla-b",
+      "pivotX": 0.4998,
+      "pivotY": 0.0224,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "urzad",
+      "pivotX": 0.4999,
+      "pivotY": 0.0227,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "bank",
+      "pivotX": 0.4999,
+      "pivotY": 0.0196,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "latarnia-gaz",
+      "pivotX": 0.5023,
+      "pivotY": 0.0496,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "topiary-stozek",
+      "pivotX": 0.4981,
+      "pivotY": 0.0473,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "topiary-kula",
+      "pivotX": 0.4981,
+      "pivotY": 0.0625,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "fontanna-duza",
+      "pivotX": 0.5004,
+      "pivotY": 0.031,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "posag",
+      "pivotX": 0.5009,
+      "pivotY": 0.0374,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "powoz",
+      "pivotX": 0.5003,
+      "pivotY": 0.0552,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "lawka-park",
+      "pivotX": 0.4994,
+      "pivotY": 0.117,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "roze",
+      "pivotX": 0.5,
+      "pivotY": 0.15,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "stajnia",
+      "pivotX": 0.5002,
+      "pivotY": 0.0315,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "siano",
+      "pivotX": 0.4981,
+      "pivotY": 0.1,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "mur-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "mur-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "mur-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0484,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ruina-a",
+      "pivotX": 0.4999,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "ruina-b",
+      "pivotX": 0.4999,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "wrak-a",
+      "pivotX": 0.5003,
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "wrak-b",
+      "pivotX": 0.5003,
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "beczka-ogien",
+      "pivotX": 0.5023,
+      "pivotY": 0.0625,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "smieci",
+      "pivotX": 0.5009,
+      "pivotY": 0.1,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "opony",
+      "pivotX": 0.5,
+      "pivotY": 0.0765,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "zlom",
+      "pivotX": 0.5006,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "ring",
+      "pivotX": 0.4996,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        5,
+        5
+      ]
+    },
+    {
+      "name": "silownia",
+      "pivotX": 0.4998,
+      "pivotY": 0.031,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "sklep-bron",
+      "pivotX": 0.4998,
+      "pivotY": 0.0334,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "fabryka",
+      "pivotX": 0.4998,
+      "pivotY": 0.0167,
+      "flat": false,
+      "foot": [
+        9,
+        5
+      ]
+    },
+    {
+      "name": "drzewo-suche",
+      "pivotX": 0.4994,
+      "pivotY": 0.0496,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "bazar-a",
+      "pivotX": 0.4997,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "bazar-b",
+      "pivotX": 0.4997,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "graffiti-d",
+      "pivotX": 0.4997,
+      "pivotY": 0.0559,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "graffiti-e",
+      "pivotX": 0.4997,
+      "pivotY": 0.0559,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "kaluza",
+      "pivotX": 0.5,
+      "pivotY": 0.2273,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "gruz",
+      "pivotX": 0.5,
+      "pivotY": 0.2,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "pekniecie",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "siatka-post",
+      "pivotX": 0.5,
+      "pivotY": 0.0938,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "siatka-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.0938,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "siatka-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0469,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     }
   ]
 }

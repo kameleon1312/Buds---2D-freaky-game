@@ -69,7 +69,7 @@ describe('districts', () => {
     expect(DISTRICTS[0]).toMatchObject({ id: START_DISTRICT, unlockLevel: 1, status: 'open' });
     expect(DISTRICTS.map((d) => d.name)).toEqual([
       'Miasto Ziomków',
-      'Las Palmos',
+      'Las Palmas',
       'Dwór Carski',
       'Los Karkos',
     ]);
@@ -79,7 +79,8 @@ describe('districts', () => {
 
   it('gates entry by level and readiness', () => {
     expect(canEnterDistrict('miasto-ziomkow', 1)).toBe(true);
-    expect(canEnterDistrict('los-karkos', 99)).toBe(false); // map not built yet
+    expect(canEnterDistrict('los-karkos', 11)).toBe(false);
+    expect(canEnterDistrict('los-karkos', 12)).toBe(true);
     expect(canEnterDistrict('nowhere', 99)).toBe(false);
   });
 });

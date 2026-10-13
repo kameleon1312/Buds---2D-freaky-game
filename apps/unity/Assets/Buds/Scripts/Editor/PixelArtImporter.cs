@@ -6,6 +6,9 @@ namespace Buds.EditorTools
     /// <summary>Textures under Assets/Buds import uncompressed; tiles stay crisp, character sheets smooth.</summary>
     public sealed class PixelArtImporter : AssetPostprocessor
     {
+        // bump when the rules change so Unity reimports existing textures
+        public override uint GetVersion() => 2;
+
         void OnPreprocessTexture()
         {
             if (!assetPath.StartsWith("Assets/Buds/")) return;
@@ -24,6 +27,8 @@ namespace Buds.EditorTools
                 importer.filterMode = FilterMode.Trilinear;
                 importer.mipmapEnabled = true;
             }
+            // world props are packed into one atlas per district at runtime, which needs readable pixels
+            if (assetPath.StartsWith("Assets/Buds/Resources/World/")) importer.isReadable = true;
         }
     }
 }

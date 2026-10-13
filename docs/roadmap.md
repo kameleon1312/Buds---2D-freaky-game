@@ -26,15 +26,15 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
 
 ## Kolejność prac
 
-1. **Miasto Ziomków w pełnej wersji** (centrum + okolice, patrz `docs/districts.md`) i pętla rozgrywki w nim — bez tego nie ma czego monetyzować.
+1. ~~Mapy 4 dzielnic w formacie tekstowym~~ (gotowe: `docs/districts.md`). Teraz **pętla rozgrywki w Mieście Ziomków**: NPC, questy, pierwsze potyczki — bez tego nie ma czego monetyzować.
    NPC z prostymi zadaniami (porozmawiaj, przynieś, zbierz), zgłaszanie zdarzeń do API i **XP przyznawane
    przez serwer** (`POST /v1/buds/me/events`, walidacja + limity). Pierwsza mini-gra.
 2. **Ekwipunek w grze.** Ekran postaci: co mam (`/v1/buds/me/items`), co mogę założyć; zmiana wyglądu
    przez `PATCH /v1/buds/me/look` z tą samą blokadą `lockedItems`. Arkusz postaci odświeża się po zmianie.
 3. **Monety i nagrody.** Portfel w API (`bud_wallets`), monety za zadania, pierwszy sklep za monety
    (stroje `common`/`uncommon`). Wszystko w transakcjach po stronie serwera.
-4. **Druga dzielnica: Las Palmos** (poziom 4). Wejście północną drogą, osobna mapa,
-   zapamiętywanie, gdzie jest gracz (`district` przy budzie). Potem Dwór Carski (8) i Los Karkos (12).
+4. **Treść pozostałych dzielnic** (mapy już są): NPC, questy i potyczki w Las Palmas, Dworze Carskim
+   i Los Karkos; zapamiętywanie po stronie serwera, w której dzielnicy jest gracz (`district` przy budzie).
 5. **Walka** (zgodnie z planem gry) — wtedy pojawia się kategoria `weapon` w praktyce: statystyki i balans
    po stronie serwera, w katalogu tylko wygląd i rzadkość.
 6. **Konta i sklep z prawdziwymi pieniędzmi.** Logowanie (Supabase Auth: Apple/Google) i łączenie konta gościa

@@ -5,105 +5,105 @@ using UnityEngine;
 
 namespace Buds.Tests
 {
-    public class VillageTests
+    public class MapFormatTests
     {
-        WorldMap map;
+        const string Sample = @"// tiny test map
+[district]
+id = test
+name = Test
+base = #86c95a
+spawn = 1,1
 
-        [SetUp]
-        public void Build() => map = Village.Build();
+[legend]
+. = grass
+T = grass + tree-a|tree-b !
+# = sidewalk !
+= = asphalt
+s = grass + sign !
+
+[ground]
+road : asphalt : 0.8 : 0.45 #3a3e48, 0.5 #4c5160
+
+[scatter]
+grass : 0.5 : tuft
+
+[signs]
+3,1 | Hello | World
+
+[exits]
+0,2,0,2 | las-palmas
+
+[zones]
+0,0,4,3 | Everything
+1,1,2,2 | Middle
+
+[grid]
+TTTTT
+T..sT
+==..T
+TT#TT
+";
 
         [Test]
-        public void IsDeterministic()
+        public void ParsesEverySection()
         {
-            var again = Village.Build();
-            Assert.AreEqual(map.Ground, again.Ground);
-            Assert.AreEqual(map.Objects, again.Objects);
-            Assert.AreEqual(map.Above, again.Above);
+            var map = MapFormat.Parse(Sample);
+            Assert.AreEqual("test", map.Id);
+            Assert.AreEqual(5, map.Width);
+            Assert.AreEqual(4, map.Height);
+            Assert.AreEqual(1, map.SpawnX);
+            Assert.AreEqual(1, map.SpawnY);
+            Assert.IsTrue(map.Solid[0, 0]);
+            Assert.IsFalse(map.Solid[1, 1]);
+            Assert.IsTrue(map.Solid[3, 2]); // footprint cell without a prop
+            Assert.AreEqual("asphalt", map.GroundAt(0, 2));
+            Assert.AreEqual(1, map.GroundStyles.Count);
+            Assert.AreEqual(2, map.GroundStyles[0].Bands.Length);
+            Assert.AreEqual("Hello", map.Signs[0].Title);
+            Assert.AreEqual("World", map.Signs[0].Text);
+            Assert.AreEqual("las-palmas", map.Exits[0].DistrictId);
+            Assert.AreEqual("Middle", map.ZoneAt(1, 1).Name); // the smallest zone wins
+            Assert.AreEqual("Everything", map.ZoneAt(4, 0).Name);
         }
 
         [Test]
-        public void SpawnIsWalkable() => Assert.IsTrue(map.IsWalkable(map.SpawnX, map.SpawnY));
-
-        [Test]
-        public void BorderIsClosedExceptRoadExits()
+        public void PicksPropVariantsDeterministically()
         {
-            for (var x = 0; x < map.Width; x++)
+            var a = MapFormat.Parse(Sample);
+            var b = MapFormat.Parse(Sample);
+            var trees = 0;
+            for (var i = 0; i < a.Props.Count; i++)
             {
-                var exit = x is 23 or 24;
-                Assert.AreEqual(!exit, Tiles.IsSolid(map.Objects[0, x]), $"north edge x={x}");
-                Assert.AreEqual(!exit, Tiles.IsSolid(map.Objects[map.Height - 1, x]), $"south edge x={x}");
+                Assert.AreEqual(a.Props[i].Name, b.Props[i].Name);
+                if (a.Props[i].Name.StartsWith("tree-")) trees++;
             }
-            for (var y = 0; y < map.Height; y++)
-            {
-                Assert.IsTrue(Tiles.IsSolid(map.Objects[y, 0]), $"west edge y={y}");
-                var eastExit = y is 17 or 18;
-                Assert.AreEqual(!eastExit, Tiles.IsSolid(map.Objects[y, map.Width - 1]), $"east edge y={y}");
-            }
+            Assert.AreEqual(12, trees);
         }
 
         [Test]
-        public void EveryWalkableTileIsReachableFromSpawn()
+        public void ArrivalIsNextToTheExitBack()
         {
-            var seen = new bool[map.Height, map.Width];
-            var queue = new Queue<Vector2Int>();
-            queue.Enqueue(new Vector2Int(map.SpawnX, map.SpawnY));
-            seen[map.SpawnY, map.SpawnX] = true;
-            var reached = 0;
-            while (queue.Count > 0)
-            {
-                var c = queue.Dequeue();
-                reached++;
-                foreach (var d in new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
-                {
-                    var n = c + d;
-                    if (!map.IsWalkable(n.x, n.y) || seen[n.y, n.x]) continue;
-                    seen[n.y, n.x] = true;
-                    queue.Enqueue(n);
-                }
-            }
-
-            var walkable = 0;
-            var stranded = new List<string>();
-            for (var y = 0; y < map.Height; y++)
-            for (var x = 0; x < map.Width; x++)
-            {
-                if (!map.IsWalkable(x, y)) continue;
-                walkable++;
-                if (!seen[y, x]) stranded.Add($"({x},{y})");
-            }
-            // a few pockets enclosed by random bushes are acceptable; whole areas are not
-            Assert.LessOrEqual(stranded.Count, walkable / 50, "unreachable: " + string.Join(" ", stranded));
-            Assert.Greater(reached, 800);
+            var map = MapFormat.Parse(Sample);
+            var at = map.ArrivalFrom("las-palmas");
+            Assert.IsTrue(map.IsWalkable(at.x, at.y));
+            Assert.AreEqual(2, at.y);
+            Assert.AreEqual(new Vector2Int(map.SpawnX, map.SpawnY), map.ArrivalFrom("nowhere"));
         }
 
-        [Test]
-        public void SignsSitOnSolidTilesNextToWalkableGround()
+        [TestCase("[grid]\n..\n.")]
+        [TestCase("[legend]\n. = grass\n[grid]\n.x")]
+        [TestCase("[district]\nwhat = 1\n[grid]\n.")]
+        [TestCase("[ground]\nbad line\n[grid]\n.")]
+        public void RejectsBrokenFiles(string text)
         {
-            Assert.IsNotEmpty(map.Signs);
-            foreach (var s in map.Signs)
-            {
-                Assert.AreEqual(Tiles.Sign, map.Objects[s.Y, s.X]);
-                Assert.IsTrue(map.IsWalkable(s.X, s.Y + 1), "sign must be readable from the south");
-            }
-        }
-
-        [Test]
-        public void CanopiesOnlyAboveTrunks()
-        {
-            for (var y = 0; y < map.Height; y++)
-            for (var x = 0; x < map.Width; x++)
-            {
-                if (map.Above[y, x] == Tiles.Empty) continue;
-                Assert.AreEqual(Tiles.TreeTop, map.Above[y, x]);
-                Assert.AreEqual(Tiles.TreeTrunk, map.Objects[y + 1, x], $"canopy at ({x},{y})");
-            }
+            Assert.Throws<MapFormatException>(() => MapFormat.Parse(text));
         }
     }
 
     public class DistrictTests
     {
         [Test]
-        public void StartsInPaczkowoAndUnlocksInOrder()
+        public void StartsInMiastoZiomkowAndUnlocksInOrder()
         {
             Assert.AreEqual(Districts.Start, Districts.All[0].Id);
             Assert.IsTrue(Districts.CanEnter(Districts.Start, 1));
@@ -112,27 +112,113 @@ namespace Buds.Tests
         }
 
         [Test]
-        public void UnfinishedOrUnknownDistrictsAreClosed()
+        public void LevelGatesTheOtherDistricts()
         {
-            Assert.IsFalse(Districts.CanEnter("las-palmos", 99));
+            Assert.IsFalse(Districts.CanEnter("las-palmas", 3));
+            Assert.IsTrue(Districts.CanEnter("las-palmas", 4));
             Assert.IsFalse(Districts.CanEnter("nowhere", 99));
-            StringAssert.Contains("poziomu 4", Districts.ClosedReason(Districts.Get("las-palmos"), 1));
+            StringAssert.Contains("poziomu 12", Districts.ClosedReason(Districts.Get("los-karkos"), 1));
+        }
+    }
+
+    /// <summary>Every district map shipped with the game: loads, connects, and only uses known art.</summary>
+    public class DistrictMapTests
+    {
+        static IEnumerable<string> Ids()
+        {
+            foreach (var d in Districts.All) yield return d.Id;
         }
 
-        [Test]
-        public void VillageExitsAreRoadsAtTheMapEdgeToKnownDistricts()
+        static HashSet<string> knownProps;
+
+        static HashSet<string> KnownProps()
         {
-            var map = Village.Build();
-            // the start district is the hub: one road to every other district
-            Assert.AreEqual(Districts.All.Length - 1, map.Exits.Count);
+            if (knownProps != null) return knownProps;
+            knownProps = new HashSet<string>();
+            foreach (var e in PropArt.LoadManifest().props) knownProps.Add(e.name);
+            return knownProps;
+        }
+
+        [TestCaseSource(nameof(Ids))]
+        public void LoadsBigWithAWalkableSpawn(string id)
+        {
+            var map = MapFormat.Load(id);
+            Assert.AreEqual(id, map.Id);
+            Assert.AreEqual(Districts.Get(id).Name, map.Name);
+            Assert.GreaterOrEqual(map.Width * map.Height, 96 * 96, "districts are big");
+            Assert.IsTrue(map.IsWalkable(map.SpawnX, map.SpawnY), "spawn");
+            Assert.IsNotEmpty(map.Zones);
+            Assert.IsNotEmpty(map.GroundStyles);
+        }
+
+        [TestCaseSource(nameof(Ids))]
+        public void UsesOnlyKnownProps(string id)
+        {
+            var map = MapFormat.Load(id);
+            foreach (var p in WorldView.AllProps(map))
+                Assert.IsTrue(KnownProps().Contains(p.Name), $"{id}: unknown prop '{p.Name}' at ({p.X},{p.Y})");
+        }
+
+        [TestCaseSource(nameof(Ids))]
+        public void ExitsAreAtTheEdgeAndLeadBack(string id)
+        {
+            var map = MapFormat.Load(id);
+            Assert.IsNotEmpty(map.Exits);
             foreach (var exit in map.Exits)
             {
                 Assert.IsNotNull(Districts.Get(exit.DistrictId), exit.DistrictId);
-                Assert.IsTrue(exit.Y0 == 0 || exit.Y1 == map.Height - 1 || exit.X0 == 0 || exit.X1 == map.Width - 1);
-                for (var y = exit.Y0; y <= exit.Y1; y++)
-                for (var x = exit.X0; x <= exit.X1; x++)
-                    Assert.IsTrue(map.IsWalkable(x, y), $"exit cell ({x},{y})");
+                Assert.IsTrue(exit.Y0 == 0 || exit.Y1 == map.Height - 1 || exit.X0 == 0 || exit.X1 == map.Width - 1,
+                    $"{id} → {exit.DistrictId} is not at the edge");
+                // the other side has a road back, and arriving there puts you on walkable ground
+                var other = MapFormat.Load(exit.DistrictId);
+                Assert.IsNotNull(other.Exits.Find(e => e.DistrictId == id), $"{exit.DistrictId} has no road back to {id}");
+                var at = other.ArrivalFrom(id);
+                Assert.IsTrue(other.IsWalkable(at.x, at.y));
             }
+        }
+
+        [TestCaseSource(nameof(Ids))]
+        public void ExitsSignsAndZonesAreReachableOnFoot(string id)
+        {
+            var map = MapFormat.Load(id);
+            var seen = new bool[map.Height, map.Width];
+            var queue = new Queue<Vector2Int>();
+            queue.Enqueue(new Vector2Int(map.SpawnX, map.SpawnY));
+            seen[map.SpawnY, map.SpawnX] = true;
+            while (queue.Count > 0)
+            {
+                var c = queue.Dequeue();
+                foreach (var d in new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+                {
+                    var n = c + d;
+                    if (!map.IsWalkable(n.x, n.y) || seen[n.y, n.x]) continue;
+                    seen[n.y, n.x] = true;
+                    queue.Enqueue(n);
+                }
+            }
+            bool Any(int x0, int y0, int x1, int y1)
+            {
+                for (var y = y0; y <= y1; y++)
+                for (var x = x0; x <= x1; x++)
+                    if (map.InBounds(x, y) && seen[y, x]) return true;
+                return false;
+            }
+            foreach (var e in map.Exits) Assert.IsTrue(Any(e.X0, e.Y0, e.X1, e.Y1), $"{id}: exit to {e.DistrictId}");
+            foreach (var z in map.Zones) Assert.IsTrue(Any(z.X0, z.Y0, z.X1, z.Y1), $"{id}: zone {z.Name}");
+            foreach (var s in map.Signs)
+            {
+                Assert.IsTrue(map.Solid[s.Y, s.X], $"{id}: sign {s.Title} should block");
+                Assert.IsTrue(Any(s.X - 1, s.Y - 1, s.X + 1, s.Y + 1), $"{id}: sign {s.Title}");
+            }
+        }
+
+        [Test]
+        public void TheStartDistrictLinksToEveryOtherDistrict()
+        {
+            var map = MapFormat.Load(Districts.Start);
+            foreach (var d in Districts.All)
+                if (d.Id != Districts.Start)
+                    Assert.IsNotNull(map.Exits.Find(e => e.DistrictId == d.Id), d.Id);
         }
     }
 
@@ -179,33 +265,47 @@ namespace Buds.Tests
             var field = GroundShapes.Field((x, y) => x is >= 2 and < 9 && y is >= 2 and < 9, 11, 11);
             Assert.Greater(GroundShapes.Contour(field, 0.4f, 11).Area(), GroundShapes.Contour(field, 0.8f, 11).Area());
         }
+
+        [Test]
+        public void TinyRadiusNeverProducesNaN()
+        {
+            var field = GroundShapes.Field((x, y) => (x + y) % 2 == 0, 6, 6, 0.3f);
+            foreach (var v in field) Assert.IsFalse(float.IsNaN(v));
+        }
+
+        [Test]
+        public void ChunksAddUpToTheWholeMesh()
+        {
+            var field = GroundShapes.Field((x, y) => (x * 7 + y * 3) % 5 < 2, 20, 16, 1.6f);
+            var whole = GroundShapes.Contour(field, 0.5f, 16).Area();
+            var n = GroundShapes.SamplesPerTile;
+            var parts = 0f;
+            for (var j = 0; j < 16 * n; j += 8 * n)
+            for (var i = 0; i < 20 * n; i += 8 * n)
+                parts += GroundShapes.Contour(field, 0.5f, 16, i, j, Mathf.Min(i + 8 * n, 20 * n), Mathf.Min(j + 8 * n, 16 * n)).Area();
+            Assert.AreEqual(whole, parts, 1e-2);
+        }
     }
 
     public class PropArtTests
     {
         [Test]
-        public void ManifestParsesPivots()
+        public void ManifestParsesPivotsAndFlags()
         {
-            var m = PropArt.Parse("{\"ppu\":96,\"props\":[{\"name\":\"tree-a\",\"pivotX\":0.5,\"pivotY\":0.05}]}");
+            var m = PropArt.Parse("{\"ppu\":96,\"props\":[{\"name\":\"road-dash\",\"pivotX\":0.5,\"pivotY\":0.05,\"flat\":true}]}");
             Assert.AreEqual(96, m.ppu);
-            Assert.AreEqual("tree-a", m.props[0].name);
-            Assert.AreEqual(0.05f, m.props[0].pivotY, 1e-6);
+            Assert.AreEqual("road-dash", m.props[0].name);
+            Assert.IsTrue(m.props[0].flat);
         }
 
         [Test]
-        public void BundledManifestCoversEveryPropTheWorldUses()
+        public void FenceRailsJoinNeighbouringPosts()
         {
-            var json = Resources.Load<TextAsset>("World/props");
-            Assert.IsNotNull(json, "run tools/export-world-art.ts");
-            var names = new HashSet<string>();
-            foreach (var e in PropArt.Parse(json.text).props) names.Add(e.name);
-            foreach (var name in new[]
-                     {
-                         "tree-a", "tree-b", "tree-c", "bush-a", "bush-b", "rock-a", "rock-b", "house-red", "house-blue",
-                         "house-teal", "sign", "fence-post", "fence-h", "fence-v", "flowers-a", "flowers-b", "flowers-c",
-                         "tuft", "pebbles", "lily",
-                     })
-                Assert.IsTrue(names.Contains(name), name);
+            var map = MapFormat.Parse("[legend]\n. = grass\nf = grass + fence-post !\n[grid]\n.f.\nff.\n");
+            var names = new List<string>();
+            foreach (var p in WorldView.AllProps(map)) names.Add($"{p.Name}@{p.X},{p.Y}");
+            CollectionAssert.Contains(names, "fence-h@0,1");
+            CollectionAssert.Contains(names, "fence-v@1,1");
         }
     }
 }

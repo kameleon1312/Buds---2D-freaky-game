@@ -78,6 +78,13 @@ namespace Buds.Characters
             body.linearVelocity = Input.Move * speed;
         }
 
+        public void Teleport(Vector3 position)
+        {
+            transform.position = position;
+            body.position = position;
+            body.linearVelocity = Vector2.zero;
+        }
+
         /// <summary>The tile the bud is standing on, in map coordinates (y down).</summary>
         public Vector2Int MapCell(int mapHeight)
         {

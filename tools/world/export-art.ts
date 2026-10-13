@@ -1,0 +1,77 @@
+// Renders every world prop to apps/unity/Assets/Buds/Resources/World/<name>.png plus props.json
+// (pivot = ground point, flat = lies on the ground, foot = blocked cells).
+//
+// Usage (from apps/api, which has resvg):
+//   pnpm exec tsx ../../tools/world/export-art.ts                 # write PNGs + manifest
+//   pnpm exec tsx ../../tools/world/export-art.ts --preview out.png [filter]   # contact sheet only
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { Resvg } from '@resvg/resvg-js';
+import { ALL_PROPS } from './art/index';
+import { T } from './art/kit';
+
+export const PPU = 96; // output pixels per tile (Unity sprite pixelsPerUnit)
+
+const svgOf = (p: { w: number; h: number; body: string }) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}">${p.body}</svg>`;
+
+const args = process.argv.slice(2);
+if (args[0] === '--preview') {
+  const filter = args[2];
+  const entries = Object.entries(ALL_PROPS).filter(([name]) => !filter || name.includes(filter));
+  const cols = 6;
+  const cell = 7 * T;
+  let x = 0;
+  let y = 0;
+  let rowH = 0;
+  let body = '';
+  entries.forEach(([name, p], i) => {
+    if (i % cols === 0 && i > 0) {
+      y += rowH + 40;
+      x = 0;
+      rowH = 0;
+    }
+    const scale = Math.min(1, cell / p.w);
+    body += `<g transform="translate(${x + (cell - p.w * scale) / 2} ${y + 30}) scale(${scale})">${p.body}</g>`;
+    body += `<text x="${x + cell / 2}" y="${y + 20}" font-family="sans-serif" font-size="22" text-anchor="middle" fill="#333">${name}</text>`;
+    rowH = Math.max(rowH, p.h * scale);
+    x += cell;
+  });
+  const W = cols * cell;
+  const H = y + rowH + 60;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#9fd07a"/>${body}</svg>`;
+  writeFileSync(
+    args[1]!,
+    new Resvg(svg, { fitTo: { mode: 'zoom', value: 0.5 }, font: { loadSystemFonts: true } })
+      .render()
+      .asPng(),
+  );
+  console.info(`preview of ${entries.length} props → ${args[1]}`);
+} else {
+  const dir = fileURLToPath(
+    new URL('../../apps/unity/Assets/Buds/Resources/World/', import.meta.url),
+  );
+  mkdirSync(dir, { recursive: true });
+  const scale = PPU / T;
+  const manifest: {
+    name: string;
+    pivotX: number;
+    pivotY: number;
+    flat: boolean;
+    foot: [number, number];
+  }[] = [];
+  for (const [name, p] of Object.entries(ALL_PROPS)) {
+    const png = new Resvg(svgOf(p), { fitTo: { mode: 'zoom', value: scale } }).render();
+    writeFileSync(`${dir}${name}.png`, png.asPng());
+    // pivot from the bottom-left in 0..1, measured on the rendered (rounded) pixel size
+    manifest.push({
+      name,
+      pivotX: +((p.ax * scale) / png.width).toFixed(4),
+      pivotY: +(1 - (p.ay * scale) / png.height).toFixed(4),
+      flat: !!p.flat,
+      foot: p.foot ?? [1, 1],
+    });
+  }
+  writeFileSync(`${dir}props.json`, JSON.stringify({ ppu: PPU, props: manifest }, null, 2) + '\n');
+  console.info(`wrote ${manifest.length} props to ${dir}`);
+}

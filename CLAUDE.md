@@ -13,7 +13,7 @@ Guidance for Claude Code when working in this repository.
 - `apps/api` — Hono API (Railway): buds, guest tokens, pairing, sprite-sheet PNGs.
 - `packages/shared` — the vector bud generator (`src/bud/vector.ts`, chibi SVG), level curve, zod schemas. Single source of truth for how a bud looks.
 - `supabase/` — migrations (`buds`, `bud_tokens`, `bud_pair_codes`).
-- `tools/` — `check-migrations.mjs`, `export-guest-sheet.ts` (regenerates the offline guest sprite in Unity), `export-world-art.ts` (renders the world props — trees, cottages, fence… — to `Resources/World/*.png` + `props.json` with pivots).
+- `tools/` — `check-migrations.mjs`, `export-guest-sheet.ts` (regenerates the offline guest sprite in Unity), `world/` (district art and maps: `export-art.ts` renders every prop in `world/art/*` to `Resources/World/*.png` + `props.json`; `export-maps.ts` builds the four district maps from `world/maps/*` into `Resources/Maps/<id>.txt` and validates them).
 
 ## Commands
 
@@ -26,8 +26,13 @@ pnpm check:migrations
 "$UNITY" -batchmode -nographics -quit -projectPath apps/unity -executeMethod Buds.EditorTools.BudsSetup.Configure -logFile -
 "$UNITY" -batchmode -nographics -projectPath apps/unity -runTests -testPlatform EditMode -assemblyNames Buds.Tests -testResults results.xml
 "$UNITY" -batchmode -nographics -projectPath apps/unity -executeMethod Buds.EditorTools.BudsBuild.Windows -logFile -
-# smoke run with screenshots (guest, or -buds-pair CODE -buds-api http://localhost:4000)
-apps/unity/Builds/Windows/Buds.exe -screen-fullscreen 0 -buds-guest -buds-autoshot <dir>
+# smoke run with screenshots (guest, or -buds-pair CODE -buds-api http://localhost:4000);
+# -buds-tour shoots every zone of every district and walks through an exit, -buds-district <id> starts elsewhere
+apps/unity/Builds/Windows/Buds.exe -screen-fullscreen 0 -buds-guest -buds-tour -buds-autoshot <dir>
+
+# world art and maps (run from apps/api, which has resvg); --preview out.png [filter] renders a contact sheet
+pnpm exec tsx ../../tools/world/export-art.ts
+pnpm exec tsx ../../tools/world/export-maps.ts
 ```
 
 Look at the autopilot screenshots after any gameplay or rendering change — tests don't show what the game looks like.
@@ -40,11 +45,13 @@ Look at the autopilot screenshots after any gameplay or rendering change — tes
 - Level curve lives in `packages/shared/src/level.ts` and is mirrored in `Progression.cs` — change both together.
 - XP, coins, gems and owned items must only ever be granted by the server (game reports events, API validates). Never trust the client.
 - Monetisation groundwork: one item catalog in `packages/shared/src/catalog.ts` (kinds, design-system rarities, `free`/`coins`/`gems`, `premium`, `available`); ownership in `bud_items` (server-written). The API rejects looks that wear items the bud doesn't own (`lockedItems`). No pay-to-win: real money buys looks and convenience, not combat power. Plan and order of work: `docs/roadmap.md`.
-- Districts: Miasto Ziomków (start, hub), Las Palmos, Dwór Carski, Los Karkos — design in `docs/districts.md`, registry in `packages/shared/src/districts.ts`, mirrored in Unity `Districts.cs` (change both together). A district is a big map (city centre + outskirts) and, later, its own multiplayer room.
+- Districts: Miasto Ziomków (start, hub), Las Palmas, Dwór Carski, Los Karkos — design in `docs/districts.md`, registry in `packages/shared/src/districts.ts`, mirrored in Unity `Districts.cs` (change both together). A district is a big map (city centre + outskirts) and, later, its own multiplayer room.
 - Guest auth: `Authorization: Bearer <player token>`; only sha256 hashes are stored. One bud can have many tokens (one per device).
 - Every request/response shape lives in `packages/shared` as a zod schema. New API behaviour touching auth, CORS, headers or limits needs a test.
 - Migrations: never edit one that is already on `main`; every new table gets RLS enabled.
-- Unity: world and UI are built from code at runtime; the only scene is `Assets/Buds/Scenes/Main.unity` (camera + `GameBootstrap`). 1 tile = 1 world unit. The map grid (`Village.cs`) drives collision; the look is smooth: ground layers are meshes traced from blurred tile masks (`GroundShapes`, rounded corners, colour bands, no outlines), props are y-sorted sprites (`WorldView.SortOrderFor`). Only characters carry the black outline. Keep logic in plain classes so it is testable in EditMode.
+- Unity: world and UI are built from code at runtime; the only scene is `Assets/Buds/Scenes/Main.unity` (camera + `GameBootstrap`). 1 tile = 1 world unit.
+- Maps are text files (`Resources/Maps/<district>.txt`, format documented in `MapFormat.cs`): a character grid + legend (`ground [+ prop|variant] [!solid]`), ground styles, scatter rules, signs, exits, zones. The file is the single source of truth for collision (the multiplayer server will read it too). Edit the generator in `tools/world/maps` or the file directly; `DistrictMapTests` check every map (spawn, exits both ways, reachability, known props). Buildings: odd footprint widths, anchor = middle of the bottom row.
+- Look: ground layers are meshes traced from blurred tile masks (`GroundShapes`, rounded corners, colour bands, no outlines) in 32×32 chunks; props are y-sorted sprites (`WorldView.SortOrderFor`) packed into one atlas per district; fences auto-join (`x-post` + `x-h`/`x-v`). Only characters carry the black outline. Keep logic in plain classes so it is testable in EditMode.
 - Secrets only via env vars; `.env.example` documents every variable.
 
 ## CI (must stay green)

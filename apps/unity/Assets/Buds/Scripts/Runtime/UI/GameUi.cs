@@ -27,6 +27,10 @@ namespace Buds.UI
         Text dialogBody;
         Image stickBase;
         Image stickKnob;
+        GameObject toast;
+        RectTransform toastRect;
+        Text toastText;
+        float toastUntil;
 
         public bool DialogOpen => dialog && dialog.activeSelf;
 
@@ -37,6 +41,7 @@ namespace Buds.UI
             BuildHud();
             BuildDialog();
             BuildStick();
+            BuildToast();
         }
 
         // ---------- pairing ----------
@@ -203,6 +208,30 @@ namespace Buds.UI
         }
 
         public void HideDialog() => dialog.SetActive(false);
+
+        // ---------- toast (district / zone name) ----------
+
+        void BuildToast()
+        {
+            toastText = UiKit.Pill("Toast", canvas.transform, "", UiKit.Surface800, 34, new Vector2(400, 70), out toastRect);
+            UiKit.Place(toastRect, new Vector2(0.5f, 1), new Vector2(0, -30), toastRect.sizeDelta, new Vector2(0.5f, 1));
+            toast = toastRect.gameObject;
+            toast.SetActive(false);
+        }
+
+        /// <summary>Shows a short banner at the top for a few seconds (entering a district or a zone).</summary>
+        public void ShowToast(string text, float seconds = 2.8f)
+        {
+            toastText.text = text;
+            toastRect.sizeDelta = new Vector2(Mathf.Max(240, toastText.preferredWidth + 72), toastRect.sizeDelta.y);
+            toast.SetActive(true);
+            toastUntil = Time.time + seconds;
+        }
+
+        public void Tick()
+        {
+            if (toast.activeSelf && Time.time > toastUntil) toast.SetActive(false);
+        }
 
         // ---------- joystick ----------
 

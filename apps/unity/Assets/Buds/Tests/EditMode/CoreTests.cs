@@ -42,10 +42,10 @@ namespace Buds.Tests
 
     public class FollowCameraTests
     {
-        [TestCase(1280, 720, 5.25f)] // landscape: height limits (10.5 tiles tall, ~18.7 wide)
-        [TestCase(1920, 1080, 5.25f)]
-        [TestCase(1080, 2400, 15.5556f)] // portrait phone: 14 tiles across
-        [TestCase(1000, 1000, 7f)]
+        [TestCase(1280, 720, 6f)] // landscape: height limits (12 tiles tall, ~21 wide)
+        [TestCase(1920, 1080, 6f)]
+        [TestCase(1080, 2400, 16.6667f)] // portrait phone: 15 tiles across
+        [TestCase(1000, 1000, 7.5f)]
         public void ShowsAtLeastTheTargetTiles(int w, int h, float expected)
         {
             var size = FollowCamera.OrthoSizeFor(w, h);

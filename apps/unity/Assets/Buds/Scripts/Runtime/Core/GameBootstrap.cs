@@ -24,6 +24,8 @@ namespace Buds.Core
         Sign nearby;
         int level = 1;
         Exit atExit;
+        Zone atZone;
+        BudSheet sheet;
 
         async void Start()
         {
@@ -131,36 +133,51 @@ namespace Buds.Core
             EnterWorld("Gość", 0, new BudSheet(sheet));
         }
 
-        void EnterWorld(string name, int xp, BudSheet sheet)
+        void EnterWorld(string name, int xp, BudSheet budSheet)
+        {
+            sheet = budSheet;
+            level = Progression.Level(xp);
+            ui.ShowHud(name, level, xp, Progression.NextLevelXp(xp));
+            // dev/test: start in another district (-buds-district las-palmas)
+            LoadDistrict(CommandLine.Get("-buds-district") ?? Districts.Start, null);
+            ui.HideLoading();
+
+            var shots = CommandLine.Get("-buds-autoshot");
+            if (shots != null) _ = AutoPilot(shots);
+        }
+
+        /// <summary>Builds a district from its map file; arriving from another one puts you next to the road back.</summary>
+        void LoadDistrict(string districtId, string fromDistrict)
         {
             if (world) Destroy(world.gameObject);
             if (player) Destroy(player.gameObject);
 
-            world = WorldView.Create(Village.Build());
-            var map = world.Map;
-            player = BudController.Spawn(sheet, world.CellCenter(map.SpawnX, map.SpawnY) + new Vector3(0, -0.3f, 0));
+            var map = MapFormat.Load(districtId);
+            world = WorldView.Create(map);
+            var at = fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
+            player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
 
             var cam = Camera.main!.GetComponent<FollowCamera>();
             cam.target = player.transform;
             cam.bounds = new Rect(0, 0, map.Width, map.Height);
             cam.SnapToTarget();
 
-            ui.HideLoading();
-            level = Progression.Level(xp);
-            ui.ShowHud(name, level, xp, Progression.NextLevelXp(xp));
-
-            var shots = CommandLine.Get("-buds-autoshot");
-            if (shots != null) _ = AutoPilot(shots);
+            atExit = map.ExitAt(at.x, at.y);
+            atZone = map.ZoneAt(at.x, at.y);
+            ui.ShowToast(atZone != null ? $"{map.Name} · {atZone.Name}" : map.Name);
         }
 
         void Update()
         {
             if (!player) return;
+            ui.Tick();
             var input = player.Input;
             input.Blocked = ui.DialogOpen;
             ui.UpdateStick(input);
 
-            CheckExit();
+            var cell = player.MapCell(world.Map.Height);
+            CheckZone(cell);
+            if (CheckExit(cell)) return;
             nearby = FindNearbySign();
             ui.SetHint(nearby != null ? "Czytaj  [E]" : null);
 
@@ -169,19 +186,59 @@ namespace Buds.Core
             else if (nearby != null) ui.ShowDialog(nearby.Title, nearby.Text);
         }
 
-        /// <summary>Walking onto a road out of the map tells you where it leads (travel comes with the next district).</summary>
-        void CheckExit()
+        void CheckZone(Vector2Int cell)
         {
-            var cell = player.MapCell(world.Map.Height);
-            Exit exit = null;
-            foreach (var e in world.Map.Exits)
-                if (e.Contains(cell.x, cell.y)) exit = e;
-            if (exit == atExit) return;
+            var zone = world.Map.ZoneAt(cell.x, cell.y);
+            if (zone == atZone) return;
+            atZone = zone;
+            if (zone != null) ui.ShowToast(zone.Name);
+        }
+
+        /// <summary>Walking onto a road out of the map travels to that district, or says why you can't yet.</summary>
+        bool CheckExit(Vector2Int cell)
+        {
+            var exit = world.Map.ExitAt(cell.x, cell.y);
+            if (exit == atExit) return false;
             atExit = exit;
-            if (exit == null) return;
+            if (exit == null) return false;
             var district = Districts.Get(exit.DistrictId);
-            if (district != null && !Districts.CanEnter(district.Id, level))
-                ui.ShowDialog(district.Name, Districts.ClosedReason(district, level));
+            if (district == null) return false;
+            // development builds skip the level gate so every district can be walked through
+            if (Districts.CanEnter(district.Id, level) || (Debug.isDebugBuild && district.Open))
+            {
+                LoadDistrict(district.Id, world.Map.Id);
+                return true;
+            }
+            ui.ShowDialog(district.Name, Districts.ClosedReason(district, level));
+            return false;
+        }
+
+        /// <summary>Puts the bud on the nearest walkable cell to (x, y) — used by the autopilot tour.</summary>
+        void Teleport(int x, int y)
+        {
+            var map = world.Map;
+            for (var r = 0; r < 20; r++)
+            for (var dy = -r; dy <= r; dy++)
+            for (var dx = -r; dx <= r; dx++)
+            {
+                if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) != r || !map.IsWalkable(x + dx, y + dy)) continue;
+                player.Teleport(world.CellCenter(x + dx, y + dy) + new Vector3(0, -0.3f, 0));
+                Camera.main!.GetComponent<FollowCamera>().SnapToTarget();
+                return;
+            }
+        }
+
+        static string Slug(string name)
+        {
+            var chars = name.ToLowerInvariant().Normalize(System.Text.NormalizationForm.FormD).ToCharArray();
+            var sb = new System.Text.StringBuilder();
+            foreach (var c in chars)
+            {
+                if (c is >= 'a' and <= 'z' or >= '0' and <= '9') sb.Append(c);
+                else if (c == 'ł') sb.Append('l');
+                else if (c == ' ' || c == '-') sb.Append('-');
+            }
+            return sb.ToString();
         }
 
         Sign FindNearbySign()
@@ -204,9 +261,10 @@ namespace Buds.Core
             var input = player.Input;
             async Awaitable Walk(Vector2 dir2, float seconds)
             {
-                input.Override = dir2;
+                // the bud is recreated on every district load, so always steer the current one
+                player.Input.Override = dir2;
                 await Awaitable.WaitForSecondsAsync(seconds);
-                input.Override = Vector2.zero;
+                if (player) player.Input.Override = Vector2.zero;
             }
             async Awaitable Shot(string file)
             {
@@ -219,24 +277,42 @@ namespace Buds.Core
             try
             {
                 await Shot("01-spawn.png");
-                await Walk(Vector2.right, 0.55f);
-                await Shot("02-walk-right.png");
-                await Walk(Vector2.up, 0.9f);
-                await Walk(Vector2.left, 0.9f);
-                await Shot("03-near-sign.png");
-                input.PressInteract();
-                await Shot("04-dialog.png");
-                input.PressInteract();
-                await Walk(Vector2.down, 2.5f);
-                await Shot("05-south.png");
-                await Walk(Vector2.right, 6f);
-                await Shot("06-east-collision.png");
-                await Walk(Vector2.left, 6f);
-                await Walk(Vector2.up, 6f);
-                await Walk(Vector2.left, 4f);
-                await Walk(Vector2.right, 1.4f);
-                await Walk(Vector2.down, 2.2f);
-                await Shot("07-houses.png");
+                await Walk(Vector2.right, 0.8f);
+                await Shot("02-walk.png");
+                var map = world.Map;
+                if (map.Signs.Count > 0)
+                {
+                    var sign = map.Signs[0];
+                    Teleport(sign.X, sign.Y + 1);
+                    await Shot("03-near-sign.png");
+                    input.PressInteract();
+                    await Shot("04-dialog.png");
+                    input.PressInteract();
+                }
+
+                // tour: every zone of every district (or just the current one without -buds-tour)
+                var districts = CommandLine.Has("-buds-tour") ? Districts.All : new[] { Districts.Get(map.Id) };
+                foreach (var district in districts)
+                {
+                    if (world.Map.Id != district.Id) LoadDistrict(district.Id, null);
+                    await Shot($"{district.Id}-00-spawn.png");
+                    var n = 1;
+                    foreach (var zone in world.Map.Zones)
+                    {
+                        Teleport((zone.X0 + zone.X1) / 2, (zone.Y0 + zone.Y1) / 2);
+                        await Shot($"{district.Id}-{n++:00}-{Slug(zone.Name)}.png");
+                    }
+                }
+
+                // travel: walk north out of the start district (development builds skip the level gate)
+                if (CommandLine.Has("-buds-tour"))
+                {
+                    LoadDistrict(Districts.Start, null);
+                    var north = world.Map.Exits.Find(e => e.Y0 == 0);
+                    Teleport(north.X0 + 1, 3);
+                    await Walk(Vector2.up, 1.5f);
+                    await Shot($"travel-arrived-in-{world.Map.Id}.png");
+                }
             }
             catch (Exception e)
             {

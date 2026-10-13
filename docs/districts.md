@@ -9,12 +9,22 @@ Rejestr (nazwy, progi poziomu, status): `packages/shared/src/districts.ts`, lust
 | #   | Dzielnica          | Wejście od poziomu | Klimat                      | Główna mechanika                                              |
 | --- | ------------------ | ------------------ | --------------------------- | ------------------------------------------------------------- |
 | 1   | **Miasto Ziomków** | start              | codzienne życie, ulica      | freestyle, graffiti i ukrywanie się przed policją             |
-| 2   | **Las Palmos**     | 4                  | tropiki, plaże, ocean       | eksploracja, zwierzęta, zadania na wodzie                     |
+| 2   | **Las Palmas**     | 4                  | tropiki, plaże, ocean       | eksploracja, zwierzęta, zadania na wodzie                     |
 | 3   | **Dwór Carski**    | 8                  | arystokracja, cegła, dworek | zagadki logiczne, okradanie nieuczciwych urzędników           |
 | 4   | **Los Karkos**     | 12                 | bieda, ruiny, graffiti      | ciągłe zaczepki, trening walki i przetrwania, sklepy z bronią |
 
-Kolejność progów rośnie z trudnością: Miasto Ziomków uczy podstaw, Las Palmos to spokojna eksploracja,
+Kolejność progów rośnie z trudnością: Miasto Ziomków uczy podstaw, Las Palmas to spokojna eksploracja,
 Dwór Carski wymaga myślenia i pierwszych walk, Los Karkos to sprawdzian dla doświadczonych.
+
+## Stan
+
+Wszystkie 4 dzielnice są zbudowane jako mapy 128 × 96 pól (`apps/unity/Assets/Buds/Resources/Maps/*.txt`) z grafiką
+w stylu gry: centrum, okolice, strefy z nazwami, tablice z opisami i drogi między dzielnicami. Następne kroki to NPC,
+questy i potyczki w tych strefach (patrz `docs/roadmap.md`).
+
+Mapy edytuje się na dwa sposoby: w skryptach `tools/world/maps/<dzielnica>.ts` (układ, budynki, rozsiane obiekty)
+albo bezpośrednio w pliku `.txt` (każdy znak to pole, legenda na górze pliku). Po zmianie skryptu:
+`pnpm exec tsx ../../tools/world/export-maps.ts` z katalogu `apps/api` — skrypt sprawdza, czy wszystko jest osiągalne.
 
 ## Wspólny układ mapy
 
@@ -23,7 +33,7 @@ Dwór Carski wymaga myślenia i pierwszych walk, Los Karkos to sprawdzian dla do
 - **Okolice:** 3–4 strefy wokół centrum, każda z własnym typem questów i przeciwników; im dalej od centrum,
   tym trudniej i lepsze nagrody.
 - **Drogi:** Miasto Ziomków jest węzłem — prowadzą z niego drogi do pozostałych trzech dzielnic
-  (północ → Las Palmos, południe → Dwór Carski, wschód → Los Karkos).
+  (północ → Las Palmas, południe → Dwór Carski, wschód → Los Karkos).
 - **Punkt odrodzenia:** przegrana walka = powrót do centrum dzielnicy (pierwszy raz — Miasto Ziomków).
 
 ## 1. Miasto Ziomków (start)
@@ -58,7 +68,7 @@ pierwsze zlecenia graffiti.
 **Grafika do zrobienia:** bloki i kamienice, sklepy z szyldami, ławki, latarnie, przystanek, skatepark,
 boisko, wiadukt, ściany pod graffiti (z rysowanym wzorem), radiowóz, policjant (postać NPC), raperzy.
 
-## 2. Las Palmos (poziom 4)
+## 2. Las Palmas (poziom 4)
 
 **Klimat:** tropiki — palmy, plaże, turkusowy ocean, hawajskie chatki na palach, kwiaty, egzotyczne zwierzęta.
 Najbardziej kolorowa i najspokojniejsza dzielnica.
