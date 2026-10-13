@@ -1,0 +1,10 @@
+{
+  "name": "Buds.Tests",
+  "rootNamespace": "Buds.Tests",
+  "references": ["Buds.Runtime", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+  "includePlatforms": ["Editor"],
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll"],
+  "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+  "autoReferenced": false
+}

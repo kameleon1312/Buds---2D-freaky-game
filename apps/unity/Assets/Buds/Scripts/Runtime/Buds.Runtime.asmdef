@@ -1,0 +1,6 @@
+{
+  "name": "Buds.Runtime",
+  "rootNamespace": "Buds",
+  "references": ["Unity.InputSystem", "UnityEngine.UI"],
+  "autoReferenced": true
+}

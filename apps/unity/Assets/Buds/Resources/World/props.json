@@ -1,0 +1,105 @@
+{
+  "ppu": 96,
+  "props": [
+    {
+      "name": "tree-a",
+      "pivotX": 0.5009,
+      "pivotY": 0.0521
+    },
+    {
+      "name": "tree-b",
+      "pivotX": 0.5009,
+      "pivotY": 0.0521
+    },
+    {
+      "name": "tree-c",
+      "pivotX": 0.5009,
+      "pivotY": 0.0521
+    },
+    {
+      "name": "bush-a",
+      "pivotX": 0.5015,
+      "pivotY": 0.1055
+    },
+    {
+      "name": "bush-b",
+      "pivotX": 0.5015,
+      "pivotY": 0.1055
+    },
+    {
+      "name": "rock-a",
+      "pivotX": 0.4992,
+      "pivotY": 0.1094
+    },
+    {
+      "name": "rock-b",
+      "pivotX": 0.5,
+      "pivotY": 0.139
+    },
+    {
+      "name": "house-red",
+      "pivotX": 0.4998,
+      "pivotY": 0.0275
+    },
+    {
+      "name": "house-blue",
+      "pivotX": 0.4998,
+      "pivotY": 0.0275
+    },
+    {
+      "name": "house-teal",
+      "pivotX": 0.4998,
+      "pivotY": 0.0275
+    },
+    {
+      "name": "sign",
+      "pivotX": 0.4987,
+      "pivotY": 0.0705
+    },
+    {
+      "name": "fence-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1154
+    },
+    {
+      "name": "fence-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1154
+    },
+    {
+      "name": "fence-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0517
+    },
+    {
+      "name": "flowers-a",
+      "pivotX": 0.4987,
+      "pivotY": 0.1621
+    },
+    {
+      "name": "flowers-b",
+      "pivotX": 0.4987,
+      "pivotY": 0.1621
+    },
+    {
+      "name": "flowers-c",
+      "pivotX": 0.4987,
+      "pivotY": 0.1621
+    },
+    {
+      "name": "tuft",
+      "pivotX": 0.5,
+      "pivotY": 0.1818
+    },
+    {
+      "name": "pebbles",
+      "pivotX": 0.5,
+      "pivotY": 0.2
+    },
+    {
+      "name": "lily",
+      "pivotX": 0.5,
+      "pivotY": 0.1667
+    }
+  ]
+}

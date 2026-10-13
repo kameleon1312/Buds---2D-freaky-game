@@ -1,0 +1,12 @@
+{
+  "name": "Buds.Editor",
+  "rootNamespace": "Buds.EditorTools",
+  "references": [
+    "Buds.Runtime",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Universal.2D.Runtime",
+    "Unity.RenderPipelines.Universal.Editor",
+    "Unity.RenderPipelines.Core.Runtime"
+  ],
+  "includePlatforms": ["Editor"]
+}
