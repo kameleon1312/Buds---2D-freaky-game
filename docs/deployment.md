@@ -46,7 +46,7 @@ Status deploymentu pojawi się jako check „Vercel” przy commitach.
    - **Data API / API** → Project URL → `SUPABASE_URL` — sam adres `https://<ref>.supabase.co`, **bez** `/rest/v1/`
      (z tą końcówką każde zapytanie kończy się błędem `PGRST125`),
    - **API Keys** → klucz **secret** (`sb_secret_…`; w starszych projektach `service_role`) → `SUPABASE_SERVICE_ROLE_KEY`,
-   - **JWT Keys** → *Legacy JWT secret* → `SUPABASE_JWT_SECRET`.
+   - **JWT Keys** → _Legacy JWT secret_ → `SUPABASE_JWT_SECRET`.
 
    Lokalnie wpisz je do pliku `.env` w katalogu głównym (jest w `.gitignore`), na produkcji do zmiennych w Railway.
    Klucz secret daje pełny dostęp do bazy: **nigdy** nie wpisuj go do zmiennych `NEXT_PUBLIC_*`, do gry ani do repo.
