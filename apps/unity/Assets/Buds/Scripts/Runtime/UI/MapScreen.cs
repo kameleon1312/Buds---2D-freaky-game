@@ -132,6 +132,12 @@ namespace Buds.UI
                 if (!Seen((int)cx, (int)cy)) continue;
                 Name(map, new Vector2(cx, cy), z.Name, parent ? 20 : 22);
             }
+            // plots: places that are coming
+            foreach (var p in map.Plots)
+            {
+                var at = new Vector2((p.X0 + p.X1 + 1) / 2f, (p.Y0 + p.Y1 + 1) / 2f);
+                if (Seen((int)at.x, (int)at.y)) Name(map, at + new Vector2(0, 3), "wkrótce", 16, UiKit.TextOnDarkMuted);
+            }
             foreach (var e in map.Exits)
             {
                 var name = Districts.Get(e.DistrictId)?.Name ?? e.DistrictId;

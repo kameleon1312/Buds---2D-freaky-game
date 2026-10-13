@@ -11,6 +11,8 @@ const envSchema = z.object({
   SUPABASE_JWT_SECRET: z.string().min(32, 'SUPABASE_JWT_SECRET must be at least 32 chars'),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),
   CREATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(5),
+  /** Look previews in the in-game creator (rendered on the server). */
+  PREVIEW_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(40),
   /** Without both of these the API keeps buds in memory (local dev only). */
   SUPABASE_URL: optional.pipe(z.string().url().optional()),
   SUPABASE_SERVICE_ROLE_KEY: optional,

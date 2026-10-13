@@ -64,7 +64,7 @@ namespace Buds.UI
 
         // ---------- pairing ----------
 
-        public void ShowPair(Action<string> onConnect, Action onGuest)
+        public void ShowPair(Action<string> onConnect, Action onGuest, Action onCreate)
         {
             if (pairScreen) UnityEngine.Object.Destroy(pairScreen);
             HideLoading();
@@ -82,29 +82,35 @@ namespace Buds.UI
             var logo = UiKit.Outlined("Logo", group, "Buds", 150, UiKit.Buds400);
             Place(logo.rectTransform, 0, 400, 600, 180);
 
-            var body = UiKit.Window("Card", group, new Vector2(600, 660), "Połącz z grą", null, out var card, out _);
-            Place(card, 0, -20, 600, 660);
+            var body = UiKit.Window("Card", group, new Vector2(600, 700), "Witaj w Buds", null, out var card, out _);
+            Place(card, 0, -30, 600, 700);
 
-            var sub = UiKit.Label("Sub", body, "Stwórz Buda na stronie, a potem wpisz kod z jego profilu.", 28, UiKit.InkSoft);
-            Place(sub.rectTransform, 0, 200, 520, 90);
+            var sub = UiKit.Label("Sub", body, "Nowy? Stwórz swojego Buda tutaj. Masz już Buda ze strony? Wpisz kod z jego profilu.", 25, UiKit.InkSoft);
+            Place(sub.rectTransform, 0, 246, 520, 80);
 
-            var field = UiKit.Input("Code", body, new Vector2(440, 120), "KOD", 80);
-            Place((RectTransform)field.transform.parent, 0, 75, 440, 120);
+            // the one gold action: a new bud, right here on the phone
+            var create = UiKit.Button("Create", body, "Stwórz nowego Buda", new Vector2(460, 96), onCreate, UiKit.Tone.Gold, 36);
+            Place(create.transform as RectTransform, 0, 150, 460, 96);
+
+            var or = UiKit.Label("Or", body, "albo połącz kodem", 22, UiKit.InkSoft, true);
+            Place(or.rectTransform, 0, 76, 460, 30);
+
+            var field = UiKit.Input("Code", body, new Vector2(440, 100), "KOD", 66);
+            Place((RectTransform)field.transform.parent, 0, 6, 440, 100);
             field.characterLimit = 6;
             field.contentType = InputField.ContentType.Alphanumeric;
             field.onValidateInput = (_, _, c) => char.IsLetterOrDigit(c) ? char.ToUpperInvariant(c) : '\0';
             field.textComponent.alignment = TextAnchor.MiddleCenter;
             ((Text)field.placeholder).alignment = TextAnchor.MiddleCenter;
 
-            pairError = UiKit.Label("Error", body, "", 26, UiKit.Alert700);
-            Place(pairError.rectTransform, 0, -10, 520, 50);
+            pairError = UiKit.Label("Error", body, "", 24, UiKit.Alert700);
+            Place(pairError.rectTransform, 0, -68, 520, 40);
 
-            // the one gold action on this screen; guest play is secondary (rep)
-            pairButton = UiKit.Button("Connect", body, "Połącz", new Vector2(440, 100), () => onConnect(field.text));
-            Place(pairButton.transform as RectTransform, 0, -100, 440, 100);
+            pairButton = UiKit.Button("Connect", body, "Połącz", new Vector2(440, 80), () => onConnect(field.text), UiKit.Tone.Buds, 32);
+            Place(pairButton.transform as RectTransform, 0, -134, 440, 80);
 
-            var guest = UiKit.Button("Guest", body, "Graj gościem", new Vector2(440, 84), onGuest, UiKit.Tone.Rep, 34);
-            Place(guest.transform as RectTransform, 0, -222, 440, 84);
+            var guest = UiKit.Button("Guest", body, "Graj gościem", new Vector2(440, 70), onGuest, UiKit.Tone.Rep, 30);
+            Place(guest.transform as RectTransform, 0, -236, 440, 70);
 
             if (Debug.isDebugBuild)
             {

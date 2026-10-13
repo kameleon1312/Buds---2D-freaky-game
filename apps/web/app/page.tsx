@@ -25,7 +25,10 @@ const CREW: BudLook[] = [
     hairColor: 6,
     outfit: 'tshirt',
     outfitColor: 7,
+    pants: 'spodnica',
     pantsColor: 0,
+    shoes: 'trampki',
+    shoesColor: 3,
   },
   {
     gender: 'on',
@@ -35,7 +38,10 @@ const CREW: BudLook[] = [
     hairColor: 0,
     outfit: 'bluza',
     outfitColor: 0,
+    pants: 'dresy',
     pantsColor: 1,
+    shoes: 'wysokie',
+    shoesColor: 1,
   },
   {
     gender: 'ona',
@@ -45,7 +51,10 @@ const CREW: BudLook[] = [
     hairColor: 4,
     outfit: 'kurtka',
     outfitColor: 6,
+    pants: 'legginsy',
     pantsColor: 1,
+    shoes: 'kozaki',
+    shoesColor: 6,
   },
   {
     gender: 'on',
@@ -55,7 +64,10 @@ const CREW: BudLook[] = [
     hairColor: 3,
     outfit: 'bluza',
     outfitColor: 2,
+    pants: 'bojowki',
     pantsColor: 2,
+    shoes: 'glany',
+    shoesColor: 1,
   },
   {
     gender: 'ona',
@@ -65,7 +77,10 @@ const CREW: BudLook[] = [
     hairColor: 0,
     outfit: 'ogrodniczki',
     outfitColor: 1,
+    pants: 'szorty',
     pantsColor: 0,
+    shoes: 'sandaly',
+    shoesColor: 8,
   },
 ];
 

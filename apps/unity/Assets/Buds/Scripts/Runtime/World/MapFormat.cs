@@ -38,6 +38,7 @@ namespace Buds.World
     /// [exits]   x0,y0,x1,y1 | district-id
     /// [zones]   x0,y0,x1,y1 | Name
     /// [doors]   x,y | interior-id | Name     // x,y = the building's anchor; entered from the cell below
+    /// [plots]   x0,y0,x1,y1 | id | kind | Name   // kept clear for future quests, NPCs and attractions
     /// </code>
     /// Prop variants (a|b|c) are chosen per cell with a fixed hash, so every client and the server agree.
     /// </summary>
@@ -92,6 +93,7 @@ namespace Buds.World
                         case "exits": map.Exits.Add(ExitLine(line)); break;
                         case "zones": map.Zones.Add(ZoneLine(line)); break;
                         case "doors": map.Doors.Add(DoorLine(line)); break;
+                        case "plots": map.Plots.Add(PlotLine(line)); break;
                         default: throw new FormatException($"unknown section [{section}]");
                     }
                 }
@@ -204,6 +206,14 @@ namespace Buds.World
             if (parts.Length != 2) throw new FormatException("zone lines look like 'x0,y0,x1,y1 | Name'");
             var r = Ints(parts[0], 4);
             return new Zone { X0 = r[0], Y0 = r[1], X1 = r[2], Y1 = r[3], Name = parts[1].Trim() };
+        }
+
+        static Plot PlotLine(string line)
+        {
+            var parts = line.Split('|');
+            if (parts.Length != 4) throw new FormatException("plot lines look like 'x0,y0,x1,y1 | id | kind | Name'");
+            var r = Ints(parts[0], 4);
+            return new Plot { X0 = r[0], Y0 = r[1], X1 = r[2], Y1 = r[3], Id = parts[1].Trim(), Kind = parts[2].Trim(), Name = parts[3].Trim() };
         }
 
         static Door DoorLine(string line)

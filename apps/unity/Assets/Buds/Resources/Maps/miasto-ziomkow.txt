@@ -7,109 +7,112 @@ spawn = 64,53
 
 [legend]
 = = asphalt
-t = asphalt !
-u = asphalt + auto-a|auto-b|auto-c !
-s = asphalt + road-dash
+u = asphalt !
+v = asphalt + auto-a|auto-b|auto-c !
+t = asphalt + road-dash
 C = asphalt + road-dash-v
-3 = asphalt + zebra
-{ = asphalt + zebra-v
-v = concrete
-w = concrete !
-1 = concrete + bench !
-# = concrete + graffiti-a !
-2 = concrete + graffiti-b !
-? = concrete + sign !
-x = concrete + skate-ramp !
-4 = court
-5 = court + kosz !
+% = asphalt + sign !
+4 = asphalt + zebra
+< = asphalt + zebra-v
+w = concrete
+x = concrete !
+2 = concrete + bench !
+$ = concrete + graffiti-a !
+3 = concrete + graffiti-b !
+^ = concrete + sign !
+y = concrete + skate-ramp !
+5 = court
+6 = court + kosz !
 ' = dirt
-Λ = dirt !
-Π = dirt + auto-b !
-Μ = dirt + garaze !
-Ν = dirt + graffiti-a !
-Ξ = dirt + graffiti-c !
-Κ = dirt + sign !
-Ο = dirt + wycieraczka-wejscie
+Ν = dirt !
+Σ = dirt + auto-b !
+Τ = dirt + auto-c !
+Ξ = dirt + garaze !
+Ο = dirt + graffiti-a !
+Π = dirt + graffiti-c !
+Μ = dirt + sign !
+Ρ = dirt + wycieraczka-wejscie
 B = forest !
 D = forest + sign !
 A = forest + tree-a|tree-b|tree-a|tree-c !
 . = grass
-M = grass !
-U = grass + altanka-a !
-T = grass + altanka-b !
-> = grass + bench !
-e = grass + bush-a !
-R = grass + bush-b !
-G = grass + fence-post !
-S = grass + flowers-a
-H = grass + flowers-b
-P = grass + flowers-c
-^ = grass + przystanek !
-( = grass + radiowoz !
-F = grass + rock-a !
-K = grass + rock-b !
+L = grass !
+T = grass + altanka-a !
+S = grass + altanka-b !
+e = grass + bench !
+b = grass + bush-a !
+Q = grass + bush-b !
+F = grass + fence-post !
+R = grass + flowers-a
+G = grass + flowers-b
+O = grass + flowers-c
+{ = grass + przystanek !
+| = grass + radiowoz !
+f = grass + rock-a !
+J = grass + rock-b !
 c = grass + sign !
-b = grass + tree-a !
-h = grass + tree-b !
+Z = grass + tree-a !
+g = grass + tree-b !
 a = grass + tree-c !
 , = grass2
-Β = grass2 !
-J = grass2 + bush-a !
-O = grass2 + bush-b !
+Δ = grass2 !
+I = grass2 + bush-a !
+N = grass2 + bush-b !
 E = grass2 + flowers-a
-Q = grass2 + flowers-b
-I = grass2 + flowers-c
-Δ = grass2 + graffiti-a !
+P = grass2 + flowers-b
+H = grass2 + flowers-c
+Η = grass2 + graffiti-a !
 Ζ = grass2 + graffiti-b !
-Ε = grass2 + graffiti-c !
-Γ = grass2 + radiowoz !
-f = grass2 + rock-a !
-L = grass2 + rock-b !
-Ι = grass2 + sign !
+Θ = grass2 + graffiti-c !
+Ε = grass2 + radiowoz !
+h = grass2 + rock-a !
+K = grass2 + rock-b !
+Λ = grass2 + sign !
 d = grass2 + tree-a !
-Z = grass2 + tree-b !
-N = grass2 + tree-c !
-Η = gravel
-Θ = gravel + rails-h
+Y = grass2 + tree-b !
+M = grass2 + tree-c !
+Ι = gravel
+Κ = gravel + rails-h
 - = path
-g = path + sign !
+i = path + sign !
 + = plaza
-} = plaza !
-$ = plaza + bench !
-< = plaza + fontanna !
-6 = plaza + lamp !
-9 = plaza + planter !
-& = plaza + sign !
-7 = plaza + tree-a|tree-b !
-| = plaza + wycieraczka-wejscie
+> = plaza !
+& = plaza + bench !
+( = plaza + fontanna !
+7 = plaza + lamp !
+# = plaza + planter !
+? = plaza + sign !
+8 = plaza + tree-a|tree-b !
+` = plaza + wycieraczka-wejscie
 _ = sand
 : = sidewalk
-i = sidewalk !
-p = sidewalk + auto-a|auto-b|auto-c !
-8 = sidewalk + bin !
-y = sidewalk + blok-a !
-z = sidewalk + blok-b !
-0 = sidewalk + blok-c !
-" = sidewalk + house-blue !
-Α = sidewalk + house-red !
-` = sidewalk + house-teal !
-q = sidewalk + hydrant !
-k = sidewalk + kamienica-a !
-m = sidewalk + kamienica-b !
-n = sidewalk + kamienica-c !
-o = sidewalk + kawiarnia !
-) = sidewalk + komisariat !
-j = sidewalk + lamp !
-@ = sidewalk + przystanek !
-l = sidewalk + sklep-ciuchy !
-% = sidewalk + sklep-kiosk !
-r = sidewalk + tree-a !
-* = sidewalk + wycieraczka-wejscie
-X = soil
-V = soil + flowers-a
-Y = soil + flowers-b
-W = soil + flowers-c
-! = water !
+j = sidewalk !
+q = sidewalk + auto-a|auto-b|auto-c !
+9 = sidewalk + bin !
+z = sidewalk + blok-a !
+0 = sidewalk + blok-b !
+1 = sidewalk + blok-c !
+Α = sidewalk + house-blue !
+Γ = sidewalk + house-red !
+Β = sidewalk + house-teal !
+r = sidewalk + hydrant !
+l = sidewalk + kamienica-a !
+n = sidewalk + kamienica-b !
+o = sidewalk + kamienica-c !
+p = sidewalk + kawiarnia !
+" = sidewalk + komisariat !
+k = sidewalk + lamp !
+! = sidewalk + przystanek !
+) = sidewalk + sign !
+m = sidewalk + sklep-ciuchy !
+* = sidewalk + sklep-kiosk !
+s = sidewalk + tree-a !
+@ = sidewalk + wycieraczka-wejscie
+W = soil
+U = soil + flowers-a
+X = soil + flowers-b
+V = soil + flowers-c
+} = water !
 
 [ground]
 grass2 : grass2 : 2.2 : 0.3 #7bbf51
@@ -145,11 +148,17 @@ water : 0.15 : lily
 118,45 | Do Los Karkos | Dalej robi się niebezpiecznie. Wejście od poziomu 7.
 61,3 | Do Las Palmas | Tropiki, plaże i ocean. Wejście od poziomu 3.
 66,88 | Do Dworu Carskiego | Dworek, cegła i zagadki. Wejście od poziomu 5.
+146,41 | Nowe Osiedle | Świeże bloki, nowi sąsiedzi. Wkrótce: więcej zadań od mieszkańców.
+149,52 | Stadion Ziomków | Tu powstaje stadion. Wkrótce: mecze, turnieje i doping.
+151,111 | Lunapark | Karuzela jeszcze w pudłach. Wkrótce: mini-gry i nagrody.
+30,113 | Port Rzeczny | Barki, wędkarze i stare magazyny. Wkrótce: rejsy po rzece.
+94,97 | Bazar Miejski | Stoiska czekają na kupców. Wkrótce: handel i wymiana.
+30,95 | Plac Ziomków | Miejsce spotkań. Wkrótce: nowi mieszkańcy z nowymi zadaniami.
 
 [exits]
 62,0,65,0 | las-palmas
-62,95,65,95 | dwor-carski
-127,46,127,49 | los-karkos
+62,131,65,131 | dwor-carski
+175,46,175,49 | los-karkos
 
 [zones]
 36,22,97,74 | Śródmieście
@@ -162,106 +171,154 @@ water : 0.15 : lily
 10,83,60,93 | Garaże
 66,74,122,93 | Tory
 100,38,126,58 | Wylotówka
+128,8,174,46 | Nowe Osiedle
+130,52,170,80 | Stadion
+132,110,172,128 | Lunapark
+4,110,124,128 | Port Rzeczny
+68,96,120,106 | Bazar Miejski
+8,94,54,106 | Plac Ziomków
 
 [doors]
 82,43 | miasto-ziomkow-kawiarnia | Kawiarnia „Ziomal”
 71,55 | miasto-ziomkow-komisariat | Komisariat
 15,87 | miasto-ziomkow-garaz | Garaż Rysia
 
+[plots]
+132,54,168,78 | mz-stadion | attraction | Stadion Ziomków
+134,112,170,126 | mz-lunapark | attraction | Lunapark
+70,98,118,104 | mz-bazar | shop | Bazar Miejski
+10,96,52,104 | mz-plac-zadan | quest | Plac Ziomków
+
 [grid]
-AAAABBBBBAAABBBBBABBBBABBAABBBBBBABABAAAABABABBBBABAAABABAAAAA====AAABABAAAABBBABBBABBBBBABBABBABBBBAAAAAABAAAAAABABBAABBABBBABA
-AABAAAAAABBAABABBBBBBBAABABAABBBAAAAABAABBABABBBABABAAAABBBBBB=C==AAABBABAAABBBBBBABBABABBABAABABBAABAABBBBABAAABAABABABABABABBA
-BBBAAABABAABBAAAABABBBBAABBAABBABBBBABABABAABAABAAAABBBABBAABB====AABAABBBBAABAAAABBBBAAABABBAABAAABAABBABABABAABBABBAABBBAAABAB
-BBBABAABAAAAABABBABBBAABABABBBABABAABBBBAAAAAAAABBBBBAABAABAAD=C==BAABBABBBBAAABABBBAABBAAAAAABBBABABABAAABAAAABABAAABBBBBBABABB
-AAAB,,,,....BBAABAAABABAABAAABBBBABBBBBAABBBAABABBBABBAABABA.A====BBAB.ABBBBAAA,,,,,BBAAAABBABB.AAABBABBBAABABABBABABBBBABABBBBA
-AABA,,,,-------ABAABAAABBBBAAAABB------BABABBBAA----BBAABA-...=C==AB.....BBAAB,,,E,,,,,ABBBAA.F...,,,,,,,,,,,,AA.....BABAABBBBAB
-AABB,,,,-GGGGGGGGG-GGGGGGGGGAGGGGGGGGG-GGGGGGGGG-GGGGGGGGG-...====B...H...ABBI,,,,,,J,,,,ABB,,....,,,,,,,,,,,,,,..K.......AAAAAB
-BAAB,,,,-G.......G-G.......G-G.......G-G.......G-G.......G-...=C==.....K..,E,,,,,,,,,,,,,,,,,E....,EL,,,,,,,,,,,...........AABAA
-BBAB....-G.MMM...G-G.MMM...G-G.MMM...G-G.MMM...G-G.MMM...G-...====........,,EN,,,,,,O,,,,,,,,.H.P..,,Q,Q,,,,,Q,,,.P.R.S....BABBB
-BBBA....-G.MTM...G-G.MUM...G-G.MTM...G-G.MUM...G-G.MTM...G-...=C==........,,,,,,,,,,Q,,,,,,,,S........,,,,,,,,,,,,,,,,,,,..AAABA
-AABB....-GVVWVXVVG-GVVVVXXWG-GVWYVXWWG-GWWYWWWXG-GYYWWXVXG-...====........I,,,,,,.K....,,Z,,,K...........,,,,,,,,O,,,E,,,.,AAABA
-BBBB....-GXWVVYXXG-GVVXVXWVG-GVXYYXVWG-GXXVXYWXG-GYWWWWVXG-...=C==....a....,Q,,,..P.S..,,,,,,.......R..b.,,,,,,,,,,Q,,,,,,,ABBBB
-ABBBB...-GGGG.GGGG-GGGG.GGGG-GGGG.GGGG-GGGG.GGGG-GGGG.GGGG-,,.====....c......b..........,,I,,.........S..,,d,,,,L,,,,,,,,,,AABBB
-AAABB...---------------------------------------------------...=C==............,......H..,,,,,.....F.....S,,,,,,,,,,,,,,,d,,BBABA
-AABBB...-GGGGGGGGG-GGGGGGGGG-GGGGGGGGG-GGGGGGGGG-GGGGGGGGG-...====...........,,.........,Q,,,d.......S...,,,,,,O,,,,,,,,,..BABBA
-ABBAA...-G.......G-G.......G-G.......G-G.......G-G.......G-...=C==..........S,,,R....e..,,,,,,,Q,,,.....,,,d,I,,,,,,,N.....BBBBA
-BABBA...-G.MMM...G-G.MMM...G-G.MMM...G-G.MMM...G-G.MMM...G-...====...........,,,..F......,,,,,,,,,,,IQ,O,,,,,,I,,,,,,,.....BABAA
-ABAAA...-G.MTM...G-G.MUM...G-G.MTM...G-G.MUM...G-G.MTM...G-...=C==.....K..S.R,,,..H......,,,,L,,,,,,,,,,,,,,,,,,,,Q,,......ABAAA
-ABAAB...-GWXXVVVYG-GYXYWWVYG-GXVYVYYYG-GYXWYXXWG-GYVYVXVXG-...====...........,,,.F......b,,,,,,,,,,,,,,J,,Z,,,,,LE,,,...S.BBBAAB
-BBAAB...-GVYVVWWWG-GVWVWWYYG-GWXVWXXVG-GVYVXYXYG-GYVYYVVWG-...=C==...........,,,..P.F....,,,,Q,,,,,f,,,,,,,Q.Z,,,,,,,.....ABBBBA
-BBAAA...-GGGG.GGGG-GGGG.GGGG-GGGG.GGGG-GGGG.GGGG-GGGG.GGGG-...====....SP.....,f,....P...,,,,Q,J,,,,,,E,,,IE.P.H,E,,E,.....ABBABA
-BBBBB...-------------------------------------------------g-...=C==....P.....F.,.....R..,O,,,,,,,,L,,,,d,,Qh.......,..a....ABABBB
-BABAB......,,,...............,,,....................,,,,,,....====....................,,,,,,,,.....,,,,,..................BBBBBA
-BABBB.......,................,,,....................,,,,,,,...=C==....,,,.........,,,,,,,,,,,,......,,,,.................ABBBBAA
-BBBAAA......,................,,,.......:==:iiiii.iiiii,iiiii.:====:.iiiii,iiiii.iiiii:==:,,,,,.......,,,.................AABABBB
-ABAAAB.......................,,,.......:C=:iiiii.iiiii,iiiii,:=C==:.iiiii.iiiii.iiiii:C=j,,,,........,,,.................BAAAAAB
-AABAAA.................................:==:iikii.iilii.iimii,:====:.iinii.iioii.iikii:==:,,,.............................AABAABB
-AAABAA..............................::::C=ipi:::::::ipi:::::::=C==::::::::ipi:::::::::C=:::q::::r........................AAABAAB
-BBBAABB.............................=s=s=s=s=s=s=s=s=s=s=s=s=s=====s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=................,,,,.....BABBAA
-BBAAABA...........,.................===========================C========================tut======...............,,,,,,....ABBBBA
-BBBAAAA........S,,Z,,,.............,,,::==::::::::::::::::::::====:::::j::::::::::::::==:vvvvvvvvvvvvvvvv......,,,,,,,....AAABAB
-ABABBAB.........,,,,,..b....a......,,,.jC=:iiiiiii..a......h,:=C==:..................:C=:vvvvvvvvvvvvvvvv......,,,,,,,....ABAAAB
-BBBBBA..........,,,,...S....e......d,,.:==:iiiiiii.iiiii....,:====:.iiiiiii.iiiiiii..:==:vwwwvwwwvvvwwwvv.......,,,,,.....AABBBA
-ABABA......,,,,,.b..S.S...b.h......,,,.:C=:iiiiiii.iiiii....,:=C==:.iiiiiii.iiiiiii..:C=:vwxwvwxwvvvwxwvv.......,,,,,.....BBAABB
-BAAA......,,J,,,...b..............,,,E,:==:iiiyiiibiioii.....:====:.iiiiiii.iiiiiii..:==:vvvvvvvvvvvvvvvv........,,,......BABBBB
-BBAB......,,,,,N.....b........c.,,,,,,,:C=:::::::::::::::..a.:=C==:.iiiziii.iii0iiih.:C=:vvvvvvvvvvvvvvvv.........,,.....BBABAAB
-BAAA.....,,,,-------------------------,:==:.........a........:====::::::::::::::::::.:==:vvvvvvvvvvvvvvv1.........,.......ABAABA
-AAABA.....,,,-------------------------,:C=:S..........a......:=C==:.........S..b....R:C=:vvw2wvvvvvvvvvvv.................ABBBAB
-BBBAA......,,--.....h..........h--.....:==:.......b..........:3333:..................:==:vvvvvvv44444444v.....b......b.....ABABB
-BAABB........--a.a.....P..H.h...--.....:C=:..e.........++++++++++++++++++....h.......:C=:vvvvvvv44454444v..................BBBBA
-AAABA.......a--..P.P.h..........--.....:==:............+b+++6++++++6+++7+......h.....8==:vvvvvvv44444.b....................ABABB
-BBBAA........--...a....R.P.R....--..h..:C=:iiiii.iiiii.iiiii++++9+++iiiii.iiiii.iiiii:C=:vw#wvvv44444......b..h............ABBAB
-BABBBA.......--.....h..a.......S--.....:==:iiiii.iiiiiSiiiii++$+++$+iiiii.iiiii.iiiii:==:vvvvvvv44444...............h...b..ABBBB
-AABBBA.......--..b..............--b....:C=:iikii.iimii.ii%ii++++++++iilii.iinii.iioii:C=:vvvvvvv44444......................ABAAA
-BBABBB.......--h....____........--.....:==:::::::::::::+++++&++++++++++++:::::::::*:::==:?vvvvvv44454............b.........AABAB
-AABAAB.......--..___________.P..--....::C=:::::::::::::+i@i++++++++++++++:::::::::::::C=::::q::::............M^M......c....BBBBA
-AABBBB.......--____!!!!!!____.b.--.N,Z================{++++++++++++++++++{======================================================
-BBBABB.......--__!!!!!!!!!!!__..--------=s=s=s=s=s=s=s{++9+++++}}}++++9++{=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=s==
-ABBBBB......R--_!!!!!!!!!!!!__.h--------=============={++++++++}}}+++++++{======================================================
-BBBABA.......--_!!!!!!!!!!!!!_..--,,,,================{++++++++}<}+++++++{======================================================
-BAABAA.......--_!!!!!!!!!!!!__..--..j.::==::q::::::::::+++++++++++j++++++i@i::::::::::==:::::::::,,.....h..........h.....ABBAAAB
-BABAA........--_!!!!!!!!!!!!__..--.....:C=:.........S.h++++$+++++++++$+a+.....a..h..h:C=:........e.......................ABBBBBB
-ABBAA.......,--__!!!!!!!!!!___..--.....:==:......b.....++++++++++++++++++H...........:==:............h......,,...........ABBBBBA
-BABAB......,,--____!!!!!!!___.h.--...H.:C=:iiiii.iiiii.iiiii++++++++iiiiiiiR...>.....:C=j..................,,d,..........BABAAAA
-BAABB......,N--.____________b...--H..S.:==:iiiii.iiiii.iiiii++++++++iiiiiii.M(M.M(M..:==:......b..........,,,,,..........BABBBAB
-BBBBB......,,--..e.._____.......--.R...:C=:iimii.ii%iieiikii6++++++6iii)iii.........>:C=:................e,,,,,....h.....ABABBBA
-ABBAA.....,,,--,...........h....--.....:==:::::::::::::++++++++++++++++|+............:==:..e..........e...,,,,,b......b..BAAAAAA
-BABAA.....,,,--,,......b.....b..--.....:C=:..a.h.............:3333:,.................:C=:........h........,,,,,,..........BABBAA
-BBABB....,,,,--,,,,..H...P......--.....:==:..................:====:......h...h.a..e..:==j..........e......,,,,,,..........BBBBAA
-ABBBA...,,,,Z---------------------.....:C=:.a........a....a..:=C==:..................:C=:....h.h.........h,,,,,,,..........BABAA
-BABBBB..,,,,,---------------------.....8==:....h.b.....b.....:====:..a.......a.......:==:h............h...,,,,,,,..........AAABB
-BBBABB..,,,,,,,,,,,ZPbR.a...bP...a.....:C=:iiiiiii.iiiiiii...:=C==:.iiiiiii......a...:C=:iiiiiii.iiiiiii..,,,,,,,..........BAAAA
-ABBAAB..,,,,,,Z,,,Q,...e.....S.........:==:iiiiiii.iiiiiii.b.:====:.iiiiiii.iiiii....:==:iiiiiii.iiiiiii..,,,,,,,,,........ABBBA
-AABBABB..,,,,,,Ed,,,.He................:C=:iiiiiii.iiiiiii..,:=C==:.iiiiiii.iiiii....:C=:iiiiiii.iiiiiii.,,,,,,,,,,,,.....ABBBAA
-BBBAABA..,,,N,,,,...,,Q,,Ze......h.....:==:iii0iiibiiiyiii..,:====:.iiiziii.iiniih...:==:iiiyiii.iiiziii,,,,,,,,,,,,,....BAABAAB
-AABBBBA...,,,,,,....,,,,,,,.........::::C=::::::::::::::::::::=C==j:::::::::::::::::::C=:::::j:::::::::::,,,,,,,,,,,,,...AAAAABA
-ABAABBA...,,,,,.....,,,,,,,.........=s=s=s=s=s=s=s=s=s=s=s=s=s=====s=s=s=s=s=s=s=s=s=s=s=s=s=s=s=....,,,,,,,,,,,,,,,,,....AABABB
-BBBAAA.....,,,,,....,,,,,,,.........=======tut=================C==============tut================...,,,,,,,,,,,,,,,,,.....BAAABA
-AABBB......,,,,,,,,,,,,,,,,.........::::==::::::::::::q::::::j====:::::j::::::::::j:::==:::::::::...,,,,,,,,,,,,,,,,,......AAABB
-BBAB.......,,,,,,,,,,,,,,,.............:C=:.............,,,,,:=C==:..................:C=:...........,,,,,,,,,,.............AAAAB
-ABBB.......,,,,,,,,,,,,,,..............:==:..............,,,,:====:..................:==:..........,,,,,,,,,...............BABAA
-BAAA,......,,,,,,,,,,,,................:C=:iiiii.iiiii.iiiii,:=C==:.iiiii.iiiii.iiiii:C=:...iiiii.,,,,,,,,,.............,..ABABA
-BABB,......,,,,,,,,,,,,................:==:iiiii.iiiii.iiiii,:====:.iiiii.iiiii.iiiii:==:...iiiii,,,,,,,,,,.............,..BBAAA
-ABBA,.....,,,,,,,,,,,,,....................ii"ii.ii`ii.iiΑii,,=C==..ii`ii.iiΑii.ii"ii.......iiΑii.,,,,,,,,,,...........,,,.ABBAA
-BBAB,,,,,,,,,,,,,,,,,,,,,.................:::::::::::::::::::,====.:,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.ABABB
-AAAB,,,,,,,,,,,......,,,,,.................................,,,=C==..,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Z,,,,,,,,,,,,,,,,AAAAB
-BBBA,,,,,,,,,,,.......,,,,,.............,,,,,.............,,,,====..,,,,,,,,,,,,,,,,,,,,,ΒΓΒ,,,,,,J,,,,,,,,,,,,,,Z,,,,,,,,,BBAAA
-BBAB,,,,,,,,,,,.......,,,,,............,,,,,,.............,,,,=C==..,,,,,,,,Z,,,,,,,,,J,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,BAABA
-BBAAB,,,,,,,,,,.......,,,,,............,,,,,,.............,,,,====..,,,ΒΔΒ,,,ΒΔΒ,,,ΒΕΒ,,,,,,,,,ΒΖΒ,,LΒΕΒ,,,ΒΖΒ,,,ΒΕΒ,,,,,,ABAABB
-BBBAA,,,,,,,,,,.......,,,,,............,,,,,,..............,,,=C==..,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,AAABAB
-BABΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗ====ΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗAAA
-ABBΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘ=C==ΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘΘBAB
-BBAΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗ====ΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗΗAAB
-BBBAAB,,,........,,,....................,,,,,.......,,,,,.....=C==..,,L,,,,,,,,J,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,J,,,,Z,,BBBBBA
-BABBBBA,,...'''''''''''''''''''''''''''''''''''''''''''''''...====..,,Ι,,,,,,,,,,,J,,,,,,L,,,,,,,,,,Z,,,,,,,,,,,J,,,,,,,,,BABAAA
-ABABBBB,,...'''''''''''''''''''''''''''''''''''''''''''Κ'''...=C==..,,,,,,,,J,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,BAAAAA
-BAABAAB,,...''ΛΛΛ'ΛΛΛ'ΛΛΛ'''''ΛΛΛ'ΛΛΛ'''''ΛΛΛ'ΛΛΛ'ΛΛΛ''''''...====..,,,ΒΕΒ,,,ΒΖΒ,,,ΒΖΒ,,,,,,,,,ΒΔΒ,,,ΒΕΒ,,,ΒΕΒ,,,ΒΕΒ,,,,,,BABABA
-AAABBBB,....''ΛΜΛ'ΛΜΛ'ΛΜΛ'ΛΝΛ'ΛΜΛ'ΛΜΛ'ΛΞΛ'ΛΜΛ'ΛΜΛ'ΛΜΛ''''''...====..,J,,,,L,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,AAABA
-AABBAA......'''Ο'''''''''''''''''''''''''''''''''''''''''''...=C==c.,,,,,,,,,,,L,,,,,,,,,,,,,L,,,,,,,,,,,,,,,,,,,,L,,,,,,,,BBBBB
-ABBABA......''''''''''''''''''''''''''''''''''''''''''ABB''...====..,,,,AAABABB,,,,,,,,,,BAB,,,,,,J,,,,,,,,,,,,,,,,,,,,,,,,AAAAB
-ABBBBBAB....''''BABBAAB'ΛΠΛ'ABBAA'''''BBAAABAAAB'''''BBBBB'...=C==ABAABBBBBABAAABBB,,,,BBABBA,,,,,,,,,,,,,,,,,,,,J,,,,,,,,,,ABAB
-ABAABBBABBABAABAAABBBBBAAAAAAAABBAABABAAABABBAABBBBAABBABABBAA====BBBBABBAAABABAABAAABAABBBBBAB,,BAABBAAABAABABA,,,,,,,,,,,AABAA
-BBABBBABAABBBBBBBBBAABBBABAABBABABABBAAABBBBBAAABABBABAAAABBBA=C==ABAAABAAAABBABBABBBBBAABAABBABABBBABBBABAABBABBBAABABBBBBBBBBA
-BAABABBBAABBBABABAABBABBBBABBABBAAABAAABBAABABAABAAABBBBAABBBB====ABBABABAAABBBABBBABABABAAABABBABABBABBBBAABBAAAABABBABABBAAABB
-AAAABAAABAABBBBBABBBBAABABBAABBABABABBBBBABBAAABBBBBBAABAABBBB=C==AABBBBAAAABBBABBBBBAAAAABBAABABBBAAAAABABBBBBAAABABABBAABABAAA
-BAABABBAABBAAABAABBBBABBBAAABBAABBABAABBABAABBBABBBAABABBBABAA====BBBABBABABABBBABABBABBBBBABBBAABABAABBBABABBAABABBBBAABBABBAAA
+AAAABBBBBAAABBBBBABBBBABBAABBBBBBABABAAAABABABBBBABAAABABAAAAA====AAABABAAAABBBABBBABBBBBABBABBABBBBAAAAAABAAAAAABABBAABBABBBABAAABAAAAAABBAABABBBBBBBAABABAABBBAAAAABAABBABABBB
+ABABAAAABBBBBBABAAAAABBABAAABBBBBBABBABABBABAABABBAABAABBBBABA=C==ABABABABABABBABBBAAABABAABBAAAABABBBBAABBAABBABBBBABABABAABAABAAAABBBABBAABBABBBAABAABBBBAABAAAABBBBAAABABBAAB
+AAABAABBABABABAABBABBAABBBAAABABBBBABAABAAAAABABBABBBAABABABBB====AABBBBAAAAAAAABBBBBAABAABAAABABBBAABBABBBBAAABABBBAABBAAAAAABBBABABABAAABAAAABABAAABBBBBBABABBAAABBBAABAAABABA
+ABAAABBBBABBBBBAABBBAABABBBABBAABABAAABABBBABABBBBAAABBAAAABBD=C==ABBABBBAABABABBABABBBBABABBBBAAABAABAABAAABBBBAAAABBBABABBBAABBAABABAAABBBAABABBBAAAABABAABBBBABAABBAAABAAAAAB
+BBAB,,,,....BABBAAAAABBAABAABAABBABBABBBBBBAAAABAAABBAAABABB.B====BBAB.BBBAABBB,,,,,AAABBBBABAA.ABBBBABBAABBAABBBBABABBABABA...AABAAAABAAAABAABBBBAAB....BBAABABBBBABBAAAABBABAB
+BBBB,,,,-------ABABBBBABABBBBBBAB------ABBBABBBB----AABBBA-...=C==AB.....ABBBA,,,E,,,,,BAAABB.....,,,,,,,,,,,,AA.....AAABAA.....BAAAAABAABBAAABAAAAA...........BA......,ABBBBAAB
+BBAB,,,,-FFFFFFFFF-FFFFFFFFFAFFFFFFFFF-FFFFFFFFF-FFFFFFFFF-...====B...G...BBBH,,,,,,,I,,,ABB,,....,,,,,,,,,,,,,,...J.............BAAA...,,,AAAABABA....................,,BABBABA
+BAAA,,,,-F.......F-F.......F-F.......F-F.......F-F.......F-...=C==......J.,E,,,,,,,,,,,,,,,,,E....,E,K,,,,,,,,,,........................,,,,,..........................,,,BBBBBB
+AAAB....-F.LLL...F-F.LLL...F-F.LLL...F-F.LLL...F-F.LLL...F-...====........,,EM,,,,,,,N,,,,,,,.G.O..,,P,P,,,,,P,,,.O..QR.................,,,,,........:==:..............,,,BBAABA
+BABB....-F.LSL...F-F.LTL...F-F.LSL...F-F.LTL...F-F.LSL...F-...=C==........,,,,,,,,,,P,,,,,,,,R........,,,,,,,,,,,,,,,,,,,...,,,,.......,,,,,,........:==:.................AABBBA
+AABA....-FUUVUWUUF-FUUUUWWVF-FUVXUWVVF-FVVXVVVWF-FXXVVWUWF-...====........H,,,,,,..J...,,Y,,,.J..........,,,,,,,,,N,,E,,,.,,,,,,,,...............................Z........BBBBBB
+ABBB....-FWVUUXWWF-FUUWUWVUF-FUWXXWUVF-FWWUWXVWF-FXVVVVUWF-...=C==....a....,P,,,..O.R..,,,,,,........Q...,,,,,,,,,,P,,,,,,,,,,,,,,.................................b......ABAABB
+AAAAB...-FFFF.FFFF-FFFF.FFFF-FFFF.FFFF-FFFF.FFFF-FFFF.FFFF-,,.====....c.......Z.........,,H,,.........R..,,,d,,,,K,,,,,,,,,,,,,,,,......................b......e.......e...AABAA
+AABAA...---------------------------------------------------...=C==............,......G..,,,,,.....Rf...R.,,,,,,,,,,,,,,,,,,,,,,,,,..........................Z...............BBBA
+BBBBA...-FFFFFFFFF-FFFFFFFFF-FFFFFFFFF-FFFFFFFFF-FFFFFFFFF-...====....Z......,,.........P,,,,,Z.....R....,,,,,,,N,,,,,,,,..,,,,,,,.......Z......e......b......e.............AABA
+BBBAA...-F.......F-F.......F-F.......F-F.......F-F.......F-...=C==.........R.,,,.Q....b.,,,,,,P,,,,.....,,,,d,,,,,,,,,a......,,,,,....g.......e.............e.............b.BBBB
+BBAAA...-F.LLL...F-F.LLL...F-F.LLL...F-F.LLL...F-F.LLL...F-...====...........,,,..Of.....,,,,,,,,,,HP,,,N,,,,H,,,,,,,,.........,,,........e.................................ABAA
+BABBB...-F.LSL...F-F.LTL...F-F.LSL...F-F.LTL...F-F.LSL...F-...=C==......JR...N,,.G.......,,,,,K,,,,,,,,,,,,,,,,,,P,,,............,.e.Z..............................g......BBAAA
+BBABB...-FVWWUUUXF-FXWXVVUXF-FWUXUXXXF-FXWVXWWVF-FXUXUWUWF-...====...........,,,..f......d,,,,,,,,,,,,,,I,,Y,,,,EK,,,..R.........,........................................ABBBAA
+BBBBA...-FUXUUVVVF-FUVUVVXXF-FVWUVWWUF-FUXUWXWXF-FXUXXUUVF-...=C==...........,,,.O...f...,,,P,,,,,,,h,,,,,P,.,Y,,,,,,...R........,................b......b..Z........g...ABBBAAB
+AAABB...-FFFF.FFFF-FFFF.FFFF-FFFF.FFFF-FFFF.FFFF-FFFF.FFFF-...====....O......,,h...O....,,,P,,,I,,,,E,,,HE,O.G.E,,E,,...O..........e.......g.............................ABBBAAB
+ABAAB...-------------------------------------------------i-...=C==....g...g..f,......Q.,,N,,,,,,,,K,,,,,P,g.......,..a................b..................................AABBBBB
+AAABB......,,,...............,,,....................,,,,,,....====....................,,,,,,,,.....,,,,,.....................,,.............Z..Z..........................BBBBBA
+ABBBA.......,................,,,....................,,,,,,,...=C==....,,,.........,,,,,,,,,,,,......,,,,....................,,,,..................g..........g.......e....BBBABA
+AABBBB......,................,,,.......:==:jjjjj.jjjjj,jjjjj.:====:.jjjjj,jjjjj.jjjjj:==:,,,,,.......,,,....................,,,,......g...............b.e..................BBBAA
+ABBBBA.......................,,,.......:C=:jjjjj.jjjjj,jjjjj,:=C==:.jjjjj.jjjjj.jjjjj:C=k,,,,........,,,....................,,,,............b.............b..g.............BABAB
+BABBBA.................................:==:jjljj.jjmjj.jjnjj,:====:.jjojj.jjpjj.jjljj:==:,,,................................,,,,...........................................ABAAA
+BBAAAB..............................::::C=jqj:::::::jqj:::::::=C==::::::::jqj:::::::::C=:::r::::s..........................,,,,,,..........................................BABAA
+ABBBBBB.............................=t=t=t=t=t=t=t=t=t=t=t=t=t=====t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=................,,,,......,,,,,,....................g.....................ABBAA
+ABBBBBA...........,.................===========================C========================uvu======...............,,,,,,.....,,,,,,..............g.......e....b...............BABA
+BBABAAA........R,,Y,,,.............,,,::==::::::::::::::::::::====:::::k::::::::::::::==:wwwwwwwwwwwwwwww......,,,,,,,.....,,,,,,,.......g..................................ABAA
+BBBABBB.........,,,,,..Z....a......,,,.kC=:jjjjjjj..a......g,:=C==:..................:C=:wwwwwwwwwwwwwwww......,,,,,,,.....,,,,,,,......................e........g.g........ABBB
+BBBABA..........,,,,...R....b......d,,.:==:jjjjjjj.jjjjj....,:====:.jjjjjjj.jjjjjjj..:==:wxxxwxxxwwwxxxww.......,,,,,......,,,,,,,..........g...b.........e.e..............BBBAA
+BBAAB......,,,,,.Z..R.R...Z.g......,,,.:C=:jjjjjjj.jjjjj....,:=C==:.jjjjjjj.jjjjjjj..:C=:wxyxwxyxwwwxyxww.......,,,,,.......,,,,,,.........................................AAAAA
+ABAB......,,I,,,...Z..............,,,E,:==:jjjzjjjZjjpjj.....:====:.jjjjjjj.jjjjjjj..:==:wwwwwwwwwwwwwwww........,,,........,,,,,,....jjjjjjj..jjjjjjj..jjjjjjj..jjjjjjj...AABAB
+BAAB......,,,,,M.....Z........c.,,,,,,,:C=:::::::::::::::..a.:=C==:.jjj0jjj.jjj1jjjg.:C=:wwwwwwwwwwwwwwww.........,,........,,,,,,....jjjjjjj..jjjjjjj..jjjjjjj..jjjjjjj...BABBB
+BBBA.....,,,,-------------------------,:==:.........a........:====::::::::::::::::::.:==:wwwwwwwwwwwwwww2.........,.........,,,,,,....jjjjjjj..jjjjjjj..jjjjjjj..jjjjjjj...AABBB
+ABABA.....,,,-------------------------,:C=:R..........a......:=C==:.........R..Z....Q:C=:wwx3xwwwwwwwwwww...................,,,,,,....jjjzjjj..jjj1jjj..jjj1jjj..jjj1jjj...ABABB
+BBAAA......,,--.....g..........g--.....:==:.......Z..........:4444:..................:==:wwwwwww55555555w.....Z......Z......,,,,,,.........................................BBBBB
+ABBBA........--a.a.....O..G.g...--.....:C=:..b.........++++++++++++++++++....g.......:C=:wwwwwww55565555w...................,,,,::::::::::::::::::::::::::::::::::::::::::AAAABB
+AABAB.......a--..O.O.g..........--.....:==:............+Z+++7++++++7+++8+......g.....9==:wwwwwww55555.Z......................,,,==========================================BBAAAB
+BABBA........--...a....Q.O.Q....--..g..:C=:jjjjj.jjjjj.jjjjj++++#+++jjjjj.jjjjj.jjjjj:C=:wx$xwww55555......Z..g............g.,,,==================%=======================BBBAAB
+BBAABA.......--.....g..a.......R--.....:==:jjjjj.jjjjjRjjjjj++&+++&+jjjjj.jjjjj.jjjjj:==:wwwwwww55555..............g...Z.....,,,::::::::::::::::::::::::::::::::::::::::::BAABAA
+BAABBB.......--..Z..............--Z....:C=:jjljj.jjnjj.jj*jj++++++++jjmjj.jjojj.jjpjj:C=:wwwwwww55555...Z....................,,,,,.........................................BAAAA
+AABAAB.......--g....____........--.....:==:::::::::::::+++++?++++++++++++:::::::::@:::==:^wwwwww55565.........................,,,,.........................................AABBA
+AABABB.......--..___________.O..--....::C=:::::::::::::+j!j++++++++++++++:::::::::::::C=::::r::::............L{L......c..............................:==:.,,,,.........,,,,BBBAA
+ABAAAB.......--____}}}}}}____.Z.--.M,Y================<++++++++++++++++++<======================================================================================================
+BAAABB.......--__}}}}}}}}}}}__..--------=t=t=t=t=t=t=t<++#+++++>>>++++#++<=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=t===t=t=t=t=t=t=t=t=t=t=t==
+AAABAB......Q--_}}}}}}}}}}}}__.g--------==============<++++++++>>>+++++++<======================================================================================================
+AABAAA.......--_}}}}}}}}}}}}}_..--,,,,================<++++++++>(>+++++++<======================================================================================================
+BABBBB.......--_}}}}}}}}}}}}__..--..k.::==::r::::::::::+++++++++++k++++++j!j::::::::::==:::::::::,,................g................................,:==:,,,,,,,,,,,,,.....AAAAB
+BAABB........--_}}}}}}}}}}}}__..--.....:C=:.........R.g++++&+++++++++&+a+.....a..g..g:C=:........b..................................................,:==:,,,,,,,,,,,,,.....AABBA
+BABAB.......,--__}}}}}}}}}}___..--.....:==:......Z.....++++++++++++++++++G...........:==:............g..Z...,,..............Z........................)==:.....,,,,,,,......BAAAB
+AAAAB......,,--____}}}}}}}___.g.--...G.:C=:jjjjj.jjjjj.jjjjj++++++++jjjjjjjQ...e.....:C=k..................,Y,,..............................,,,,,,..:==:......,,,,,,.....BBBABB
+AAABB......,M--.____________Z...--G..R.:==:jjjjj.jjjjj.jjjjj++++++++jjjjjjj.L|L.L|L..:==:......Z..........,,,,,.........g...........+++++++++++++++++++++++++++++++++++++.ABBAAB
+ABBAA......,,--..b.._____.......--.Q...:C=:jjnjj.jj*jjbjjljj7++++++7jjj"jjj.........e:C=:................b,,,,,.g...................+++++++++++++++++++++++++++++++++++++.BABAAB
+BBBBA.....,,,--,...........g....--.....:==:::::::::::::++++++++++++++++`+............:==:..b..........b...,,d,,....Z................+++++++++++++++++++++++++++++++++++++.AAAABA
+BBABA.....,,,--,,......Z.....Z..--.....:C=:..a.g.............:4444:,.................:C=:........g........,,,,,,....................+++++++++++++++++++++++++++++++++++++.AABBAA
+AABBA....,,,,--,,,,..G...O......--.....:==:..................:====:......g...g.a..b..:==k..........b......,,,,,,....................+++++++++++++++++++++++++++++++++++++..ABBBB
+ABBBA...,,,,Y---------------------.....:C=:.a........a....a..:=C==:..................:C=:....g.g.........g,,,,,,,...................+++++++++++++++++++++++++++++++++++++,,ABBAA
+AAABBB..,,,,,---------------------.....9==:....g.Z.....Z.....:====:..a.......a.......:==:g............g...,,,,,,,...................+++++++++++++++++++++++++++++++++++++,,,BAAB
+BBBBBA..,,,,,,,,,,,YOZQ.a...ZO...a.....:C=:jjjjjjj.jjjjjjj...:=C==:.jjjjjjj......a...:C=:jjjjjjj.jjjjjjj..,,,,,,,...................+++++++++++++++++++++++++++++++++++++,,BABBB
+BABABA..,,,,,,Y,,,P,...b.....R.........:==:jjjjjjj.jjjjjjj.Z.:====:.jjjjjjj.jjjjj....:==:jjjjjjj.jjjjjjj..,,,,,,,,,.................+++++++++++++++++++++++++++++++++++++,,AAABA
+BBBBBAA..,,,,,,Ed,,,.Gb................:C=:jjjjjjj.jjjjjjj..,:=C==:.jjjjjjj.jjjjj....:C=:jjjjjjj.jjjjjjj.,,,,,,,,,,,,...............+++++++++++++++++++++++++++++++++++++,,AAABA
+ABAABBA..,,,M,,,,...,,P,,Yb......g.....:==:jjj1jjjZjjjzjjj..,:====:.jjj0jjj.jjojjg...:==:jjjzjjj.jjj0jjj,,,,,,,,,,,,,...............+++++++++++++++++++++++++++++++++++++,,BABAA
+AABBBBA...,,,,,,....,,,,,,,.........::::C=::::::::::::::::::::=C==k:::::::::::::::::::C=:::::k:::::::::::,,,,,,,,,,,,,..............+++++++++++++++++++++++++++++++++++++,,AABAA
+ABBAABB...,,,,,.....,,,,,,,.........=t=t=t=t=t=t=t=t=t=t=t=t=t=====t=t=t=t=t=t=t=t=t=t=t=t=t=t=t=....,,,,,,,,,,,,,,,,,..............+++++++++++++++++++++++++++++++++++++,,BBBAB
+BABAAB.....,,,,,....,,,,,,,.........=======uvu=================C==============uvu================...,,,,,,,,,,,,,,,,,...............+++++++++++++++++++++++++++++++++++++,,BAAAB
+ABBBA......,,,,,,,,,,,,,,,,.........::::==::::::::::::r::::::k====:::::k::::::::::k:::==:::::::::...,,,,,,,,,,,,,,,,,...............+++++++++++++++++++++++++++++++++++++.BAAAAB
+ABBB.......,,,,,,,,,,,,,,,.............:C=:.............,,,,,:=C==:..................:C=:...........,,,,,,,,,,......................+++++++++++++++++++++++++++++++++++++.BBABBA
+BBAA.......,,,,,,,,,,,,,,..............:==:..............,,,,:====:..................:==:..........,,,,,,,,,........................+++++++++++++++++++++++++++++++++++++BABBAAB
+BAAA,......,,,,,,,,,,,,................:C=:jjjjj.jjjjj.jjjjj,:=C==:.jjjjj.jjjjj.jjjjj:C=:...jjjjj.,,,,,,,,,.............,...........+++++++++++++++++++++++++++++++++++++.BAAABB
+BBBB,......,,,,,,,,,,,,................:==:jjjjj.jjjjj.jjjjj,:====:.jjjjj.jjjjj.jjjjj:==:...jjjjj,,,,,,,,,,.............,...........+++++++++++++++++++++++++++++++++++++.AAABAA
+BBBB,.....,,,,,,,,,,,,,....................jjΑjj.jjΒjj.jjΓjj,,=C==..jjΒjj.jjΓjj.jjΑjj.......jjΓjj.,,,,,,,,,,...........,,,..........+++++++++++++++++++++++++++++++++++++..BABAA
+ABBB,,,,,,,,,,,,,,,,,,,,,.................:::::::::::::::::::,====.:,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,..........+++++++++++++++++++++++++++++++++++++...BBAB
+BAAB,,,,,,,,,,,......,,,,,.................................,,,=C==..,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Y,,,,,,,,,,,,,,,,,........+++++++++++++++++++++++++++++++++++++...ABAB
+AABB,,,,,,,,,,,.......,,,,,.............,,,,,.............,,,,====..,,,,,,,,,,,,,,,,,,,,,ΔΕΔ,,,,,,I,,,,,,,,,,,,,,Y,,,,,,,,,,,,,,....+++++++++++++++++++++++++++++++++++++...BABB
+ABAA,,,,,,,,,,,.......,,,,,............,,,,,,.............,,,,=C==..,,,,,,,,Y,,,,,,,,,I,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,...+++++++++++++++++++++++++++++++++++++,.BAAAB
+BBBBA,,,,,,,,,,.......,,,,,............,,,,,,.............,,,,====..,,,ΔΖΔ,,,ΔΗΔ,,,ΔΖΔ,,,,,,,,,ΔΖΔ,,KΔΘΔ,,,ΔΖΔ,,,ΔΘΔ,,,,,,,,,,,,,...+++++++++++++++++++++++++++++++++++++,AAAAAA
+ABBAA,,,,,,,,,,.......,,,,,............,,,,,,..............,,,=C==..,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,..............,,,...:==:..,,,,,,...,,,,,BABAAAB
+ABBΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙ====ΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙ:==:ΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙAAB
+BABΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚ=C==ΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚ:==:ΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚΚBBB
+BBBΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙ====ΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙ:==:ΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙΙBAB
+AABAAA,,,........,,,....................,,,,,.......,,,,,.....=C==..,,K,,,,,,,,I,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,I,,,,Y,,,,,,,,,,,,,,...............:==:.......,,,,,,,,,BAABBBB
+BABBAAB,,...'''''''''''''''''''''''''''''''''''''''''''''''...====..,,Λ,,,,,,,,,,,I,,,,,,K,,,,,,,,,,Y,,,,,,,,,,,I,,,,,,,,,,,,,,,,,,,,,,..............:==:.......,,,,,,,,,BAAABAA
+BABAAAB,,...'''''''''''''''''''''''''''''''''''''''''''Μ'''...=C==..,,,,,,,,I,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,..............:==:........,,,,,,,,,AABBAB
+BBABAAB,,...''ΝΝΝ'ΝΝΝ'ΝΝΝ'''''ΝΝΝ'ΝΝΝ'''''ΝΝΝ'ΝΝΝ'ΝΝΝ''''''...====..,,,ΔΗΔ,,,ΔΗΔ,,,ΔΗΔ,,,,,,,,,ΔΖΔ,,,ΔΗΔ,,,ΔΘΔ,,,ΔΘΔ,,,,,,,,,,,,,,,,,,,,.............:==:........,,,,,,,,,BBBBBB
+BBAABBB,....''ΝΞΝ'ΝΞΝ'ΝΞΝ'ΝΟΝ'ΝΞΝ'ΝΞΝ'ΝΠΝ'ΝΞΝ'ΝΞΝ'ΝΞΝ''''''...=C==..,I,,,,K,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,....,,,,,,,,,,,,........:==:........,,,,,,,,,ABAABB
+ABABAB......'''Ρ'''''''''''''''''''''''''''''''''''''''''''...====c.,,,,,,,,I,K,,,,,,,,,,,,,K,,,,,,,,,,,,,,,,,,,,K,,,,,,,,,,......,,,,,,,,,,,,.......:==:.........,,,.....BAAABB
+BBBAAA......'''''''''''''''''''''''''''''''''''''''''''''''...=C==..,,,,,,,,,,,,,,,,,,,,,,,,,,,,,I,,,,,,,,,,,,,,,,,,,,,,,,,,......,,,,,,,,,,,,.......:==:.........,,......BABBAB
+AAAABB......''''''''''''ΝΣΝ'''''''''''''''''ΝΤΝ''''''''''''...====..,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Y,,,,,,I,,,,,,,,,,,,......,,,,,,,,,,,,.......:==:.........,.......BAAAAA
+ABAAAB......'''''''''''''''''''''''''''''''''''''''''''''''...=C==..,,,,,,,,,I,,,,,,,,I,I,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,......,,,,,,,,,,,,.......:==:.................AAAABB
+ABBABB......'''''''''''''''''''''''''''''''''''''''''''''''...====..,,,,,,,,,,,,,,,,,,,,,,K,,,,,,,,,,,,,,,,,,,,,,,K,,,,,,,,.......,,,,,,,,,,,,,......:==:................,BBBAAB
+AABBAB.........,,,,,,,,....,,,,,,,,...........................=C==........................,,,,,,,,,,,,,,,.....,,,,,,,,,..........,,,,,,,,....,,,,,,,,:==:.............,,,,ABBBAB
+BBABAA........,,,,,,,,......,,,,,,,,,,,,.............,,,......====......,,..............,,,,,,,,.,,,,,,,,......,,,,,,,..........,,,,,,,,......,,,,,,,:==:............,,,,,BBABBB
+AABABB........,,,,,,,.......,,Λ,,,,,,,,,,...........,,,,,.....=C==.....,,,,.............,,,,,,,,.,,,,,,,,.......,,,,,..........,,,,,,,,.......,,,,,,,:==:,...........,,,,BBBBBBB
+ABAABA....+++++++++++++++++++++++++++++++++++++++++++,,,,.....====....,,,,,............,,,,,,,,,.,,,,,,,,.......,,,,,..........,,,,,,,,.......,,,,,,,:==:,...........,,,,BBBAABB
+BABABA....+++++++++++++++++++++++++++++++++++++++++++,,,,.....=C==....,,,,,............,,,,,,,Λ...,,,,,,,.......,,,,,..........,,,,,,,,.......,,,,,,,:==:,...........,,,,ABBABBB
+BABBAB.,,,+++++++++++++++++++++++++++++++++++++++++++,,,,.....====....+++++++++++++++++++++++++++++++++++++++++++++++++.......,,,,,,,,.........,,,,,,:==:.............,,,BAAABAA
+ABBAABA,,,+++++++++++++++++++++++++++++++++++++++++++,,,,.....=C==....+++++++++++++++++++++++++++++++++++++++++++++++++.......,,,,.................,,:==:................BAABAAA
+BBBBAAB,,,+++++++++++++++++++++++++++++++++++++++++++,,,......====....+++++++++++++++++++++++++++++++++++++++++++++++++.......,,.....................:==:................BBBAAAA
+ABBABAB,,,+++++++++++++++++++++++++++++++++++++++++++,,,......=C==....+++++++++++++++++++++++++++++++++++++++++++++++++......,,,.....................:==:................AAABBBA
+BBBABAB,,,+++++++++++++++++++++++++++++++++++++++++++,,.......====....+++++++++++++++++++++++++++++++++++++++++++++++++......,,,.....................:==:................ABAAABA
+BBABAB,,,,+++++++++++++++++++++++++++++++++++++++++++,,.......=C==....+++++++++++++++++++++++++++++++++++++++++++++++++......,,,.....................:==:.................BABBBB
+AABBAA,,,,+++++++++++++++++++++++++++++++++++++++++++,........====....+++++++++++++++++++++++++++++++++++++++++++++++++....,,,,,.....................:==:.................AABABB
+ABABBA,,,.................,,,,,,,,,,,,,,........,,,...........=C==....,,,,,,..........,,,,,,,,...............,,,,,,,,,,,,,,,,,,,,,,..................:==:...,.............AABBAA
+AABAAA,,,..............,,,,,,,,,,,,,,,,,.................,,,,,====....,,,,..........,,,,,,,,,,,,.........,,,,,,,,,,,,,,,,,,,,,,,,,,,,,...............:==:..,,,............BAABBB
+BBABB,::::::::::::::::::::::::::::::::::::::::::::::::::::::::=C==::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::==::::::::::::::::::.BBAAB
+ABBAA,====================================================================================================================================================================.BBABA
+BABB.,====================================================================================================================================================================..BBBA
+BBAA..::::::::::::::::::::::::::::::::::::::::::::::::::::::::=C==::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::==::::::::::::::::::..ABBB
+BBBA..................,,,,,,,...,,,,,,,,,................,,,,,====............,,,,,,,,,,,,,,,,,...............,,,,,,,,,,,,,,,,,,,,,..................:=%:,,,,,,,............ABAA
+BBBBA.................,,,,,,......,,,,,,..................,,,,=C==...........,,,,,,,,,,,,,,,,,.................,,,,,,,,,,,,,,,,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.BAAA
+ABBBB.....,,,,,.......,,,,,...c....,,,,,..................,,,,====..........,,,,,,,,,,,,,,,,,,..................,,,,,,,,,,,,,,,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.AAAA
+BBBABB________________________________________________________=C==___________________________________________________________,,,......wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.BBBA
+AAAABB________________________________________________________====___________________________________________________________,,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.AABA
+BBBAAA________________________________________________________=C==___________________________________________________________,,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.AABA
+BBBBB_________________________________________________________====___________________________________________________________,,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.AAAB
+ABABB_________________________________________________________=C==___________________________________________________________,,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwAABAB
+AAABA_________________________________________________________====___________________________________________________________,,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwABABB
+AABB}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}=C==}}}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}}}}}}}}}},,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwAABAA
+BBBB}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}====}}}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}}}}}}}}}},,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwBBBAA
+ABBA}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}=C==}}}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}}}}}}}}}},,,,.....wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwBBABA
+ABBA}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}====}}}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}}}}}}}}}},,,......wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwAABBB
+ABBB}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}=C==}}}}}}}}}}}}}}}}}}--}}}}}}}}}}}}}}--}}}}}}}}}}}}}}}}}}}}}}}.........wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwABABB
+BABA}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}====}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}.........wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwBAABA
+BAAB}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}=C==}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}.........wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwAABAA
+ABAABBABBAAABABAABBABAAAB.BBAAAAABBAABAABAAABABBAABAABBBAAABBB====,,,,,,,BAAABAAAAABAAABBBBABAABAABBAABAA.BABBABBB,,,.BAAABABBAB........ABBABBA,,,,,,,,,,,BABAAABABA..,,AAABBBBA
+BBAAABBBBBABAAAABBBABAABABABABBABABBBBABBABBABBBABBBBAABAABAAB=C==AAAABABBBBBBBBBABBABABAAAAABBAAAABAABAABAAABBABBBABAAABAABABBAABABBAAABAABBABABBAAABABAAABAAABBABABAABAAAABBBA
+ABAABABABAABBABBAABBAAABAABABABAABBBABABAAABBBBBAAAABAAABBABAB====BABBABABABBBBABBBAABABBABAAABBABABBBBAABABBBAABBABABBAAABABABAABAABBBAABABBABBBABBABBAABAABABABABAAABABBABAAAB
+BBABABBBBAAABBAABBBABAAAAABBAAAABBBBAABBBBAAABBBBBBBBBAAABBAAA=C==ABAAABBBAABABABBABBBBBBABBAAAAABAAAAAAAAABBABBABBBBBBBABBBBAAAABBBAABBBBBABBBBBBBBBAABABBABABBAABBAAABAABBBBAB
+ABAABABAAABABAABABBABBABAABAABAAABBAABBBBABBAABBBBBABAABBBABAA====BBBABAAABAABBAAAAAAAAAAAABAAABAAAAABBBBABBABAAAAABBBBABBBBABAABABBAABBBABAAABAAAABAAABAABBBBABBBAABBAABAABBAAB

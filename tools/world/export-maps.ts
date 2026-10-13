@@ -11,6 +11,7 @@ import { interiors } from './maps/interiors';
 import { lasPalmas } from './maps/las-palmas';
 import { losKarkos } from './maps/los-karkos';
 import { miastoZiomkow } from './maps/miasto-ziomkow';
+import { wyspaStartowa } from './maps/wyspa-startowa';
 
 const districts = [miastoZiomkow, lasPalmas, dworCarski, losKarkos].map((build) => build());
 const rooms = interiors();
@@ -30,7 +31,10 @@ if (problems.length) throw new Error(`Maps have problems:\n  - ${problems.join('
 
 const dir = fileURLToPath(new URL('../../apps/unity/Assets/Buds/Resources/Maps/', import.meta.url));
 mkdirSync(dir, { recursive: true });
-for (const map of [...districts, ...rooms] as MapCanvas[]) {
+// the tutorial island: its pier leads to Miasto Ziomków, one way
+const island = wyspaStartowa();
+
+for (const map of [...districts, island, ...rooms] as MapCanvas[]) {
   const { reachable, walkable } = map.validate();
   writeFileSync(`${dir}${map.id}.txt`, map.toText());
   console.info(`${map.id}: ${map.w}×${map.h}, ${reachable}/${walkable} walkable cells reachable`);

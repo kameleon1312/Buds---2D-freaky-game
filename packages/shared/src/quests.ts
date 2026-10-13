@@ -7,6 +7,7 @@ import { DWOR_CARSKI } from './content/dwor-carski';
 import { LAS_PALMAS } from './content/las-palmas';
 import { LOS_KARKOS } from './content/los-karkos';
 import { MIASTO_ZIOMKOW } from './content/miasto-ziomkow';
+import { WYSPA_STARTOWA } from './content/wyspa-startowa';
 import { levelFromXp } from './level';
 
 /**
@@ -32,6 +33,7 @@ export const npcSchema = z.object({
   lines: z.array(z.string().min(1)).min(1),
 });
 export type Npc = z.infer<typeof npcSchema>;
+export type NpcInput = z.input<typeof npcSchema>;
 
 export const questStepSchema = z.discriminatedUnion('kind', [
   /** Walk up to an NPC and talk. `text` is what they say. */
@@ -42,6 +44,8 @@ export const questStepSchema = z.discriminatedUnion('kind', [
     radius: z.number().int().min(1).max(6),
     label: z.string().min(1),
   }),
+  /** Win a duel against this opponent (from the same district). */
+  z.object({ kind: z.literal('duel'), enemy: id, label: z.string().min(1) }),
   /** Pick up every item lying at `spots` (shown only while this step is active). */
   z.object({
     kind: z.literal('collect'),
@@ -83,7 +87,7 @@ export type DistrictContent = z.infer<typeof districtContentSchema>;
 
 /** All content, validated once at load. */
 export const CONTENT: DistrictContent = (() => {
-  const all = [MIASTO_ZIOMKOW, LAS_PALMAS, DWOR_CARSKI, LOS_KARKOS];
+  const all = [WYSPA_STARTOWA, MIASTO_ZIOMKOW, LAS_PALMAS, DWOR_CARSKI, LOS_KARKOS];
   return districtContentSchema.parse({
     npcs: all.flatMap((c) => c.npcs),
     quests: all.flatMap((c) => c.quests),
@@ -133,9 +137,16 @@ export function contentProblems(content: DistrictContent): string[] {
       problems.push(`${q.id}: giver ${q.giver} lives in another district`);
     for (const r of q.requires)
       if (!questIds.has(r)) problems.push(`${q.id}: requires unknown quest ${r}`);
-    for (const s of q.steps)
+    for (const s of q.steps) {
       if (s.kind === 'talk' && !npcIds.has(s.npc))
         problems.push(`${q.id}: talks to unknown npc ${s.npc}`);
+      if (s.kind === 'duel') {
+        const foe = content.enemies.find((e) => e.id === s.enemy);
+        if (!foe) problems.push(`${q.id}: duel with unknown enemy ${s.enemy}`);
+        else if (foe.district !== q.district)
+          problems.push(`${q.id}: ${s.enemy} lives in another district`);
+      }
+    }
     if (q.rewardItem && !catalogItem(q.rewardItem))
       problems.push(`${q.id}: reward ${q.rewardItem} is not in the catalog`);
   }

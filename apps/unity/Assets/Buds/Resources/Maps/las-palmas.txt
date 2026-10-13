@@ -7,61 +7,65 @@ spawn = 64,72
 
 [legend]
 . = grass
-r = grass !
-y = grass + bar-plaza !
-b = grass + bush-a !
-o = grass + bush-b !
-t = grass + chatka-a !
-s = grass + chatka-c !
-d = grass + flaming !
-j = grass + palm-a !
-W = grass + palm-b !
-P = grass + palm-c !
-e = grass + paproc !
-v = grass + sign !
-u = grass + wycieraczka-wejscie
+w = grass !
+2 = grass + bar-plaza !
+e = grass + bush-a !
+t = grass + bush-b !
+y = grass + chatka-a !
+x = grass + chatka-c !
+g = grass + flaming !
+n = grass + palm-a !
+Z = grass + palm-b !
+V = grass + palm-c !
+h = grass + paproc !
+0 = grass + sign !
+z = grass + wycieraczka-wejscie
 , = grass2
-S = grass2 + palm-a !
-m = grass2 + palm-b !
-l = grass2 + palm-c !
-c = grass2 + paproc !
-i = grass2 + sign !
-T = jungle
-M = jungle !
-U = jungle + jungle-a !
-L = jungle + jungle-a|jungle-b|palm-a|palm-b !
-a = jungle + jungle-b !
-Z = jungle + paproc !
-Y = jungle + papuga !
-V = jungle + sign !
+H = grass2 + jungle-a !
+L = grass2 + jungle-b !
+I = grass2 + palm-a !
+G = grass2 + palm-b !
+r = grass2 + palm-c !
+f = grass2 + paproc !
+m = grass2 + sign !
+D = jungle
+S = jungle !
+N = jungle + jungle-a !
+R = jungle + jungle-a|jungle-b|palm-a|palm-b !
+d = jungle + jungle-b !
+q = jungle + palm-a !
+j = jungle + palm-b !
+c = jungle + paproc !
+b = jungle + papuga !
+Y = jungle + sign !
 A = ocean !
-p = ocean + lodz !
+u = ocean + lodz !
 - = path
-f = path !
-k = path + pochodnia !
-h = path + ruiny-swiatyni !
-w = path + sign !
-x = path + stragan-owoce !
-q = planks
+i = path !
+o = path + pochodnia !
+l = path + ruiny-swiatyni !
+p = path + sign !
+1 = path + stragan-owoce !
+v = planks
 C = rock
-E = rock + rock-dark !
-D = rock + rock-dark-b !
+F = rock + rock-dark !
+E = rock + rock-dark-b !
 _ = sand
-g = sand + deski-surf !
-X = sand + flaming !
-H = sand + krab !
-J = sand + lezak-a !
-O = sand + lezak-b !
-z = sand + palm-a !
-N = sand + palm-b !
-I = sand + parasol-a !
-R = sand + parasol-b !
-F = sand + rock-a !
-G = sand + rock-b !
-K = sand + sign !
-n = sand + zolw !
+k = sand + deski-surf !
+a = sand + flaming !
+M = sand + krab !
+P = sand + lezak-a !
+U = sand + lezak-b !
+3 = sand + palm-a !
+T = sand + palm-b !
+O = sand + parasol-a !
+X = sand + parasol-b !
+J = sand + rock-a !
+K = sand + rock-b !
+Q = sand + sign !
+s = sand + zolw !
 B = shallow !
-Q = water !
+W = water !
 
 [ground]
 sand : sand shallow ocean planks : 2 : 0.42 #e8cf96, 0.5 #f6e3b0
@@ -91,9 +95,13 @@ water : 0.12 : lily
 30,68 | Plaża Aloha | Najlepsze fale na wyspie. Wkrótce: zawody surfingowe.
 44,20 | Rafa | Przy odpływie widać kolorowe ryby. Podobno leży tu zatopiony skarb.
 67,90 | Do Miasta Ziomków | Droga powrotna do miasta.
+150,37 | Wodospad | Huk wody słychać z daleka. Wkrótce: skoki do laguny.
+149,55 | Wioska Tiki | Mieszkańcy dopiero się wprowadzają. Wkrótce: nowe zadania.
+60,103 | Zatoka Żółwi | Tu żółwie składają jaja. Wkrótce: wyprawy z przewodnikiem.
+102,109 | Przystań Jachtowa | Wkrótce: regaty i łowienie ryb.
 
 [exits]
-62,95,65,95 | miasto-ziomkow
+62,131,65,131 | miasto-ziomkow
 
 [zones]
 44,50,90,86 | Miasteczko
@@ -104,104 +112,148 @@ water : 0.12 : lily
 90,14,124,74 | Dżungla
 100,27,116,39 | Ruiny Świątyni
 84,12,124,24 | Wulkaniczne Klify
+132,16,168,36 | Wodospad
+130,54,170,80 | Wioska Tiki
+12,96,126,128 | Zatoka Żółwi
 
 [doors]
 52,64 | las-palmas-chatka | Chatka rybaka
 
+[plots]
+134,18,166,34 | lp-wodospad | attraction | Wodospad
+132,56,168,78 | lp-wioska-tiki | quest | Wioska Tiki
+84,110,120,124 | lp-przystan | minigame | Przystań Jachtowa
+
 [grid]
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBB
-AAAAAAAAAAAAAAABBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBAAAAAA--AAAAAAAAAAAABBBBBBBBBB
-AAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBAAAAAAAAAAABBBBBBBBBBBBBBBBBB--AAAAAABBBBBBBBBBBCC___
-AAAAAAAAAAAAAAAAABB____BBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBAAAAAABBBBCDCCDCCCCCBBBBBB--BBBBBBBBBBBBCCCCCCC___
-AAAAAAAAAAAAAAAAABB___________________BBBBBAAAAAAAAAAAAABBBB_______________BBBBBBBBBBBCCCCCCCCECCCCCCCCC--BBBBBBCCCCCCCCDCCCC___
-AAAAAAAAAAAAAAAAAABB_____________________BBBBBBBBBBBBBBBBB____________________BBBBBBCECCCCCCCCCCCDCCCDCC--CCCCCCCCCCCCCCCCCCC___
-AAAAAAAAAAAAAAAAAABB_______________________BBBBBBBBBBBBB_F__________________G_______CCCCCCCCCCCCCCCCCCCC--CCCCCCCCDCCCCCCCCDC___
-AAAAAAAAAAAAAAAAAABB_____________________________F____________G____H________________CCCCCCCCCCCCCCCECCCC--CECCCCCCCCDCCCCCCCC___
-AAAAAAAAAAAAAAAAAABB__________F_____________________________________________________CCCCCCCCCCCCCCCCCCCC--CCCCCCCECCCCCCCCCCC___
-AAAAAAAAAAAAAAAAAABB_______________I_______JK_____________________________________G_CCCCCCCCCCCCCCCCCCCC--CCCCDCCCCCCCCCCCCCCLML
-AAAAAAAAAAAAAAAAAABB________________________________________________________F_______CCCCCDCCECCCCDCCCCCC--CCCCCCCCDCCCCCCCCCCLLL
-AAAAAAAAAAAAAAAAAABB_____N_...........O_____________________....__H___H_____________CCCCCCCCCCCCCCCCCCCC--CCCCCCECCCCCDCCCCCCMLL
-AAAAAAAAAAAAAAAAAABB_______..P...........I________________..P_____QQQQQQQQ___,______CECCCCCCCCCDCCCCCDCC--CCCCCCCCCCCCCCCCCCCLML
-AAAAAAAAAAAAAAAAAABB_R_____..............,,_____________...._____QQQQQQQQQQ____,,,..CCCCCCECCCCCCCCCCCCC--DCCCCCCCCCCCCCCCCCCLLL
-AAAAAAAAAAAAAAAAAABB_______.............,,,,,,,,S,..P.......___QQQQQQQQQQQQQ____,...........TTTTTTUTTTUV--TTTTTTTTTTTTTUTTTMLMML
-AAAAAAAAAAAAAAAAAABB_____J_..W.......,,,,,,,,,,,,,..........X_QQQQQQQQQQQQQQQQ__,...........TTTTTTTTYTTT--TTTTTTZTTTTTTTTTTTMLMM
-AAAAAAAAAAAAAAAAAABB_______.......,,,,,,,,,,,..............___QQQQQQQQQQQQQQQQ__X...........TTaTTTTTTUTT--TTTTTTTTTaTaTTTTTTMMLL
-AAAAAAAAAAAAAAAAAABB_______..,,,,,,,,,,,,,,,,...........S,,,__QQQQQQQQQQQQQQQQ___...b.......TTTTTTTTT---------------TTTTaTaTMLLL
-AAAAAAAAAAAAAAAAABBI______..,,,,,,c,,,,,,,,,.........,,,,,,,__QQQQQQQQQQQQQQQQ___.......,,,,aTTTTZTTT---------------TTTTTTTTMMMM
-AAAAAAAAAAAAAAAAABB_____I_..,,,,,,,,,,,,,,,,........,,,,,,,,___QQQQQQQQQQQQQ____.......c,,,,TTTaTZTTT---------------TTTTTTTTLMLL
-AAAAAAAAAAAAAAAAABB_______..,,,,,,,,,,,,,,,,.........,,,,,,,_X_QQQQQQQQQQQQ___..........,,,,TZTZYYTaT---------------TTUTTTTTLMLM
-AAAAAAAAAAAAAAAABB_______....,,,,,,,,,,,,,,,.........,,,,,,,,_________QQQQ__...d............TTTTaTTTT---------------TTTTTTTLLLLM
-AAAAAAAAAAAAAAAABB_______...............,,,,.................._____________e................TTaTTTTYT-----fffff-----TTTTTZLLMMML
-AAAAAAAAAAAAAAABB_______,,,..b....P...W...,......................,,,._____..................TTTTTTTTZ-----fffff-----TTTaTTLMMMLL
-AAAAAAAAAAAAAAABBI____g_,,,.....................................,,,,..._X...................TTTTTTTTT-----ffhff-----TTTTTTMLMMLM
-AAAAAAAAAAAAAAABB_______,,,.....................................,,i,,.........j.............aZYTUTTTT---------------TaTTTTLMMLLM
-AAAAAAAAAAAAAAABB_______,,,W..........e.........j..P.........e..,,,,.................b...W..TTTTTTTTT-k-----------k-YTTYTTLLMLLL
-AAAAAAAAAAAAAAABB_______,,,......................................,,,........................TTTTTZTUZ---------------TTTTUTTLLLLM
-AAAAAAAAAAAAAAAABB_I_____........j........,...............W......,,,................--------TTTaTaTTTVTT--TTZTTTTTZTTTTTTTTLMMLM
-AAAAAAAAAAAAAAAABB______O....,,,.........,,,....j.....................b............e-------------------------------------TTMLLML
-AAAAAAAAAAAAAAAABB_______...,,,,,,......,,,,,........................,,,,,,,,.......-------------------------------------TTMMMMM
-AAAAAAAAAAAAAAAAABB_______..,,,,,,,....,,,,,l........................,,,,,,,,,......--------aTTZZUTTTTTT--TaTaTTTZTTZTTTTTTMMLML
-AAAAAAAAAAAAAAAAABB_______..,,,,,,,....,,,,,,,.....b..................,,,,,,,...............ZTTTZTTTTTTT--TTTTTTTTUTTTTTTTTLLLLM
-AAAAAAAAAAAAAAAAABBJ_____J...,,,,,,W.,,,,,,,,,,,.............W..........b.....W..e..........aTTTTTYTTTTT--TTUTTTTTTTTTTYTTTMMLLL
-AAAAAAAAAAAAAAAAABB_______.......,,,,,,,,,,,,,,,,,.......W.........P........................TTTYTTTTaTTU--TTTTTTTUTTaTTTTTTMLMML
-AAAAAAAAAAAAAAAAABB_______........,,,,,,,,,,,,,,,,,...................................b.....UTTTTYTTTTTT--TTTTTTTTTTTTTTTTZLLLML
-AAAAAAAAAAAAAAAAABB_______.........,,,,,,,,,,,,,,,,...b.....................................TTTTTTTTaTTa--TaTTTTTTTUTTTTTTTMLLLM
-AAAAAAAAAAAAAAAAABB_______.........,,,,,,,l,,m,,,,,.........................................TTTYTTTTTTTT--TTTTTTTTZTTTTTTTTLMMLM
-AAAAAAAAAAAAAAAAABB_______.........,,,,,,,,,,,,,,,,..........................j..............TTTTTTTTTaTa--TTTTTTTTaTTaTTTaTMLMLL
-AAAAAAAAAAAAAAAAABB_______.........,,,,,,,,,....j..................j...............e.P...P..TUTaTTTTTTTT--TTZTTTTTTTTTTUTTTLLLML
-AAAAAAAAAAAAAAAAABB_____n_..........,,,,,,,,..e............W................................TTTTTTTTTaTa--TTTTTUTTTTaTTTTTTLLLLM
-AAAAAAAAAAAAAAAAABBI______.........................j...........e......o......P.............,TTTUTUTaTTTT--TTTTTTTTTTTTTTTTTLLLML
-AAAAAAAAAAAAAAAAABB_______.................................o........P..............e.......,TTTTTTTTTTaT--TTTTTTTTTTTTTTTTZMLLLL
-AAAAAAAAAAAAAAAAABB_______......................e......W........................W..........,TTTZTTTTTTTT--TTTTTTTTTTTTYTTTTMMLMM
-AAAAAAAAAAAAAAAAABB_______...................................W..........W..........W.......,ZTTaTTZTTTTT--TTTTUZZTZYTZTTZTaMMMLM
-AAAAAAAAAAAAAAAAABB____R__...................................................P.............,TaTTTTaTTaTT--TTTTZTTTTTTTUTTTZMLLLL
-AAAAAAAAAAAAAAAABB_______......................P...........................................,TTTTTTTTTTZU--TTTTaTTaTTTTTTTTTLMMML
-AAAAAAAAAAAAAAAABB_______...........................P.......e.W............................,UZTTTTTTTTTT--UTUTTTTTTaTTTTYTZLMMML
-AAAAApAAAAAAAAABB_____K_...,,,,,,,,...............................W..........e........j.e..,TTTUTTaTaTTT--TTTTTTTZTTZTYTTTTMLMMM
-AAqqqqqqqqqqqqqqqqqqq___..,,,,,,,,,..................e.....................P...............,TTTTTTTTTZTT--TaTTTTTTTaTZaTTTTLLMLM
-AAqqqqqqqqqqqqqqqqqqq_I_...,,,,,,,.............P....................o..P.........o.........,aTTTTTTUYTTU--TTTTUTTTTTTTTTaTTMMLLM
-AAAAAAAAAAAAAABB_______......,,,,.................rrrrr..rrrrr......rrrrr..rrrrr....j...j..,TTTTUTZTTTTZ--UTTTTTTaTUTTUTTZTMLLLL
-AAAAAAAApAAAAABB_______......................o....rrrrr..rrrrr..j...rrrrr.Wrrrrr............TTTTTTZTTTTT--TTTTTZTTTTTTTTTTTMMLMM
-AAAAAAAAAAAAAABB_______...........................rrsrrj.rrtrr......rrsrr..rrtrr............TUTaTTTTTTTa--TTTTUTTTTUTTTTaTTLMMLM
-AAAAAAAAAAAAAAABB___J___............................u...........................j...........TTTTYTTUTTTT--TTTTTTYZTTTTTTTTTLLLMM
-AAAAAAAAAAAAAAABB_______.....................P....k---------------------------------k.......TTTTTTTTTTTT--TTTTTTUTTTTTUTTTTLMMMM
-AAAAAAAAAAAAAAAABB_______.........................-----------------------------------.......UTTTTTaTTTTT--TaTTTYTTTTUTTTaTTTLLMM
-AAAAAAAAAAAAAAAABB_______.....v...............e...----------w------------------------.......TTTTUTTTTUTT--TTTTTZTTTTTTTTTTTTLLMM
-AAAAAAAAAAAAAAAAABB_------------------------j----------------------------------------..j....TYaTTYTTTTTT--TTTTaTaTTTZTTTTTaTMMML
-AAAAAAAAAAAAAAAAAABB-----------------------------------------k----k------------------.....j,TTTTZTUTTTTT--TTTTTTTTTTZTTTTTTTMLLM
-AAAAAAAAAAAAAAAAAABBJ______...,...................-----------------------------------......,TTTTTTTZTUTTTTTZTTTUTTTTTTUTTTTTLLML
-AAAAAAAAAAAAAAAAAABB_____R_...,,............j.....---------------------------------ffrrr...,TaTTTTTTTTTTTTTTTTTZTTTTTYTTTZTMMMMM
-AAAAAAAAAAAAAAAAAABB_______...,,..................------fxf---------fxf------------ffrrr.o.,TTTTTUTaTTTTTTTUTTUTTTTTTTTUTTLMMMLL
-AAAAAAAAAAAAAAAAABB_______........................k--------------------------------ffyrr...,TaTTTTTTTTTZTTTTTTTTTTTTTaTTTMLMMMMM
-AAAAAAAAAAAAAAAAABB_______...................W.....---j.......----.....---W...---........j.......................,,,.....LLLLMMM
-AAAAAAAAAAAAAAAABB_______..........................---........----.....---....---........................................LLLMMLL
-AAAAAAAAAAAAAAABB_______...........................---.......j----.o...---....---.......o...................,,............LLLLLL
-AAAAAAAAAAAAAABB_J_____...........................rrrrr.......----....rrrrr.jrrrrr.........................,,,,...........MLLLLM
-AAAAAAAAAAAAAABB_______..........................jrrrrr.......----..e.rrrrr..rrrrr.........................,,,,............MMMMM
-AAAAAAAAAAAAABB_______.............,,.......e.....rrtrrj......----....rrsrr..rrtrr.W.......................,,,,............LMLML
-AAAAAAAAAAAAABB______z,,,,,,,....,,,,,........................----.j......e...............................,,,,,,...........MLMMM
-AAAAAAAAAAAAABB_______,,,,,,,,,,,,,,,,,..........j............----..........................,,,,,,,,.....,,,,,,,...........MLLLM
-AAAAAAAAAAAAABBI______,,,,,,,,,,,,,,,,,,,,,..W................----....e.........e...P..o...,,,,,,,,,,,,,,,,,,,,,..........LLMMLL
-AAAAAAAAAAAAABB_______,,,,,,,,,,,,,,,,,,,,,,....e.............----.j......W.e..............,,,,,,,,,,,,,,,,,,,,,..........MLLLLL
-AAAAAAAAAAAAABB____J__,,,,,,,,,,,,,,,,,,,,,,..................----.......................o.,,,,,,,,,,,,,,,,,,,,,.........LMLMLML
-AAAAAAAAAAAAABB_______.,,,,,,,,,,,,,,,,,,,,,W.................----o.........................,,,,,,,,....,,,,,,,,..........LLLMLM
-AAAAAAAAAAAAABB_______..........,,,,,,,,,,,,.......,,,,,,,,...----.......................................,,,,,,...........LLMMLL
-AAAAAAAAAAAAABB_______...........,,,,,,,,,,,.......,,,,,,,,...----.......................................,,,,,,........,,,MMMMMM
-AAAAAAAAAAAAABB_______..MLM......,,,,,,,,,,,,,,..MLMMMMLLMMLLM----L.......................................,,,,,...MMM.,,,,MLMMLL
-AAAAAAAAAAAAABB_______MMMMLLMLLM.,,,,,,LMMLMMLMMLLLMMLLLMLMMLM----MV.....LMLLL..........MLLLLLMMLML.......,,,,,..MMLMLMLLMLMMMML
-AAAAAAAAAAAAABB___R___LLMMMLLLMLMM,,,LLLMLLLLLLMLLLLMMLMMLMLML----MLL...LMMLMLMLLMMLMMLMLLMMMLLMLLMMLMMLMML,,,,.MMLMLLLLMMLMLLLL
-AAAAAAAAAAAAABB_______LMMMLLMLLLLMMLMLLMLLMMLLLMMMLMMMMMMMMMLM----LMMLLLMLLLMMMLLLLLMMLMLLLLMLLMMLLMMMLLMMLLLLLMLMMMLMLLLLLLLMLM
-AAAAAAAAAAAAABB_______MMLLLMLMLLLMMLMMMMLMMLLMMMLMLLMMMLMMLLMM----MMLMMMLLLLLLMMMMLMLLLMMLLLLMLLMLMMLMMLLLLMMLMLMLLMMMLLMLLLMLLL
-AAAAAAAAAAAAABB_______MMMLLMLLLLLLMMLMMMMMLLMMMMLLMMMMLLLMLMML----LMMMLLLMLLMLLMMLMLMLMLMLLLMLMLLLMLLMLMLMLLMMLLLLMMMLLLLMLLMMML
-AAAAAAAAAAAAAABB_______MMLMLMMLLLMLMMLLMLLLLMMMMLLLLMMLMLLLMML----MMLLLLLMLLLLLMMMLMMMMLLLMLMLLLMLMMLMMMMMLMMMLMLLLMMLMLLLMMMMMM
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBA
+AAAAAAAAAAAAAAABBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBAAAAAA--AAAAAAAAAAAABBBBBBBBBBBBAAAAAAAAAAAABBBBBBAAAAAAAAAAAAAAAAAAAABBBBBBBB
+AAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBAAAAAAAAAAABBBBBBBBBBBBBBBBBB--AAAAAABBBBBBBBBBBCC_,,BBBAAAAAAAAAABBBBBBBBBBAAAAAAAAAAAAAAAABB,D____B
+AAAAAAAAAAAAAAAAABB____BBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBAAAAAABBBBCECCECCCCCBBBBBB--BBBBBBBBBBBBCCCCCCC_,,,,BBAAAAAAABBB,,,,,,BBBBBBBBBBAAAAAAABBB,,,_____
+AAAAAAAAAAAAAAAAABB___________________BBBBBAAAAAAAAAAAAABBBB_______________BBBBBBBBBBBCCCCCCCCFCCCCCCCCC--BBBBBBCCCCCCCCECCCC_,,,G,BBBAAABBBB,,,,,,,,,,BBBBBBBBBBBBBBBB,,G,_____
+AAAAAAAAAAAAAAAAAABB_____________________BBBBBBBBBBBBBBBBB____________________BBBBBBCFCCCCCCCCCCCECCCECC--CCCCCCCCCCCCCCCCCCC_,,,,DDBBBBBBB,,,,,,H,,,,,,,,,,,,BBBBBBB,I,,,,_____
+AAAAAAAAAAAAAAAAAABB_______________________BBBBBBBBBBBBB_J__________________K_______CCCCCCCCCCCCCCCCCCCC--CCCCCCCCECCCCCCCCEC_L,,DDDDDBBB,,,,,,,,,,,,,,,,,,,,,I,DDDDDD,,,,,_____
+AAAAAAAAAAAAAAAAAABB_____________________________J____________K____M________________CCCCCCCCCCCCCCCFCCCC--CFCCCCCCCCECCCCCCCC_,,,DDDND,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,_____
+AAAAAAAAAAAAAAAAAABB__________J_____________________________________________________CCCCCCCCCCCCCCCCCCCC--CCCCCCCFCCCCCCCCCCE_,,,DDDDD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,_____
+AAAAAAAAAAAAAAAAAABB_______________O_______PQ_____________________________________K_CCCCCCCCCCCCCCCCCCCC--CCCECCCCCCCCCCCCCCC,,,,,DDDD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,RRRS_
+AAAAAAAAAAAAAAAAAABB________________________________________________________J_______CCCCECCFCCCCECCCCCCC--CCCCCCCECCCCCCCCCCC.,,,,H,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,L,RRRRR
+AAAAAAAAAAAAAAAAAABB_____T_...........U_____________________....__M___M_____________CCCCCCCCCCCCCCCCCCCC--CCCCCFCCCCCECCCCCCC.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,RRRSS
+AAAAAAAAAAAAAAAAAABB_______..V...........O________________..V_____WWWWWWWW___,______FCCCCCCCCCECCCCCECCC--CCCCCCCCCCCCCCCCCCC.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,RRSRR
+AAAAAAAAAAAAAAAAAABB_X_____..............,,_____________...._____WWWWWWWWWW____,,,..CCCCCFCCCCCCCCCCCCCC--CCCCCCCCCCCCCCCCCCC.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,SRSRR
+AAAAAAAAAAAAAAAAAABB_______.............,,,,,,,,I,..V.......___WWWWWWWWWWWWW____,...........DDDDNDDDNDDY--DDDDDDDDDDDNDDDDDDD.,,,,,,,I,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,RRSRS
+AAAAAAAAAAAAAAAAAABB_____P_..Z.......,,,,,,,,,,,,,..........a_WWWWWWWWWWWWWWWW__,...........DDDDDDDbDDND--DDDDDcDDDDDDDDDDDDD.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,SRSRSS
+AAAAAAAAAAAAAAAAAABB_______.......,,,,,,,,,,,..............___WWWWWWWWWWWWWWWW__a...........dDDDDDDNDDDc--DDDDDDDdDdDDDDDDDDD.,,H,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,SSRRSR
+AAAAAAAAAAAAAAAAAABB_______..,,,,,,,,,,,,,,,,...........I,,,__WWWWWWWWWWWWWWWW___...e.......DDDDDDDDD---------------DDdcdDDdD.DDD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,RRSSSS
+AAAAAAAAAAAAAAAAABBO______..,,,,,,f,,,,,,,,,.........,,,,,,,__WWWWWWWWWWWWWWWW___.......,,,,DDDcDDDDc---------------DDDDDDDDD.DND,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,RSRRRS
+AAAAAAAAAAAAAAAAABB_____O_..,,,,,,,,,,,,,,,,........,,,,,,,,___WWWWWWWWWWWWW____.......f,,,,DdDcDDDbD---------------DDDDDDDDc.DDDD,,,I,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,RSRRRRS
+AAAAAAAAAAAAAAAAABB_______..,,,,,,,,,,,,,,,,.........,,,,,,,_a_WWWWWWWWWWWW___..........,,,,DcbbDdDDD---------------NDDDDDDDD.DDDD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,DD,RRSSSR
+AAAAAAAAAAAAAAAABB_______....,,,,,,,,,,,,,,,.........,,,,,,,,_________WWWW__...g............DDdDDDDDN---------------DDDDNDDDd.DDD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,DDDRSSSRR
+AAAAAAAAAAAAAAAABB_______...............,,,,.................._____________h................DDDDDbNDD-----iiiii-----DDdcDDdDD.,,,,,DDD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,DjDSRSSRS
+AAAAAAAAAAAAAAABB_______,,,..e....V...Z...,......................,,,._____..................DDDdDDcDD-----iiiii-----DDDDDDDDD.I,,,DDDD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,DDDRSSRRS
+AAAAAAAAAAAAAAABBO____k_,,,.....................................,,,,..._a...................DDDDDDDcD-----iilii-----DDDDdDDcN.,,,,NDDDDDDjDDDDDdDDD,,,--,,DDDDD,L,,,IDDDDDDRRSRR
+AAAAAAAAAAAAAAABB_______,,,.....................................,,m,,.........n.............bDDDNDDDD---------------DNDDDDDDD.,,,,DDDDDDDD,DDDDDDjD,,,-H,,DDDDD,,,,,,DDDDDDRRRRR
+AAAAAAAAAAAAAAABB_______,,,Z..........h.........n..V.........h..,,,,.................e...Z..DDDDDDDDD-o-----------o-DbDDDDDDD.,,,,DDdDDDDD,DDDDDDDD,,,p-,,DDDDD,,,,,,jDDDDDSRSSR
+AAAAAAAAAAAAAAABB_______,,,......................................,,,........................DNDcDdcDb---------------DNDDDdDdD.,,,,DDDDDjDDDDDDDDDDDD,,G-L,DDDDL,,,,,,,DDDDDSSRRS
+AAAAAAAAAAAAAAAABB_O_____........n........,...............Z......,,,................--------DDDDDDDDDYDD--NDDDDDNcDDDDDdDDDDD.,,,,,DDDDDDDDjDDDDDDDqD,--,,,,,,,,,,H,,,DDDDDRSSSS
+AAAAAAAAAAAAAAAABB______U....,,,.........,,,....n.....................e............h-----------------------------------------------G---G-------------------H-------------DDSSSRS
+AAAAAAAAAAAAAAAABB_______...,,,,,,......,,,,,........................,,,,,,,,.......-------------------------------------N-----d-----------------------------------------DDRRRRR
+AAAAAAAAAAAAAAAAABB_______..,,,,,,,....,,,,,r........................,,,,,,,,,......--------DDccDDdDdDDD--DDDDDDcDdcDDDDDDDDc,DDDD,,,,,,,DDDDDNDDDDDDDj-D,,H,,,,,,,,,,HDDDDSSSRR
+AAAAAAAAAAAAAAAAABB_______..,,,,,,,....,,,,,,,.....e..................,,,,,,,...............DDDcDDDDDDDD--DDDDDDDDDDDDDDDDDDD,qDDD,,,,I,DDDDDDDDDDDDDD--D,,,,,,,,,,,,,,DDDDRSRSS
+AAAAAAAAAAAAAAAAABBP_____P...,,,,,,Z.,,,,,,,,,,,.............Z..........e.....Z..h........n.DDDDDbDNDDDD--DDDDDDDDDDDDbDDDDDd.DDDDD,,,DDDDDDDDDDDDDDDD--D,,,G,,,,,,G,,DDDDRRRRSR
+AAAAAAAAAAAAAAAAABB_______.......,,,,,,,,,,,,,,,,,......Z.........V.........................DDNDDDDDDDDD--DdDDDDDDdDDNDDDDdDc.,,DDDDDDDDDqDNDDDDDDDDDD--,,,,,,,,,,,,,,DNDDSRRRSR
+AAAAAAAAAAAAAAAAABB_______........,,,,,,,,,,,,,,,,,..................................e......DDDDbDDDDDdD--DDDDDDDDDDDDDDDcDDD.,,,DDDDDDDDDDDDDjDDDDD,,-H,,,,,,,,,,,,,DDDDDSSRSSR
+AAAAAAAAAAAAAAAAABB_______.........,,,,,,,,,,,,,,,,..e......................................dDDDdDDDDDDD--DDDDDDDDDDDDDDDDDDD.,,,DDDDDDDDDDDDDDDDDDD,,--,,,DDDDDD,,DDDDDDjSRRRRR
+AAAAAAAAAAAAAAAAABB_______.........,,,,,,r,,G,,,,,,.........................................DDbDDDDDDDDD--DDDDDDDcDDDDDDDDDdD.,,,DDjDDqDDDDDDDDDDDDD,,--,,DDDDDDDDDDDqDDDDSRRRRR
+AAAAAAAAAAAAAAAAABB_______.........,,,,,,,,,,,,,,,,.........................n...e...........dDDDDDDDDDDd--dDDDdDDcDNDdDDDDDDD.,,IDDDDDDDDDDDDDDDDDDD,L--,,DDDDDDDDDDDDDDDSRRRSRS
+AAAAAAAAAAAAAAAAABB_______.........,,,,,,,,,....n..................n...............h.V...V..DbDDDDDDDDDD--DDNDDDDDDDDDDDDDDdD.,,,DDDDDNDDDDDDDDDDDDD,,--,,DDDDDDD,,,DDDDDRRRRSSR
+AAAAAAAAAAAAAAAAABB_____s_..........,,,,,,,,..h............Z................................dDDDDDDDNDDD--DDDDDdDDDDNDNDdDDDD.,,,IDDDDDDD,,,DDDDDDD,L,--,,DDDDDD,,,,,DDDDSSSSSRS
+AAAAAAAAAAAAAAAAABBO______.........................n...........h......t......V.............,DDDDDDNDDDDD--DDDDDDDDDDDDDDDDdDD.,,,,DDDDDD,,,,DDDjDdD,,,--,,DDDDDD,,,,,,,dDDSRRRRR
+AAAAAAAAAAAAAAAAABB_______.................................t........V..............h.......,DDDDDDDDDcDD--DDDDDDDDDDDDDcDDDDD,,,,,DDDDD,,H,,,DDDDDD,,,--,,DDDDDD,,,,,,,,,,,SSSRR
+AAAAAAAAAAAAAAAAABB_______......................h......Z........................Z..........,cDDDDDDDDDDD--DDDDDDDDDdDDDDDDcDD,,,,,,DDDD,,,,,,DDDDDD,,,--,,DNDqDD,,,,,,I,,,,SSSRS
+AAAAAAAAAAAAAAAAABB_______...................................Z..........Z..........Z.......,DDDDcNDDDDDD--DDDdDcDdcDDcdDcdDDD,,,,,,DDDD,G,,,,DDDDDD,,m--,HDDDDDD,,,,,,,,,I,RSSSR
+AAAAAAAAAAAAAAAAABB____X__...................................................V.............,NDDDDDDDDDDD--DDDDcDDDDDDDDDDDcND,,,,,,j_____________________________________,,RSRSS
+AAAAAAAAAAAAAAAABB_______......................V...........................................,DDDDDdDDdDcD--DDDDdDNDDDDDDDDNDDD,,,,,,,_____________________________________,,SRRSS
+AAAAAAAAAAAAAAAABB_______...........................V.......h.Z............................,DcNDDDDDDDDD--DDcDDDDDDNDDdbDcDDD,,,,,,,_____________________________________,RRRRSS
+AAAAAuAAAAAAAAABB_____Q_...,,,,,,,,...............................Z..........h........n.h..,DDDDDDDDDDDD--DDDDDDcDDcDbDDDDNDD,,,,,,,_____________________________________RSSRSSR
+AAvvvvvvvvvvvvvvvvvvv___..,,,,,,,,,..................h.....................V...............,DDdDDDDDcDdD--DDDdDdDDDDccNDDDDDD,,,,,,,_____________________________________SRRRSSR
+AAvvvvvvvvvvvvvvvvvvv_O_...,,,,,,,.............V....................t..V.........t.........,DDDDDNbDDDDD--DdDDDDDDDDNDDDDDDDD,,,,L,,_____________________________________SSSSRRS
+AAAAAAAAAAAAAABB_______......,,,,.................wwwww..wwwww......wwwww..wwwww....n...n..,DNccDDDDdDND--DDDDDDDDDDDDDcDDDDD.,,,,,,_____________________________________,SRRSSS
+AAAAAAAAuAAAAABB_______......................t....wwwww..wwwww..n...wwwww.Zwwwww............DDDDcDDDDDDD--DDDcDdDDNDdDDDDDdDd.,,,DDD_____________________________________,SSRSRR
+AAAAAAAAAAAAAABB_______...........................wwxwwn.wwyww......wwxww..wwyww............DDDDNDDDDNDD--dDNDDDDDDDDDdDdDDDD.,,DDDj_____________________________________,,SRRSR
+AAAAAAAAAAAAAAABB___P___............................z...........................n...........DDbDDDDDDDDD--DDDDbcDDDDdDDDDDDDD.,GDDDD_____________________________________,,SSSSS
+AAAAAAAAAAAAAAABB_______.....................V....o---------------------------------o.......DDDNDDDDDNDD--DDNDDDDDdDDDDDdDdDD.,,DDDD_____________________________________,,RSSSR
+AAAAAAAAAAAAAAAABB_______.........................-----------------------------------.....n.DDDDDDNDDDDD--DDDbDDNDDDDNDDDDDDD.,,DDDD_____________________________________,,RSRSS
+AAAAAAAAAAAAAAAABB_______.....0...............h...----------p------------------------.......DDDDDDDDDDDD--DDDcdDDDDDDDDDDDDDb.,,DDDD_____________________________________,,SSSRR
+AAAAAAAAAAAAAAAAABB_-----------------------------------------------------------------..n....DdDdDDDDDDDD--DDDDDDDDNcDDDDDDDDD.,,DDDD_____________________________________,,RRSSS
+AAAAAAAAAAAAAAAAAABB-----------------------------------------o----o------------------......,DDDcDDDDDDDD--DDDDDDDDDcDNDDDDDDD,,,qDjD_____________________________________,,RRRSS
+AAAAAAAAAAAAAAAAAABBP______...,.............V.....-----------------------------------......,DDNDDDcDDNDDDDcDDdDDDDDDDDDDDDDDD,,,,DDD_____________________________________,,RRRRR
+AAAAAAAAAAAAAAAAAABB_____X_...,,..................---------------------------------iiwww...,cDDDDDDDDDDDDDdDDcDDNDdbDDDcDDNDD,L,,DDD_____________________________________,RRRSRR
+AAAAAAAAAAAAAAAAAABB_______...,,..................------i1i---------i1i------------iiwww.t.,NDDDDDDDDNDDDDDDdDDDDDDDDDDDDDDDD,,,,,DD_____________________________________,RRSSSS
+AAAAAAAAAAAAAAAAABB_______........................o--------------------------------ii2ww...,DDDDDDDdDcDDdDDDDDNDNDDDDDDDDdDbD,,G,,,,_____________________________________SSRSRSR
+AAAAAAAAAAAAAAAAABB_______....................Z....---t.......----.....---.n.h---................................,,,.........,,,,,,,_____________________________________SRSSSSR
+AAAAAAAAAAAAAAAABB_______...................h......---........----.....---....---........n....................................,,,,,,_____________________________________DRRSRRS
+AAAAAAAAAAAAAAABB_______...........................---.....t..----.....---...h---...t.......................,,................,,I,I,_____________________________________DSRRSRR
+AAAAAAAAAAAAAABB_P_____.......................h..hwwwww.......----n...wwwww..wwwwwn........................,,,,...............,,,,,,_____________________________________DDRRRRS
+AAAAAAAAAAAAAABB_______...........................wwwwwZ......----....wwwwwZ.wwwww......h..................,,,,...............,I,,,,,,,,,,,,,,DDDDDDDD--DdDDDDD,,,,,,,DDDDD,RSRS
+AAAAAAAAAAAAABB_______.............,,.............wwyww.......----....wwxww..wwyww...Z.....................,,,,...............,,,,,,,,,,,,,,H,,DDDDG,,-LDDDDDDND,,,,,LDDDD,,RRRR
+AAAAAAAAAAAAABB______3,,,,,,,....,,,,,........................----.n.h....................................,,,,,,..............,,,,,,,,,I,,,,,,,,,,,,,,--,DDDDDDDL,,,,,,,D,,,SRSR
+AAAAAAAAAAAAABB_______,,,,,,,,,,,,,,,,,................V..h..t----................n.........,,,,,,,,.....,,,,,,,.............,,,,,I,,,,,,,,,G,H,,,,,,,--,DDDDDDDD,,,,,I,,,,RSSRR
+AAAAAAAAAAAAABBO______,,,,,,,,,,,,,,,,,,,,,...Z...............----...................V.....,,,,,,,,,,,,,,,,,,,,,.............,,,,,,,,,,,,,,,,,,,,,,,,,--,,DDDDDDDDD,,,,,,,,SSSSS
+AAAAAAAAAAAAABB_______,,,,,,,,,,,,,,,,,,,,,,h....Z............----.n....h.Z................,,,,,,,,,,,,,,,,,,,,,.............,,,,,,,,H,,,,,,,,,,,,,,,,--,,DDDDDDDjDD,,,H,,SSRSSR
+AAAAAAAAAAAAABB____P__,,,,,,,,,,,,,,,,,,,,,,................t.----..................t......,,,,,,,,,,,,,,,,,,,,,............,,,,,,,,,,,,,G,,,,,,,,,,,,--,DDDDDjDDDDD,,,,,,SSSSRR
+AAAAAAAAAAAAABB_______.,,,,,,,,,,,,,,,,,,,,,Z.................----..........................,,,,,,,,....,,,,,,,,............,,,,,,,G,,,,,,D,,,,,,,,,,,--,DDDDDDDqDDDD,,,,,SSRRSS
+AAAAAAAAAAAAABB_______..........,,,,,,,,,,,,.......,,,,,,,,...----.......................................,,,,,,............,,,,,,,,,,H,,DDDD,,,,,,,,,D--DDDDDDDDDDDDDL,,,,SRRRSS
+AAAAAAAAAAAAABB_______...........,,,,,,,,,,,.......,,,,,,,,...----.......................................,,,,,,........,,,,,,,,,,,,,,,DDDDDDD,,,,,,,DD--DDDDDqDqDDDDDD,,,,SSRSSR
+AAAAAAAAAAAAABB_______...........,,,,,,,,,,,,,,..,,,,,,,,,....----........................................,,,,,.......,,,,,,,,,,,G,DDDDDDDDDD,,H,,,,DD--DDDDDDDDDDDDDDD,,,RSSSSR
+AAAAAAAAAAAAABB_______...........,,,,,,,,,,,,,,,,,,,,,,,,,....----.0......................................,,,,,.......,,,,,,,,,,,,,DDDDDqDDDD,,,,,G,DD--DDDdDDDDDDDDDDD,,,RSRRSR
+AAAAAAAAAAAAABB___X___............,,,,,,,,,,,,,,,,,,,,,,,,....----........................................,,,,,.......,,,,,,,,,,,,,qDNDDDDDDD,,,I,,,DDN-DDDDDNDDdDDDDD,,,,SSRSSR
+AAAAAAAAAAAAABB_______.............,,,,,,,,,,......,,,,,,,,...----........................................,,,,,,.......,,,,,,,,G,,DDDDDDDDDDD,,,,,,,DD--jDDDDDDDDDDDD,,,,,SSRRRS
+AAAAAAAAAAAAABB_______.............,,,,,,,,,........,,,,,,,,..----........................................,,,,,,.............,,,,HDDDDNDDDDDj,,,,,,,,D--,,,,,,,,,DD,,,,,,,,SRRRS
+AAAAAAAAAAAAABB______U...............,,,,,,,.........,,,,,,,,,----...........................,,,,,,......,,,,,,,,,............,,,,DDDDDDDD,,,,,,,G,,,,--,,,L,,,,,,,,,,,I,,,.RSSR
+AAAAAAAAAAAAAABB_______...............,,,,,,...........,,,,,,,----.......................,,,,,,,,,,......,,,,,,,,,,,..........,I,,DDDDDDD,,,,DDDDDD,,I-I,,,,,,,,,I,,,,,,,,,.SRSR
+AAAAAAAAAAAAAABB_______................,,,,,............,,,,,,----.......................,,,,,,,,,,,.....,,,,,,,,,,,..........,,,DDDDDDDD,,,,DDDDDD,,,--,,,,,,,,,,,,,,,,,,,.SSRR
+AAAAAAAAAAAAAABB_______................,,,,,............,,,,,,----.......................,,,,,,,,,,,.....,,,,,,,,,,,..................................--....................SRRR
+AAAAAAAAAAAAAABB______________________________________________----___________________________________________________________.........................--..........,,,,,,...SRRRR
+AAAAAAAAAAAAAABB______________________________________________----___________________________________________________________.........................--.........,,,,,,,,,,RSSRS
+AAAAAAAAAAAAAAABB_____________________________________________----___________________________________________________________.........................--........,,,,,,,,,,,RSSRS
+AAAAAAAAAAAAAAABB_____________________________________________----___________________________________________________________.........................--........,,,,,,,,,,,RSRRS
+AAAAAAAAAAAAAAAABB____________________________________________----___________________________________________________________.........................--........,,,,,,,,,,,RSSSS
+AAAAAAAAAAAAAAAABB__________________________________________Q_----___________________________________________________________.........................--........,,,,,,,,,,,RRRSS
+AAAAAAAAAAAAAAAAABB___________________________________________----___________________________________________________________--------------------------------------------,,,SRRR
+AAAAAAAAAAAAAAAAAABB__________________________________________----___________________________________________________________--------------------------------------------,,,SRSS
+AAAAAAAAAAAAAAAAAABB__________________________________________----___________________________________________________________.....................,,,,--,,.........,,,,,,,,,RRRS
+AAAAAAAAAAAAAAAAAAABB_________________________________________----___________________________________________________________..................,,,,,,,--,,,..........,,,,,,RRRRR
+AAAAAAAAAAAAAAAAAAABB_________________________________________----___________________________________________________________..................,,,,,,,--,,,...........,,,,,RSRRR
+AAAAAAAAAAAAAAAAAAABB_________________________________________----____________________________________Q______________________..................,,,,,,,--,,,..........,,,,,RSSRSS
+AAAAAAAAAAAAAAAAAABB__________________________________________----___________________________________________________________...................,,,,,,--,...........,,,,,,RSRSRR
+AAAAAAAAAAAAAAAAAABB__________________________________________----___________________________________________________________.........................--..........,,,,,,,,SRSSRR
+AAAAAAAAAAAAAAAAABB_________WW_____WWWWWW_____________________----___________________________________________________________.........................--.........,,,,,,,,RSSRSRS
+AAAAAAAAAAAAAAAABB_________WWWWWWWWWWWWWWWWW__________________----___________________________________________________________.........................--.........,,,,,,,,RRSSRSS
+AAAAAAAAAAAAAAAABB________WWWWWWWWWWWWWWWWWWW_________________----___________________________________________________________.........................--.........,,,,,,,,RSRRSSS
+AAAAAAAAAAAAAAABB_______WWWWWWWWWWWWWWWWWWWWWW________________----___________________________________________________________.........................--.........,,,,,,,,RRSRRSS
+AAAAAAAAAAAAAAABB______WWWWWWWWWWWWWWWWWWWWWWWW_______________----___________________________________________________________...................,.....--.........,,,,,,,,RSSRSSR
+AAAAAAAAAAAAAABB_______WWWWWWWWWWWWWWWWWWWWWWWW_______________----___________________________________________________________..................,,,,,..--........,,,,,,,,,SSRSRRR
+AAAAAAAAAAAAAABB________WWWWWWWWWWWWWWWWWWWWWWW_______________----___________________________________________________________.................,,,,,,,,--,,,,,,,,,,,,,,,,,RSSRSRR
+AAAAAAAAAAAAAABB_________WWWWWWWWWWWWWWWWWWWWWW_______________----___________________________________________________________................,,,,,,,,,--,,,,,,,,,,,,,,,,,RRRSSSR
+AAAAAAAAAAAAAABB__________WWWWWWWWWWWWWWWWWWWWW_______________----___________________________________________________________................,,,,,,,,,--,,,,,,,,,,,,,,,,,RSRRRRS
+AAAAAAAAAAAAAABB__________WWWWWWWWWWWWWWWWWWWW________________----___________________________________________________________................,,,,,,,,,--,,,,,,,,,,,,,,,,,,SRSRRS
+AAAAAAAAAAAAAABB___________WWWWWWWWWWWWWWWWWWW________________----___________________________________________________________................,,,,,,,,,--,,,,,,,,,,,,,,,,,,RRSSRR
+AAAAAAAAAAAAAABB______________WWWWW___WWWWW___________________----___________________________________________________________................,,,,,,,,...,,,,,,,,...........RSSSR
+AAAAAAAAAAAAAABB______________________________________________----___________________________________________________________................,,,,,,,.......,,,..............SSSS
+AAAAAAAAAAAAAABB_____________SSSSSRSSS_____SRRS_______________----___________________________________________________________................,,,,,,........RR......SRRR.....SSSR
+AAAAAAAAAAAAAABB____________RRRRSSRSRRRRSRRSSRRSSSRRS_________----RR_______________SRSSS______RSRRRRRR_______________________....RSRSSSRRR...,,,,,,......SRSRRRSSRSSSSRS....SRRS
+AAAAAAAAAAAAAABB_______...SSRSRRSSSRSSRRSSSSSRSSRSSSRRRRRRSSSS----RSSRRR......RSRRSRSSRSSRRRRSSRSRSRRSSS.........RRSRRRSRRRS...SSRRSRRRRRRSSRSSSSSR.....RSSSSRRSSSSRRRSRS...SRSR
+AAAAAAAAAAAAAAABB_______SSRSSSRRRSRRSRRSSRSRSRSRSRRRSRSRRRSRRS----RRSSRRRRSSSRRRRSRRSSSRSSRSRSSRRRSRSSRRSRRRRSSSSRRRRSSRSRRRSSRRRSSSSRRRRRSRRRRRSSSRSSSSRRRSRSRRRSRSSRSSSSSRSSSR
+AAAAAAAAAAAAAAAABB_______SRRRSSRSRRRSSSSSSSRRRSRRSSSRRSRSRSSSR----RSSRSRSSRRSSRSSRSSSRRRRRSRSSSRRRRRRSSRSSSSSSRRSRSRRSSRSRSSRSSRSSSRSRSSRSSSSRRSRRSSSSRRRSSSRSSRRSRRSRSSSSRRSSRR
+AAAAAAAAAAAAAAAAABB_______RRSRSRRRRRRSRSRSSRRRRSRRRSSSRRSRSRRS----RRRRSRSRRRSRRSRSSRSRRRRRSSRRSRRSRSSRRRRRRSSRSSSRRRRRSSRRRRSSRRSRRSRRRRRRSRSSRRRRRSRRSRRRSRRRRRRRSSRRRSSRSSRSSR
+AAAAAAAAAAAAAAAAAABB_______SSRSSRRSSSRRSRSRSSRRSSSRSRSRSSRRSSR----RSSSSRRRRSRRSRRSSSRRSSRSSSRSSRRRRRSRRRRRSSRRRRRRRRSRSRRSRSSSRRSSRSRSRRSRSRRRRSSRSRSRRSRRRRRRRRRSRRSSSRSSSSSRRS

@@ -40,6 +40,7 @@ namespace Buds.Core
         {
             var e = enemy.Data;
             enemy.Face(player.transform.position);
+            if (PracticeAsGuest(enemy)) return;
             var line = e.lines.Length > 0 ? e.lines[UnityEngine.Random.Range(0, e.lines.Length)] : "Walczymy?";
             if (session == null)
             {
@@ -93,7 +94,11 @@ namespace Buds.Core
                 {
                     lastReward = res.reward;
                     SetXp(res.reward.xp);
-                    if (fightingWith) enemyWorld.Rest(fightingWith.Data.id, RematchSeconds);
+                    if (fightingWith)
+                    {
+                        enemyWorld.Rest(fightingWith.Data.id, RematchSeconds);
+                        if (quests.Duel(fightingWith.Data.id)) ui.ShowToast("Cel zadania osiągnięty!", 2.5f);
+                    }
                 }
                 fightScreen.ShowResult(res.fight, res.reward);
             }

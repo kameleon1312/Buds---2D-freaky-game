@@ -186,3 +186,32 @@ pokoju, który wychodzi do tej samej dzielnicy.
 
 `M` albo przycisk „Mapa” pokazuje dzielnicę narysowaną z jej kolorów, z mgłą tam, gdzie Bud jeszcze nie był
 (zapisywaną na urządzeniu), z nazwami miejsc, drzwiami, drogami do innych dzielnic, celami zadań i licznikiem skrytek.
+
+## Wyspa Startowa (samouczek)
+
+Każdy nowy Bud zaczyna na małej wyspie (`Resources/Maps/wyspa-startowa.txt`, generator `tools/world/maps/wyspa-startowa.ts`,
+treść `packages/shared/src/content/wyspa-startowa.ts`). Cztery zadania uczą po kolei:
+
+- **Pierwsze kroki:** chodzenie i bieg (wejście na wzgórze latarni).
+- **Kokosy dla rybaka:** zbieranie przedmiotów.
+- **Trening na ringu:** pojedynek z manekinem, a w nagrodę pierwsza broń.
+- **Rejs do miasta:** po oddaniu tego zadania otwiera się pomost i łódź płynie do Miasta Ziomków (bez drogi powrotnej).
+
+Po drodze jest skrytka, a tablice podpowiadają sterowanie. Buda, który grał przed powstaniem wyspy (ma zadania z innych
+dzielnic), gra od razu wpuszcza do miasta.
+
+## Miejsce na więcej (działki)
+
+Dzielnice urosły do 176×132 pól: stara część ma te same współrzędne, a na wschodzie i południu doszły nowe strefy
+(`tools/world/maps/outskirts.ts`). Każda dzielnica ma **działki** (`[plots]` w pliku mapy, `m.plot(...)` w generatorze):
+wolne, osiągalne obszary z identyfikatorem i rodzajem (`quest`, `attraction`, `minigame`, `shop`, `arena`), pod
+przyszłe zadania, NPC i atrakcje. Gra pokazuje je na mapie jako „wkrótce”, a testy pilnują, żeby zostały wolne.
+
+| Dzielnica      | Nowe strefy                         | Działki                                            |
+| -------------- | ----------------------------------- | -------------------------------------------------- |
+| Miasto Ziomków | Nowe Osiedle, Port Rzeczny          | Stadion, Lunapark, Bazar Miejski, Plac Ziomków     |
+| Las Palmas     | Wodospad, Wioska Tiki, Zatoka Żółwi | Wodospad, Wioska Tiki, Przystań Jachtowa           |
+| Dwór Carski    | Winnice, Jezioro Dworskie           | Tor Wyścigów Konnych, Stary Młyn, Oranżeria        |
+| Los Karkos     | Port Przemytników                   | Stara Kopalnia, Tor Motocrossowy, Ruiny Elektrowni |
+
+Nowe NPC i zadania dodajesz jak dotąd w `content/<dzielnica>.ts`, ustawiając je na działce (współrzędne z `[plots]`).

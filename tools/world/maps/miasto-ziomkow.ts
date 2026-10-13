@@ -1,10 +1,12 @@
 // Miasto Ziomków — the start district and hub (docs/districts.md). City centre with the Rynek, streets and
 // blocks; outskirts: park, skatepark, allotments, hill, railway, garages and the road east to Los Karkos.
+import { miastoZiomkowOutskirts } from './outskirts';
 import { MapCanvas, noise2, rng, type Rect } from './lib';
 
 export function miastoZiomkow(): MapCanvas {
-  const W = 128;
-  const H = 96;
+  // grown from 128×96: the old part keeps its coordinates, the outskirts fill the new east and south
+  const W = 176;
+  const H = 132;
   const m = new MapCanvas('miasto-ziomkow', 'Miasto Ziomków', W, H);
   m.base = '#86c95a';
   const r = rng(1001);
@@ -454,6 +456,8 @@ export function miastoZiomkow(): MapCanvas {
     { ground: 'asphalt', chance: 0.006, props: 'manhole' },
     { ground: 'water', chance: 0.15, props: 'lily' },
   );
+  miastoZiomkowOutskirts(m);
+
   // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
   m.door([82, 43], 'miasto-ziomkow-kawiarnia', 'Kawiarnia „Ziomal”');
   m.door([71, 55], 'miasto-ziomkow-komisariat', 'Komisariat');

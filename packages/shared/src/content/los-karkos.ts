@@ -1,12 +1,12 @@
 import type { CacheInput } from '../caches';
 import { scaledEnemy, type EnemyInput } from '../combat';
-import type { Npc, QuestInput } from '../quests';
+import type { NpcInput, QuestInput } from '../quests';
 
 /** Los Karkos — the dangerous district (from level 7). ~2600 XP. */
 const D = 'los-karkos';
 
 export const LOS_KARKOS: {
-  npcs: Npc[];
+  npcs: NpcInput[];
   quests: QuestInput[];
   caches: CacheInput[];
   enemies: EnemyInput[];

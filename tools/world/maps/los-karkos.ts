@@ -1,10 +1,12 @@
 // Los Karkos — the dangerous district (docs/districts.md): abandoned blocks covered in graffiti, the bazaar,
 // the ring and gym with the weapon shop, the fenced junkyard, the sludge canal and the old factory.
+import { losKarkosOutskirts } from './outskirts';
 import { MapCanvas, noise2, rng, type Rect } from './lib';
 
 export function losKarkos(): MapCanvas {
-  const W = 128;
-  const H = 96;
+  // grown from 128×96: the old part keeps its coordinates, the outskirts fill the new east and south
+  const W = 176;
+  const H = 132;
   const m = new MapCanvas('los-karkos', 'Los Karkos', W, H, 'weeds');
   m.base = '#a9a172';
   const r = rng(4001);
@@ -234,6 +236,8 @@ export function losKarkos(): MapCanvas {
     { ground: 'weeds', chance: 0.06, props: 'tuft' },
     { ground: 'rubble', chance: 0.06, props: 'gruz' },
   );
+  losKarkosOutskirts(m);
+
   // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
   m.door([117, 56], 'los-karkos-silownia', 'Siłownia „Żelazo”');
   m.door([29, 42], 'los-karkos-ruina', 'Opuszczone mieszkanie');

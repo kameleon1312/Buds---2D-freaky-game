@@ -42,6 +42,23 @@ namespace Buds.World
         public Vector2Int Front => new(X, Y + 1);
     }
 
+    /// <summary>
+    /// A plot: a clear, reachable area the map keeps for content to come (quests, NPCs, attractions). Kind: quest |
+    /// attraction | minigame | shop | arena.
+    /// </summary>
+    public sealed class Plot
+    {
+        public int X0;
+        public int Y0;
+        public int X1;
+        public int Y1;
+        public string Id;
+        public string Kind;
+        public string Name;
+
+        public bool Contains(int x, int y) => x >= X0 && x <= X1 && y >= Y0 && y <= Y1;
+    }
+
     public sealed class Sign
     {
         public int X;
@@ -104,6 +121,7 @@ namespace Buds.World
         public readonly List<Exit> Exits = new();
         public readonly List<Zone> Zones = new();
         public readonly List<Door> Doors = new();
+        public readonly List<Plot> Plots = new();
         public readonly List<GroundStyle> GroundStyles = new();
         public readonly List<ScatterRule> Scatter = new();
 

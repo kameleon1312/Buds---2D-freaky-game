@@ -46,8 +46,19 @@ export const DISTRICTS = [
 
 export type DistrictId = (typeof DISTRICTS)[number]['id'];
 
-/** Where every new bud spawns (and respawns after a lost fight). */
+/** Where every bud lives once the tutorial is done (and respawns after a lost fight). */
 export const START_DISTRICT: DistrictId = 'miasto-ziomkow';
+
+/**
+ * The tutorial island: every new bud wakes up here, learns the game, and leaves by boat for Miasto Ziomków when
+ * the last tutorial quest is done. Not a district (no level gate, no road back). Mirrored in Unity Districts.cs.
+ */
+export const TUTORIAL_ISLAND = {
+  id: 'wyspa-startowa',
+  name: 'Wyspa Startowa',
+  /** Handing this quest in opens the pier. */
+  finalQuest: 'wyspa-rejs',
+} as const;
 
 export const districtById = (id: string): District | undefined =>
   DISTRICTS.find((d) => d.id === id);

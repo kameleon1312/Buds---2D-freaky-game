@@ -5,7 +5,8 @@ import {
   type CachesResponse,
   type OpenCacheResponse,
   type ApiError,
-  type BudLook,
+  type BudLookInput,
+  type LookOptions,
   type BudResponse,
   type CatalogItem,
   type CatalogResponse,
@@ -31,7 +32,8 @@ function makeApp(env: Record<string, string> = {}) {
 
 type App = ReturnType<typeof makeApp>;
 
-const look: BudLook = {
+/** A look from before legwear and shoes became parts: still valid, with defaults. */
+const look: BudLookInput = {
   gender: 'ona',
   mood: 'zadziorny',
   skin: 3,
@@ -77,7 +79,7 @@ describe('POST /v1/buds', () => {
     [{ name: 'A', look }],
     [{ name: '<script>', look }],
     [{ name: 'Ola', look: { ...look, skin: 42 } }],
-    [{ name: 'Ola', look: { ...look, hair: 'irokez' } }],
+    [{ name: 'Ola', look: { ...look, hair: 'dredy' } }],
     [{ name: 'Ola' }],
   ])('rejects invalid input %j', async (body) => {
     const res = await makeApp().request('/v1/buds', post(body));
@@ -463,5 +465,45 @@ describe('caches', () => {
     const { open } = await setup();
     expect((await open('nie-ma-takiej')).status).toBe(404);
     expect((await open('ZŁA%20NAZWA')).status).toBe(404);
+  });
+});
+
+describe('look creator', () => {
+  it('lists every part per gender with labels and colours', async () => {
+    const res = await makeApp().request('/v1/look/options');
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as LookOptions;
+    expect(body.byGender.map((g) => g.gender)).toEqual(['on', 'ona']);
+    for (const g of body.byGender)
+      for (const part of [g.hair, g.top, g.legs, g.shoes]) {
+        expect(part.styles.length).toBeGreaterThanOrEqual(5);
+        expect(part.colors.length).toBeGreaterThanOrEqual(8);
+      }
+    const ona = body.byGender.find((g) => g.gender === 'ona')!;
+    expect(ona.legs.styles.some((s) => s.id === 'spodnica')).toBe(true);
+    expect(ona.moods.find((m) => m.id === 'radosny')?.label).toBe('Radosna');
+  });
+
+  it('renders a preview sheet for a look that is not a bud yet', async () => {
+    const encoded = Buffer.from(
+      JSON.stringify({ ...look, pants: 'bojowki', shoes: 'glany', shoesColor: 3 }),
+    ).toString('base64url');
+    const res = await makeApp().request(`/v1/look/sheet.png?look=${encoded}&scale=2`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('image/png');
+    const png = Buffer.from(await res.arrayBuffer());
+    expect(png.readUInt32BE(16)).toBe(96); // 3 frames × 32 px
+  });
+
+  it('rejects broken looks', async () => {
+    const app = makeApp();
+    expect((await app.request('/v1/look/sheet.png?look=nie-json')).status).toBe(400);
+    const bad = Buffer.from(JSON.stringify({ ...look, shoes: 'szpilki' })).toString('base64url');
+    expect((await app.request(`/v1/look/sheet.png?look=${bad}`)).status).toBe(400);
+  });
+
+  it('keeps old looks valid and fills the new parts', async () => {
+    const { bud } = await createBud(makeApp());
+    expect(bud.look).toMatchObject({ pants: 'jeansy', shoes: 'trampki', shoesColor: 0 });
   });
 });

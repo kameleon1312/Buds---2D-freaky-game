@@ -53,6 +53,9 @@ import {
   type QuestsResponse,
   PAIR_CODE_TTL_MINUTES,
   budSlugSchema,
+  budLookSchema,
+  lookOptions,
+  type LookOptions,
   lockedItems,
   type CatalogItem,
   type CatalogResponse,
@@ -661,6 +664,39 @@ export function createApp(
   app.get('/v1/buds/top', async (c) => {
     const limit = Math.min(Math.max(Number(c.req.query('limit')) || 50, 1), 100);
     return c.json<LeaderboardResponse>({ buds: await store.top(limit) });
+  });
+
+  // ---------- the look creator (website and game) ----------
+
+  /** Each body part's catalog and colours per gender: the game builds its creator from this. */
+  app.get('/v1/look/options', (c) => {
+    c.header('Cache-Control', 'public, max-age=3600');
+    return c.json<LookOptions>(lookOptions());
+  });
+
+  /**
+   * A preview sheet for a look that isn't a bud yet (the in-game creator). `look` is the JSON look, base64url.
+   * Rendering costs CPU, so it has its own limit.
+   */
+  app.get('/v1/look/sheet.png', rateLimit(env.PREVIEW_LIMIT_PER_MINUTE), (c) => {
+    let look: unknown = null;
+    try {
+      look = JSON.parse(Buffer.from(c.req.query('look') ?? '', 'base64url').toString('utf8'));
+    } catch {
+      look = null;
+    }
+    const parsed = budLookSchema.safeParse(look);
+    if (!parsed.success) {
+      return c.json<ApiError>(
+        { error: { code: 'invalid_input', message: 'Nieprawidłowy wygląd' } },
+        400,
+      );
+    }
+    const scale = Math.min(Math.max(Math.round(Number(c.req.query('scale'))) || 6, 2), 8);
+    return c.body(new Uint8Array(budSheetPng(parsed.data, scale)), 200, {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400',
+    });
   });
 
   app.get('/v1/buds/:slug/sheet.png', async (c) => {

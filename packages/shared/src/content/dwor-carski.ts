@@ -1,12 +1,12 @@
 import type { CacheInput } from '../caches';
 import { scaledEnemy, type EnemyInput } from '../combat';
-import type { Npc, QuestInput } from '../quests';
+import type { NpcInput, QuestInput } from '../quests';
 
 /** Dwór Carski — aristocratic district (from level 5). ~2020 XP: enough to reach level 7 and Los Karkos. */
 const D = 'dwor-carski';
 
 export const DWOR_CARSKI: {
-  npcs: Npc[];
+  npcs: NpcInput[];
   quests: QuestInput[];
   caches: CacheInput[];
   enemies: EnemyInput[];

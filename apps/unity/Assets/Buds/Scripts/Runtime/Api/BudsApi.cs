@@ -170,6 +170,43 @@ namespace Buds.Api
             return Parse<T>(req);
         }
 
+        // ---------- the in-game creator ----------
+
+        public async Awaitable<LookOptionsDto> GetLookOptions()
+        {
+            using var req = UnityWebRequest.Get($"{baseUrl}/v1/look/options");
+            req.timeout = TimeoutSeconds;
+            await req.SendWebRequest();
+            return Parse<LookOptionsDto>(req);
+        }
+
+        /// <summary>A sheet for a look that isn't a bud yet: the server renders it with the same generator.</summary>
+        public async Awaitable<Texture2D> PreviewSheet(BudLookDto look, int scale = 6)
+        {
+            var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonUtility.ToJson(look)))
+                .TrimEnd('=').Replace('+', '-').Replace('/', '_');
+            using var req = UnityWebRequestTexture.GetTexture($"{baseUrl}/v1/look/sheet.png?look={encoded}&scale={scale}", false);
+            req.timeout = TimeoutSeconds;
+            await req.SendWebRequest();
+            if (req.result != UnityWebRequest.Result.Success) throw ToException(req);
+            return DownloadHandlerTexture.GetContent(req);
+        }
+
+        /// <summary>Creates a bud from the game (no website needed); returns it with its player token.</summary>
+        public async Awaitable<CreateBudResponse> CreateBud(string name, BudLookDto look)
+        {
+            var body = JsonUtility.ToJson(new CreateBudRequest { name = name, look = look });
+            using var req = new UnityWebRequest($"{baseUrl}/v1/buds", UnityWebRequest.kHttpVerbPOST)
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            await req.SendWebRequest();
+            return Parse<CreateBudResponse>(req);
+        }
+
         async Awaitable<T> Get<T>(string path, string token)
         {
             using var req = UnityWebRequest.Get(baseUrl + path);

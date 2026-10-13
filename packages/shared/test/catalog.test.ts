@@ -21,7 +21,10 @@ const look: BudLook = {
   hairColor: 0,
   outfit: 'kurtka',
   outfitColor: 0,
+  pants: 'jeansy',
   pantsColor: 0,
+  shoes: 'trampki',
+  shoesColor: 0,
 };
 
 describe('catalog', () => {

@@ -11,6 +11,7 @@ import {
   CATALOG,
   CONTENT,
   DISTRICTS,
+  TUTORIAL_ISLAND,
   cacheMap,
   SKILLS,
   SKILL_GEAR_MAX,
@@ -43,7 +44,11 @@ const mapOf = (district: string) => {
 };
 
 // spawn points come from the [district] section (districts and the rooms caches lie in)
-for (const id of new Set([...DISTRICTS.map((d) => d.id), ...CONTENT.caches.map(cacheMap)])) {
+for (const id of new Set([
+  ...DISTRICTS.map((d) => d.id),
+  TUTORIAL_ISLAND.id,
+  ...CONTENT.caches.map(cacheMap),
+])) {
   let text: string;
   try {
     text = readFileSync(mapPath(id), 'utf8');
@@ -161,6 +166,7 @@ const flatStep = (s: Quest['steps'][number]) => ({
   radius: s.kind === 'reach' ? s.radius : 0,
   label: s.kind === 'talk' ? '' : s.label,
   item: s.kind === 'collect' ? s.item : '',
+  enemy: s.kind === 'duel' ? s.enemy : '',
   spots: s.kind === 'collect' ? s.spots : [],
 });
 const json = {

@@ -1,4 +1,12 @@
-import { HAIR_COLORS, OUTFIT_COLORS, PANTS_COLORS, SKINS, type HairStyle } from './constants';
+import {
+  HAIR_COLORS,
+  OUTFIT_COLORS,
+  PANTS_COLORS,
+  SHOES_COLORS,
+  SKINS,
+  type HairStyle,
+  type Outfit,
+} from './constants';
 import type { BudLook } from './look';
 
 /**
@@ -26,7 +34,16 @@ const OUT = '#121218';
 type Pair = [base: string, shade: string];
 
 // skin shades matched to SKINS (hand-picked like the design sheet, not a flat darken)
-const SKIN_SHADES = ['#dcae8e', '#d49e78', '#a46a42', '#7f5034', '#663c22', '#4f2c18'] as const;
+const SKIN_SHADES = [
+  '#dcae8e',
+  '#d49e78',
+  '#a46a42',
+  '#7f5034',
+  '#663c22',
+  '#4f2c18',
+  '#e6bfa5',
+  '#3a1f12',
+] as const;
 
 function mix(a: string, b: string, t: number): string {
   const ch = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
@@ -55,15 +72,17 @@ export function budPalette(look: BudLook): BudPalette {
   const top = OUTFIT_COLORS[look.outfitColor] ?? OUTFIT_COLORS[0];
   const pants = PANTS_COLORS[look.pantsColor] ?? PANTS_COLORS[0];
   const cap = OUTFIT_COLORS[(look.outfitColor + 3) % OUTFIT_COLORS.length] ?? OUTFIT_COLORS[3];
-  const lightTop = top === '#f6f2e9';
+  const shoes = SHOES_COLORS[look.shoesColor ?? 0] ?? SHOES_COLORS[0];
+  const lightShoes = shoes === '#f6f2e9' || shoes === '#c9b593';
   return {
     skin: [skin, SKIN_SHADES[look.skin] ?? shade(skin)],
     hair: [hair, shade(hair, 0.4)],
     top: [top, shade(top)],
     pants: [pants, shade(pants)],
-    shoes: lightTop ? ['#3a3d4a', '#262833'] : ['#f6f2e9', '#cfc6b4'],
-    sole: top === '#a3e635' ? '#ff3d50' : '#a3e635',
-    soleTone: lightTop ? ['#f6f2e9', '#cfc6b4'] : ['#e4dccb', '#b9ae99'],
+    shoes: [shoes, shade(shoes, lightShoes ? 0.16 : 0.26)],
+    // the accent stripe picks up the top's colour (or lime when the top is white)
+    sole: top === '#f6f2e9' || top === shoes ? '#a3e635' : top,
+    soleTone: lightShoes ? ['#e4dccb', '#b9ae99'] : ['#f6f2e9', '#cfc6b4'],
     cap: [cap, shade(cap)],
     lips: '#b23a55',
   };
@@ -192,6 +211,24 @@ const HAIR_FRONT: Partial<Record<HairStyle, string>> = {
   afro: 'M34 39 Q34 21 60 21 Q86 21 86 39 Q80 31 60 31 Q40 31 34 39Z',
   daszek: 'M34 40 Q33 13 60 13 Q87 13 86 40 Q81 29 72 27 Q64 33 52 29 Q41 31 34 40Z',
   sluchawki: 'M33 40 Q30 12 60 10 Q90 12 87 40 Q84 22 60 20 Q36 22 33 40Z',
+  // the crest only; the shaved sides are the scalp
+  irokez: 'M52 30 Q49 6 60 1 Q71 6 68 30 Q64 24 60 25 Q56 24 52 30Z',
+  buzz: 'M35 37 Q34 15 60 15 Q86 15 85 37 Q80 25 60 24 Q40 25 35 37Z',
+  loki: 'M33 42 Q29 12 60 11 Q91 12 87 42 Q84 34 79 36 Q76 28 70 32 Q66 25 60 30 Q54 25 50 32 Q44 28 41 36 Q36 34 33 42Z',
+  kitki: 'M34 40 Q33 13 60 13 Q87 13 86 40 Q80 26 66 24 Q58 32 44 28 Q38 32 34 40Z',
+};
+
+/** Strands drawn over the front hair so it reads as hair, not a helmet. */
+const STRANDS: Partial<Record<HairStyle, string>> = {
+  krotkie: 'M44 22 Q50 18 57 20 M63 18 Q71 18 77 24',
+  dlugie: 'M42 24 Q50 19 58 21 M64 19 Q74 20 80 28',
+  kucyk: 'M42 24 Q50 19 58 21 M64 19 Q74 20 80 28',
+  kok: 'M44 22 Q50 18 57 20 M63 18 Q71 18 77 24',
+  bob: 'M40 26 Q48 18 58 20 M64 19 Q76 19 82 30',
+  grzywka: 'M42 30 V20 M52 33 V17 M62 33 V16 M72 32 V18',
+  loki: 'M44 24 q3 -4 6 0 M56 20 q3 -4 6 0 M68 22 q3 -4 6 0',
+  warkocze: 'M48 20 Q54 18 59 22 M61 22 Q66 18 72 20',
+  kitki: 'M42 24 Q50 19 58 21 M64 19 Q74 20 80 28',
 };
 
 function backHair(pen: Pen, style: HairStyle, hair: Pair, facing: Facing) {
@@ -211,6 +248,15 @@ function backHair(pen: Pen, style: HairStyle, hair: Pair, facing: Facing) {
         return pen.shaded('M46 20 Q88 10 88 42 L88 62 Q82 66 76 62 L74 42Z', hair, -3, -2);
       case 'afro':
         return pen.shaded(circ(62, 30, 33), hair, -4, -4);
+      case 'loki':
+        return pen.shaded(
+          'M60 26 Q92 14 92 46 Q98 56 90 64 Q94 76 82 80 Q74 84 72 72 L70 50Z',
+          hair,
+          -3,
+          -2,
+        );
+      case 'kitki':
+        return pen.shaded(circ(76, 12, 9), hair, -2, -2);
       default:
         return pen;
     }
@@ -243,6 +289,16 @@ function backHair(pen: Pen, style: HairStyle, hair: Pair, facing: Facing) {
       );
     case 'afro':
       return pen.shaded(circ(60, 30, 34), hair, -4, -4);
+    case 'loki':
+      // a curly mane down to the shoulders
+      return pen.shaded(
+        'M31 42 Q27 10 60 10 Q93 10 89 42 Q97 52 90 62 Q95 74 84 80 Q76 84 74 72 H46 Q44 84 36 80 Q25 74 30 62 Q23 52 31 42Z',
+        hair,
+        -3,
+        -2,
+      );
+    case 'kitki':
+      return pen.shaded(circ(36, 14, 9.5), hair, -2, -2).shaded(circ(84, 14, 9.5), hair, -2, -2);
     default:
       return pen;
   }
@@ -302,9 +358,29 @@ function frontHair(pen: Pen, style: HairStyle, p: BudPalette, facing: Facing) {
     return headwear(pen, style, p, facing);
   }
 
+  if (style === 'irokez' || style === 'buzz') {
+    // close crops: a darker scalp tone with the crest on top
+    const scalp =
+      facing === 'side'
+        ? 'M35 38 Q34 15 58 15 Q84 15 84 40 Q80 30 66 26 Q50 24 35 38Z'
+        : facing === 'up'
+          ? 'M34 42 Q32 14 60 14 Q88 14 86 42 Q84 54 70 58 H50 Q36 54 34 42Z'
+          : HAIR_FRONT.buzz!;
+    pen.shaded(scalp, [mix(p.hair[0], p.skin[0], 0.45), mix(p.hair[1], p.skin[1], 0.45)], -2, -2);
+    if (style === 'irokez') {
+      const crest =
+        facing === 'side'
+          ? 'M38 26 Q40 6 58 2 Q78 2 84 24 Q72 16 60 16 Q48 16 38 26Z'
+          : HAIR_FRONT.irokez!;
+      pen.shaded(crest, p.hair, -2, -2);
+    }
+    return pen;
+  }
+
   if (facing === 'up') {
     // the back of the head is all hair
     pen.shaded('M33 42 Q31 12 60 12 Q89 12 87 42 Q86 60 70 64 H50 Q34 60 33 42Z', p.hair, -4, -4);
+    pen.line('M50 18 Q46 34 50 52 M60 15 Q61 34 59 54 M70 18 Q74 34 70 52', 1.4, p.hair[1]);
     if (style === 'jezyk')
       pen.shaded('M40 22 L42 9 L50 17 L55 5 L62 15 L69 5 L73 17 L81 11 L80 24Z', p.hair, -2, -2);
     if (style === 'kucyk') {
@@ -324,10 +400,13 @@ function frontHair(pen: Pen, style: HairStyle, p: BudPalette, facing: Facing) {
           ? 'M34 39 Q36 22 58 22 Q82 22 84 42 Q83 54 78 60 Q74 44 64 36 Q54 30 44 31 Q38 33 34 39Z'
           : 'M34 40 Q32 13 58 13 Q86 13 85 42 Q84 56 77 63 Q74 46 64 36 Q56 30 44 30 Q38 33 34 40Z';
     pen.shaded(cap, p.hair, -3, -3);
+    if (style !== 'afro') pen.line('M46 24 Q58 18 72 22 M70 30 Q78 34 80 46', 1.4, p.hair[1]);
     return headwear(pen, style, p, facing);
   }
 
   pen.shaded(HAIR_FRONT[style] ?? HAIR_FRONT.krotkie!, p.hair, -3, -3);
+  const strands = STRANDS[style];
+  if (strands) pen.line(strands, 1.4, p.hair[1]);
   return headwear(pen, style, p, facing);
 }
 
@@ -396,6 +475,7 @@ function face(pen: Pen, look: BudLook, p: BudPalette) {
   }
   if (fem && open)
     pen.line('M48 40.6 l-2.8 -1.8 M47.6 43 l-3 -0.6 M72 40.6 l2.8 -1.8 M72.4 43 l3 -0.6', 1.6);
+  pen.line('M58.6 49.6 Q60 51 61.4 49.6', 1.5, p.skin[1]); // nose
 }
 
 function sideFace(pen: Pen, look: BudLook, p: BudPalette) {
@@ -451,42 +531,226 @@ function sideFace(pen: Pen, look: BudLook, p: BudPalette) {
 
 type Ctx = { look: BudLook; p: BudPalette; frame: WalkFrame };
 
-/** Chunky sneaker: rounded upper with a stripe and a thick sole. `toe` -1 points left (side view). */
-function shoe(pen: Pen, x: number, ground: number, p: BudPalette, toe: 0 | -1) {
-  const g = ground;
-  const upper =
-    toe === 0
-      ? `M${x - 10.5} ${g - 3}Q${x - 11.5} ${g - 13} ${x - 3} ${g - 13.5}H${x + 3}Q${x + 11.5} ${g - 13} ${x + 10.5} ${g - 3}Z`
-      : `M${x + 7} ${g - 3}V${g - 10}Q${x + 7} ${g - 14} ${x + 1} ${g - 14}Q${x - 9} ${g - 13} ${x - 13} ${g - 3}Z`;
-  pen.shaded(upper, p.shoes, -2, -2);
+const SHORT_SLEEVES: readonly Outfit[] = ['tshirt', 'polo', 'sukienka', 'kamizelka'];
+
+/** Legs that show skin below a hem: shorts from the knee, a skirt or a dress from the hem (leggings stay). */
+function legSkin(look: BudLook): 'knee' | 'hem' | null {
+  if (look.pants === 'szorty') return 'knee';
+  if (look.pants === 'spodnica') return 'hem';
+  if (look.outfit === 'sukienka' && look.pants !== 'legginsy') return 'hem';
+  return null;
+}
+
+/** One leg from the hip (x1) to the ankle above `ground`, dressed in the look's legwear. */
+function leg(
+  pen: Pen,
+  x1: number,
+  x2: number,
+  ground: number,
+  p: BudPalette,
+  look: BudLook,
+  back: boolean,
+) {
+  const ankle = ground - 12;
+  const pants: Pair = back ? [p.pants[1], p.pants[1]] : p.pants;
+  const skin: Pair = back ? [p.skin[1], p.skin[1]] : p.skin;
+  const bare = legSkin(look);
+  const at = (t: number) => x1 + (x2 - x1) * t;
+  const y = (t: number) => HIP_Y + (ankle - HIP_Y) * t;
+  if (bare === 'hem') {
+    pen.shaded(limb(x1, HIP_Y, 6.5, x2, ankle, 5), skin, -2, -2);
+    return;
+  }
+  const wide = look.pants === 'bojowki' ? 8.6 : look.pants === 'legginsy' ? 6.6 : 7.5;
+  const narrow =
+    look.pants === 'legginsy'
+      ? 4.8
+      : look.pants === 'dresy'
+        ? 5
+        : look.pants === 'bojowki'
+          ? 6.4
+          : 5.5;
+  if (bare === 'knee') {
+    // shorts to just above the knee, then the leg
+    pen.shaded(limb(at(0.55), y(0.55), 5.6, x2, ankle, 5), skin, -2, -2);
+    pen.shaded(limb(x1, HIP_Y, wide, at(0.5), y(0.5), 7.2), pants, -2, -2);
+    pen.line(`M${r2(at(0.5) - 7)} ${r2(y(0.5) + 2)} H${r2(at(0.5) + 7)}`, 1.4, p.pants[1]);
+    return;
+  }
+  pen.shaded(limb(x1, HIP_Y, wide, x2, ankle, narrow), pants, -2, -2);
+  switch (look.pants) {
+    case 'jeansy':
+      // an outer seam and a turned-up hem
+      pen.line(
+        `M${r2(at(0.1) + 4)} ${r2(y(0.1))} L${r2(x2 + 3.2)} ${r2(ankle - 6)}`,
+        1.1,
+        p.pants[1],
+      );
+      pen.flat(rr(x2 - narrow - 0.5, ankle - 4, narrow * 2 + 1, 4, 1.5), p.pants[1]);
+      break;
+    case 'dresy':
+      // one piping line down the side and an elastic cuff
+      pen.line(
+        `M${r2(at(0.05) + 5)} ${r2(y(0.05))} L${r2(x2 + 3.4)} ${r2(ankle - 5)}`,
+        1.6,
+        '#f6f2e9',
+      );
+      pen.flat(rr(x2 - narrow - 0.6, ankle - 4.5, narrow * 2 + 1.2, 4.5, 2), p.pants[1]);
+      break;
+    case 'bojowki':
+      // a cargo pocket on the thigh
+      pen.flat(rr(at(0.38) - 5, y(0.38), 10, 9, 2), p.pants[1]);
+      pen.line(`M${r2(at(0.38) - 5)} ${r2(y(0.38) + 3)} H${r2(at(0.38) + 5)}`, 1.1);
+      break;
+    case 'chinosy':
+      // a pressed crease and a rolled cuff
+      pen.line(`M${r2(at(0.08))} ${r2(y(0.08))} L${r2(x2)} ${r2(ankle - 5)}`, 1, p.pants[1]);
+      pen.flat(
+        rr(x2 - narrow - 0.5, ankle - 5, narrow * 2 + 1, 5, 1.5),
+        mix(p.pants[0], '#ffffff', 0.18),
+      );
+      break;
+    case 'legginsy':
+      pen.line(
+        `M${r2(at(0.15) - 2)} ${r2(y(0.15))} L${r2(x2 - 2)} ${r2(ankle - 6)}`,
+        1.4,
+        mix(p.pants[0], '#ffffff', 0.25),
+      );
+      break;
+  }
+  // a soft fold at the knee
+  pen.line(`M${r2(at(0.55) - 3)} ${r2(y(0.55))} q3 1.5 6 0`, 1, p.pants[1]);
+}
+
+/** The hem of a skirt or a dress, over the hips (drawn after the legs, under the torso). */
+function skirt(pen: Pen, look: BudLook, p: BudPalette, side: boolean) {
+  const dress = look.outfit === 'sukienka';
+  if (!dress && look.pants !== 'spodnica') return;
+  const tone = dress ? p.top : p.pants;
+  const d = side ? 'M46 104 H74 L80 128 Q60 133 40 128Z' : 'M38 104 H82 L90 128 Q60 135 30 128Z';
+  pen.shaded(d, tone, -3, -2);
   pen.line(
-    toe === 0
-      ? `M${x - 6} ${g - 7.5}Q${x} ${g - 4.5} ${x + 6} ${g - 7.5}`
-      : `M${x - 7} ${g - 6.5}Q${x - 1} ${g - 9} ${x + 4} ${g - 7}`,
-    2,
-    p.sole,
-  );
-  pen.shaded(
-    toe === 0 ? rr(x - 12, g - 5, 24, 6.5, 3) : rr(x - 14, g - 5, 23, 6.5, 3),
-    p.soleTone,
-    -1,
-    -1,
+    side ? 'M52 108 L48 127 M66 108 L70 127' : 'M48 108 L43 129 M60 108 V131 M72 108 L77 129',
+    1.1,
+    tone[1],
   );
 }
 
-function legsFront(pen: Pen, { p, frame }: Ctx) {
+/** A shoe of the look's style. `toe` -1 points left (side view). */
+function shoe(pen: Pen, x: number, ground: number, p: BudPalette, toe: 0 | -1, look: BudLook) {
+  const g = ground;
+  const style = look.shoes ?? 'trampki';
+  const front = toe === 0;
+  const sole = (h: number, tone: Pair = p.soleTone) =>
+    pen.shaded(
+      front ? rr(x - 12, g - h + 1.5, 24, h, 3) : rr(x - 14, g - h + 1.5, 23, h, 3),
+      tone,
+      -1,
+      -1,
+    );
+  const dark: Pair = ['#3a3d4a', '#262833'];
+  switch (style) {
+    case 'sandaly': {
+      // the foot shows, with two straps
+      pen.shaded(
+        front
+          ? rr(x - 9, g - 10, 18, 9, 4)
+          : `M${x + 6} ${g - 2}V${g - 8}Q${x + 2} ${g - 12} ${x - 4} ${g - 10}Q${x - 11} ${g - 8} ${x - 12} ${g - 2}Z`,
+        p.skin,
+        -1,
+        -1,
+      );
+      sole(4.5, p.shoes);
+      pen.flat(front ? rr(x - 10, g - 9, 20, 3, 1.5) : rr(x - 9, g - 9, 15, 3, 1.5), p.shoes[0]);
+      pen.flat(front ? rr(x - 10, g - 5, 20, 2.6, 1.3) : rr(x - 3, g - 12, 3, 9, 1.3), p.shoes[0]);
+      return;
+    }
+    case 'mokasyny': {
+      const upper = front
+        ? `M${x - 10.5} ${g - 3}Q${x - 11} ${g - 10} ${x - 3} ${g - 10.5}H${x + 3}Q${x + 11} ${g - 10} ${x + 10.5} ${g - 3}Z`
+        : `M${x + 7} ${g - 3}V${g - 8}Q${x + 6} ${g - 11} ${x} ${g - 11}Q${x - 9} ${g - 10} ${x - 13} ${g - 3}Z`;
+      pen.shaded(upper, p.shoes, -2, -2);
+      pen.line(
+        front
+          ? `M${x - 5} ${g - 7}Q${x} ${g - 9} ${x + 5} ${g - 7}`
+          : `M${x - 8} ${g - 6}Q${x - 3} ${g - 9} ${x + 2} ${g - 7}`,
+        1.4,
+        p.shoes[1],
+      );
+      sole(3.5, dark);
+      return;
+    }
+    case 'glany':
+    case 'kozaki':
+    case 'wysokie': {
+      // boots and high-tops: the upper climbs the ankle
+      const top = style === 'kozaki' ? 30 : style === 'glany' ? 20 : 17;
+      const upper = front
+        ? `M${x - 10.5} ${g - 3}V${g - top + 4}Q${x - 10} ${g - top} ${x - 5} ${g - top}H${x + 5}Q${x + 10} ${g - top} ${x + 10.5} ${g - top + 4}V${g - 3}Z`
+        : `M${x + 7} ${g - 3}V${g - top + 3}Q${x + 7} ${g - top} ${x + 2} ${g - top}H${x - 4}Q${x - 6} ${g - top} ${x - 6} ${g - top + 4}V${g - 9}Q${x - 11} ${g - 8} ${x - 13} ${g - 3}Z`;
+      pen.shaded(upper, p.shoes, -2, -2);
+      if (style !== 'kozaki') {
+        // laces
+        const lx = front ? x : x - 1;
+        for (let i = 0; i < (style === 'glany' ? 4 : 3); i++)
+          pen.line(
+            `M${lx - 3} ${g - 7 - i * 3.6} H${lx + 3}`,
+            1.2,
+            style === 'glany' ? '#f6f2e9' : p.sole,
+          );
+        pen.flat(
+          front ? rr(x - 10.5, g - top, 21, 3.5, 1.5) : rr(x - 6, g - top, 13, 3.5, 1.5),
+          p.shoes[1],
+        );
+      } else {
+        pen.line(
+          front ? `M${x + 4} ${g - top + 3} V${g - 6}` : `M${x + 4} ${g - top + 3} V${g - 6}`,
+          1.2,
+          p.shoes[1],
+        );
+      }
+      sole(style === 'glany' ? 7 : 5.5, style === 'glany' ? dark : p.soleTone);
+      return;
+    }
+    default: {
+      // chunky trainers: rounded upper with a stripe and a thick sole
+      const upper = front
+        ? `M${x - 10.5} ${g - 3}Q${x - 11.5} ${g - 13} ${x - 3} ${g - 13.5}H${x + 3}Q${x + 11.5} ${g - 13} ${x + 10.5} ${g - 3}Z`
+        : `M${x + 7} ${g - 3}V${g - 10}Q${x + 7} ${g - 14} ${x + 1} ${g - 14}Q${x - 9} ${g - 13} ${x - 13} ${g - 3}Z`;
+      pen.shaded(upper, p.shoes, -2, -2);
+      pen.line(
+        front
+          ? `M${x - 6} ${g - 7.5}Q${x} ${g - 4.5} ${x + 6} ${g - 7.5}`
+          : `M${x - 7} ${g - 6.5}Q${x - 1} ${g - 9} ${x + 4} ${g - 7}`,
+        2,
+        p.sole,
+      );
+      pen.line(
+        front
+          ? `M${x - 2.5} ${g - 12} l5 0 M${x - 2.5} ${g - 10} l5 0`
+          : `M${x + 1} ${g - 12.5} l3 1.5`,
+        1,
+        OUT,
+      );
+      sole(6.5);
+    }
+  }
+}
+
+function legsFront(pen: Pen, { look, p, frame }: Ctx) {
   for (const [x, lifted, foot] of [
     [50, frame === 1, 47],
     [70, frame === 2, 73],
   ] as const) {
     const ground = lifted ? 145 : 150;
     // a little taper from the hip to the ankle; feet turn slightly outwards
-    pen.shaded(limb(x, HIP_Y, 7.5, foot, ground - 12, 5.5), p.pants, -2, -2);
-    shoe(pen, foot, ground, p, 0);
+    leg(pen, x, foot, ground, p, look, false);
+    shoe(pen, foot, ground, p, 0, look);
   }
+  skirt(pen, look, p, false);
 }
 
-function legsSide(pen: Pen, { p, frame }: Ctx) {
+function legsSide(pen: Pen, { look, p, frame }: Ctx) {
   // back leg first (darker), then the front leg
   const legs: [number, boolean][] =
     frame === 0
@@ -505,32 +769,63 @@ function legsSide(pen: Pen, { p, frame }: Ctx) {
           ];
   legs.forEach(([x, lifted], i) => {
     const ground = lifted ? 145 : 150;
-    const pants: Pair = i === 0 ? [p.pants[1], p.pants[1]] : p.pants;
-    pen.shaded(limb(60 + (x - 60) * 0.5, HIP_Y, 7.5, x, ground - 12, 5.5), pants, -2, -2);
-    shoe(pen, x, ground, i === 0 ? { ...p, shoes: [p.shoes[1], p.shoes[1]] } : p, -1);
+    leg(pen, 60 + (x - 60) * 0.5, x, ground, p, look, i === 0);
+    shoe(pen, x, ground, i === 0 ? { ...p, shoes: [p.shoes[1], p.shoes[1]] } : p, -1, look);
   });
+  skirt(pen, look, p, true);
 }
 
 /** Arm hanging from the shoulder at (sx, 76) to a rounded hand at (hx, hy). */
 function arm(pen: Pen, sx: number, hx: number, hy: number, { look, p }: Ctx) {
   const wx = sx + (hx - sx) * 0.85;
   const wy = hy - 6;
-  if (look.outfit === 'tshirt') {
+  if (SHORT_SLEEVES.includes(look.outfit)) {
     const ex = sx + (hx - sx) * 0.35;
     pen.shaded(limb(ex, 84, 5.5, wx, wy, 5), p.skin, -2, -2);
-    pen.shaded(limb(sx, 76, 8, ex, 87, 7), p.top, -2, -2);
+    // a vest shows the T-shirt underneath at the shoulder
+    const sleeve: Pair = look.outfit === 'kamizelka' ? [p.cap[0], p.cap[1]] : p.top;
+    pen.shaded(limb(sx, 76, 8, ex, 87, 7), sleeve, -2, -2);
   } else {
-    pen.shaded(limb(sx, 76, 7.5, wx, wy, 6), p.top, -2, -2);
-    if (look.outfit === 'bluza' || look.outfit === 'kurtka')
+    const sleeve: Pair = p.top;
+    pen.shaded(limb(sx, 76, 7.5, wx, wy, 6), sleeve, -2, -2);
+    // a crease at the elbow
+    const ex = sx + (wx - sx) * 0.5;
+    pen.line(`M${r2(ex - 4)} ${r2(76 + (wy - 76) * 0.5)} q4 2 8 0`, 1, p.top[1]);
+    if (look.outfit !== 'koszula' && look.outfit !== 'flanela')
       pen.flat(limb(sx + (wx - sx) * 0.88, wy - 3, 6.3, wx, wy, 6.3), p.top[1]); // ribbed cuff
+    else
+      pen.flat(limb(sx + (wx - sx) * 0.9, wy - 2, 6.2, wx, wy, 6.2), mix(p.top[0], '#ffffff', 0.2));
   }
   pen.shaded(circ(hx, hy, 6.5), p.skin, -2, -2);
+  // a thumb, so the hand reads as a hand
+  pen.line(
+    `M${r2(hx + (hx < 60 ? 3 : -3))} ${r2(hy - 3)} q${hx < 60 ? 2.5 : -2.5} 2 ${hx < 60 ? 1 : -1} 5`,
+    1.1,
+    p.skin[1],
+  );
+}
+
+/** A plaid of thin lines over a shape (flannel). */
+function plaid(pen: Pen, x0: number, x1: number, y0: number, y1: number, tone: Pair) {
+  const lines: string[] = [];
+  for (let x = x0 + 4; x < x1; x += 8) lines.push(`M${x} ${y0} V${y1}`);
+  for (let y = y0 + 5; y < y1; y += 8) lines.push(`M${x0} ${y} H${x1}`);
+  pen.line(lines.join(' '), 1.6, mix(tone[1], '#1b1430', 0.15));
 }
 
 function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
   const { look, p } = ctx;
   const fem = look.gender === 'ona';
-  pen.shaded(fem ? TORSO_F : TORSO_M, p.top, -6, -3);
+  const shape = fem ? TORSO_F : TORSO_M;
+  const vest = look.outfit === 'kamizelka';
+  // a vest goes over a T-shirt in the accent colour
+  pen.shaded(shape, vest ? p.cap : p.top, -6, -3);
+  // light on the shoulders
+  pen.line(
+    'M44 72 Q50 69 54 70 M66 70 Q70 69 76 72',
+    1.6,
+    mix(vest ? p.cap[0] : p.top[0], '#ffffff', 0.35),
+  );
   switch (look.outfit) {
     case 'bluza':
       if (back) {
@@ -540,14 +835,17 @@ function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
         pen.shaded(rr(47, 92, 26, 13, 5), p.top, -1, -2);
         pen.line('M55 72 V84 M65 72 V84', 1.6);
       }
+      pen.flat(rr(fem ? 39 : 37, 108, fem ? 42 : 46, 6, 3), p.top[1]);
       break;
     case 'tshirt':
       if (!back) pen.line('M50 68 Q60 76 70 68', 1.6);
+      pen.line('M48 96 Q54 99 60 97', 1, p.top[1]);
       break;
     case 'kurtka':
       if (!back) pen.line('M60 70 V112', 1.6);
       pen.shaded(rr(fem ? 39 : 37, 106, fem ? 42 : 46, 8, 3), [p.top[1], p.top[1]], 0, 0);
       pen.shaded('M48 67 Q60 74 72 67 L70 64 Q60 69 50 64Z', p.cap, 0, -1);
+      if (!back) pen.flat(rr(65, 82, 9, 3, 1.5), p.top[1]);
       break;
     case 'ogrodniczki':
       if (back) {
@@ -562,14 +860,108 @@ function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
         pen.shaded(rr(52, 92, 16, 9, 2), p.pants, 0, -1);
       }
       break;
+    case 'koszula':
+    case 'flanela':
+      if (look.outfit === 'flanela') plaid(pen, fem ? 40 : 38, fem ? 80 : 82, 70, 112, p.top);
+      if (back) {
+        pen.shaded('M48 67 Q60 72 72 67 L72 71 Q60 76 48 71Z', [p.top[1], p.top[1]], 0, 0);
+        break;
+      }
+      // a collar, buttons and a chest pocket
+      pen.shaded(
+        'M50 66 L60 75 L56 79 L47 70Z',
+        [mix(p.top[0], '#ffffff', 0.15), p.top[1]],
+        -1,
+        -1,
+      );
+      pen.shaded(
+        'M70 66 L60 75 L64 79 L73 70Z',
+        [mix(p.top[0], '#ffffff', 0.15), p.top[1]],
+        -1,
+        -1,
+      );
+      pen.line('M60 76 V112', 1.2);
+      pen.raw(
+        [82, 92, 102]
+          .map(
+            (y) =>
+              `<circle cx="61.8" cy="${y}" r="1.2" fill="#f6f2e9" stroke="${OUT}" stroke-width="0.8"/>`,
+          )
+          .join(''),
+      );
+      pen.flat(rr(65, 80, 9, 8, 1.5), p.top[1]);
+      break;
+    case 'sweter':
+      // ribbed collar, hem and a knit pattern
+      pen.shaded(
+        back ? rr(48, 66, 24, 5, 2.5) : 'M48 67 Q60 76 72 67 L72 71 Q60 80 48 71Z',
+        [p.top[1], p.top[1]],
+        0,
+        0,
+      );
+      pen.flat(rr(fem ? 39 : 37, 106, fem ? 42 : 46, 8, 3), p.top[1]);
+      pen.line(
+        'M42 108 V114 M48 108 V114 M54 108 V114 M60 108 V114 M66 108 V114 M72 108 V114 M78 108 V114',
+        1,
+        mix(p.top[1], '#1b1430', 0.2),
+      );
+      if (!back)
+        pen.line(
+          'M52 86 l4 4 l4 -4 l4 4 l4 -4 M52 96 l4 4 l4 -4 l4 4 l4 -4',
+          1.2,
+          mix(p.top[0], '#ffffff', 0.3),
+        );
+      break;
+    case 'polo':
+      if (back) {
+        pen.shaded(rr(49, 65, 22, 5, 2), [p.top[1], p.top[1]], 0, 0);
+        break;
+      }
+      pen.shaded('M51 66 L60 72 L57 76 L48 69Z', [p.top[1], p.top[1]], 0, 0);
+      pen.shaded('M69 66 L60 72 L63 76 L72 69Z', [p.top[1], p.top[1]], 0, 0);
+      pen.line('M60 72 V84', 1.2);
+      pen.raw(
+        '<circle cx="61.6" cy="77" r="1" fill="#f6f2e9"/><circle cx="61.6" cy="82" r="1" fill="#f6f2e9"/>',
+      );
+      break;
+    case 'kamizelka':
+      // two vest panels over the T-shirt, with pockets
+      pen.shaded(
+        fem
+          ? 'M41 76 Q42 69 53 68 L58 112 H45 Q39 112 40 104 Q44 94 41 76Z'
+          : 'M39 76 Q40 69 52 68 L58 112 H44 Q37 112 38 104Z',
+        p.top,
+        -3,
+        -2,
+      );
+      pen.shaded(
+        fem
+          ? 'M79 76 Q78 69 67 68 L62 112 H75 Q81 112 80 104 Q76 94 79 76Z'
+          : 'M81 76 Q80 69 68 68 L62 112 H76 Q83 112 82 104Z',
+        p.top,
+        -3,
+        -2,
+      );
+      if (!back) {
+        pen.flat(rr(44, 96, 9, 6, 1.5), p.top[1]);
+        pen.flat(rr(67, 96, 9, 6, 1.5), p.top[1]);
+      }
+      break;
+    case 'sukienka':
+      // a fitted bodice with a belt; the skirt is drawn with the legs
+      if (!back) pen.line('M50 68 Q60 75 70 68', 1.6);
+      pen.flat(rr(fem ? 40 : 38, 100, fem ? 40 : 44, 5, 2), p.top[1]);
+      break;
   }
 }
 
 function torsoSide(pen: Pen, { look, p }: Ctx) {
-  pen.shaded(TORSO_SIDE, p.top, -5, -3);
+  const vest = look.outfit === 'kamizelka';
+  pen.shaded(TORSO_SIDE, vest ? p.cap : p.top, -5, -3);
   switch (look.outfit) {
     case 'bluza':
       pen.shaded('M66 66 Q82 64 79 82 Q73 75 66 75Z', [p.top[1], p.top[1]], 0, 0);
+      pen.flat(rr(45, 108, 30, 6, 3), p.top[1]);
       break;
     case 'kurtka':
       pen.shaded(rr(45, 106, 30, 8, 3), [p.top[1], p.top[1]], 0, 0);
@@ -578,6 +970,30 @@ function torsoSide(pen: Pen, { look, p }: Ctx) {
     case 'ogrodniczki':
       pen.shaded(rr(46, 80, 22, 34, 4), p.pants, -3, -2);
       pen.line('M50 82 L50 68', 3, p.pants[1]);
+      break;
+    case 'koszula':
+    case 'flanela':
+      if (look.outfit === 'flanela') plaid(pen, 46, 74, 70, 112, p.top);
+      pen.shaded(
+        'M48 66 L56 72 L52 76 L45 70Z',
+        [mix(p.top[0], '#ffffff', 0.15), p.top[1]],
+        -1,
+        -1,
+      );
+      pen.line('M48 76 V112', 1.1);
+      break;
+    case 'sweter':
+      pen.shaded('M48 67 Q56 74 66 67 L66 71 Q56 78 48 71Z', [p.top[1], p.top[1]], 0, 0);
+      pen.flat(rr(45, 106, 30, 8, 3), p.top[1]);
+      break;
+    case 'polo':
+      pen.shaded('M49 66 L57 71 L54 75 L46 69Z', [p.top[1], p.top[1]], 0, 0);
+      break;
+    case 'kamizelka':
+      pen.shaded('M45 76 Q46 69 56 68 L62 112 H51 Q44 112 45 104Z', p.top, -3, -2);
+      break;
+    case 'sukienka':
+      pen.flat(rr(45, 100, 30, 5, 2), p.top[1]);
       break;
   }
 }
@@ -601,7 +1017,7 @@ function head(pen: Pen, ctx: Ctx, facing: Facing) {
   pen.shaded(circ(60, 40, 26), p.skin, -5, -5);
   if (facing === 'down') {
     face(pen, look, p);
-    if (look.mood === 'tajemniczy' && !['czapka', 'daszek'].includes(look.hair)) {
+    if (look.mood === 'tajemniczy' && !['czapka', 'daszek', 'buzz', 'irokez'].includes(look.hair)) {
       // a lock of hair over one eye
       pen.shaded('M40 30 Q54 30 56 50 Q50 44 42 46 Q44 38 40 30Z', p.hair, -2, -2);
     }

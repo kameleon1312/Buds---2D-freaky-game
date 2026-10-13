@@ -5,6 +5,8 @@ import {
   HAIR_STYLES,
   MOODS,
   OUTFITS,
+  PANTS,
+  SHOES,
   VIEW_H,
   VIEW_W,
   budFrameMarkup,
@@ -28,14 +30,25 @@ const base: BudLook = {
   hairColor: 0,
   outfit: 'bluza',
   outfitColor: 0,
+  pants: 'jeansy',
   pantsColor: 0,
+  shoes: 'trampki',
+  shoesColor: 0,
 };
 
 function everyCombination(): BudLook[] {
   return GENDERS.flatMap((gender) =>
     MOODS.flatMap((mood) =>
       HAIR_STYLES.flatMap((hair) =>
-        OUTFITS.map((outfit) => ({ ...base, gender, mood, hair, outfit })),
+        OUTFITS.map((outfit, i) => ({
+          ...base,
+          gender,
+          mood,
+          hair,
+          outfit,
+          pants: PANTS[i % PANTS.length]!,
+          shoes: SHOES[(i + HAIR_STYLES.indexOf(hair)) % SHOES.length]!,
+        })),
       ),
     ),
   );
@@ -49,7 +62,8 @@ function numbers(markup: string): number[] {
 }
 
 describe('budFrameMarkup', () => {
-  it('produces well-formed markup for every option, facing and step', () => {
+  // every style of every part, in every facing and step: thousands of frames
+  it('produces well-formed markup for every option, facing and step', { timeout: 60_000 }, () => {
     for (const look of everyCombination()) {
       for (const facing of FACINGS) {
         for (const frame of [0, 1, 2] as WalkFrame[]) {
@@ -135,7 +149,7 @@ describe('look', () => {
 
   it('rejects out-of-range colours', () => {
     expect(budLookSchema.safeParse({ ...base, skin: 99 }).success).toBe(false);
-    expect(budLookSchema.safeParse({ ...base, hair: 'irokez' }).success).toBe(false);
+    expect(budLookSchema.safeParse({ ...base, hair: 'dredy' }).success).toBe(false);
   });
 
   it('labels agree with gender', () => {

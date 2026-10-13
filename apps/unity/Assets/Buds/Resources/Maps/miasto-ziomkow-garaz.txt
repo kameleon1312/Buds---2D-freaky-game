@@ -38,6 +38,8 @@ floor : floor : 0.4 : 0.5 #9da3ad
 
 [doors]
 
+[plots]
+
 [grid]
 AAAAAAAAAAA
 BCDEDCDEDCB

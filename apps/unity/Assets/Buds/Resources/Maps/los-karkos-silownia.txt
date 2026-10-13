@@ -39,6 +39,8 @@ floor : floor : 0.4 : 0.5 #3a3d4a
 
 [doors]
 
+[plots]
+
 [grid]
 AAAAAAAAAAAAAAAAA
 BCDEDCDEDCDEDCDEB

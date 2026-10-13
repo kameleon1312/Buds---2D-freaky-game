@@ -53,7 +53,7 @@ namespace Buds.Core
             foreach (var q in quests.Active)
             {
                 var objective = quests.Objective(q.id);
-                if (q.district != world?.Map.DistrictId) objective += $" ({Districts.Get(q.district)?.Name ?? q.district})";
+                if (q.district != world?.Map.DistrictId) objective += $" ({Districts.NameOf(q.district)})";
                 list.Add((q.title, objective));
             }
             ui.SetQuests(list);
@@ -185,6 +185,7 @@ namespace Buds.Core
                 await Awaitable.WaitForSecondsAsync(0.3f);
             }
 
+            if (world.Map.Id != Districts.Start) LoadDistrict(Districts.Start, null);
             await Visit("wiktor");
             await shot("q1-offer.png");
             await Press(); // accept

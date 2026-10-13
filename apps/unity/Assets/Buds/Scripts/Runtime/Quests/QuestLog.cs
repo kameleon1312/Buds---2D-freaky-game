@@ -144,6 +144,35 @@ namespace Buds.Quests
             return any;
         }
 
+        /// <summary>A duel was won: completes any "duel" step against this opponent.</summary>
+        public bool Duel(string enemyId)
+        {
+            var any = false;
+            foreach (var a in active.ToArray())
+            {
+                var step = CurrentStep(a.id);
+                if (step is not { kind: "duel" } || step.enemy != enemyId) continue;
+                Advance(a);
+                any = true;
+            }
+            return any;
+        }
+
+        /// <summary>
+        /// Has this bud finished the tutorial island? Yes after its final quest — and for buds that played before the
+        /// island existed (they have quests from elsewhere).
+        /// </summary>
+        public bool TutorialDone(string island, string finalQuest)
+        {
+            if (Completed.Contains(finalQuest)) return true;
+            foreach (var id in Completed)
+            {
+                var q = content.Quest(id);
+                if (q != null && q.district != island) return true;
+            }
+            return false;
+        }
+
         /// <summary>Items still lying around for active "collect" steps in this district.</summary>
         public IEnumerable<(QuestData quest, StepData step, int spot)> Pickups(string district)
         {
@@ -208,6 +237,7 @@ namespace Buds.Quests
                 "talk" => $"Porozmawiaj: {content.Npc(step.npc)?.name ?? step.npc}",
                 "reach" => $"Idź do: {step.label}",
                 "collect" => $"Zbierz: {step.label} {a.collected.Count}/{step.spots.Length}",
+                "duel" => step.label,
                 _ => step.label ?? "",
             };
         }
@@ -223,8 +253,15 @@ namespace Buds.Quests
             {
                 "talk" => NpcCell(step.npc),
                 "reach" => (q.district, step.x, step.y),
+                "duel" => EnemyCell(step.enemy),
                 _ => null,
             };
+        }
+
+        (string, int, int)? EnemyCell(string enemyId)
+        {
+            var e = content.Enemy(enemyId);
+            return e == null || e.spots.Length == 0 ? null : (e.district, e.spots[0].x, e.spots[0].y);
         }
 
         (string, int, int)? NpcCell(string npcId)

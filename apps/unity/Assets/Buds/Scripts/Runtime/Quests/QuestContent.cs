@@ -36,6 +36,7 @@ namespace Buds.Quests
         public int radius;
         public string label;
         public string item;
+        public string enemy; // duel steps
         public CellData[] spots;
     }
 

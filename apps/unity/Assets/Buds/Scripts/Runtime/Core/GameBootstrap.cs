@@ -62,6 +62,13 @@ namespace Buds.Core
                 return;
             }
 
+            // automated run of the in-game creator: makes a new bud, then the autopilot takes over
+            if (CommandLine.Has("-buds-create-demo") && CommandLine.Get("-buds-autoshot") is { } createShots)
+            {
+                _ = CreatorDemo(createShots);
+                return;
+            }
+
             var session = PlayerSession.Load();
             if (session == null)
             {
@@ -92,7 +99,7 @@ namespace Buds.Core
 
         void ShowPairing(string error = null)
         {
-            ui.ShowPair(code => _ = Connect(code), StartAsGuest);
+            ui.ShowPair(code => _ = Connect(code), StartAsGuest, () => _ = OpenCreator());
             pairingVisible = true;
             if (error != null) ui.SetPairBusy(false, error);
         }
@@ -160,7 +167,8 @@ namespace Buds.Core
             SetUpMap();
             SetUpFights();
             // dev/test: start in another district (-buds-district las-palmas)
-            LoadDistrict(CommandLine.Get("-buds-district") ?? Districts.Start, null);
+            // new buds start on the tutorial island; -buds-district <id> starts elsewhere (dev/test)
+            LoadDistrict(CommandLine.Get("-buds-district") ?? StartMap(), null);
             ui.HideLoading();
 
             var shots = CommandLine.Get("-buds-autoshot");
@@ -205,6 +213,7 @@ namespace Buds.Core
 
         void Update()
         {
+            creatorScreen?.Tick();
             if (!player) return;
             ui.Tick();
             if (travelling) return;
@@ -271,6 +280,7 @@ namespace Buds.Core
             if (exit == atExit) return false;
             atExit = exit;
             if (exit == null) return false;
+            if (TutorialExitBlocked()) return false;
             if (world.Map.IsInterior)
             {
                 // the doormat: back out to the street
@@ -375,12 +385,14 @@ namespace Buds.Core
                     input.PressInteract();
                 }
 
+                if (CommandLine.Has("-buds-tutorial-demo")) await TutorialDemo(Shot);
                 if (CommandLine.Has("-buds-quest-demo")) await QuestDemo(Shot);
 
                 // tour: every zone of every district (or just the current one without -buds-tour)
-                var districts = CommandLine.Has("-buds-tour") ? Districts.All : new[] { Districts.Get(map.Id) };
+                var districts = CommandLine.Has("-buds-tour") ? Districts.All : new[] { Districts.Get(world.Map.Id) };
                 foreach (var district in districts)
                 {
+                    if (district == null) continue; // the tutorial island isn't a district
                     if (world.Map.Id != district.Id) LoadDistrict(district.Id, null);
                     await Shot($"{district.Id}-00-spawn.png");
                     var n = 1;

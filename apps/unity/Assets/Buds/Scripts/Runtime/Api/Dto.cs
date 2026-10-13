@@ -14,7 +14,63 @@ namespace Buds.Api
         public int hairColor;
         public string outfit;
         public int outfitColor;
+        public string pants = "jeansy";
         public int pantsColor;
+        public string shoes = "trampki";
+        public int shoesColor;
+
+        public BudLookDto Clone() => (BudLookDto)MemberwiseClone();
+    }
+
+    [Serializable]
+    public class OptionDto
+    {
+        public string id;
+        public string label;
+    }
+
+    /// <summary>One body part's standard catalog for a gender: styles and colours.</summary>
+    [Serializable]
+    public class PartDto
+    {
+        public OptionDto[] styles;
+        public string[] colors;
+    }
+
+    [Serializable]
+    public class GenderOptionsDto
+    {
+        public string gender;
+        public OptionDto[] moods;
+        public PartDto hair;
+        public PartDto top;
+        public PartDto legs;
+        public PartDto shoes;
+    }
+
+    /// <summary>GET /v1/look/options: everything the creator offers (the lists live in packages/shared).</summary>
+    [Serializable]
+    public class LookOptionsDto
+    {
+        public OptionDto[] genders;
+        public string[] skins;
+        public GenderOptionsDto[] byGender;
+
+        public GenderOptionsDto For(string gender) => Array.Find(byGender ?? Array.Empty<GenderOptionsDto>(), g => g.gender == gender);
+    }
+
+    [Serializable]
+    public class CreateBudRequest
+    {
+        public string name;
+        public BudLookDto look;
+    }
+
+    [Serializable]
+    public class CreateBudResponse
+    {
+        public BudDto bud;
+        public string token;
     }
 
     [Serializable]

@@ -205,6 +205,11 @@ namespace Buds.Tests
                             foreach (var c in s.spots) Assert.IsTrue(map.IsWalkable(c.x, c.y), $"{q.id} {s.item} at ({c.x},{c.y})");
                             Assert.IsNotNull(Resources.Load<Texture2D>("World/item-" + s.item), $"art for item-{s.item}");
                             break;
+                        case "duel":
+                            var foe = content.Enemy(s.enemy);
+                            Assert.IsNotNull(foe, $"{q.id} duels {s.enemy}");
+                            Assert.AreEqual(q.district, foe.district, $"{q.id}: {s.enemy} stands in the quest's map");
+                            break;
                         default:
                             Assert.Fail($"{q.id}: unknown step kind {s.kind}");
                             break;

@@ -22,6 +22,17 @@ namespace Buds.World
             new() { Id = "los-karkos", Name = "Los Karkos", UnlockLevel = 7, Open = true, Blurb = "Niebezpiecznie. Opuszczone bloki, zaczepki i trening przetrwania." },
         };
 
+        /// <summary>
+        /// The tutorial island (packages/shared TUTORIAL_ISLAND): new buds start here; handing in the final quest opens
+        /// the pier to Miasto Ziomków. Not a district: no level gate, no road back.
+        /// </summary>
+        public const string Tutorial = "wyspa-startowa";
+        public const string TutorialName = "Wyspa Startowa";
+        public const string TutorialFinalQuest = "wyspa-rejs";
+
+        /// <summary>A map's name for labels: a district, the island, or the id.</summary>
+        public static string NameOf(string id) => id == Tutorial ? TutorialName : Get(id)?.Name ?? id;
+
         public static District Get(string id)
         {
             foreach (var d in All)

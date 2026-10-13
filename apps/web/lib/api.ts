@@ -32,7 +32,11 @@ const FRIENDLY: Record<number, string> = {
   500: 'Coś poszło nie tak po naszej stronie. Spróbuj za moment.',
 };
 
-async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit): Promise<T> {
+async function request<T>(
+  path: string,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  init?: RequestInit,
+): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, init);

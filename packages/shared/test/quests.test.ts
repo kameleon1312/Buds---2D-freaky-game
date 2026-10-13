@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   CONTENT,
+  TUTORIAL_ISLAND,
   cacheBlocker,
+  catalogItem,
   cacheMap,
   cacheProblems,
   contentProblems,
@@ -91,5 +93,33 @@ describe('caches', () => {
     expect(cacheMap({ district: 'miasto-ziomkow', map: 'miasto-ziomkow-garaz' })).toBe(
       'miasto-ziomkow-garaz',
     );
+  });
+});
+
+describe('tutorial island', () => {
+  const island = CONTENT.quests.filter((q) => q.district === TUTORIAL_ISLAND.id);
+
+  it('is a chain that ends with the quest that opens the pier', () => {
+    expect(island.length).toBeGreaterThanOrEqual(4);
+    const final = questById(TUTORIAL_ISLAND.finalQuest)!;
+    expect(final.district).toBe(TUTORIAL_ISLAND.id);
+    // every other island quest is needed (directly or not) before the final one
+    const needed = new Set<string>();
+    const walk = (id: string) => questById(id)!.requires.forEach((r) => (needed.add(r), walk(r)));
+    walk(final.id);
+    for (const q of island) if (q.id !== final.id) expect(needed.has(q.id)).toBe(true);
+    expect(island.some((q) => questBlocker(q, 0, new Set()) === null)).toBe(true);
+  });
+
+  it('teaches a duel and gives a first weapon', () => {
+    expect(island.some((q) => q.steps.some((s) => s.kind === 'duel'))).toBe(true);
+    expect(island.some((q) => catalogItem(q.rewardItem ?? '')?.weapon)).toBe(true);
+  });
+
+  it('flags duels with unknown opponents', () => {
+    const q = { ...island[0]!, steps: [{ kind: 'duel' as const, enemy: 'duch', label: 'x' }] };
+    expect(
+      contentProblems({ ...CONTENT, quests: [q] }).some((p) => p.includes('unknown enemy')),
+    ).toBe(true);
   });
 });

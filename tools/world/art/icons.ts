@@ -24,6 +24,113 @@ const ICONS_ITEMS: Record<string, Icon> = {
       flat(rr(24, 38, 16, 9, 3), '#7cc01a', LINE, 2) +
       stroke('M29 22v8M35 22v8', LINE, 2),
   },
+  'outfit-koszula': {
+    body:
+      shirt(['#f6f2e9', '#d8cfbf']) +
+      flat(
+        poly([
+          [24, 16],
+          [32, 26],
+          [28, 30],
+          [21, 20],
+        ]),
+        '#ffffff',
+        LINE,
+        2,
+      ) +
+      flat(
+        poly([
+          [40, 16],
+          [32, 26],
+          [36, 30],
+          [43, 20],
+        ]),
+        '#ffffff',
+        LINE,
+        2,
+      ) +
+      stroke('M32 26V52', LINE, 2) +
+      [32, 38, 44].map((y) => flat(circ(34, y, 1.6), '#4cc7ff', LINE, 1)).join(''),
+  },
+  'outfit-sweter': {
+    body:
+      shirt(['#ff7aa8', '#d95a88']) +
+      stroke('M24 32l4 4l4 -4l4 4l4 -4M24 40l4 4l4 -4l4 4l4 -4', '#ffffff', 2, 0.7) +
+      flat(rr(20, 47, 24, 5, 2), '#d95a88', LINE, 1.5),
+  },
+  'outfit-polo': {
+    body:
+      shirt(['#3fb39b', '#2c8574']) +
+      flat(
+        poly([
+          [25, 16],
+          [32, 23],
+          [29, 27],
+          [22, 19],
+        ]),
+        '#2c8574',
+        LINE,
+        1.5,
+      ) +
+      flat(
+        poly([
+          [39, 16],
+          [32, 23],
+          [35, 27],
+          [42, 19],
+        ]),
+        '#2c8574',
+        LINE,
+        1.5,
+      ) +
+      stroke('M32 23V32', LINE, 1.5),
+  },
+  'outfit-kamizelka': {
+    body:
+      shirt(['#f6f2e9', '#d8cfbf']) +
+      flat(
+        poly([
+          [20, 20],
+          [30, 18],
+          [31, 52],
+          [20, 52],
+        ]),
+        '#8a8a5a',
+        LINE,
+        2,
+      ) +
+      flat(
+        poly([
+          [44, 20],
+          [34, 18],
+          [33, 52],
+          [44, 52],
+        ]),
+        '#8a8a5a',
+        LINE,
+        2,
+      ) +
+      flat(rr(22, 40, 7, 5, 1), '#6b6b44', LINE, 1) +
+      flat(rr(35, 40, 7, 5, 1), '#6b6b44', LINE, 1),
+  },
+  'outfit-flanela': {
+    body:
+      shirt(['#ff3d50', '#bd1c31']) +
+      stroke('M24 18V52M32 16V52M40 18V52M14 28H50M18 38H46M20 46H44', '#7a1622', 2, 0.7) +
+      stroke('M32 22V52', LINE, 2),
+  },
+  'outfit-sukienka': {
+    body:
+      shaded(
+        `M24 12L28 12Q32 16 36 12L40 12L44 30L54 56H10L20 30Z`,
+        ['#b45cff', '#8a3fd1'],
+        LINE,
+        -4,
+        -3,
+      ) +
+      flat(rr(19, 28, 26, 4, 2), '#8a3fd1', LINE, 1.5) +
+      stroke('M24 36L20 54M32 34V56M40 36L44 54', '#8a3fd1', 1.5),
+  },
   'outfit-tshirt': { body: shirt(['#4cc7ff', '#1b86c9']) + stroke('M26 16q6 6 12 0', LINE, 2.5) },
   'outfit-kurtka': {
     body:

@@ -1,12 +1,12 @@
 import type { CacheInput } from '../caches';
 import { scaledEnemy, type EnemyInput } from '../combat';
-import type { Npc, QuestInput } from '../quests';
+import type { NpcInput, QuestInput } from '../quests';
 
 /** Las Palmas — tropical district (from level 3). ~1340 XP: enough to reach level 5 and Dwór Carski. */
 const D = 'las-palmas';
 
 export const LAS_PALMAS: {
-  npcs: Npc[];
+  npcs: NpcInput[];
   quests: QuestInput[];
   caches: CacheInput[];
   enemies: EnemyInput[];
@@ -329,7 +329,7 @@ export const LAS_PALMAS: {
       id: 'lp-dzungla',
       district: D,
       x: 117,
-      y: 59,
+      y: 58,
       look: 'skrzynka',
       coins: 40,
       xp: 15,
@@ -411,7 +411,7 @@ export const LAS_PALMAS: {
       },
       lines: ['Nic nie widziałeś.', 'Dżungla nie lubi gości.'],
       spots: [
-        { x: 100, y: 60 },
+        { x: 99, y: 59 },
         { x: 110, y: 45 },
       ],
     }),

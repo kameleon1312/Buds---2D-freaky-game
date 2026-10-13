@@ -11,10 +11,15 @@ import {
   HAIR_LABELS,
   MOODS,
   moodBlurb,
-  OUTFITS,
+  OUTFITS_BY_GENDER,
   OUTFIT_COLORS,
   OUTFIT_LABELS,
+  PANTS_BY_GENDER,
   PANTS_COLORS,
+  PANTS_LABELS,
+  SHOES_BY_GENDER,
+  SHOES_COLORS,
+  SHOES_LABELS,
   SKINS,
   budNameSchema,
   moodLabel,
@@ -137,9 +142,15 @@ export function Creator({ initialLook }: { initialLook: BudLook }) {
                 className="chip"
                 aria-pressed={look.gender === g}
                 onClick={() => {
-                  // switch to that gender's favourite hairstyle unless the current one is already typical for it
-                  const keepHair = HAIR_BY_GENDER[g].slice(0, 5).includes(look.hair);
-                  update({ gender: g, hair: keepHair ? look.hair : HAIR_BY_GENDER[g][0]! });
+                  // keep each part if it's in that gender's catalog, otherwise take its first pick
+                  const keep = <T,>(list: readonly T[], v: T) => (list.includes(v) ? v : list[0]!);
+                  update({
+                    gender: g,
+                    hair: keep(HAIR_BY_GENDER[g], look.hair),
+                    outfit: keep(OUTFITS_BY_GENDER[g], look.outfit),
+                    pants: keep(PANTS_BY_GENDER[g], look.pants),
+                    shoes: keep(SHOES_BY_GENDER[g], look.shoes),
+                  });
                 }}
               >
                 {GENDER_LABELS[g]}
@@ -197,9 +208,9 @@ export function Creator({ initialLook }: { initialLook: BudLook }) {
           />
         </Field>
 
-        <Field label="Ciuchy">
-          <div className="chips chips-4">
-            {OUTFITS.map((o) => (
+        <Field label="Góra">
+          <div className="chips chips-3">
+            {OUTFITS_BY_GENDER[look.gender].map((o) => (
               <button
                 key={o}
                 type="button"
@@ -215,13 +226,51 @@ export function Creator({ initialLook }: { initialLook: BudLook }) {
             colors={OUTFIT_COLORS}
             value={look.outfitColor}
             onChange={(outfitColor) => update({ outfitColor })}
-            label="Kolor ciuchów"
+            label="Kolor góry"
           />
+        </Field>
+
+        <Field label="Nogi">
+          <div className="chips chips-3">
+            {PANTS_BY_GENDER[look.gender].map((p) => (
+              <button
+                key={p}
+                type="button"
+                className="chip"
+                aria-pressed={look.pants === p}
+                onClick={() => update({ pants: p })}
+              >
+                {PANTS_LABELS[p]}
+              </button>
+            ))}
+          </div>
           <Swatches
             colors={PANTS_COLORS}
             value={look.pantsColor}
             onChange={(pantsColor) => update({ pantsColor })}
-            label={look.outfit === 'ogrodniczki' ? 'Kolor ogrodniczek' : 'Kolor spodni'}
+            label={look.outfit === 'ogrodniczki' ? 'Kolor ogrodniczek' : 'Kolor nóg'}
+          />
+        </Field>
+
+        <Field label="Buty">
+          <div className="chips chips-3">
+            {SHOES_BY_GENDER[look.gender].map((sh) => (
+              <button
+                key={sh}
+                type="button"
+                className="chip"
+                aria-pressed={look.shoes === sh}
+                onClick={() => update({ shoes: sh })}
+              >
+                {SHOES_LABELS[sh]}
+              </button>
+            ))}
+          </div>
+          <Swatches
+            colors={SHOES_COLORS}
+            value={look.shoesColor}
+            onChange={(shoesColor) => update({ shoesColor })}
+            label="Kolor butów"
           />
         </Field>
 

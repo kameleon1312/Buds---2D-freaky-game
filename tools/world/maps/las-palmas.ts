@@ -1,10 +1,12 @@
 // Las Palmas — tropical district (docs/districts.md): ocean to the west and north, beaches, the stilt-hut
 // town with the beach bar, the pier, the flamingo lagoon, the jungle with temple ruins and volcanic cliffs.
+import { lasPalmasOutskirts } from './outskirts';
 import { MapCanvas, noise2, rng } from './lib';
 
 export function lasPalmas(): MapCanvas {
-  const W = 128;
-  const H = 96;
+  // grown from 128×96: the old part keeps its coordinates, the outskirts fill the new east and south
+  const W = 176;
+  const H = 132;
   const m = new MapCanvas('las-palmas', 'Las Palmas', W, H);
   m.base = '#8ed16a';
   const r = rng(2001);
@@ -273,6 +275,8 @@ export function lasPalmas(): MapCanvas {
     { ground: 'path', chance: 0.03, props: 'muszle' },
     { ground: 'water', chance: 0.12, props: 'lily' },
   );
+  lasPalmasOutskirts(m);
+
   // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
   m.door([52, 64], 'las-palmas-chatka', 'Chatka rybaka');
   return m;

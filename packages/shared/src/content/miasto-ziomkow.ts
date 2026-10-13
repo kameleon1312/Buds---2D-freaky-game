@@ -1,7 +1,7 @@
-import type { BudLook } from '../bud/look';
+import type { BudLookInput } from '../bud/look';
 import type { CacheInput } from '../caches';
 import { scaledEnemy, type EnemyInput } from '../combat';
-import type { Npc, QuestInput } from '../quests';
+import type { NpcInput, QuestInput } from '../quests';
 
 /**
  * Miasto Ziomków — starter NPCs and quests (~500 XP: a new player reaches level 3 in the first quarter hour).
@@ -13,10 +13,10 @@ import type { Npc, QuestInput } from '../quests';
 
 const D = 'miasto-ziomkow';
 
-const look = (l: BudLook) => l;
+const look = (l: BudLookInput) => l;
 
 export const MIASTO_ZIOMKOW: {
-  npcs: Npc[];
+  npcs: NpcInput[];
   quests: QuestInput[];
   caches: CacheInput[];
   enemies: EnemyInput[];

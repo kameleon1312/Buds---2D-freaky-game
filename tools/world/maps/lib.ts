@@ -4,6 +4,8 @@
 import { ALL_PROPS } from '../art/index';
 
 export type Cell = { g: string; p?: string; s?: boolean };
+export const PLOT_KINDS = ['quest', 'attraction', 'minigame', 'shop', 'arena'] as const;
+export type PlotKind = (typeof PLOT_KINDS)[number];
 export type Rect = [x0: number, y0: number, x1: number, y1: number];
 
 /** Readable characters for common cells; everything else gets the next free character. */
@@ -68,6 +70,11 @@ export class MapCanvas {
   readonly zones: { r: Rect; name: string }[] = [];
   /** Doors into interiors: (x, y) is the building's anchor (middle of its bottom row), entered from below. */
   readonly doors: { x: number; y: number; target: string; name: string }[] = [];
+  /**
+   * Plots: free, reachable areas kept for content to come (quests, NPCs, attractions). Content refers to them by
+   * id; the map promises they stay clear.
+   */
+  readonly plots: { r: Rect; id: string; kind: PlotKind; name: string }[] = [];
   readonly scatter: { ground: string; chance: number; props: string }[] = [];
   readonly ground: { name: string; kinds: string; radius: number; bands: [number, string][] }[] =
     [];
@@ -270,6 +277,12 @@ export class MapCanvas {
     this.doors.push({ x, y, target, name });
   }
 
+  /** Keeps a rectangle clear (ground `g`, no props, walkable) for future content. */
+  plot(r: Rect, id: string, kind: PlotKind, name: string, g?: string) {
+    this.rect(r, (x, y) => ({ g: g ?? this.get(x, y)?.g ?? 'grass' }));
+    this.plots.push({ r, id, kind, name });
+  }
+
   exit(r: Rect, district: string) {
     this.exits.push({ r, district });
   }
@@ -339,6 +352,19 @@ export class MapCanvas {
     }
     for (const d of this.doors)
       if (!seen.has((d.y + 1) * this.w + d.x)) errors.push(`door to ${d.target} can't be reached`);
+    for (const p of this.plots) {
+      const [x0, y0, x1, y1] = p.r;
+      let open = true;
+      let reached = false;
+      for (let y = y0; y <= y1; y++)
+        for (let x = x0; x <= x1; x++) {
+          const c = this.get(x, y);
+          if (!c || c.s || c.p) open = false;
+          if (seen.has(y * this.w + x)) reached = true;
+        }
+      if (!open) errors.push(`plot ${p.id} is not clear`);
+      if (!reached) errors.push(`plot ${p.id} can't be reached`);
+    }
     if (this.kind === 'interior' && !this.exits.some((e) => e.district === this.outside))
       errors.push(`interior has no way out to ${this.outside}`);
     if (errors.length) throw new Error(`${this.id}:\n  ${errors.join('\n  ')}`);
@@ -401,6 +427,9 @@ export class MapCanvas {
       '',
       '[doors]',
       ...this.doors.map((d) => `${d.x},${d.y} | ${d.target} | ${d.name}`),
+      '',
+      '[plots]',
+      ...this.plots.map((p) => `${p.r.join(',')} | ${p.id} | ${p.kind} | ${p.name}`),
       '',
       '[grid]',
       ...rows,

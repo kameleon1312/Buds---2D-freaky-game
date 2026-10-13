@@ -1,10 +1,12 @@
 // Dwór Carski — aristocratic district (docs/districts.md): tree-lined avenue to the manor and its fountain
 // courtyard, the rose garden, a real hedge maze, brick tenements, the officials' quarter and the stables.
+import { dworCarskiOutskirts } from './outskirts';
 import { MapCanvas, noise2, rng, type Rect } from './lib';
 
 export function dworCarski(): MapCanvas {
-  const W = 128;
-  const H = 96;
+  // grown from 128×96: the old part keeps its coordinates, the outskirts fill the new east and south
+  const W = 176;
+  const H = 132;
   const m = new MapCanvas('dwor-carski', 'Dwór Carski', W, H, 'lawn');
   m.base = '#7fbf5a';
   const r = rng(3001);
@@ -278,6 +280,8 @@ export function dworCarski(): MapCanvas {
     { ground: 'dirt', chance: 0.05, props: 'pebbles|tuft' },
     { ground: 'water', chance: 0.12, props: 'lily' },
   );
+  dworCarskiOutskirts(m);
+
   // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
   m.door([64, 52], 'dwor-carski-dworek', 'Salon dworku');
   m.door([82, 20], 'dwor-carski-urzad', 'Urząd Skarbowy');
