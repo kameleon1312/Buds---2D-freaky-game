@@ -31,13 +31,28 @@ Status deploymentu pojawi się jako check „Vercel” przy commitach.
 
 ## Supabase
 
-```bash
-supabase link --project-ref <ref>
-supabase db push        # wysyła migracje z supabase/migrations
-```
+1. supabase.com → **New project** (np. `buds`, region **Central EU (Frankfurt)**, zapisz hasło do bazy).
+2. Migracje (CLI nie trzeba instalować — `pnpm dlx` pobiera je na chwilę), z katalogu głównego repo:
 
-Klucze: Project Settings → API (`service_role` i JWT Secret). Klucz service role trzymaj wyłącznie w Railway —
-nigdy w zmiennych `NEXT_PUBLIC_*`.
+   ```bash
+   pnpm dlx supabase login
+   pnpm dlx supabase link --project-ref <ref>   # ref = część adresu https://<ref>.supabase.co, pyta o hasło do bazy
+   pnpm dlx supabase db push                     # wysyła wszystkie migracje z supabase/migrations
+   ```
+
+   Po każdej nowej migracji w repo wystarczy ponownie `pnpm dlx supabase db push`.
+
+3. Klucze (Project Settings):
+   - **Data API / API** → Project URL → `SUPABASE_URL` — sam adres `https://<ref>.supabase.co`, **bez** `/rest/v1/`
+     (z tą końcówką każde zapytanie kończy się błędem `PGRST125`),
+   - **API Keys** → klucz **secret** (`sb_secret_…`; w starszych projektach `service_role`) → `SUPABASE_SERVICE_ROLE_KEY`,
+   - **JWT Keys** → *Legacy JWT secret* → `SUPABASE_JWT_SECRET`.
+
+   Lokalnie wpisz je do pliku `.env` w katalogu głównym (jest w `.gitignore`), na produkcji do zmiennych w Railway.
+   Klucz secret daje pełny dostęp do bazy: **nigdy** nie wpisuj go do zmiennych `NEXT_PUBLIC_*`, do gry ani do repo.
+
+4. Sprawdzenie: `pnpm dev` nie wypisuje ostrzeżenia „kept in memory”, a Bud stworzony na stronie pojawia się w
+   Table Editor → `buds`.
 
 ## Gra (Unity → Google Play)
 
