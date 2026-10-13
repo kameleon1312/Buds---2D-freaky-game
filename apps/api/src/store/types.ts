@@ -1,10 +1,15 @@
-import type { BudRecord, CreateBudInput, ItemSource, OwnedItem } from '@buds/shared';
+import type { BudRecord, CreateBudInput, ItemSource, OwnedItem, SlotId } from '@buds/shared';
+
+export type BuyResult = { status: 'ok' | 'owned' | 'poor'; coins: number };
+/** ok = linked now, mine = already this user's, taken = another user's. */
+export type ClaimResult = 'ok' | 'mine' | 'taken';
 
 /**
  * A bud can have several player tokens (web browser, phone app…). Only sha256 hashes are stored.
  */
 export interface BudStore {
-  create(input: CreateBudInput, tokenHash: string): Promise<BudRecord>;
+  /** `userId`: the account creating it (signed in on the website), if any. */
+  create(input: CreateBudInput, tokenHash: string, userId?: string): Promise<BudRecord>;
   getBySlug(slug: string): Promise<BudRecord | null>;
   getByTokenHash(tokenHash: string): Promise<BudRecord | null>;
   addToken(slug: string, tokenHash: string): Promise<void>;
@@ -37,4 +42,28 @@ export interface BudStore {
     maxRank: number,
   ): Promise<number | null>;
   wallet(slug: string): Promise<{ coins: number; gems: number }>;
+  /** Ids of the caches the bud has opened. */
+  openedCaches(slug: string): Promise<string[]>;
+  /**
+   * Records the opening and adds `coins` to the wallet and `xp` to the bud atomically. Returns the new XP and coin
+   * balance, or null when the cache was already opened (then nothing changes).
+   */
+  openCache(
+    slug: string,
+    cacheId: string,
+    coins: number,
+    xp: number,
+  ): Promise<{ xp: number; coins: number } | null>;
+  /** Worn items by slot (empty slots are absent). */
+  equipment(slug: string): Promise<Partial<Record<SlotId, string>>>;
+  /** Puts an item into a slot, or empties it (null). The API checks ownership and the slot first. */
+  equip(slug: string, slot: SlotId, itemId: string | null): Promise<void>;
+  /** Buys an item for coins atomically: never twice, never below zero coins. */
+  buyItem(slug: string, itemId: string, price: number): Promise<BuyResult>;
+  /** Buds of an account, oldest first. */
+  budsOfUser(userId: string): Promise<BudRecord[]>;
+  /** The account a bud belongs to, or null for a guest bud. */
+  ownerOf(slug: string): Promise<string | null>;
+  /** Links a guest bud to an account (only if it has no account yet). */
+  claimBud(slug: string, userId: string): Promise<ClaimResult>;
 }

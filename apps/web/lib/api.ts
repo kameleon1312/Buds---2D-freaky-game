@@ -1,5 +1,9 @@
 import {
+  accountBudSchema,
+  accountBudsResponseSchema,
   apiErrorSchema,
+  type AccountBud,
+  type AccountBudsResponse,
   budResponseSchema,
   createBudResponseSchema,
   leaderboardResponseSchema,
@@ -23,6 +27,7 @@ export class ApiRequestError extends Error {
 }
 
 const FRIENDLY: Record<number, string> = {
+  401: 'Sesja wygasła. Zaloguj się ponownie.',
   429: 'Za szybko! Odczekaj chwilę i spróbuj ponownie.',
   500: 'Coś poszło nie tak po naszej stronie. Spróbuj za moment.',
 };
@@ -38,7 +43,8 @@ async function request<T>(path: string, schema: z.ZodType<T>, init?: RequestInit
   if (!res.ok) {
     const apiMessage = apiErrorSchema.safeParse(body).data?.error.message;
     const message =
-      FRIENDLY[res.status] ?? (res.status === 400 && apiMessage ? apiMessage : 'Nieznany błąd.');
+      FRIENDLY[res.status] ??
+      ([400, 403, 404, 409].includes(res.status) && apiMessage ? apiMessage : 'Nieznany błąd.');
     throw new ApiRequestError(message, res.status);
   }
   return schema.parse(body);
@@ -69,10 +75,14 @@ export async function getLeaderboard(limit = 50): Promise<BudRecord[]> {
 
 // ---------- browser ----------
 
-export function createBud(input: CreateBudInput): Promise<CreateBudResponse> {
+/** Signed in (`accessToken`): the bud belongs to the account right away. */
+export function createBud(
+  input: CreateBudInput,
+  accessToken?: string | null,
+): Promise<CreateBudResponse> {
   return request('/v1/buds', createBudResponseSchema, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(accessToken ? bearer(accessToken) : {}) },
     body: JSON.stringify(input),
   });
 }
@@ -91,5 +101,27 @@ export function createPairCode(token: string): Promise<PairCodeResponse> {
   return request('/v1/buds/me/pair-code', pairCodeResponseSchema, {
     method: 'POST',
     headers: bearer(token),
+  });
+}
+
+// ---------- account (signed in on the website) ----------
+
+export function getAccountBuds(accessToken: string): Promise<AccountBudsResponse> {
+  return request('/v1/account/buds', accountBudsResponseSchema, { headers: bearer(accessToken) });
+}
+
+/** Links the guest bud this browser created to the account. */
+export function claimBud(accessToken: string, guestToken: string): Promise<AccountBud> {
+  return request('/v1/account/buds/claim', accountBudSchema, {
+    method: 'POST',
+    headers: { ...bearer(accessToken), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: guestToken }),
+  });
+}
+
+export function accountPairCode(accessToken: string, slug: string): Promise<PairCodeResponse> {
+  return request(`/v1/account/buds/${encodeURIComponent(slug)}/pair-code`, pairCodeResponseSchema, {
+    method: 'POST',
+    headers: bearer(accessToken),
   });
 }

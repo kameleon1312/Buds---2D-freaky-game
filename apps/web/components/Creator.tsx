@@ -22,6 +22,7 @@ import {
   type BudLook,
 } from '@buds/shared';
 import { createBud } from '@/lib/api';
+import { accessToken } from '@/lib/supabase';
 import { savePlayer } from '@/lib/player';
 import { BudPreview } from './BudPreview';
 import { BudSprite } from './BudSprite';
@@ -83,7 +84,8 @@ export function Creator({ initialLook }: { initialLook: BudLook }) {
     setPending(true);
     setError(null);
     try {
-      const { bud, token } = await createBud({ name: nameCheck.data, look });
+      // signed in: the bud goes straight into the account
+      const { bud, token } = await createBud({ name: nameCheck.data, look }, await accessToken());
       savePlayer({ slug: bud.slug, token });
       router.push(`/b/${bud.slug}?nowy=1`);
     } catch (err) {
@@ -106,7 +108,7 @@ export function Creator({ initialLook }: { initialLook: BudLook }) {
           </p>
         </div>
         <button type="button" className="btn" onClick={() => setLook(randomLook())}>
-          🎲 Losuj wygląd
+          Losuj wygląd
         </button>
       </div>
 

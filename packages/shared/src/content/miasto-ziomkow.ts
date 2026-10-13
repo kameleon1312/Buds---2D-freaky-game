@@ -1,4 +1,5 @@
 import type { BudLook } from '../bud/look';
+import type { CacheInput } from '../caches';
 import type { Npc, QuestInput } from '../quests';
 
 /**
@@ -13,7 +14,7 @@ const D = 'miasto-ziomkow';
 
 const look = (l: BudLook) => l;
 
-export const MIASTO_ZIOMKOW: { npcs: Npc[]; quests: QuestInput[] } = {
+export const MIASTO_ZIOMKOW: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
   npcs: [
     {
       id: 'wiktor',
@@ -318,6 +319,92 @@ export const MIASTO_ZIOMKOW: { npcs: Npc[]; quests: QuestInput[] } = {
         { kind: 'reach', x: 95, y: 35, radius: 1, label: 'Druga rampa' },
         { kind: 'reach', x: 101, y: 35, radius: 1, label: 'Trzecia rampa' },
       ],
+    },
+  ],
+  // hidden caches (skrytki): revealed when the bud comes close, coins and XP granted by the server once
+  caches: [
+    {
+      id: 'mz-wzgorze',
+      district: D,
+      x: 112,
+      y: 8,
+      look: 'kufer',
+      coins: 60,
+      xp: 25,
+      text: 'Zakopany kuferek! W środku stare monety i list: „Dla tego, kto słucha, co mówią znaki”.',
+    },
+    {
+      id: 'mz-park',
+      district: D,
+      x: 16,
+      y: 44,
+      look: 'worek',
+      coins: 15,
+      xp: 10,
+      text: 'Ktoś schował worek przy stawie. Kilka monet i mokra mapa parku.',
+    },
+    {
+      id: 'mz-dzialki',
+      district: D,
+      x: 14,
+      y: 9,
+      look: 'dzban',
+      coins: 20,
+      xp: 10,
+      text: 'Dzban działkowca. Pod nasionami rzodkiewki leżą oszczędności na czarną godzinę.',
+    },
+    {
+      id: 'mz-garaze',
+      district: D,
+      x: 39,
+      y: 89,
+      look: 'opona',
+      coins: 25,
+      xp: 10,
+      text: 'W starej oponie ktoś trzymał kasę za lakier. Teraz jest twoja.',
+    },
+    {
+      id: 'mz-tory',
+      district: D,
+      x: 99,
+      y: 88,
+      look: 'cegly',
+      coins: 30,
+      xp: 15,
+      text: 'Za luźnymi cegłami skrytka grafficiarzy: monety i szkic tagu.',
+    },
+    {
+      id: 'mz-kawiarnia',
+      district: D,
+      map: 'miasto-ziomkow-kawiarnia',
+      x: 12,
+      y: 2,
+      look: 'dzban',
+      coins: 20,
+      xp: 10,
+      text: 'Dzbanek na napiwki, o którym wszyscy zapomnieli.',
+    },
+    {
+      id: 'mz-komisariat',
+      district: D,
+      map: 'miasto-ziomkow-komisariat',
+      x: 12,
+      y: 9,
+      look: 'kufer',
+      coins: 40,
+      xp: 20,
+      text: 'Kufer z dowodami rzeczowymi. Nikt nie liczył tych monet od lat.',
+    },
+    {
+      id: 'mz-garaz',
+      district: D,
+      map: 'miasto-ziomkow-garaz',
+      x: 1,
+      y: 4,
+      look: 'skrzynka',
+      coins: 25,
+      xp: 10,
+      text: 'Skrzynka Rysia: śrubki, stary walkman i trochę drobnych.',
     },
   ],
 };

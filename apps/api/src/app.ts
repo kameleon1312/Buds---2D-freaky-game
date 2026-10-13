@@ -14,6 +14,25 @@ import {
   type SkillsResponse,
   type WalletResponse,
   levelFromXp,
+  MAX_BUDS_PER_ACCOUNT,
+  SLOTS,
+  catalogItem,
+  characterStats,
+  claimBudRequestSchema,
+  coinsWithLuck,
+  emptyEquipment,
+  equipRequestSchema,
+  fitsSlot,
+  slotIdSchema,
+  type AccountBud,
+  type AccountBudsResponse,
+  type BuyResponse,
+  type EquipmentResponse,
+  type SkillId,
+  cacheBlocker,
+  cacheIdSchema,
+  type CachesResponse,
+  type OpenCacheResponse,
   questBlocker,
   questIdSchema,
   type CompleteQuestResponse,
@@ -36,7 +55,8 @@ import {
   type PairCodeResponse,
 } from '@buds/shared';
 import type { Env } from './env.js';
-import { requireAuth, type AuthVariables } from './middleware/auth.js';
+import { createRemoteJWKSet, type JWTVerifyGetKey } from 'jose';
+import { optionalUser, requireAuth, type AuthKeys, type AuthVariables } from './middleware/auth.js';
 import {
   hashToken,
   newPlayerToken,
@@ -57,9 +77,22 @@ export type AppDeps = {
   catalog?: readonly CatalogItem[];
   /** NPCs and quests; production uses the shared content. */
   content?: DistrictContent;
+  /** Public keys for account tokens; production fetches the project's JWKS. */
+  jwks?: JWTVerifyGetKey;
 };
 
-export function createApp(env: Env, { store, catalog = CATALOG, content = CONTENT }: AppDeps) {
+export function createApp(
+  env: Env,
+  { store, catalog = CATALOG, content = CONTENT, jwks }: AppDeps,
+) {
+  const keys: AuthKeys = {
+    secret: env.SUPABASE_JWT_SECRET,
+    jwks:
+      jwks ??
+      (env.SUPABASE_URL
+        ? createRemoteJWKSet(new URL('/auth/v1/.well-known/jwks.json', env.SUPABASE_URL))
+        : undefined),
+  };
   const app = new Hono<{ Variables: AuthVariables & PlayerVariables }>();
 
   app.use('*', requestId());
@@ -68,7 +101,7 @@ export function createApp(env: Env, { store, catalog = CATALOG, content = CONTEN
     '*',
     cors({
       origin: (origin) => (origin === env.WEB_ORIGIN ? origin : null),
-      allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowHeaders: ['Authorization', 'Content-Type'],
       maxAge: 600,
     }),
@@ -91,7 +124,7 @@ export function createApp(env: Env, { store, catalog = CATALOG, content = CONTEN
     }),
   );
 
-  app.get('/v1/me', requireAuth(env.SUPABASE_JWT_SECRET), (c) => {
+  app.get('/v1/me', requireAuth(keys), (c) => {
     const user = c.get('user');
     return c.json<MeResponse>({ id: user.id, email: user.email, role: user.role });
   });
@@ -113,8 +146,21 @@ export function createApp(env: Env, { store, catalog = CATALOG, content = CONTEN
         403,
       );
     }
+    // signed in on the website: the new bud belongs to the account right away
+    const user = await optionalUser(c, keys);
+    if (user && (await store.budsOfUser(user.id)).length >= MAX_BUDS_PER_ACCOUNT) {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'too_many_buds',
+            message: `Na jednym koncie zmieści się ${MAX_BUDS_PER_ACCOUNT} Budów`,
+          },
+        },
+        409,
+      );
+    }
     const token = newPlayerToken();
-    const bud = await store.create(input.data, hashToken(token));
+    const bud = await store.create(input.data, hashToken(token), user?.id);
     return c.json<CreateBudResponse>({ bud, token }, 201);
   });
 
@@ -167,6 +213,213 @@ export function createApp(env: Env, { store, catalog = CATALOG, content = CONTEN
       level,
       levelUp: level > before,
       item: quest.rewardItem ?? null,
+    });
+  });
+
+  // ---------- gear (ekwipunek) and the coin shop ----------
+
+  const equipmentOf = async (slug: string) => {
+    const slots = emptyEquipment();
+    for (const [slot, itemId] of Object.entries(await store.equipment(slug)))
+      if (slot in slots) slots[slot as keyof typeof slots] = itemId;
+    return slots;
+  };
+
+  /** Stats the server trusts: worn items (still in the catalog) plus trained skills. */
+  const statsOf = async (slug: string, slots?: Awaited<ReturnType<typeof equipmentOf>>) => {
+    const worn = Object.values(slots ?? (await equipmentOf(slug)))
+      .map((id) => (id ? catalogItem(id, catalog) : undefined))
+      .filter((i) => i !== undefined);
+    const ranks = Object.fromEntries((await store.skills(slug)).map((s) => [s.id, s.rank]));
+    return characterStats(worn, ranks as Partial<Record<SkillId, number>>);
+  };
+
+  const equipmentResponse = async (slug: string): Promise<EquipmentResponse> => {
+    const slots = await equipmentOf(slug);
+    return { slots, stats: await statsOf(slug, slots) };
+  };
+
+  app.get('/v1/buds/me/equipment', requirePlayer(store), async (c) =>
+    c.json<EquipmentResponse>(await equipmentResponse(c.get('bud').slug)),
+  );
+
+  /** Wears an owned item in its slot, or empties the slot (`itemId: null`). */
+  app.put('/v1/buds/me/equipment/:slot', requirePlayer(store), async (c) => {
+    const slot = slotIdSchema.safeParse(c.req.param('slot'));
+    if (!slot.success) throw new HTTPException(404, { message: 'Nie ma takiego miejsca' });
+    const input = equipRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success) {
+      return c.json<ApiError>(
+        { error: { code: 'invalid_input', message: 'Podaj przedmiot' } },
+        400,
+      );
+    }
+    const bud = c.get('bud');
+    const itemId = input.data.itemId;
+    if (itemId !== null) {
+      const item = catalogItem(itemId, catalog);
+      if (!fitsSlot(item, slot.data)) {
+        const where = SLOTS.find((s) => s.id === slot.data)!.name.toLowerCase();
+        return c.json<ApiError>(
+          { error: { code: 'wrong_slot', message: `Tego nie założysz na: ${where}` } },
+          400,
+        );
+      }
+      const owned = new Set((await store.items(bud.slug)).map((i) => i.itemId));
+      if (item!.price.currency !== 'free' && !owned.has(itemId)) {
+        return c.json<ApiError>(
+          { error: { code: 'item_locked', message: `Nie masz jeszcze: ${item!.name}` } },
+          403,
+        );
+      }
+    }
+    await store.equip(bud.slug, slot.data, itemId);
+    return c.json<EquipmentResponse>(await equipmentResponse(bud.slug));
+  });
+
+  /** Buys gear for coins earned in the game. Real money will only ever buy looks (catalog rule). */
+  app.post('/v1/shop/:itemId/buy', requirePlayer(store), async (c) => {
+    const item = catalogItem(c.req.param('itemId'), catalog);
+    if (!item?.shop || !item.available || item.price.currency !== 'coins') {
+      throw new HTTPException(404, { message: 'Tego nie ma w sklepie' });
+    }
+    const result = await store.buyItem(c.get('bud').slug, item.id, item.price.amount);
+    if (result.status === 'owned') {
+      return c.json<ApiError>({ error: { code: 'owned', message: 'Już to masz' } }, 409);
+    }
+    if (result.status === 'poor') {
+      const missing = item.price.amount - result.coins;
+      return c.json<ApiError>(
+        { error: { code: 'not_enough_coins', message: `Brakuje ci ${missing} monet` } },
+        409,
+      );
+    }
+    return c.json<BuyResponse>({ itemId: item.id, coins: result.coins });
+  });
+
+  // ---------- accounts (signed in on the website) ----------
+
+  const accountBud = async (slug: string): Promise<AccountBud> => {
+    const bud = (await store.getBySlug(slug))!;
+    const [wallet, items, equipment, quests, caches] = await Promise.all([
+      store.wallet(slug),
+      store.items(slug),
+      equipmentResponse(slug),
+      store.completedQuests(slug),
+      store.openedCaches(slug),
+    ]);
+    return {
+      bud,
+      level: levelFromXp(bud.xp).level,
+      coins: wallet.coins,
+      gems: wallet.gems,
+      items,
+      equipment: equipment.slots,
+      stats: equipment.stats,
+      questsDone: quests.length,
+      cachesFound: caches.length,
+    };
+  };
+
+  /** Everything private about the account's buds. */
+  app.get('/v1/account/buds', requireAuth(keys), async (c) => {
+    const buds = await store.budsOfUser(c.get('user').id);
+    return c.json<AccountBudsResponse>({
+      buds: await Promise.all(buds.map((b) => accountBud(b.slug))),
+    });
+  });
+
+  /** Links the guest bud this browser created (proved by its guest token) to the account. */
+  app.post('/v1/account/buds/claim', requireAuth(keys), async (c) => {
+    const input = claimBudRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success) {
+      return c.json<ApiError>(
+        { error: { code: 'invalid_input', message: 'Brak tokenu Buda' } },
+        400,
+      );
+    }
+    const bud = await store.getByTokenHash(hashToken(input.data.token));
+    if (!bud) throw new HTTPException(404, { message: 'Nie znaleziono tego Buda' });
+    const user = c.get('user');
+    if ((await store.budsOfUser(user.id)).length >= MAX_BUDS_PER_ACCOUNT) {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'too_many_buds',
+            message: `Na jednym koncie zmieści się ${MAX_BUDS_PER_ACCOUNT} Budów`,
+          },
+        },
+        409,
+      );
+    }
+    const result = await store.claimBud(bud.slug, user.id);
+    if (result === 'taken') {
+      return c.json<ApiError>(
+        { error: { code: 'bud_taken', message: 'Ten Bud należy już do innego konta' } },
+        409,
+      );
+    }
+    return c.json<AccountBud>(await accountBud(bud.slug));
+  });
+
+  /** A pairing code for one of the account's buds: the way to bring it to a new phone. */
+  app.post('/v1/account/buds/:slug/pair-code', requireAuth(keys), async (c) => {
+    const slug = budSlugSchema.safeParse(c.req.param('slug'));
+    if (!slug.success || (await store.ownerOf(slug.data)) !== c.get('user').id) {
+      throw new HTTPException(404, { message: 'Nie masz takiego Buda' });
+    }
+    const code = makePairCode();
+    const expiresAt = new Date(Date.now() + PAIR_CODE_TTL_MINUTES * 60_000);
+    await store.savePairCode(slug.data, code, expiresAt);
+    return c.json<PairCodeResponse>({ code, expiresAt: expiresAt.toISOString() }, 201);
+  });
+
+  // ---------- caches (skrytki) ----------
+
+  app.get('/v1/buds/me/caches', requirePlayer(store), async (c) =>
+    c.json<CachesResponse>({ opened: await store.openedCaches(c.get('bud').slug) }),
+  );
+
+  /**
+   * The game reports a searched cache; the server checks that it exists and the bud's level, and grants its coins
+   * and XP exactly once. (Like quests, checking that the bud really stood there needs the multiplayer server.)
+   */
+  app.post('/v1/buds/me/caches/:id/open', requirePlayer(store), async (c) => {
+    const cacheId = cacheIdSchema.safeParse(c.req.param('id'));
+    const cache = cacheId.success ? content.caches.find((k) => k.id === cacheId.data) : undefined;
+    if (!cache) throw new HTTPException(404, { message: 'Nie ma takiej skrytki' });
+    const bud = c.get('bud');
+    const opened = new Set(await store.openedCaches(bud.slug));
+    const already = {
+      error: { code: 'already_opened', message: 'Ta skrytka jest już pusta' },
+    } satisfies ApiError;
+    const blocker = cacheBlocker(cache, bud.xp, opened);
+    if (blocker === 'already_opened') return c.json<ApiError>(already, 409);
+    if (blocker === 'level_too_low') {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'level_too_low',
+            message: `Tę skrytkę otworzysz od poziomu ${cache.minLevel}`,
+          },
+        },
+        409,
+      );
+    }
+    // Szczęście from worn gear adds coins (computed here, never by the game)
+    const coins = coinsWithLuck(cache.coins, (await statsOf(bud.slug)).luck);
+    const result = await store.openCache(bud.slug, cache.id, coins, cache.xp);
+    if (!result) return c.json<ApiError>(already, 409);
+    const before = levelFromXp(bud.xp).level;
+    const level = levelFromXp(result.xp).level;
+    return c.json<OpenCacheResponse>({
+      cacheId: cache.id,
+      coinsGained: coins,
+      coins: result.coins,
+      xpGained: cache.xp,
+      xp: result.xp,
+      level,
+      levelUp: level > before,
     });
   });
 

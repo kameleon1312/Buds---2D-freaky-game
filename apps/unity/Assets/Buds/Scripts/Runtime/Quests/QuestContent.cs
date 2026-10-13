@@ -56,12 +56,48 @@ namespace Buds.Quests
     }
 
     [Serializable]
+    public sealed class SkillBonusData
+    {
+        public string id;
+        public int rank;
+    }
+
+    [Serializable]
     public sealed class ItemData
     {
         public string id;
         public string name;
-        public string kind; // outfit | headwear | accessory | weapon | …
+        public string kind; // outfit | headwear | accessory | weapon | gear | …
         public string rarity; // common … mythic (design-system rarity colours)
+        public string slot; // gear: head | face | torso | hands | legs | feet | accessory | held; "" = not worn
+        public int speed;
+        public int armor;
+        public int luck;
+        public SkillBonusData[] skillBonus;
+        public int coins; // price in the coin shop (the server charges)
+        public bool shop;
+        public bool premium; // real money: looks only
+        public bool available;
+        public string description;
+
+        public bool IsGear => !string.IsNullOrEmpty(slot);
+    }
+
+    [Serializable]
+    public sealed class StatData
+    {
+        public string id; // speed | armor | luck
+        public string name;
+        public string unit;
+        public int max;
+        public string description;
+    }
+
+    [Serializable]
+    public sealed class SlotData
+    {
+        public string id;
+        public string name;
     }
 
     [Serializable]
@@ -73,6 +109,22 @@ namespace Buds.Quests
         public string district;
     }
 
+    /// <summary>A hidden cache (skrytka): coins and XP the server grants once, when the bud searches it.</summary>
+    [Serializable]
+    public sealed class CacheData
+    {
+        public string id;
+        public string district;
+        public string map; // the district itself or one of its rooms
+        public int x;
+        public int y;
+        public string look; // art: skrytka-<look>, skrytka-<look>-pusta
+        public int coins;
+        public int xp;
+        public int minLevel;
+        public string text;
+    }
+
     /// <summary>All NPCs and quests the game knows (the API validates completions against the same data).</summary>
     [Serializable]
     public sealed class QuestContent
@@ -82,6 +134,10 @@ namespace Buds.Quests
         public ItemData[] items;
         public SkillData[] skills;
         public int skillMaxRank;
+        public CacheData[] caches;
+        public StatData[] stats;
+        public SlotData[] slots;
+        public int skillGearMax;
 
         public static QuestContent Parse(string json)
         {
@@ -90,6 +146,20 @@ namespace Buds.Quests
             content.quests ??= Array.Empty<QuestData>();
             content.items ??= Array.Empty<ItemData>();
             content.skills ??= Array.Empty<SkillData>();
+            content.caches ??= Array.Empty<CacheData>();
+            content.stats ??= Array.Empty<StatData>();
+            content.slots ??= Array.Empty<SlotData>();
+            foreach (var i in content.items)
+            {
+                i.slot ??= "";
+                i.skillBonus ??= Array.Empty<SkillBonusData>();
+                i.description ??= "";
+            }
+            foreach (var c in content.caches)
+            {
+                if (string.IsNullOrEmpty(c.map)) c.map = c.district;
+                if (c.minLevel < 1) c.minLevel = 1;
+            }
             if (content.skillMaxRank < 1) content.skillMaxRank = 5;
             foreach (var q in content.quests)
             {

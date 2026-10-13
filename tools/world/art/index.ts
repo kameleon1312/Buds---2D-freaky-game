@@ -1,5 +1,6 @@
 import { CITY } from './city';
 import { COMMON } from './common';
+import { INTERIOR } from './interior';
 import type { Prop } from './kit';
 import { MANOR } from './manor';
 import { QUEST_PROPS } from './quest';
@@ -14,4 +15,5 @@ export const ALL_PROPS: Record<string, Prop> = {
   ...MANOR,
   ...RUINS,
   ...QUEST_PROPS,
+  ...INTERIOR,
 };

@@ -1460,6 +1460,786 @@
         1,
         1
       ]
+    },
+    {
+      "name": "sciana-kawiarnia-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-kawiarnia-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-kawiarnia-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-komisariat-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-komisariat-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-komisariat-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-garaz-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-garaz-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-garaz-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-chatka-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-chatka-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-chatka-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-dworek-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-dworek-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-dworek-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-urzad-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-urzad-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-urzad-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-silownia-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-silownia-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-silownia-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-ruina-a",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-ruina-okno",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sciana-ruina-obraz",
+      "pivotX": 0.5,
+      "pivotY": 0.04,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "podloga-deski",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "podloga-deski-stare",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "podloga-parkiet",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "podloga-kafle",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "podloga-beton",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "podloga-guma",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lada",
+      "pivotX": 0.5,
+      "pivotY": 0.0473,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "stolik",
+      "pivotX": 0.5,
+      "pivotY": 0.075,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "stolik-kwadrat",
+      "pivotX": 0.5,
+      "pivotY": 0.075,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "krzeslo",
+      "pivotX": 0.5,
+      "pivotY": 0.0765,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "krzeslo-metal",
+      "pivotX": 0.5,
+      "pivotY": 0.0765,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "regal-sloiki",
+      "pivotX": 0.5,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "regal-ksiazki",
+      "pivotX": 0.5,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "regal-narzedzia",
+      "pivotX": 0.5,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "roslina",
+      "pivotX": 0.5,
+      "pivotY": 0.0532,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "biurko",
+      "pivotX": 0.5,
+      "pivotY": 0.0532,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "szafka",
+      "pivotX": 0.5,
+      "pivotY": 0.054,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "szafka-zielona",
+      "pivotX": 0.5,
+      "pivotY": 0.054,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "krata",
+      "pivotX": 0.5,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dystrybutor",
+      "pivotX": 0.5,
+      "pivotY": 0.0473,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "warsztat",
+      "pivotX": 0.5,
+      "pivotY": 0.0532,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "skrzynka",
+      "pivotX": 0.5,
+      "pivotY": 0.075,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lozko-a",
+      "pivotX": 0.5,
+      "pivotY": 0.0374,
+      "flat": false,
+      "foot": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "lozko-b",
+      "pivotX": 0.5,
+      "pivotY": 0.0374,
+      "flat": false,
+      "foot": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "dywan-czerwony",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dywan-plecionka",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dywan-zielony",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "kominek",
+      "pivotX": 0.5,
+      "pivotY": 0.0309,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "fotel",
+      "pivotX": 0.5,
+      "pivotY": 0.0625,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "stol-dlugi",
+      "pivotX": 0.5,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        5,
+        2
+      ]
+    },
+    {
+      "name": "zegar",
+      "pivotX": 0.5,
+      "pivotY": 0.0376,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sejf",
+      "pivotX": 0.5,
+      "pivotY": 0.0642,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lawka-sztanga",
+      "pivotX": 0.5,
+      "pivotY": 0.054,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "worek-bokserski",
+      "pivotX": 0.5,
+      "pivotY": 0.0375,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "hantle",
+      "pivotX": 0.5,
+      "pivotY": 0.0642,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "kanapa",
+      "pivotX": 0.5,
+      "pivotY": 0.061,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "kanapa-stara",
+      "pivotX": 0.5,
+      "pivotY": 0.061,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "telewizor",
+      "pivotX": 0.5,
+      "pivotY": 0.054,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "lampa-stojaca",
+      "pivotX": 0.5,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "wycieraczka",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "wycieraczka-wejscie",
+      "pivotX": 0.5,
+      "pivotY": 0.1,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-skrzynka",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-skrzynka-pusta",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-worek",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-worek-pusta",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-kufer",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-kufer-pusta",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-cegly",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-cegly-pusta",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-dzban",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-dzban-pusta",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-opona",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "skrytka-opona-pusta",
+      "pivotX": 0.4981,
+      "pivotY": 0.0736,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "blysk",
+      "pivotX": 0.5015,
+      "pivotY": 0.0418,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     }
   ]
 }

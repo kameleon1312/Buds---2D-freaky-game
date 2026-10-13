@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import { budLookSchema, ownedItemSchema, type BudRecord } from '@buds/shared';
+import { budLookSchema, ownedItemSchema, type BudRecord, type SlotId } from '@buds/shared';
 import { makeSlug } from './slug.js';
-import type { BudStore } from './types.js';
+import type { BudStore, BuyResult } from './types.js';
 
 type BudRow = {
   id: string;
@@ -60,11 +60,16 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       return bud ? toRecord(bud) : null;
     },
 
-    async create(input, tokenHash) {
+    async create(input, tokenHash, userId) {
       for (let attempt = 0; attempt < 3; attempt++) {
         const { data, error } = await db
           .from('buds')
-          .insert({ slug: makeSlug(input.name), name: input.name, look: input.look })
+          .insert({
+            slug: makeSlug(input.name),
+            name: input.name,
+            look: input.look,
+            user_id: userId ?? null,
+          })
           .select(COLUMNS)
           .single();
         if (error?.code === UNIQUE_VIOLATION) continue;
@@ -161,6 +166,93 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       if (error) throw error;
       const row = data as { coins: number; gems: number } | null;
       return { coins: row?.coins ?? 0, gems: row?.gems ?? 0 };
+    },
+
+    async equipment(slug) {
+      const { data, error } = await db
+        .from('bud_equipment')
+        .select('slot, item_id')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return Object.fromEntries(
+        (data as { slot: SlotId; item_id: string }[]).map((r) => [r.slot, r.item_id]),
+      );
+    },
+
+    async equip(slug, slot, itemId) {
+      const budId = await idBySlug(slug);
+      const { error } = itemId
+        ? await db
+            .from('bud_equipment')
+            .upsert(
+              { bud_id: budId, slot, item_id: itemId, equipped_at: new Date().toISOString() },
+              { onConflict: 'bud_id,slot' },
+            )
+        : await db.from('bud_equipment').delete().eq('bud_id', budId).eq('slot', slot);
+      if (error) throw error;
+    },
+
+    async buyItem(slug, itemId, price) {
+      const { data, error } = await db.rpc('buy_item', {
+        p_bud: await idBySlug(slug),
+        p_item: itemId,
+        p_price: price,
+      });
+      if (error) throw error;
+      return data as BuyResult;
+    },
+
+    async budsOfUser(userId) {
+      const { data, error } = await db
+        .from('buds')
+        .select(COLUMNS)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return (data as BudRow[]).map(toRecord);
+    },
+
+    async ownerOf(slug) {
+      const { data, error } = await db
+        .from('buds')
+        .select('user_id')
+        .eq('slug', slug)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as { user_id: string | null } | null)?.user_id ?? null;
+    },
+
+    async claimBud(slug, userId) {
+      // only a bud without an account can be claimed: the filter makes it atomic
+      const { data, error } = await db
+        .from('buds')
+        .update({ user_id: userId })
+        .eq('slug', slug)
+        .is('user_id', null)
+        .select('id');
+      if (error) throw error;
+      if ((data as unknown[]).length) return 'ok';
+      return (await this.ownerOf(slug)) === userId ? 'mine' : 'taken';
+    },
+
+    async openedCaches(slug) {
+      const { data, error } = await db
+        .from('bud_caches')
+        .select('cache_id')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return (data as { cache_id: string }[]).map((r) => r.cache_id);
+    },
+
+    async openCache(slug, cacheId, coins, xp) {
+      const { data, error } = await db.rpc('open_cache', {
+        p_bud: await idBySlug(slug),
+        p_cache: cacheId,
+        p_coins: coins,
+        p_xp: xp,
+      });
+      if (error) throw error;
+      return (data as { xp: number; coins: number } | null) ?? null;
     },
 
     async completedQuests(slug) {

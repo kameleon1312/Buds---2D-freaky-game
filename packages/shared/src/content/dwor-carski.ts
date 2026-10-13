@@ -1,9 +1,10 @@
+import type { CacheInput } from '../caches';
 import type { Npc, QuestInput } from '../quests';
 
 /** Dwór Carski — aristocratic district (from level 5). ~2020 XP: enough to reach level 7 and Los Karkos. */
 const D = 'dwor-carski';
 
-export const DWOR_CARSKI: { npcs: Npc[]; quests: QuestInput[] } = {
+export const DWOR_CARSKI: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
   npcs: [
     {
       id: 'alfred',
@@ -290,6 +291,71 @@ export const DWOR_CARSKI: { npcs: Npc[]; quests: QuestInput[] } = {
         },
         { kind: 'talk', npc: 'irena', text: 'To wystarczy, żeby ich zamknąć. Świetna robota.' },
       ],
+    },
+  ],
+  // hidden caches (skrytki): revealed when the bud comes close, coins and XP granted by the server once
+  caches: [
+    {
+      id: 'dc-labirynt',
+      district: D,
+      x: 11,
+      y: 85,
+      look: 'kufer',
+      coins: 70,
+      xp: 30,
+      text: 'Kufer w ślepym zaułku labiryntu. Ogrodnik chyba nie wie, co tu stoi.',
+    },
+    {
+      id: 'dc-ogrod',
+      district: D,
+      x: 50,
+      y: 62,
+      look: 'dzban',
+      coins: 40,
+      xp: 15,
+      text: 'Dzban pod różami. Ktoś płacił ogrodnikowi za milczenie.',
+    },
+    {
+      id: 'dc-stajnie',
+      district: D,
+      x: 118,
+      y: 86,
+      look: 'worek',
+      coins: 35,
+      xp: 15,
+      text: 'Worek owsa, a pod owsem sakiewka stajennego.',
+    },
+    {
+      id: 'dc-kamienice',
+      district: D,
+      x: 12,
+      y: 40,
+      look: 'cegly',
+      coins: 45,
+      xp: 20,
+      text: 'Za luźnymi cegłami kamienicy: plotki spisane na kartce i monety.',
+    },
+    {
+      id: 'dc-dworek',
+      district: D,
+      map: 'dwor-carski-dworek',
+      x: 3,
+      y: 2,
+      look: 'kufer',
+      coins: 100,
+      xp: 35,
+      text: 'Rodowy kuferek schowany za zegarem. Złote monety z herbem.',
+    },
+    {
+      id: 'dc-urzad',
+      district: D,
+      map: 'dwor-carski-urzad',
+      x: 8,
+      y: 2,
+      look: 'skrzynka',
+      coins: 90,
+      xp: 30,
+      text: 'Skrzynka obok sejfu: „pomyłkowo” pobrane opłaty. Wracają do ludzi.',
     },
   ],
 };

@@ -61,3 +61,15 @@ Kolejne (np. walka, mini-gra freestyle, graffiti, przynieś przedmiot z ekwipunk
   sprawdza, czy każdy NPC stoi na wolnym polu i nie blokuje przejścia, a cele i przedmioty są osiągalne, potem
   zapisuje JSON i arkusze NPC. Nowy przedmiot do zbierania potrzebuje grafiki `item-<nazwa>` w `tools/world/art/quest.ts`.
 - Testy: `packages/shared/test/quests.test.ts`, `apps/api/test/buds.test.ts` (quests), Unity `QuestTests.cs`.
+
+## Skrytki
+
+W każdej dzielnicy (także we wnętrzach budynków) leżą ukryte skrytki: skrzynki, worki, kufry, luźne cegły, dzbany,
+opony. Są niewidoczne, dopóki Bud nie podejdzie na kilka kroków. Wtedy pojawiają się z błyskiem („Coś tu błyszczy…”),
+a umiejętność **Spryt** wydłuża ten zasięg. Przeszukanie (`E` lub dotknięcie) daje monety i trochę XP, raz na Buda.
+Przyznaje je serwer (`POST /v1/buds/me/caches/:id/open`, funkcja SQL `open_cache`: zapis, XP i portfel w jednej
+transakcji). Gość może przeszukiwać skrytki, ale nic nie zapisuje.
+
+Skrytki dopisujesz w `content/<dzielnica>.ts` w tablicy `caches`: `id`, `district`, opcjonalnie `map` (pokój, np.
+`miasto-ziomkow-kawiarnia`), `x`, `y`, `look`, `coins`, `xp`, `text` (co Bud znajduje). `export-quests.ts` sprawdza,
+czy skrytka leży na wolnym polu, da się do niej podejść i nie odcina przejścia.

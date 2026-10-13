@@ -156,6 +156,8 @@ namespace Buds.Core
             ui.ShowHud(name, level, xp, Progression.NextLevelXp(xp));
             SetUpQuests(completed);
             SetUpPanel();
+            SetUpCaches();
+            SetUpMap();
             // dev/test: start in another district (-buds-district las-palmas)
             LoadDistrict(CommandLine.Get("-buds-district") ?? Districts.Start, null);
             ui.HideLoading();
@@ -164,37 +166,51 @@ namespace Buds.Core
             if (shots != null) _ = AutoPilot(shots);
         }
 
-        /// <summary>Builds a district from its map file; arriving from another one puts you next to the road back.</summary>
+        /// <summary>
+        /// Builds a district or a room from its map file. Arriving from another district puts you next to the road
+        /// back, leaving a room puts you in front of its door, entering a room just inside the doormat.
+        /// </summary>
         void LoadDistrict(string districtId, string fromDistrict)
         {
             if (world) Destroy(world.gameObject);
             if (player) Destroy(player.gameObject);
 
             var map = MapFormat.Load(districtId);
+            EnterMap(map);
             world = WorldView.Create(map);
             questWorld = QuestWorld.Create(world, quests);
+            cacheWorld = CacheWorld.Create(world, caches);
             UpdateTracker();
             var at = fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
             player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
+            player.Blocked = (x, y) => !map.IsWalkable(x, map.Height - 1 - y);
+            player.Motor.SpeedMultiplier = 1 + gear.Speed / 100f;
+            // walking into a room you face into it; stepping out of one you face the street
+            if (map.IsInterior) player.Look(Vector2.up);
+            else if (map.Doors.Exists(d => d.Target == fromDistrict)) player.Look(Vector2.down);
 
             var cam = Camera.main!.GetComponent<FollowCamera>();
             cam.target = player.transform;
-            cam.bounds = new Rect(0, 0, map.Width, map.Height);
+            // rooms: a little room above the map so the whole back wall shows; around them, the map's dark base
+            cam.bounds = new Rect(0, 0, map.Width, map.Height + (map.IsInterior ? 1.6f : 0));
+            Camera.main.backgroundColor = map.BaseColor;
             cam.SnapToTarget();
 
             atExit = map.ExitAt(at.x, at.y);
             atZone = map.ZoneAt(at.x, at.y);
-            ui.ShowToast(atZone != null ? $"{map.Name} · {atZone.Name}" : map.Name);
+            ui.ShowToast(map.IsInterior || atZone == null ? map.Name : $"{map.Name} · {atZone.Name}");
         }
 
         void Update()
         {
             if (!player) return;
             ui.Tick();
+            if (travelling) return;
             var input = player.Input;
-            input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false);
+            input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false);
             ui.UpdateStick(input);
 
+            if (UpdateMapScreen(input)) return;
             if (UpdatePanel(input)) return;
 
             // quest offers wait for a choice: E / Enter accepts, Esc / Q declines, or tap a button
@@ -209,15 +225,27 @@ namespace Buds.Core
             CheckZone(cell);
             if (CheckExit(cell)) return;
             CheckQuestProgress(cell);
+            Explore(cell);
 
+            // what the bud can interact with: a person first, then a cache, a door, a sign
             var feet = (Vector2)player.transform.position;
+            var (mx, my) = FeetOnMap();
             nearbyNpc = questWorld.NearestNpc(feet, InteractRange);
-            nearby = nearbyNpc ? null : FindNearbySign();
-            ui.SetHint(nearbyNpc ? $"Rozmawiaj: {nearbyNpc.Data.name}  [E]" : nearby != null ? "Czytaj  [E]" : null);
+            nearbyCache = nearbyNpc ? null : caches.Nearest(world.Map.Id, mx, my, CacheWorld.SearchRange);
+            nearbyDoor = nearbyNpc || nearbyCache != null ? null : FindNearbyDoor(feet);
+            nearby = nearbyNpc || nearbyCache != null || nearbyDoor != null ? null : FindNearbySign();
+            ui.SetHint(nearbyNpc ? $"Rozmawiaj: {nearbyNpc.Data.name}  [E]"
+                : nearbyCache != null ? "Przeszukaj  [E]"
+                : nearbyDoor != null ? $"Wejdź: {nearbyDoor.Name}  [E]"
+                : nearby != null ? "Czytaj  [E]"
+                : null);
+            if (!ui.DialogOpen && CheckDoorPush(input, cell)) return;
 
             if (!input.InteractPressed) return;
             if (ui.DialogOpen) ui.HideDialog();
             else if (nearbyNpc) TalkTo(nearbyNpc);
+            else if (nearbyCache != null) _ = OpenCache(nearbyCache);
+            else if (nearbyDoor != null) EnterDoor(nearbyDoor);
             else if (nearby != null) ui.ShowDialog(nearby.Title, nearby.Text);
         }
 
@@ -236,12 +264,18 @@ namespace Buds.Core
             if (exit == atExit) return false;
             atExit = exit;
             if (exit == null) return false;
+            if (world.Map.IsInterior)
+            {
+                // the doormat: back out to the street
+                _ = Travel(exit.DistrictId, world.Map.Id);
+                return true;
+            }
             var district = Districts.Get(exit.DistrictId);
             if (district == null) return false;
             // development builds skip the level gate so every district can be walked through
             if (Districts.CanEnter(district.Id, level) || (Debug.isDebugBuild && district.Open))
             {
-                LoadDistrict(district.Id, world.Map.Id);
+                _ = Travel(district.Id, world.Map.Id);
                 return true;
             }
             ui.ShowDialog(district.Name, Districts.ClosedReason(district, level));
@@ -314,6 +348,15 @@ namespace Buds.Core
                 await Shot("01-spawn.png");
                 await Walk(Vector2.right, 0.8f);
                 await Shot("02-walk.png");
+                // running: the shot is taken mid-run, with the dust
+                player.Input.OverrideRun = true;
+                player.Input.Override = Vector2.left;
+                await Shot("02-run.png");
+                player.Input.Override = Vector2.zero;
+                player.Input.OverrideRun = false;
+                OpenMap();
+                await Shot("02-map.png");
+                mapScreen.Hide();
                 var map = world.Map;
                 if (map.Signs.Count > 0)
                 {
@@ -339,7 +382,16 @@ namespace Buds.Core
                         Teleport((zone.X0 + zone.X1) / 2, (zone.Y0 + zone.Y1) / 2);
                         await Shot($"{district.Id}-{n++:00}-{Slug(zone.Name)}.png");
                     }
+                    if (CommandLine.Has("-buds-tour"))
+                    {
+                        await VisitRooms(Shot);
+                        OpenMap();
+                        await Shot($"{district.Id}-map.png");
+                        mapScreen.Hide();
+                    }
                 }
+
+                if (CommandLine.Has("-buds-gear-demo") && session != null) await GearDemo(Shot);
 
                 // travel: walk north out of the start district (development builds skip the level gate)
                 if (CommandLine.Has("-buds-tour"))

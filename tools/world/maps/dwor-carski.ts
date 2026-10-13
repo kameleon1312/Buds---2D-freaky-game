@@ -278,5 +278,8 @@ export function dworCarski(): MapCanvas {
     { ground: 'dirt', chance: 0.05, props: 'pebbles|tuft' },
     { ground: 'water', chance: 0.12, props: 'lily' },
   );
+  // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
+  m.door([64, 52], 'dwor-carski-dworek', 'Salon dworku');
+  m.door([82, 20], 'dwor-carski-urzad', 'Urząd Skarbowy');
   return m;
 }

@@ -9,11 +9,11 @@ Guidance for Claude Code when working in this repository.
 ## Layout
 
 - `apps/unity` — the game (Unity 6.6, URP 2D, Input System). Code in `Assets/Buds/Scripts/{Runtime,Editor}`, tests in `Assets/Buds/Tests/EditMode`.
-- `apps/web` — Next.js 15 site (Vercel): bud creator, bud profile + pairing code, ranking.
+- `apps/web` — Next.js 15 site (Vercel): landing + bud creator, bud profile + pairing code, ranking, account (`/konto`), privacy page.
 - `apps/api` — Hono API (Railway): buds, guest tokens, pairing, sprite-sheet PNGs.
 - `packages/shared` — the vector bud generator (`src/bud/vector.ts`, chibi SVG), level curve, zod schemas. Single source of truth for how a bud looks.
 - `supabase/` — migrations (`buds`, `bud_tokens`, `bud_pair_codes`).
-- `tools/` — `check-migrations.mjs`, `export-guest-sheet.ts` (regenerates the offline guest sprite in Unity), `world/` (district art and maps: `export-art.ts` renders every prop in `world/art/*` to `Resources/World/*.png` + `props.json`; `export-maps.ts` builds the four district maps from `world/maps/*` into `Resources/Maps/<id>.txt` and validates them).
+- `tools/` — `check-migrations.mjs`, `export-guest-sheet.ts` (regenerates the offline guest sprite in Unity), `world/` (district art and maps: `export-art.ts` renders every prop in `world/art/*` to `Resources/World/*.png` + `props.json`; `export-maps.ts` builds the four district maps and their rooms (`world/maps/interiors.ts`) from `world/maps/*` into `Resources/Maps/<id>.txt` and validates them).
 
 ## Commands
 
@@ -54,6 +54,11 @@ Look at the autopilot screenshots after any gameplay or rendering change — tes
 - Migrations: never edit one that is already on `main`; every new table gets RLS enabled.
 - Unity: world and UI are built from code at runtime; the only scene is `Assets/Buds/Scenes/Main.unity` (camera + `GameBootstrap`). 1 tile = 1 world unit.
 - Maps are text files (`Resources/Maps/<district>.txt`, format documented in `MapFormat.cs`): a character grid + legend (`ground [+ prop|variant] [!solid]`), ground styles, scatter rules, signs, exits, zones. The file is the single source of truth for collision (the multiplayer server will read it too). Edit the generator in `tools/world/maps` or the file directly; `DistrictMapTests` check every map (spawn, exits both ways, reachability, known props). Buildings: odd footprint widths, anchor = middle of the bottom row.
+- Interiors: a district map's `[doors]` (building anchor → room id) lead into small room maps (`kind = interior`, `outside = <district>`, id `<district>-<place>`), built by `tools/world/maps/interiors.ts`; the room's doormat exit leads back in front of the door (`WorldMap.ArrivalFrom`). `m.door()` puts an entrance mat in front and clears 1×1 props there. Travel between maps fades (`GameBootstrap.Travel`).
+- Hidden caches (skrytki): `caches` in `content/<district>.ts` (schema in `packages/shared/src/caches.ts`), invisible until the bud is within `CacheLog.RevealRadius` (Spryt widens it); coins + XP granted once by `POST /v1/buds/me/caches/:id/open` (atomic `open_cache` SQL function). Logic in `CacheLog`, view in `CacheWorld`, exported by `export-quests.ts`.
+- Gear: eight slots head to toe (`packages/shared/src/gear.ts`); catalog items with `slot` + `bonus` (speed / armor / luck / skill ranks, capped, gear adds at most +2 per skill). Stats formula mirrored in Unity `Quests/Gear.cs` (change both). Only gear earned in the game may give bonuses: premium / gems items are looks only (`gearProblems`, tested). Coin shop: `shop: true` items, `POST /v1/shop/:itemId/buy` (atomic `buy_item`). Luck adds cache coins on the server. Own brand names only. Details: `docs/ekwipunek.md`.
+- Accounts: Supabase Auth (e-mail + password) on the website (`/konto`); the API verifies account tokens with the project JWKS (ES256) or the legacy HS256 secret (`middleware/auth.ts`). A bud belongs to an account via `buds.user_id` (created while signed in, or claimed with the guest token). Private bud data only through `/v1/account/*`; the public profile shows name, look, level. The web reads the repo-root `.env` (next.config.ts).
+- Movement is `BudMotor` (plain class: acceleration, running with Shift / a long stick drag, facing hysteresis, corner assist); `BudController` only applies it. The map screen (`MapScreen`, M) draws `MapPicture` with the per-device fog of war (`Exploration`).
 - Look: ground layers are meshes traced from blurred tile masks (`GroundShapes`, rounded corners, colour bands, no outlines) in 32×32 chunks; props are y-sorted sprites (`WorldView.SortOrderFor`) packed into one atlas per district; fences auto-join (`x-post` + `x-h`/`x-v`). Only characters carry the black outline. Keep logic in plain classes so it is testable in EditMode.
 - Secrets only via env vars; `.env.example` documents every variable.
 

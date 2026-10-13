@@ -1,8 +1,8 @@
 // Exports NPCs and quests from packages/shared (content/*.ts) for the Unity game:
 //   apps/unity/Assets/Buds/Resources/Quests/content.json   (flat, JsonUtility-friendly)
 //   apps/unity/Assets/Buds/Resources/Npcs/<npc>.png        (sprite sheets from the bud generator)
-// and checks every position against the district maps: NPCs stand on free ground without cutting a path
-// off, every talk/reach/collect target can be reached from the spawn.
+// and checks every position against the maps: NPCs and hidden caches stand on free ground without cutting a
+// path off, every talk/reach/collect target can be reached from the spawn.
 //
 // Usage (from apps/api): pnpm exec tsx ../../tools/world/export-quests.ts
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -11,8 +11,13 @@ import {
   CATALOG,
   CONTENT,
   DISTRICTS,
+  cacheMap,
   SKILLS,
+  SKILL_GEAR_MAX,
   SKILL_MAX_RANK,
+  SLOTS,
+  STATS,
+  gearProblems,
   contentProblems,
   type Quest,
 } from '@buds/shared';
@@ -21,7 +26,7 @@ import { ALL_PROPS } from './art/index';
 import { budSheetPng } from '../../apps/api/src/png';
 import { mapPath, readMap, reachable, walkable, type MapGrid } from './maps/read';
 
-const problems = contentProblems(CONTENT);
+const problems = [...contentProblems(CONTENT), ...gearProblems()];
 
 const maps = new Map<string, MapGrid>();
 const spawnOf = new Map<string, [number, number]>();
@@ -34,15 +39,32 @@ const mapOf = (district: string) => {
   return m;
 };
 
-// spawn points come from the [district] section
-for (const d of DISTRICTS) {
-  const text = readFileSync(mapPath(d.id), 'utf8');
+// spawn points come from the [district] section (districts and the rooms caches lie in)
+for (const id of new Set([...DISTRICTS.map((d) => d.id), ...CONTENT.caches.map(cacheMap)])) {
+  let text: string;
+  try {
+    text = readFileSync(mapPath(id), 'utf8');
+  } catch {
+    problems.push(`no map ${id} (tools/world/export-maps.ts)`);
+    continue;
+  }
   const m = /spawn\s*=\s*(\d+),(\d+)/.exec(text);
-  if (m) spawnOf.set(d.id, [Number(m[1]), Number(m[2])]);
+  if (m) spawnOf.set(id, [Number(m[1]), Number(m[2])]);
 }
 
-// NPCs block their cell in the game: check with all of them in place
+// NPCs and caches block their cell in the game: check with all of them in place
 const npcCells = new Map<string, Set<string>>();
+for (const c of CONTENT.caches) {
+  const id = cacheMap(c);
+  if (!spawnOf.has(id)) continue;
+  const m = mapOf(id);
+  if (!walkable(m, c.x, c.y)) problems.push(`cache ${c.id} lies on a blocked cell (${c.x},${c.y})`);
+  const prop = m.props[c.y]?.[c.x];
+  if (prop && !prop.startsWith('podloga-')) problems.push(`cache ${c.id} lies on prop ${prop}`);
+  const set = npcCells.get(id) ?? new Set<string>();
+  set.add(`${c.x},${c.y}`);
+  npcCells.set(id, set);
+}
 for (const n of CONTENT.npcs) {
   const m = mapOf(n.district);
   if (!walkable(m, n.x, n.y)) problems.push(`npc ${n.id} stands on a blocked cell (${n.x},${n.y})`);
@@ -68,6 +90,18 @@ const nextTo = (district: string, x: number, y: number) =>
 
 for (const n of CONTENT.npcs)
   if (!nextTo(n.district, n.x, n.y)) problems.push(`npc ${n.id} can't be reached`);
+for (const c of CONTENT.caches)
+  if (spawnOf.has(cacheMap(c)) && !nextTo(cacheMap(c), c.x, c.y))
+    problems.push(`cache ${c.id} can't be reached`);
+// NPCs and caches must not wall anything off: every cell reachable without them stays reachable
+for (const [id, blocked] of npcCells) {
+  const [sx, sy] = spawnOf.get(id)!;
+  if (reach.get(id)!.size !== reachable(mapOf(id), sx, sy).size - blocked.size)
+    problems.push(`${id}: NPCs or caches cut off part of the map`);
+}
+for (const c of CONTENT.caches)
+  if (!ALL_PROPS[`skrytka-${c.look}`] || !ALL_PROPS[`skrytka-${c.look}-pusta`])
+    problems.push(`cache ${c.id}: no art skrytka-${c.look} (tools/world/art/interior.ts)`);
 for (const q of CONTENT.quests) {
   for (const s of q.steps) {
     if (s.kind === 'reach') {
@@ -88,7 +122,7 @@ for (const q of CONTENT.quests)
   for (const s of q.steps)
     if (s.kind === 'collect' && !ALL_PROPS[`item-${s.item}`])
       problems.push(`${q.id}: no art item-${s.item} (tools/world/art/quest.ts)`);
-for (const item of CATALOG.filter((i) => i.available))
+for (const item of CATALOG.filter((i) => i.available || i.preview))
   if (!(item.id in ICONS.items))
     problems.push(`catalog item ${item.id} has no icon (tools/world/art/icons.ts)`);
 for (const skill of SKILLS)
@@ -134,12 +168,32 @@ const json = {
     steps: q.steps.map(flatStep),
   })),
   // the Bud panel shows names, kinds and rarities; prices stay on the server
-  items: CATALOG.filter((i) => i.available).map(({ id, name, kind, rarity }) => ({
+  // the Bud panel shows the paper doll, bonuses and the coin shop; prices are shown, the server charges
+  items: CATALOG.filter((i) => i.available || i.preview).map((i) => ({
+    id: i.id,
+    name: i.name,
+    kind: i.kind,
+    rarity: i.rarity,
+    slot: i.slot ?? '',
+    speed: i.bonus?.speed ?? 0,
+    armor: i.bonus?.armor ?? 0,
+    luck: i.bonus?.luck ?? 0,
+    skillBonus: Object.entries(i.bonus?.skills ?? {}).map(([id, rank]) => ({ id, rank })),
+    coins: i.price.currency === 'coins' ? i.price.amount : 0,
+    shop: !!i.shop,
+    premium: i.premium,
+    available: i.available,
+    description: i.description ?? '',
+  })),
+  stats: STATS.map(({ id, name, unit, max, description }) => ({
     id,
     name,
-    kind,
-    rarity,
+    unit,
+    max,
+    description,
   })),
+  slots: SLOTS.map(({ id, name }) => ({ id, name })),
+  skillGearMax: SKILL_GEAR_MAX,
   skills: SKILLS.map(({ id, name, description, district }) => ({
     id,
     name,
@@ -147,6 +201,18 @@ const json = {
     district,
   })),
   skillMaxRank: SKILL_MAX_RANK,
+  caches: CONTENT.caches.map((c) => ({
+    id: c.id,
+    district: c.district,
+    map: cacheMap(c),
+    x: c.x,
+    y: c.y,
+    look: c.look,
+    coins: c.coins,
+    xp: c.xp,
+    minLevel: c.minLevel,
+    text: c.text,
+  })),
 };
 const unity = (p: string) =>
   fileURLToPath(new URL(`../../apps/unity/Assets/Buds/Resources/${p}`, import.meta.url));
@@ -164,4 +230,6 @@ for (const f of readdirSync(unity('Npcs')))
 for (const n of CONTENT.npcs) writeFileSync(unity(`Npcs/${n.id}.png`), budSheetPng(n.look, 6));
 
 const xp = CONTENT.quests.reduce((sum, q) => sum + q.xp, 0);
-console.info(`exported ${CONTENT.npcs.length} NPCs and ${CONTENT.quests.length} quests (${xp} XP)`);
+console.info(
+  `exported ${CONTENT.npcs.length} NPCs, ${CONTENT.quests.length} quests (${xp} XP), ${CONTENT.caches.length} caches`,
+);

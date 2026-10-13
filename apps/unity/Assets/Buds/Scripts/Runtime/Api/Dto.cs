@@ -100,6 +100,69 @@ namespace Buds.Api
     }
 
     [Serializable]
+    public class CachesResponse
+    {
+        public string[] opened;
+    }
+
+    [Serializable]
+    public class OpenCacheResponse
+    {
+        public string cacheId;
+        public int coinsGained;
+        public int coins;
+        public int xpGained;
+        public int xp;
+        public int level;
+        public bool levelUp;
+    }
+
+    /// <summary>Worn item per slot ("" or null = empty). Stats are recomputed in the game (Gear.Stats).</summary>
+    [Serializable]
+    public class EquipmentSlotsDto
+    {
+        public string head;
+        public string face;
+        public string torso;
+        public string hands;
+        public string legs;
+        public string feet;
+        public string accessory;
+        public string held;
+
+        public System.Collections.Generic.Dictionary<string, string> ToDictionary()
+        {
+            var d = new System.Collections.Generic.Dictionary<string, string>();
+            void Add(string slot, string id)
+            {
+                if (!string.IsNullOrEmpty(id)) d[slot] = id;
+            }
+            Add("head", head);
+            Add("face", face);
+            Add("torso", torso);
+            Add("hands", hands);
+            Add("legs", legs);
+            Add("feet", feet);
+            Add("accessory", accessory);
+            Add("held", held);
+            return d;
+        }
+    }
+
+    [Serializable]
+    public class EquipmentResponse
+    {
+        public EquipmentSlotsDto slots;
+    }
+
+    [Serializable]
+    public class BuyResponse
+    {
+        public string itemId;
+        public int coins;
+    }
+
+    [Serializable]
     public class ApiErrorBody
     {
         public ApiErrorDetail error;

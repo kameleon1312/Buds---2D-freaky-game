@@ -141,7 +141,115 @@ const ICONS_ITEMS: Record<string, Icon> = {
       flat(circ(39, 40, 4), '#ffc93c', LINE, 1.5) +
       flat(rr(36, 24, 7, 7, 1), '#4cc7ff', LINE, 1.5),
   },
+  // ---------- coin shop gear ----------
+  'buty-trampki': { body: shoe(['#f6f2e9', '#d8cfbf'], '#ff3d50') },
+  'buty-glany': {
+    body:
+      shaded(
+        `M18 14H34V38L52 42Q56 44 56 50V54H14V20Q14 14 18 14Z`,
+        ['#3a3d4a', '#262833'],
+        LINE,
+        -3,
+        -3,
+      ) +
+      stroke('M20 22h10M20 28h10M20 34h10', '#b7bec9', 2.5) +
+      flat(rr(12, 50, 46, 6, 2), '#8f5e3b', LINE, 2),
+  },
+  'buty-sprintery': {
+    body:
+      shoe(['#4cc7ff', '#1b86c9'], '#ffc93c') +
+      stroke('M4 28h10M2 36h12M6 44h8', '#ffc93c', 3) +
+      stroke('M30 30l6 -6l2 6l6 -6', '#ffffff', 2.5),
+  },
+  // premium (looks only): the same shoe in gold
+  'buty-sprintery-zlote': {
+    body:
+      shoe(['#ffc93c', '#d98a0b'], '#fff3c4') +
+      stroke('M4 28h10M2 36h12M6 44h8', '#ffc93c', 3) +
+      `<circle cx="50" cy="16" r="3" fill="#ffffff"/><circle cx="56" cy="24" r="2" fill="#ffe27a"/>`,
+  },
+  'spodnie-dresy': { body: pants(['#3a3d4a', '#262833'], '#a3e635') },
+  'spodnie-bojowki': {
+    body:
+      pants(['#8a8a5a', '#6b6b44']) +
+      flat(rr(15, 32, 9, 9, 2), '#6b6b44', LINE, 1.5) +
+      flat(rr(40, 32, 9, 9, 2), '#6b6b44', LINE, 1.5),
+  },
+  'kamizelka-odblaskowa': {
+    body:
+      shaded(
+        `M20 12L28 12L32 20L36 12L44 12L50 22V54H14V22Z`,
+        ['#ff9a1f', '#d97a0b'],
+        LINE,
+        -3,
+        -3,
+      ) + stroke('M14 36H50M14 44H50', '#e6ebf2', 4),
+  },
+  'bluza-kewlar': {
+    body:
+      shirt(['#4a505c', '#363a47']) +
+      stroke('M22 26l20 20M22 36l12 12M30 24l12 12M22 46l4 4', '#5d6470', 2) +
+      shaded(`M32 24L42 28V38Q42 46 32 50Q22 46 22 38V28Z`, ['#ffc93c', '#d98a0b'], LINE, -2, -2),
+  },
+  'kask-twardziel': {
+    body:
+      shaded(`M10 42Q10 14 32 14Q54 14 54 42Z`, ['#a3e635', '#7cc01a'], LINE, -4, -3) +
+      stroke('M24 18v20M32 15v23M40 18v20', '#5d9a12', 3) +
+      flat(rr(8, 40, 48, 7, 3), '#3a3d4a', LINE, 2),
+  },
+  'okulary-lisie-oko': {
+    body:
+      shaded(`M6 26H28Q30 40 18 42Q6 42 6 30Z`, ['#ff9a1f', '#d97a0b'], LINE, -2, -2) +
+      shaded(`M36 26H58V30Q58 42 46 42Q34 40 36 26Z`, ['#ff9a1f', '#d97a0b'], LINE, -2, -2) +
+      stroke('M28 28Q32 24 36 28', LINE, 3) +
+      stroke('M10 30l6 0M40 30l6 0', '#ffffff', 2.5, 0.8),
+  },
+  'rekawiczki-kleks': {
+    body:
+      shaded(
+        `M18 54V30L14 22Q12 18 16 18L22 26V12Q22 8 26 8Q30 8 30 12V24V10Q30 6 34 6Q38 6 38 10V26V14Q38 10 42 10Q46 10 46 14V40Q46 54 34 54Z`,
+        ['#f6f2e9', '#d8cfbf'],
+        LINE,
+        -3,
+        -2,
+      ) +
+      flat(circ(34, 40, 5), '#b45cff', LINE, 1.5) +
+      flat(circ(26, 30, 3), '#4cc7ff', LINE, 1.5) +
+      flat(circ(40, 22, 2.5), '#a3e635', LINE, 1.5),
+  },
+  'plecak-szperacz': {
+    body:
+      shaded(rr(14, 14, 36, 42, 10), ['#3fb39b', '#2c8574'], LINE, -3, -3) +
+      stroke('M24 14Q24 6 32 6Q40 6 40 14', LINE, 3) +
+      shaded(rr(20, 34, 24, 16, 4), ['#2c8574', '#1f6b5c'], LINE, -2, -2) +
+      flat(circ(40, 22, 5), '#ffc93c', LINE, 1.5) +
+      stroke('M38 24l2 -4l2 4', LINE, 1.5),
+  },
+  'mikrofon-bit': {
+    body:
+      shaded(rr(26, 30, 12, 26, 4), ['#3a3d4a', '#262833'], LINE, -2, -2) +
+      shaded(circ(32, 20, 13), ['#b7bec9', '#8a929e'], LINE, -3, -3) +
+      stroke('M24 16h16M23 22h18M26 28h12', '#5d6470', 2) +
+      flat(rr(29, 40, 6, 4, 1), '#ff3d50', LINE, 1),
+  },
 };
+
+/** A trainer seen from the side; `stripe` for the sole and the laces. */
+function shoe(tone: Tone, stripe: string) {
+  return (
+    shaded(`M8 30Q10 22 20 22L30 20Q36 30 46 32L54 34Q60 36 58 44V48H8Z`, tone, LINE, -3, -3) +
+    flat(rr(6, 44, 54, 8, 3), stripe, LINE, 2) +
+    stroke('M22 24l4 6M28 22l4 6', LINE, 2)
+  );
+}
+
+function pants(tone: Tone, stripe?: string) {
+  return (
+    shaded(`M16 8H48L50 56H36L32 24L28 56H14Z`, tone, LINE, -3, -3) +
+    flat(rr(16, 8, 32, 6, 2), tone[1], LINE, 2) +
+    (stripe ? stroke('M18 16L16 54M46 16L48 54', stripe, 3) : '')
+  );
+}
 
 const ICONS_SKILLS: Record<string, Icon> = {
   flow: {

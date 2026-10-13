@@ -41,11 +41,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <nav>
             <Link href="/#kreator">Stwórz</Link>
             <Link href="/top">Ranking</Link>
+            <Link href="/konto">Konto</Link>
           </nav>
         </header>
         {children}
         <footer className="site-footer">
           <span>Buds · gra o ziomkach z charakterem</span>
+          <nav className="footer-links">
+            <Link href="/konto">Konto</Link>
+            <Link href="/top">Ranking</Link>
+            <Link href="/prywatnosc">Prywatność</Link>
+          </nav>
         </footer>
       </body>
     </html>

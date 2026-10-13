@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   CATALOG,
+  CONTENT,
+  type CachesResponse,
+  type OpenCacheResponse,
   type ApiError,
   type BudLook,
   type BudResponse,
@@ -394,5 +397,71 @@ describe('rewards, skills and wallet', () => {
     expect(
       (await (await app.request('/v1/buds/me/wallet', auth)).json()) as WalletResponse,
     ).toEqual({ coins: 0, gems: 0 });
+  });
+});
+
+describe('caches', () => {
+  async function setup(content = CONTENT) {
+    const app = createApp(
+      loadEnv({ SUPABASE_JWT_SECRET: 'x'.repeat(32), CREATE_LIMIT_PER_MINUTE: '100' }),
+      { store: createMemoryStore(), content },
+    );
+    const { token } = await createBud(app);
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+    const open = (id: string) =>
+      app.request(`/v1/buds/me/caches/${id}/open`, { method: 'POST', ...auth });
+    return { app, auth, open };
+  }
+  const first = CONTENT.caches[0]!;
+
+  it('requires the player token', async () => {
+    const { app } = await setup();
+    expect((await app.request('/v1/buds/me/caches')).status).toBe(401);
+    expect(
+      (await app.request(`/v1/buds/me/caches/${first.id}/open`, { method: 'POST' })).status,
+    ).toBe(401);
+  });
+
+  it('grants coins and XP once, into the wallet', async () => {
+    const { app, auth, open } = await setup();
+    const res = await open(first.id);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as OpenCacheResponse;
+    expect(body).toMatchObject({
+      cacheId: first.id,
+      coinsGained: first.coins,
+      coins: first.coins,
+      xpGained: first.xp,
+      xp: first.xp,
+    });
+    expect((await open(first.id)).status).toBe(409);
+    const list = (await (await app.request('/v1/buds/me/caches', auth)).json()) as CachesResponse;
+    expect(list.opened).toEqual([first.id]);
+    const wallet = (await (await app.request('/v1/buds/me/wallet', auth)).json()) as WalletResponse;
+    expect(wallet.coins).toBe(first.coins);
+    const me = (await (await app.request('/v1/buds/me', auth)).json()) as BudResponse;
+    expect(me.bud.xp).toBe(first.xp);
+  });
+
+  it('adds up coins from several caches', async () => {
+    const { open } = await setup();
+    const [a, b] = CONTENT.caches;
+    await open(a!.id);
+    const body = (await (await open(b!.id)).json()) as OpenCacheResponse;
+    expect(body.coins).toBe(a!.coins + b!.coins);
+  });
+
+  it('respects the minimum level', async () => {
+    const locked = { ...first, id: 'zamknieta', minLevel: 5 };
+    const { open } = await setup({ ...CONTENT, caches: [locked] });
+    const res = await open('zamknieta');
+    expect(res.status).toBe(409);
+    expect(((await res.json()) as ApiError).error.code).toBe('level_too_low');
+  });
+
+  it('rejects unknown or malformed cache ids', async () => {
+    const { open } = await setup();
+    expect((await open('nie-ma-takiej')).status).toBe(404);
+    expect((await open('ZŁA%20NAZWA')).status).toBe(404);
   });
 });

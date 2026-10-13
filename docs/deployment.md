@@ -51,7 +51,17 @@ Status deploymentu pojawi się jako check „Vercel” przy commitach.
    Lokalnie wpisz je do pliku `.env` w katalogu głównym (jest w `.gitignore`), na produkcji do zmiennych w Railway.
    Klucz secret daje pełny dostęp do bazy: **nigdy** nie wpisuj go do zmiennych `NEXT_PUBLIC_*`, do gry ani do repo.
 
-4. Sprawdzenie: `pnpm dev` nie wypisuje ostrzeżenia „kept in memory”, a Bud stworzony na stronie pojawia się w
+4. Konta graczy (logowanie e-mailem i hasłem), w panelu Supabase:
+   - **Authentication → Sign In / Providers → Email:** włączone, z potwierdzaniem adresu e-mail;
+   - **Authentication → URL Configuration:** Site URL = adres strony (lokalnie `http://localhost:3000`), a w
+     Redirect URLs dodaj `http://localhost:3000/konto`, `http://localhost:3000/konto/nowe-haslo` i to samo dla
+     domeny produkcyjnej;
+   - **Project Settings → API Keys:** klucz **publishable** (`sb_publishable_…`, w starszych projektach `anon`)
+     → `NEXT_PUBLIC_SUPABASE_ANON_KEY`, a Project URL → `NEXT_PUBLIC_SUPABASE_URL`. Te dwa są publiczne z założenia
+     (trafiają do przeglądarki), lokalnie w głównym `.env`, na produkcji w Vercel.
+     API sprawdza tokeny kont kluczami publicznymi projektu (JWKS), więc nic więcej nie trzeba ustawiać.
+
+5. Sprawdzenie: `pnpm dev` nie wypisuje ostrzeżenia „kept in memory”, a Bud stworzony na stronie pojawia się w
    Table Editor → `buds`.
 
 ## Gra (Unity → Google Play)

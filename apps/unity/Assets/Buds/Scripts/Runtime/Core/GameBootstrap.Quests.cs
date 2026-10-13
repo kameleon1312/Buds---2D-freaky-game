@@ -53,7 +53,7 @@ namespace Buds.Core
             foreach (var q in quests.Active)
             {
                 var objective = quests.Objective(q.id);
-                if (q.district != world?.Map.Id) objective += $" ({Districts.Get(q.district)?.Name ?? q.district})";
+                if (q.district != world?.Map.DistrictId) objective += $" ({Districts.Get(q.district)?.Name ?? q.district})";
                 list.Add((q.title, objective));
             }
             ui.SetQuests(list);

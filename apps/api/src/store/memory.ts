@@ -1,4 +1,4 @@
-import type { BudRecord, OwnedItem } from '@buds/shared';
+import type { BudRecord, OwnedItem, SlotId } from '@buds/shared';
 import { makeSlug } from './slug.js';
 import type { BudStore } from './types.js';
 
@@ -10,15 +10,20 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const owned = new Map<string, OwnedItem[]>(); // slug -> granted items
   const quests = new Map<string, Set<string>>(); // slug -> completed quest ids
   const skills = new Map<string, Map<string, number>>(); // slug -> skill -> rank
+  const caches = new Map<string, Set<string>>(); // slug -> opened cache ids
+  const coins = new Map<string, number>(); // slug -> coin balance
+  const gear = new Map<string, Map<SlotId, string>>(); // slug -> slot -> item
+  const owners = new Map<string, string>(); // slug -> user id
   const copy = (bud: BudRecord | undefined) => (bud ? { ...bud, look: { ...bud.look } } : null);
 
   return {
-    async create(input, tokenHash) {
+    async create(input, tokenHash, userId) {
       let slug = makeSlug(input.name);
       while (buds.has(slug)) slug = makeSlug(input.name);
       const bud: BudRecord = { ...input, slug, xp: 0, createdAt: now().toISOString() };
       buds.set(slug, bud);
       tokens.set(tokenHash, slug);
+      if (userId) owners.set(slug, userId);
       return copy(bud) as BudRecord;
     },
 
@@ -79,8 +84,66 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
       return rank + 1;
     },
 
-    async wallet() {
-      return { coins: 0, gems: 0 };
+    async wallet(slug) {
+      return { coins: coins.get(slug) ?? 0, gems: 0 };
+    },
+
+    async equipment(slug) {
+      return Object.fromEntries(gear.get(slug) ?? []);
+    },
+
+    async equip(slug, slot, itemId) {
+      const worn = gear.get(slug) ?? new Map<SlotId, string>();
+      if (itemId) worn.set(slot, itemId);
+      else worn.delete(slot);
+      gear.set(slug, worn);
+    },
+
+    async buyItem(slug, itemId, price) {
+      const balance = coins.get(slug) ?? 0;
+      if ((owned.get(slug) ?? []).some((i) => i.itemId === itemId))
+        return { status: 'owned', coins: balance };
+      if (balance < price) return { status: 'poor', coins: balance };
+      coins.set(slug, balance - price);
+      owned.set(slug, [
+        ...(owned.get(slug) ?? []),
+        { itemId, source: 'shop', acquiredAt: now().toISOString() },
+      ]);
+      return { status: 'ok', coins: balance - price };
+    },
+
+    async budsOfUser(userId) {
+      return [...buds.values()]
+        .filter((b) => owners.get(b.slug) === userId)
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        .map((b) => copy(b) as BudRecord);
+    },
+
+    async ownerOf(slug) {
+      return owners.get(slug) ?? null;
+    },
+
+    async claimBud(slug, userId) {
+      const owner = owners.get(slug);
+      if (owner) return owner === userId ? 'mine' : 'taken';
+      owners.set(slug, userId);
+      return 'ok';
+    },
+
+    async openedCaches(slug) {
+      return [...(caches.get(slug) ?? [])];
+    },
+
+    async openCache(slug, cacheId, gained, xp) {
+      const bud = buds.get(slug);
+      if (!bud) throw new Error(`Bud ${slug} not found`);
+      const opened = caches.get(slug) ?? new Set<string>();
+      if (opened.has(cacheId)) return null;
+      opened.add(cacheId);
+      caches.set(slug, opened);
+      bud.xp += xp;
+      coins.set(slug, (coins.get(slug) ?? 0) + gained);
+      return { xp: bud.xp, coins: coins.get(slug)! };
     },
 
     async completedQuests(slug) {

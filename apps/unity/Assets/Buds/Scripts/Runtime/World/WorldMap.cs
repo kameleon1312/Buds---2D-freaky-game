@@ -28,6 +28,20 @@ namespace Buds.World
         public int Area => (X1 - X0 + 1) * (Y1 - Y0 + 1);
     }
 
+    /// <summary>
+    /// A building you can walk into: (X, Y) is its anchor (middle of the bottom row, solid), entered from the cell
+    /// below it. Target is the interior map's id.
+    /// </summary>
+    public sealed class Door
+    {
+        public int X;
+        public int Y;
+        public string Target;
+        public string Name;
+
+        public Vector2Int Front => new(X, Y + 1);
+    }
+
     public sealed class Sign
     {
         public int X;
@@ -76,6 +90,10 @@ namespace Buds.World
         public Color BaseColor = new(0.53f, 0.79f, 0.35f);
         public int SpawnX;
         public int SpawnY;
+        /// <summary>Interior (a room inside a building) rather than a district.</summary>
+        public bool IsInterior;
+        /// <summary>For interiors: the district its way out leads to.</summary>
+        public string Outside;
 
         public readonly List<string> GroundKinds = new();
         public int[,] Ground; // index into GroundKinds, [y, x]
@@ -85,6 +103,7 @@ namespace Buds.World
         public readonly List<Sign> Signs = new();
         public readonly List<Exit> Exits = new();
         public readonly List<Zone> Zones = new();
+        public readonly List<Door> Doors = new();
         public readonly List<GroundStyle> GroundStyles = new();
         public readonly List<ScatterRule> Scatter = new();
 
@@ -111,12 +130,27 @@ namespace Buds.World
             return null;
         }
 
+        /// <summary>The district this map belongs to: itself, or the one an interior is entered from.</summary>
+        public string DistrictId => IsInterior ? Outside : Id;
+
+        /// <summary>The door whose front cell (just below the building) is (x, y).</summary>
+        public Door DoorInFront(int x, int y)
+        {
+            foreach (var d in Doors)
+                if (d.X == x && d.Y + 1 == y) return d;
+            return null;
+        }
+
         /// <summary>
-        /// Where a bud coming from another district appears: next to the exit that leads back there,
-        /// a few steps into the map. Falls back to the spawn point.
+        /// Where a bud coming from another map appears: in front of the door of the room it left, or next to the
+        /// exit that leads back to the district it came from, a few steps into the map. Interiors always start at
+        /// their spawn (just inside the door); unknown origins fall back to the spawn point.
         /// </summary>
         public Vector2Int ArrivalFrom(string districtId)
         {
+            foreach (var d in Doors)
+                if (d.Target == districtId) return d.Front;
+            if (IsInterior) return new Vector2Int(SpawnX, SpawnY);
             foreach (var e in Exits)
             {
                 if (e.DistrictId != districtId) continue;

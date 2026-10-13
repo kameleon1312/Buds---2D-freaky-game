@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { budLookSchema } from './bud/look';
+import { cacheProblems, cacheSchema } from './caches';
 import { catalogItem } from './catalog';
 import { DWOR_CARSKI } from './content/dwor-carski';
 import { LAS_PALMAS } from './content/las-palmas';
@@ -74,6 +75,7 @@ export type QuestInput = z.input<typeof questSchema>;
 export const districtContentSchema = z.object({
   npcs: z.array(npcSchema),
   quests: z.array(questSchema),
+  caches: z.array(cacheSchema).default([]),
 });
 export type DistrictContent = z.infer<typeof districtContentSchema>;
 
@@ -83,6 +85,7 @@ export const CONTENT: DistrictContent = (() => {
   return districtContentSchema.parse({
     npcs: all.flatMap((c) => c.npcs),
     quests: all.flatMap((c) => c.quests),
+    caches: all.flatMap((c) => c.caches),
   });
 })();
 
@@ -143,6 +146,7 @@ export function contentProblems(content: DistrictContent): string[] {
     return ok;
   };
   for (const q of content.quests) if (!visit(q.id)) problems.push(`${q.id}: circular requirements`);
+  problems.push(...cacheProblems(content.caches));
   return problems;
 }
 

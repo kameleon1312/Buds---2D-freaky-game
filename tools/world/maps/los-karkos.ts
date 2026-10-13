@@ -234,5 +234,8 @@ export function losKarkos(): MapCanvas {
     { ground: 'weeds', chance: 0.06, props: 'tuft' },
     { ground: 'rubble', chance: 0.06, props: 'gruz' },
   );
+  // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
+  m.door([117, 56], 'los-karkos-silownia', 'Siłownia „Żelazo”');
+  m.door([29, 42], 'los-karkos-ruina', 'Opuszczone mieszkanie');
   return m;
 }

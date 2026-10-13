@@ -454,5 +454,9 @@ export function miastoZiomkow(): MapCanvas {
     { ground: 'asphalt', chance: 0.006, props: 'manhole' },
     { ground: 'water', chance: 0.15, props: 'lily' },
   );
+  // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
+  m.door([82, 43], 'miasto-ziomkow-kawiarnia', 'Kawiarnia „Ziomal”');
+  m.door([71, 55], 'miasto-ziomkow-komisariat', 'Komisariat');
+  m.door(m.find('garaze')[0]!, 'miasto-ziomkow-garaz', 'Garaż Rysia');
   return m;
 }

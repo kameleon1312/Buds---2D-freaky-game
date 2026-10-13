@@ -1,9 +1,10 @@
+import type { CacheInput } from '../caches';
 import type { Npc, QuestInput } from '../quests';
 
 /** Las Palmas — tropical district (from level 3). ~1340 XP: enough to reach level 5 and Dwór Carski. */
 const D = 'las-palmas';
 
-export const LAS_PALMAS: { npcs: Npc[]; quests: QuestInput[] } = {
+export const LAS_PALMAS: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
   npcs: [
     {
       id: 'kahu',
@@ -274,6 +275,70 @@ export const LAS_PALMAS: { npcs: Npc[]; quests: QuestInput[] } = {
           ],
         },
       ],
+    },
+  ],
+  // hidden caches (skrytki): revealed when the bud comes close, coins and XP granted by the server once
+  caches: [
+    {
+      id: 'lp-rafa',
+      district: D,
+      x: 44,
+      y: 18,
+      look: 'kufer',
+      coins: 80,
+      xp: 30,
+      text: 'Zatopiony skarb z rafy! Kufer pełen złotych monet i muszli.',
+    },
+    {
+      id: 'lp-ruiny',
+      district: D,
+      x: 107,
+      y: 32,
+      look: 'dzban',
+      coins: 50,
+      xp: 25,
+      text: 'Gliniany dzban ukryty między kamieniami świątyni.',
+    },
+    {
+      id: 'lp-plaza',
+      district: D,
+      x: 20,
+      y: 80,
+      look: 'worek',
+      coins: 25,
+      xp: 10,
+      text: 'Worek zakopany w piasku. Ktoś zgubił portfel na plaży.',
+    },
+    {
+      id: 'lp-pomost',
+      district: D,
+      x: 8,
+      y: 60,
+      look: 'opona',
+      coins: 30,
+      xp: 10,
+      text: 'Opona-odbijacz przy pomoście, a w niej puszka z monetami.',
+    },
+    {
+      id: 'lp-dzungla',
+      district: D,
+      x: 117,
+      y: 59,
+      look: 'skrzynka',
+      coins: 40,
+      xp: 15,
+      text: 'Skrzynka przemytników w gąszczu dżungli.',
+    },
+    {
+      id: 'lp-chatka',
+      district: D,
+      map: 'las-palmas-chatka',
+      x: 2,
+      y: 6,
+      look: 'skrzynka',
+      coins: 35,
+      xp: 15,
+      text: 'Pod łóżkiem rybaka: skrzynka z oszczędnościami z połowów.',
     },
   ],
 };

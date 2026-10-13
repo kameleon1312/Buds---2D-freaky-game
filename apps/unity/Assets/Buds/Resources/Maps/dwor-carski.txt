@@ -9,51 +9,53 @@ spawn = 64,30
 ; = cobble
 L = cobble !
 P = cobble + bank !
-W = cobble + fontanna-duza !
+X = cobble + fontanna-duza !
 M = cobble + kamienica-cegla-a !
 N = cobble + kamienica-cegla-b !
 K = cobble + latarnia-gaz !
-U = cobble + lawka-park !
-S = cobble + posag !
-T = cobble + powoz !
-R = cobble + sign !
-V = cobble + topiary-kula !
+V = cobble + lawka-park !
+T = cobble + posag !
+U = cobble + powoz !
+S = cobble + sign !
+W = cobble + topiary-kula !
 O = cobble + urzad !
+Q = cobble + wycieraczka-wejscie
 ' = dirt
-f = dirt !
-l = dirt + fence-post !
-h = dirt + powoz !
-r = dirt + siano !
-j = dirt + sign !
-g = dirt + stajnia !
+h = dirt !
+n = dirt + fence-post !
+j = dirt + powoz !
+t = dirt + siano !
+l = dirt + sign !
+i = dirt + stajnia !
 A = forest !
 F = forest + latarnia-gaz !
 C = forest + sign !
 B = forest + tree-a|tree-b|topiary-stozek !
-Z = gravel
-p = gravel + latarnia-gaz !
-d = gravel + lawka-park !
-k = gravel + posag !
-a = hedge !
+a = gravel
+r = gravel + latarnia-gaz !
+f = gravel + lawka-park !
+m = gravel + posag !
+d = gravel + wycieraczka-wejscie
+b = hedge !
 D = lawn
-X = lawn !
-b = lawn + dworek !
+Y = lawn !
+c = lawn + dworek !
 J = lawn + latarnia-gaz !
-e = lawn + posag !
-c = lawn + roze
-Q = lawn + sign !
-q = lawn + topiary-kula !
+g = lawn + posag !
+e = lawn + roze
+R = lawn + sign !
+s = lawn + topiary-kula !
 H = lawn + topiary-stozek !
-m = lawn + tree-a !
-n = lawn + tree-b !
+o = lawn + tree-a !
+p = lawn + tree-b !
 E = lawn2
-Y = lawn2 !
+Z = lawn2 !
 G = lawn2 + latarnia-gaz !
-i = lawn2 + sign !
-t = lawn2 + topiary-kula !
+k = lawn2 + sign !
+v = lawn2 + topiary-kula !
 I = lawn2 + topiary-stozek !
-o = lawn2 + tree-b !
-s = water !
+q = lawn2 + tree-b !
+u = water !
 
 [ground]
 lawn2 : lawn2 : 2.2 : 0.3 #74b552
@@ -93,6 +95,10 @@ water : 0.12 : lily
 86,56,122,90 | Stajnie
 44,73,84,93 | Park Dworski
 
+[doors]
+64,52 | dwor-carski-dworek | Salon dworku
+82,20 | dwor-carski-urzad | Urząd Skarbowy
+
 [grid]
 AABBBBABAAAABBBBBABAAABBAABABABBBBABBABABABBBBAAAAAAABBABABA;;;;;;;;BABBBBBBAABBBBAABBAABAABABBBBAAABBBAABBABBAABAABABBBAABABBBA
 AAAAABABAAABBBBBAAAABBABBAAAABAABABBBAABAABAABAAAABABBBBBABB;;;;;;;;BBABABABABBABBBABBBABABAABABBBABBABAAAABBABBAABBBABAABABBBAB
@@ -115,76 +121,76 @@ AAABBDDDDLLLLLDLLLLL;;;DDDDLLLLLDLLLLLDDK;;EELLLLLDLLLLLDDEE;;;;;;;;DD;;;;;;;;;L
 BBAABDDDDLLLLLDLLLLL;;;DDDDLLLLLDLLLLLDD;;;EELLLLLDLLLLLDDEI;;;;;;;;HD;;;;;;;;;LLLLLLL;;;;;;;;;;;;;;;LLLLLLL;;;;;;;;LLLLL;;DABAB
 AABADDDDDLLMLLDLLNLL;;;DDDDLLNLLDLLMLLDD;;;EELLMLLDLLNLLDDEE;;;;;;;;DD;;;;;;;;;LLLLLLL;;;K;;;;;;;;;;;LLLLLLL;;;;;;;;LLLLL;;DAAAB
 ABBADDDD;;;;;;;;;;;;;;;K;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;JD;;;;;;;;;LLLOLLL;;;;;;;;;;;;;;;LLLPLLL;;;;;;;;LLNLL;;DBBAA
-BBBBDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;;;;;;;;;;;;;;;;;;;AABAA
+BBBBDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DD;;;;;;;;;;;;Q;;;;;;;;;;;;;;;;K;;;;;;;;;;;;;;;;;;;;;;;AABAA
 BABBDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BBABB
-ABBADDDDDEEEEEEDDDDD;;;DDDDDDDDQDDDDDDDD;;;DDDDDEDDDDDDDDDDE;;;;;;;;ED;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BAABA
+ABBADDDDDEEEEEEDDDDD;;;DDDDDDDDRDDDDDDDD;;;DDDDDEDDDDDDDDDDE;;;;;;;;ED;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BAABA
 BBBBDDDDDEEEEEEDDDDD;;;DDDDDDDDDDDDDDDDD;;;DDDDDEEDDDDDDDDDG;;;;;;;;GD;;;;;K;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BBABB
 AABBDDDDDEEEEEEDDDDD;;;DDDDDDDDDDDDDDDDD;;;DDDDDEEDDDDDDDDDD;;;;;;;;ED;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BBABB
 AABBDDDDEEEEEEEDDDDD;;;DDDDDDDDDDDDDDDDD;;;DDDDDEDDDDDDDDDDH;;;;;;;;ID;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BABAB
 BABBBDDEEEEEEEEDDDDD;;;DDDDDDDDDDDDDDDDD;;;DDDDDDDDDDDDDDDDD;;;;;;;;DD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;BABAA
-AABABEEEEEEEEEEDDDDDK;;DDDDDDDEDDDDDDDDDK;;DDDDDDDDDDDDDDDDJ;;;;;;;;JD;;;;;;;;;;;;;;;;;;;;R;;S;;;;;;;;;;;;;;;;;LTL;;;;;;;;;DBBBA
+AABABEEEEEEEEEEDDDDDK;;DDDDDDDEDDDDDDDDDK;;DDDDDDDDDDDDDDDDJ;;;;;;;;JD;;;;;;;;;;;;;;;;;;;;S;;T;;;;;;;;;;;;;;;;;LUL;;;;;;;;;DBBBA
 AAABBEEEEEEEEEEDDDDD;;;DDDDDEEEEEDDDDDDD;;;DDDDDDDDDDDDDDDDD;;;;;;;;DD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DAAAB
 ABBBBEEEEEEEEEEDDDDD;;;DDDDDEEEEEDDDDDDD;;;DDDDDDDDDDDDDDDDH;;;;;;;;HD;;;;;;;;K;;;;;;;;;;;;;;;;;;;;K;;;;;;;;;;;;;;;;;;;;;;;DBBAB
 BABABEEEELLLLLDLLLLL;;;DDDDLLLLLELLLLLDD;;;DDLLLLLDLLLLLDDDD;;;;;;;;DD;;;;;;;;;;;;;;;;;;K;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DBABA
 BBBBBEEEELLLLLDLLLLL;;;DDDDLLLLLELLLLLDD;;;DDLLLLLDLLLLLDDDJ;;;;;;;;JD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;BBBAB
 ABBBBAEEELLMLLDLLNLL;;;DDDDLLNLLDLLMLLDDK;;DDLLMLLDLLNLLDDDD;;;;;;;;DD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;;;BBBAA
 BAAAABEE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HD;;;;LLLLL;;;;;;;LLLLL;;;;;LLLLL;;;;;;;LLLLL;;;;;;;;;;BAABA
-AAAABBEE;;;;;;;;;;;;;;;;U;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DD;;;;LLLLL;;;;K;;LLLLL;;;;;LLLLL;;K;;;;LLLLL;;;;;;;;;;ABABA
+AAAABBEE;;;;;;;;;;;;;;;;V;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DD;;;;LLLLL;;;;K;;LLLLL;;;;;LLLLL;;K;;;;LLLLL;;;;;;;;;;ABABA
 ABBABEEE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;LLMLL;;;;;;;LLMLL;;;;;LLMLL;;;;;;;LLMLL;;;;;;;;;;ABBAB
 ABBAAEEEDDDDDDDDDDDD;;;DDDDDEEEEDDDDDDDD;;;DDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ABAAA
-BBABBDDDDDDDDDDDDDDD;;;DDDDDDDEDDDDDDDDD;;KDDD;;V;;;;;V;;;;K;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AABAB
+BBABBDDDDDDDDDDDDDDD;;;DDDDDDDEDDDDDDDDD;;KDDD;;W;;;;;W;;;;K;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AABAB
 ABBBDDDDDDDDDDDDDDDD;;;DDDDDDDDDDDDDDDDD;;;DDD;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ABBAA
 BBABDDDDDDDDDDDDDDDD;;;DDDDDDDDDDDDDDDDD;;;DDE;;;;;;;;;;;;;;;;LLLLL;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ABBAB
 AABBDDDDDDDDDDDDDDDD;;;DDDDDDDDDDDDEEEED;;;DEE;;;;;;;;;;;;;;;;LLLLL;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;;;;;;;;;BBBBB
-BBAADDDDDDDDDDDDDDDD;;;DDDDDDDDDDDDEEEEE;;;DEE;;;;;;;;;;;;;;;;LLWLL;;;;;;;;K;;;;;;;;;;;;;;;;;;LTL;;;;;;;;;;;;;;;;;;;;;;;;;;BAABB
+BBAADDDDDDDDDDDDDDDD;;;DDDDDDDDDDDDEEEEE;;;DEE;;;;;;;;;;;;;;;;LLXLL;;;;;;;;K;;;;;;;;;;;;;;;;;;LUL;;;;;;;;;;;;;;;;;;;;;;;;;;BAABB
 ABBBDDDDDLLLLLDLLLLL;;;DDDDLLLLLDLLLLLEE;;;DEE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AABBB
 ABBABDDDDLLLLLDLLLLL;;;DDDDLLLLLDLLLLLEE;;;EEE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ABBBB
-BABAADDDDLLMLLDLLNLL;;;DDDDLLNLLDLLMLLEE;;;EEE;;;K;;;LTL;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;BABAA
-ABBBADDDDDDDDDDDDDDD;;;DDDDDEEEEEEDDDDDE;U;EEE;;;;;;;;;;;R;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AABBB
-BBBBBDDDDDDDEDDDDDDDDDDDDDDEEEEEEEDDDDDEEEEEEEEEEEEEEEEEEDXXXXXXYYYYYYXDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDEEEEEEEEDDDDDEEEEEBBABA
-BBBBAADDDDDEEEDDDDDDDDDDDDEEEEEEEEDDDDDEEEEEEEEEEEEEEEEEEDXXXXXXYYYYYYXDDDDDDDDDDDZZZZZZZZZZZZZZZZZZZZZZZEEEEEEEEDDDDDEEEEEAAAAB
-ABBBBADDDDDEEEDDDDDDDDDDDDEEEEEEEEDDDDDDEEEEEEEEEEEEEEEEEDXXXXXXYYYYYYXDDDDDDDDDDDZZZZZZZZZZZZZZZZZZZZZZZEEEEEEEEDDDDDEEEEEABBBB
-ABBAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaDEEEEEEEEEEEEEEDDXXXXXXYYYYYXXDDDDDDDDDDDDDDDDDDDDDDDDEEEEDDDDZZEEEEEEEEDDDDDDEEEEBABBB
-BBABABaZaZZZZZZZaZZZZZZZaZZZZZZZZZZZaZZZaDDDDEEEEEEEEDDDDDXXXXXXXYYYYXXDDDDDDDDDDDDDDDDDDDDDDDDEEEEEDDDZZDDDDDDDDDDDDDDDDDDAAAAA
-ABBABBaZaZaZaaaZaZaaaaaZaaaZaaaaaaaZaZaZaDDDDDEEEEEEDDDDDDXXXXXXbYYYYXXDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEZZDDDDDDDDDEDDDDDDDDABBBB
-BBABBAaZaZaZaZaZaZaZZZaZZZZZaZZZaZZZaZaZaDDDZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZDDDDDDDDDDEEEEEEEEZZDDDDDDDDDEEDDDDDDDBBABA
-BBAAAAaZaaaZaZaZaZaZaaaaaaaaaZaZaZaaaaaZaDDDDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEZZDDDDDDDDEEEDDDDDDDAAABB
-BBABAAaZZZZZaZZZaZaZZZZZZZZZaZaZZZaZZZaZaDDDDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEZZDDDDDDDDEEEDDDDDDDBBAAB
-BBBBAAaaaaaaaZaaaZaaaaaaaZaaaZaaaaaZaZaZaDDDDDcDcDcDcDcDcDcDcDZZZdcDcDcDcDcDcDcDcDcDDD'''''''''''''''''ZZ''''''''''''''''''BAABB
-ABBABAaZZZZZaZZZaZZZaZZZaZZZaZZZZZZZaZZZaDDDDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDD'''''''''''''''''ZZ''''''''''''''''''AABAB
-BBBBBBaZaaaZaaaZaaaZaZaZaaaZaaaaaaaaaaaZaDDDDDDDDDeDDDDDDDDDDDZZZZDDDDDDDDDDeDDDDDDDDD'''''''''''''''''ZZ''''''''''''''''''BAAAB
-BABAADaZaZZZZZaZZZZZaZaZZZaZZZZZZZaZZZZZaDDDDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDD'''''''''''''''''ZZ''''''''''''''''''BBBBA
-AAAAADaZaZaaaaaaaaaaaZaaaZaZaaaaaZaZaaaaaDDEDDcDcDcDcDcDcDcDcDZZZZcDcDcDcDcDcDcDcDcDDD'''''''''''''''''ZZ''''''''''''''''''BBBBA
-AABBBDaZaZZZaZZZaZZZZZaZZZaZaZZZZZaZZZZZaDDDDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDD'''''''''''''''''ZZ''''''''''''''''''BABAA
-BBBABDaZaaaZaZaZaZaaaZaZaaaZaZaaaaaaaaaZaDDDZZZZZZZZZZZZdZZZZZZZZZZZZZZZZZZZZZZZZZZZZD''''''''fffff''''ZZ'''''fffff''''''''BBBBB
-BBAABEaZZZaZZZaZZZaZZZaZaZZZaZZZZZaZZZZZaDDDZZZZZZZZZZZZZZZZZZdZZZZZZZZZZZZZZZZZZZZZZD''''''''fffff''''ZZ'''''fffff'''''''BAABAB
-AAAABEaZaaaaaaaaaaaZaaaZaZaaaaaaaZaZaaaaaDDDDDDDDDDDDDDDDDDDDDZZZZQDDDDDDDDDDDDDDDDDDD''''''''ffgff''''ZZ'''''ffgff'''''''BBBABB
-BBBAAEaZaZZZZZZZZZaZaZZZaZZZaZZZZZaZaZZZaDDDDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDD'''''''''''''''''ZZ'''''''''''''''''AAABAA
-ABBABEaZaZaaaaaaaZaZaZaaaaaaaZaaaZaZaaaZaDDDDDcDcDcDcDcDcDcDcDZZZZcDcDcDcDcDcDcDcDcDDD'''''''''''''''''ZZ'''''''''''''''''ABABBA
-AAAAAEaZaZZZZZZZaZZZaZZZZZaZZZaZZZaZZZZZaDDDDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDD'''''''''''''''''ZZ'''''''''''''''''BAABBB
-BBBAAEaZaaaaaaaZaaaaaaaaaZaZaaaZaaaaaaaZaDDDDDDDDDeDDDDDDDDDDDZZZZDDDDDDDDDDeDDDDDDDDD'''''''''''''''''fhf''''''''''''''''AABABA
-ABAABBaZZZZZaZaZZZaZZZaZZZZZaZZZaZZZZZaZaEEEDDDDDDDDDDDDDDDDDDZZZZDDDDDDDDDDDDDDDDDDDD'''''''''''''''''ZZ'''''''''''''''''BABBAB
-AAAAABaaaaaZaZaaaZaaaZaZaaaaaaaZaZaZaaaZaEEiDDcDcDcDcDcDcDcDcDZZZZcDcDcDcDcDcDcDcDcDDD'''''''''''''''j'ZZ'''''''''''''''''BBAABA
-BAAAAAaZaZZZaZZZaZZZaZakZZaZZZaZaZaZZZaZZZZZZZZZZZZZZZZZZZZZZZZZZZDDDDDDDDDDDDDDDDDDDD'''''''''''''''''ZZ'''''''''''''''''ABBAAB
-AABBBDaZaZaaaaaZaaaZaZZZZaaZaZaaaZaaaZaZaZZZZZZZZZZZZZZZZZZZZZZZZZDDDDDDDDDDDDDDDDDDDD''lllllllllllllllZZ'lllllllllllllll'ABBAAB
-BBAAADaZaZaZZZZZaZaZaZZZaZZZaZZZZZaZZZaZaEEEEDDDDDDDDDDDDDDDEDZZZZDDDDDDDDDDEEEEEEEDDD''l'''''''''''''''''''''''''''''''l''BBABA
-BBBABDaZaZaZaZaZaZaZaaaaaZaaaaaaaaaZaaaZaEEEEDDDDDDDDDDDDDDDDDZZZZDDDDDDDmDDDEEEEEEDDD''l'''''''''''''''''''''''''''''''l''ABBBB
-BBBAADaZaZaZaZaZaZaZZZZZaZaZZZZZZZaZZZZZaEEEDnDDDDDDDDDDDDDDDDZZZZDDmDDDDDDDDDDDDDDoEE''l'''''''''''''''''''''''''''''''l''BAABB
-BBABBDaZaZaaaZaZaZaaaaaZaZaZaaaaaZaaaaaaaDEDDDDDDDDDDDDDDDDZZZZZpZZDDDDDDDDDDDDDDDDEEE''l'''''''''''''''''''''''''''''''l''BBABA
-AABAADaZaZZZaZaZaZZZZZaZZZaZZZaZZZZZZZZZaDDDDDDDnDDDDqDDDDZZZZZZZZZZZZDDDDDDDDDDDDDEEE''l'''''''''''''r''''''''''''''r''l''AABAB
-BAABDDaZaaaZaZaZaaaZaZaaaaaaaZaZaaaaaaaaaDDDDDDDDDDDDDDDDZdZssssssssZZZDDDDDDDDDDDDtEE''l'''''''''''''''''''''''''''''''l''BBAAA
-BBAADDaZZZaZZZaZZZaZaZZZZZaZZZaZZZZZZZZZaDDDDDDDDDDDDDDDZZssssssssssssZZDDDDDDDDDDDEEE''l'''''''''''''''''''''''''''''''l''DBBAB
-AABBDDaZaaaaaaaaaZaZaaaaaZaaaaaZaaaaaaaZaDDDDDDDDDDqDDDZZssssssssssssssZDDDDDDDDDDDEEE''l'''''''''''''''''''''''''''''''l''DAABB
-AABADDaZZZZZZZZZaZaZaZZZaZZZZZaZaZZZaZZZaDDDDDDDDDDDDDDZZssssssssssssssZnDDDDDDDDDDEEE''l'''''''''''''''''''''''''''''''l''EBBBA
-BABAADaZaZaaaaaaaZaZaZaZaaaaaZaZaaaZaZaZaDDDDDDDDDDDDDDZZssssssssssssssZDDDnDDDDmDDEEE''l'''''''''''''''''''''''''''''''l''AABBB
-BAAAADaZaZZZZZaZZZaZZZaZZZaZaZaZZZaZaZaZaDDDDDDmDDDDDDDZZsssssssssssssZZDDDDDDDDDDDEEE''l'''''''''''''''r'''''''''''''''l''AABBB
-BBABBAaZaaaaaZaZaaaaaaaaaZaZaZaaaZaZaZaaaDDDDDDDDDDDmDDDZZssssssssssssZDDDDDDDDDDDDEEE''l''''''''''''''''''''''''r''''''l''ABAAB
-BBBBABaZZZaZaZaZZZaZZZZZZZaZaZZZaZaZaZZZaDDDDDDDDDDDDDDDDZZZssssssssZZZDDDDDDDDDDDDEEE''l'''''''''''''''''''''''''''''''l''BBABB
-BAABBAaaaZaZaZaaaZaZaaaaaaaZaaaZaZaZaaaZaDDDDDDDDDDDDDDDDDZZZZZZZZZZZZDDDDDDDDDDDDDEEE''l'''''''''''''''''''''''''''''''l''BBBBB
-AABABDaZZZaZaZZZaZaZZZaZaZZZZZZZaZZZZZaZaDDDDDDDDDDDDDqDDDDDDDZZZZZDDDDDDDDDDnDDDDDEEE''l'''''''''''''''''''''''''''''''l''BABBB
-BAAADDaZaaaZaZaaaZaaaZaZaZaaaaaaaaaaaaaZaDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDqDDDDDDDDDDDE''lllllllllllllllllllllllllllllllll''EBBAA
-ABAADDaZZZZZaZZZZZZZZZaZZZZZZZZZZZZZZZZZaDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDnDDDD'''''''''''''''''''''''''''''''''''''EBAAA
-BBBADDaaaaaaaaaaaaaaaaaaaaaaaBBAaaaaaaaaaDDDDDDBAABBABABBBBABABBABBBDDDDDAAAAADDDDDDBBBB''''BBABABABA'''''''ABBBB''''''''''EABAA
+BABAADDDDLLMLLDLLNLL;;;DDDDLLNLLDLLMLLEE;;;EEE;;;K;;;LUL;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;K;;;;;BABAA
+ABBBADDDDDDDDDDDDDDD;;;DDDDDEEEEEEDDDDDE;V;EEE;;;;;;;;;;;S;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AABBB
+BBBBBDDDDDDDEDDDDDDDDDDDDDDEEEEEEEDDDDDEEEEEEEEEEEEEEEEEEDYYYYYYZZZZZZYDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDEEEEEEEEDDDDDEEEEEBBABA
+BBBBAADDDDDEEEDDDDDDDDDDDDEEEEEEEEDDDDDEEEEEEEEEEEEEEEEEEDYYYYYYZZZZZZYDDDDDDDDDDDaaaaaaaaaaaaaaaaaaaaaaaEEEEEEEEDDDDDEEEEEAAAAB
+ABBBBADDDDDEEEDDDDDDDDDDDDEEEEEEEEDDDDDDEEEEEEEEEEEEEEEEEDYYYYYYZZZZZZYDDDDDDDDDDDaaaaaaaaaaaaaaaaaaaaaaaEEEEEEEEDDDDDEEEEEABBBB
+ABBAAAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDEEEEEEEEEEEEEEDDYYYYYYZZZZZYYDDDDDDDDDDDDDDDDDDDDDDDDEEEEDDDDaaEEEEEEEEDDDDDDEEEEBABBB
+BBABABbabaaaaaaabaaaaaaabaaaaaaaaaaabaaabDDDDEEEEEEEEDDDDDYYYYYYYZZZZYYDDDDDDDDDDDDDDDDDDDDDDDDEEEEEDDDaaDDDDDDDDDDDDDDDDDDAAAAA
+ABBABBbabababbbababbbbbabbbabbbbbbbabababDDDDDEEEEEEDDDDDDYYYYYYcZZZZYYDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEaaDDDDDDDDDEDDDDDDDDABBBB
+BBABBAbababababababaaabaaaaabaaabaaabababDDDaaaaaaaaaaaaaaaaaaaadaaaaaaaaaaaaaaaaaaaaDDDDDDDDDDEEEEEEEEaaDDDDDDDDDEEDDDDDDDBBABA
+BBAAAAbabbbabababababbbbbbbbbabababbbbbabDDDDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEaaDDDDDDDDEEEDDDDDDDAAABB
+BBABAAbaaaaabaaababaaaaaaaaababaaabaaababDDDDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEaaDDDDDDDDEEEDDDDDDDBBAAB
+BBBBAAbbbbbbbabbbabbbbbbbabbbabbbbbabababDDDDDeDeDeDeDeDeDeDeDaaafeDeDeDeDeDeDeDeDeDDD'''''''''''''''''aa''''''''''''''''''BAABB
+ABBABAbaaaaabaaabaaabaaabaaabaaaaaaabaaabDDDDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDD'''''''''''''''''aa''''''''''''''''''AABAB
+BBBBBBbabbbabbbabbbabababbbabbbbbbbbbbbabDDDDDDDDDgDDDDDDDDDDDaaaaDDDDDDDDDDgDDDDDDDDD'''''''''''''''''aa''''''''''''''''''BAAAB
+BABAADbabaaaaabaaaaababaaabaaaaaaabaaaaabDDDDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDD'''''''''''''''''aa''''''''''''''''''BBBBA
+AAAAADbababbbbbbbbbbbabbbababbbbbababbbbbDDEDDeDeDeDeDeDeDeDeDaaaaeDeDeDeDeDeDeDeDeDDD'''''''''''''''''aa''''''''''''''''''BBBBA
+AABBBDbabaaabaaabaaaaabaaababaaaaabaaaaabDDDDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDD'''''''''''''''''aa''''''''''''''''''BABAA
+BBBABDbabbbababababbbababbbababbbbbbbbbabDDDaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaaaaaaaaD''''''''hhhhh''''aa'''''hhhhh''''''''BBBBB
+BBAABEbaaabaaabaaabaaababaaabaaaaabaaaaabDDDaaaaaaaaaaaaaaaaaafaaaaaaaaaaaaaaaaaaaaaaD''''''''hhhhh''''aa'''''hhhhh'''''''BAABAB
+AAAABEbabbbbbbbbbbbabbbababbbbbbbababbbbbDDDDDDDDDDDDDDDDDDDDDaaaaRDDDDDDDDDDDDDDDDDDD''''''''hhihh''''aa'''''hhihh'''''''BBBABB
+BBBAAEbabaaaaaaaaababaaabaaabaaaaababaaabDDDDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDD'''''''''''''''''aa'''''''''''''''''AAABAA
+ABBABEbababbbbbbbabababbbbbbbabbbababbbabDDDDDeDeDeDeDeDeDeDeDaaaaeDeDeDeDeDeDeDeDeDDD'''''''''''''''''aa'''''''''''''''''ABABBA
+AAAAAEbabaaaaaaabaaabaaaaabaaabaaabaaaaabDDDDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDD'''''''''''''''''aa'''''''''''''''''BAABBB
+BBBAAEbabbbbbbbabbbbbbbbbababbbabbbbbbbabDDDDDDDDDgDDDDDDDDDDDaaaaDDDDDDDDDDgDDDDDDDDD'''''''''''''''''hjh''''''''''''''''AABABA
+ABAABBbaaaaababaaabaaabaaaaabaaabaaaaababEEEDDDDDDDDDDDDDDDDDDaaaaDDDDDDDDDDDDDDDDDDDD'''''''''''''''''aa'''''''''''''''''BABBAB
+AAAAABbbbbbababbbabbbababbbbbbbabababbbabEEkDDeDeDeDeDeDeDeDeDaaaaeDeDeDeDeDeDeDeDeDDD'''''''''''''''l'aa'''''''''''''''''BBAABA
+BAAAAAbabaaabaaabaaababmaabaaabababaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaDDDDDDDDDDDDDDDDDDDD'''''''''''''''''aa'''''''''''''''''ABBAAB
+AABBBDbababbbbbabbbabaaaabbababbbabbbababaaaaaaaaaaaaaaaaaaaaaaaaaDDDDDDDDDDDDDDDDDDDD''nnnnnnnnnnnnnnnaa'nnnnnnnnnnnnnnn'ABBAAB
+BBAAADbababaaaaabababaaabaaabaaaaabaaababEEEEDDDDDDDDDDDDDDDEDaaaaDDDDDDDDDDEEEEEEEDDD''n'''''''''''''''''''''''''''''''n''BBABA
+BBBABDbabababababababbbbbabbbbbbbbbabbbabEEEEDDDDDDDDDDDDDDDDDaaaaDDDDDDDoDDDEEEEEEDDD''n'''''''''''''''''''''''''''''''n''ABBBB
+BBBAADbababababababaaaaababaaaaaaabaaaaabEEEDpDDDDDDDDDDDDDDDDaaaaDDoDDDDDDDDDDDDDDqEE''n'''''''''''''''''''''''''''''''n''BAABB
+BBABBDbababbbabababbbbbabababbbbbabbbbbbbDEDDDDDDDDDDDDDDDDaaaaaraaDDDDDDDDDDDDDDDDEEE''n'''''''''''''''''''''''''''''''n''BBABA
+AABAADbabaaabababaaaaabaaabaaabaaaaaaaaabDDDDDDDpDDDDsDDDDaaaaaaaaaaaaDDDDDDDDDDDDDEEE''n'''''''''''''t''''''''''''''t''n''AABAB
+BAABDDbabbbabababbbababbbbbbbababbbbbbbbbDDDDDDDDDDDDDDDDafauuuuuuuuaaaDDDDDDDDDDDDvEE''n'''''''''''''''''''''''''''''''n''BBAAA
+BBAADDbaaabaaabaaababaaaaabaaabaaaaaaaaabDDDDDDDDDDDDDDDaauuuuuuuuuuuuaaDDDDDDDDDDDEEE''n'''''''''''''''''''''''''''''''n''DBBAB
+AABBDDbabbbbbbbbbababbbbbabbbbbabbbbbbbabDDDDDDDDDDsDDDaauuuuuuuuuuuuuuaDDDDDDDDDDDEEE''n'''''''''''''''''''''''''''''''n''DAABB
+AABADDbaaaaaaaaabababaaabaaaaababaaabaaabDDDDDDDDDDDDDDaauuuuuuuuuuuuuuapDDDDDDDDDDEEE''n'''''''''''''''''''''''''''''''n''EBBBA
+BABAADbababbbbbbbababababbbbbababbbabababDDDDDDDDDDDDDDaauuuuuuuuuuuuuuaDDDpDDDDoDDEEE''n'''''''''''''''''''''''''''''''n''AABBB
+BAAAADbabaaaaabaaabaaabaaabababaaababababDDDDDDoDDDDDDDaauuuuuuuuuuuuuaaDDDDDDDDDDDEEE''n'''''''''''''''t'''''''''''''''n''AABBB
+BBABBAbabbbbbababbbbbbbbbabababbbabababbbDDDDDDDDDDDoDDDaauuuuuuuuuuuuaDDDDDDDDDDDDEEE''n''''''''''''''''''''''''t''''''n''ABAAB
+BBBBABbaaabababaaabaaaaaaababaaabababaaabDDDDDDDDDDDDDDDDaaauuuuuuuuaaaDDDDDDDDDDDDEEE''n'''''''''''''''''''''''''''''''n''BBABB
+BAABBAbbbabababbbababbbbbbbabbbabababbbabDDDDDDDDDDDDDDDDDaaaaaaaaaaaaDDDDDDDDDDDDDEEE''n'''''''''''''''''''''''''''''''n''BBBBB
+AABABDbaaababaaababaaababaaaaaaabaaaaababDDDDDDDDDDDDDsDDDDDDDaaaaaDDDDDDDDDDpDDDDDEEE''n'''''''''''''''''''''''''''''''n''BABBB
+BAAADDbabbbababbbabbbabababbbbbbbbbbbbbabDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDsDDDDDDDDDDDE''nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn''EBBAA
+ABAADDbaaaaabaaaaaaaaabaaaaaaaaaaaaaaaaabDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDpDDDD'''''''''''''''''''''''''''''''''''''EBAAA
+BBBADDbbbbbbbbbbbbbbbbbbbbbbbBBAbbbbbbbbbDDDDDDBAABBABABBBBABABBABBBDDDDDAAAAADDDDDDBBBB''''BBABABABA'''''''ABBBB''''''''''EABAA
 ABBBDDDDABBAADDDDDDDDDDBBBBBAABBBADDDDBBABBBAABABBABBBBABBAABBBABBBAABBBBBABBBBDDDAAAABABBBABBAABBAAAABAABAAABBBBBDDDDDDEEEEAAAB
 ABBBAABBBAABBBBAABBBBABBBBBAABABBBAAABAAAAAAAAAABBABBABBABABAAABBBAABAAABABBAAAABBBBABABBBAAABBABBABAABBBABBAABBBBAAABABAABBABBA
 AAABBBBABAAAABBAABAAABBBABAABBBBBABBBAAAABBAAABAAAABABAAAABABBABABBAABBBBABABBABBAAABABBBABABAABBBABBBBAAAABBAABAABBBBBAAAAABBBA

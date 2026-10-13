@@ -1543,93 +1543,559 @@
       "id": "outfit-bluza",
       "name": "Bluza",
       "kind": "outfit",
-      "rarity": "common"
+      "rarity": "common",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "outfit-tshirt",
       "name": "T-shirt",
       "kind": "outfit",
-      "rarity": "common"
+      "rarity": "common",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "outfit-kurtka",
       "name": "Bomberka",
       "kind": "outfit",
-      "rarity": "common"
+      "rarity": "common",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "outfit-ogrodniczki",
       "name": "Ogrodniczki",
       "kind": "outfit",
-      "rarity": "common"
+      "rarity": "common",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "headwear-czapka",
       "name": "Czapka",
       "kind": "headwear",
-      "rarity": "common"
+      "rarity": "common",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "headwear-daszek",
       "name": "Czapka z daszkiem",
       "kind": "headwear",
-      "rarity": "common"
+      "rarity": "common",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "headwear-sluchawki",
       "name": "Słuchawki",
       "kind": "headwear",
-      "rarity": "common"
+      "rarity": "common",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "deskorolka",
       "name": "Deskorolka Kuby",
       "kind": "accessory",
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "slot": "held",
+      "speed": 6,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "flow",
+          "rank": 1
+        }
+      ],
+      "coins": 400,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "spray-zloty",
       "name": "Złoty spray",
       "kind": "accessory",
-      "rarity": "rare"
+      "rarity": "rare",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "graffiti",
+          "rank": 2
+        }
+      ],
+      "coins": 900,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "wianek-aloha",
       "name": "Wianek Aloha",
       "kind": "headwear",
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "slot": "head",
+      "speed": 0,
+      "armor": 0,
+      "luck": 2,
+      "skillBonus": [
+        {
+          "id": "surfing",
+          "rank": 1
+        }
+      ],
+      "coins": 500,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "muszla-szczescia",
       "name": "Muszla szczęścia",
       "kind": "accessory",
-      "rarity": "rare"
+      "rarity": "rare",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 6,
+      "skillBonus": [],
+      "coins": 1200,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "monokl",
       "name": "Monokl",
       "kind": "accessory",
-      "rarity": "rare"
+      "rarity": "rare",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 1400,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "cylinder",
       "name": "Cylinder",
       "kind": "headwear",
-      "rarity": "epic"
+      "rarity": "epic",
+      "slot": "head",
+      "speed": 0,
+      "armor": 0,
+      "luck": 3,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 2500,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "rekawice-bokserskie",
       "name": "Rękawice bokserskie",
       "kind": "weapon",
-      "rarity": "rare"
+      "rarity": "rare",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 1,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "walka",
+          "rank": 1
+        }
+      ],
+      "coins": 1800,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
     },
     {
       "id": "kurtka-karkos",
       "name": "Kurtka z naszywkami",
       "kind": "outfit",
-      "rarity": "epic"
+      "rarity": "epic",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 4,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "przetrwanie",
+          "rank": 1
+        }
+      ],
+      "coins": 3000,
+      "shop": false,
+      "premium": false,
+      "available": true,
+      "description": ""
+    },
+    {
+      "id": "buty-trampki",
+      "name": "Trampki Ziomal",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "feet",
+      "speed": 3,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 150,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Lekkie trampki na co dzień."
+    },
+    {
+      "id": "buty-glany",
+      "name": "Glany Karkos",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "feet",
+      "speed": 2,
+      "armor": 3,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 700,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Ciężkie, ale nic ich nie przebije."
+    },
+    {
+      "id": "buty-sprintery",
+      "name": "Sprintery Błysk",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "feet",
+      "speed": 10,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 1500,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Najszybsze buty w mieście."
+    },
+    {
+      "id": "spodnie-dresy",
+      "name": "Dresy Szybki Lolek",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "legs",
+      "speed": 2,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 200,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Wygodne na bieganie po osiedlu."
+    },
+    {
+      "id": "spodnie-bojowki",
+      "name": "Bojówki Sześć Kieszeni",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "legs",
+      "speed": 0,
+      "armor": 1,
+      "luck": 3,
+      "skillBonus": [],
+      "coins": 600,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Zmieszczą każde znalezisko."
+    },
+    {
+      "id": "kamizelka-odblaskowa",
+      "name": "Kamizelka Widoczny",
+      "kind": "gear",
+      "rarity": "common",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 1,
+      "luck": 1,
+      "skillBonus": [],
+      "coins": 250,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Widać cię z daleka."
+    },
+    {
+      "id": "bluza-kewlar",
+      "name": "Bluza z kewlaru Pancerniak",
+      "kind": "gear",
+      "rarity": "epic",
+      "slot": "torso",
+      "speed": 0,
+      "armor": 8,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 3500,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Wygląda jak zwykła bluza. Nie jest zwykła."
+    },
+    {
+      "id": "kask-twardziel",
+      "name": "Kask Twardziel",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "head",
+      "speed": 0,
+      "armor": 3,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 500,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Rowerowy, ale wytrzyma więcej."
+    },
+    {
+      "id": "okulary-lisie-oko",
+      "name": "Okulary Lisie Oko",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "face",
+      "speed": 0,
+      "armor": 0,
+      "luck": 5,
+      "skillBonus": [],
+      "coins": 1200,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Widzisz to, czego inni nie widzą."
+    },
+    {
+      "id": "rekawiczki-kleks",
+      "name": "Rękawiczki Kleks",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "hands",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "graffiti",
+          "rank": 1
+        }
+      ],
+      "coins": 600,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Farba się ich nie ima."
+    },
+    {
+      "id": "plecak-szperacz",
+      "name": "Plecak Szperacz",
+      "kind": "gear",
+      "rarity": "rare",
+      "slot": "accessory",
+      "speed": 0,
+      "armor": 0,
+      "luck": 4,
+      "skillBonus": [
+        {
+          "id": "spryt",
+          "rank": 1
+        }
+      ],
+      "coins": 1400,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Dla tych, którzy szukają skrytek."
+    },
+    {
+      "id": "mikrofon-bit",
+      "name": "Mikrofon Bit",
+      "kind": "gear",
+      "rarity": "uncommon",
+      "slot": "held",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [
+        {
+          "id": "flow",
+          "rank": 1
+        }
+      ],
+      "coins": 800,
+      "shop": true,
+      "premium": false,
+      "available": true,
+      "description": "Bez niego żadna bitwa."
+    },
+    {
+      "id": "buty-sprintery-zlote",
+      "name": "Sprintery Błysk — złota edycja",
+      "kind": "outfit",
+      "rarity": "legendary",
+      "slot": "",
+      "speed": 0,
+      "armor": 0,
+      "luck": 0,
+      "skillBonus": [],
+      "coins": 0,
+      "shop": false,
+      "premium": true,
+      "available": false,
+      "description": "Tylko wygląd: złote buty, te same statystyki."
     }
   ],
+  "stats": [
+    {
+      "id": "speed",
+      "name": "Szybkość",
+      "unit": "%",
+      "max": 25,
+      "description": "Szybszy chód i bieg: każdy punkt to +1% prędkości."
+    },
+    {
+      "id": "armor",
+      "name": "Pancerz",
+      "unit": "",
+      "max": 40,
+      "description": "Mniej obrażeń w potyczkach (gdy wejdą walki)."
+    },
+    {
+      "id": "luck",
+      "name": "Szczęście",
+      "unit": "%",
+      "max": 50,
+      "description": "Więcej monet ze skrytek: każdy punkt to +1%."
+    }
+  ],
+  "slots": [
+    {
+      "id": "head",
+      "name": "Głowa"
+    },
+    {
+      "id": "face",
+      "name": "Twarz"
+    },
+    {
+      "id": "torso",
+      "name": "Tułów"
+    },
+    {
+      "id": "hands",
+      "name": "Dłonie"
+    },
+    {
+      "id": "legs",
+      "name": "Nogi"
+    },
+    {
+      "id": "feet",
+      "name": "Stopy"
+    },
+    {
+      "id": "accessory",
+      "name": "Dodatek"
+    },
+    {
+      "id": "held",
+      "name": "W ręku"
+    }
+  ],
+  "skillGearMax": 2,
   "skills": [
     {
       "id": "flow",
@@ -1668,5 +2134,319 @@
       "district": "los-karkos"
     }
   ],
-  "skillMaxRank": 5
+  "skillMaxRank": 5,
+  "caches": [
+    {
+      "id": "mz-wzgorze",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow",
+      "x": 112,
+      "y": 8,
+      "look": "kufer",
+      "coins": 60,
+      "xp": 25,
+      "minLevel": 1,
+      "text": "Zakopany kuferek! W środku stare monety i list: „Dla tego, kto słucha, co mówią znaki”."
+    },
+    {
+      "id": "mz-park",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow",
+      "x": 16,
+      "y": 44,
+      "look": "worek",
+      "coins": 15,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Ktoś schował worek przy stawie. Kilka monet i mokra mapa parku."
+    },
+    {
+      "id": "mz-dzialki",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow",
+      "x": 14,
+      "y": 9,
+      "look": "dzban",
+      "coins": 20,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Dzban działkowca. Pod nasionami rzodkiewki leżą oszczędności na czarną godzinę."
+    },
+    {
+      "id": "mz-garaze",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow",
+      "x": 39,
+      "y": 89,
+      "look": "opona",
+      "coins": 25,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "W starej oponie ktoś trzymał kasę za lakier. Teraz jest twoja."
+    },
+    {
+      "id": "mz-tory",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow",
+      "x": 99,
+      "y": 88,
+      "look": "cegly",
+      "coins": 30,
+      "xp": 15,
+      "minLevel": 1,
+      "text": "Za luźnymi cegłami skrytka grafficiarzy: monety i szkic tagu."
+    },
+    {
+      "id": "mz-kawiarnia",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow-kawiarnia",
+      "x": 12,
+      "y": 2,
+      "look": "dzban",
+      "coins": 20,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Dzbanek na napiwki, o którym wszyscy zapomnieli."
+    },
+    {
+      "id": "mz-komisariat",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow-komisariat",
+      "x": 12,
+      "y": 9,
+      "look": "kufer",
+      "coins": 40,
+      "xp": 20,
+      "minLevel": 1,
+      "text": "Kufer z dowodami rzeczowymi. Nikt nie liczył tych monet od lat."
+    },
+    {
+      "id": "mz-garaz",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow-garaz",
+      "x": 1,
+      "y": 4,
+      "look": "skrzynka",
+      "coins": 25,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Skrzynka Rysia: śrubki, stary walkman i trochę drobnych."
+    },
+    {
+      "id": "lp-rafa",
+      "district": "las-palmas",
+      "map": "las-palmas",
+      "x": 44,
+      "y": 18,
+      "look": "kufer",
+      "coins": 80,
+      "xp": 30,
+      "minLevel": 1,
+      "text": "Zatopiony skarb z rafy! Kufer pełen złotych monet i muszli."
+    },
+    {
+      "id": "lp-ruiny",
+      "district": "las-palmas",
+      "map": "las-palmas",
+      "x": 107,
+      "y": 32,
+      "look": "dzban",
+      "coins": 50,
+      "xp": 25,
+      "minLevel": 1,
+      "text": "Gliniany dzban ukryty między kamieniami świątyni."
+    },
+    {
+      "id": "lp-plaza",
+      "district": "las-palmas",
+      "map": "las-palmas",
+      "x": 20,
+      "y": 80,
+      "look": "worek",
+      "coins": 25,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Worek zakopany w piasku. Ktoś zgubił portfel na plaży."
+    },
+    {
+      "id": "lp-pomost",
+      "district": "las-palmas",
+      "map": "las-palmas",
+      "x": 8,
+      "y": 60,
+      "look": "opona",
+      "coins": 30,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Opona-odbijacz przy pomoście, a w niej puszka z monetami."
+    },
+    {
+      "id": "lp-dzungla",
+      "district": "las-palmas",
+      "map": "las-palmas",
+      "x": 117,
+      "y": 59,
+      "look": "skrzynka",
+      "coins": 40,
+      "xp": 15,
+      "minLevel": 1,
+      "text": "Skrzynka przemytników w gąszczu dżungli."
+    },
+    {
+      "id": "lp-chatka",
+      "district": "las-palmas",
+      "map": "las-palmas-chatka",
+      "x": 2,
+      "y": 6,
+      "look": "skrzynka",
+      "coins": 35,
+      "xp": 15,
+      "minLevel": 1,
+      "text": "Pod łóżkiem rybaka: skrzynka z oszczędnościami z połowów."
+    },
+    {
+      "id": "dc-labirynt",
+      "district": "dwor-carski",
+      "map": "dwor-carski",
+      "x": 11,
+      "y": 85,
+      "look": "kufer",
+      "coins": 70,
+      "xp": 30,
+      "minLevel": 1,
+      "text": "Kufer w ślepym zaułku labiryntu. Ogrodnik chyba nie wie, co tu stoi."
+    },
+    {
+      "id": "dc-ogrod",
+      "district": "dwor-carski",
+      "map": "dwor-carski",
+      "x": 50,
+      "y": 62,
+      "look": "dzban",
+      "coins": 40,
+      "xp": 15,
+      "minLevel": 1,
+      "text": "Dzban pod różami. Ktoś płacił ogrodnikowi za milczenie."
+    },
+    {
+      "id": "dc-stajnie",
+      "district": "dwor-carski",
+      "map": "dwor-carski",
+      "x": 118,
+      "y": 86,
+      "look": "worek",
+      "coins": 35,
+      "xp": 15,
+      "minLevel": 1,
+      "text": "Worek owsa, a pod owsem sakiewka stajennego."
+    },
+    {
+      "id": "dc-kamienice",
+      "district": "dwor-carski",
+      "map": "dwor-carski",
+      "x": 12,
+      "y": 40,
+      "look": "cegly",
+      "coins": 45,
+      "xp": 20,
+      "minLevel": 1,
+      "text": "Za luźnymi cegłami kamienicy: plotki spisane na kartce i monety."
+    },
+    {
+      "id": "dc-dworek",
+      "district": "dwor-carski",
+      "map": "dwor-carski-dworek",
+      "x": 3,
+      "y": 2,
+      "look": "kufer",
+      "coins": 100,
+      "xp": 35,
+      "minLevel": 1,
+      "text": "Rodowy kuferek schowany za zegarem. Złote monety z herbem."
+    },
+    {
+      "id": "dc-urzad",
+      "district": "dwor-carski",
+      "map": "dwor-carski-urzad",
+      "x": 8,
+      "y": 2,
+      "look": "skrzynka",
+      "coins": 90,
+      "xp": 30,
+      "minLevel": 1,
+      "text": "Skrzynka obok sejfu: „pomyłkowo” pobrane opłaty. Wracają do ludzi."
+    },
+    {
+      "id": "lk-zlom",
+      "district": "los-karkos",
+      "map": "los-karkos",
+      "x": 100,
+      "y": 10,
+      "look": "opona",
+      "coins": 60,
+      "xp": 25,
+      "minLevel": 1,
+      "text": "Opona na złomowisku, w środku zwitek banknotów. Pies dalej śpi."
+    },
+    {
+      "id": "lk-kanal",
+      "district": "los-karkos",
+      "map": "los-karkos",
+      "x": 39,
+      "y": 87,
+      "look": "worek",
+      "coins": 50,
+      "xp": 20,
+      "minLevel": 1,
+      "text": "Worek przy kanale. Lepiej nie pytać, czyj był."
+    },
+    {
+      "id": "lk-bazar",
+      "district": "los-karkos",
+      "map": "los-karkos",
+      "x": 50,
+      "y": 78,
+      "look": "skrzynka",
+      "coins": 55,
+      "xp": 20,
+      "minLevel": 1,
+      "text": "Skrzynka spod straganu. Handlarz miał zapasową kasę."
+    },
+    {
+      "id": "lk-fabryka",
+      "district": "los-karkos",
+      "map": "los-karkos",
+      "x": 104,
+      "y": 90,
+      "look": "cegly",
+      "coins": 80,
+      "xp": 30,
+      "minLevel": 1,
+      "text": "Za ceglanym murem fabryki: skrytka gangu. Odważnie!"
+    },
+    {
+      "id": "lk-silownia",
+      "district": "los-karkos",
+      "map": "los-karkos-silownia",
+      "x": 1,
+      "y": 9,
+      "look": "worek",
+      "coins": 45,
+      "xp": 20,
+      "minLevel": 1,
+      "text": "Worek treningowy z dziurą, a w dziurze monety za karnety."
+    },
+    {
+      "id": "lk-ruina",
+      "district": "los-karkos",
+      "map": "los-karkos-ruina",
+      "x": 5,
+      "y": 5,
+      "look": "dzban",
+      "coins": 120,
+      "xp": 40,
+      "minLevel": 1,
+      "text": "Dzban pod podłogą opuszczonego mieszkania. Ktoś tu kiedyś żył dostatnio."
+    }
+  ]
 }

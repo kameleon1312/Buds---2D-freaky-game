@@ -8,7 +8,7 @@ spawn = 64,72
 [legend]
 . = grass
 r = grass !
-x = grass + bar-plaza !
+y = grass + bar-plaza !
 b = grass + bush-a !
 o = grass + bush-b !
 t = grass + chatka-a !
@@ -18,7 +18,8 @@ j = grass + palm-a !
 W = grass + palm-b !
 P = grass + palm-c !
 e = grass + paproc !
-u = grass + sign !
+v = grass + sign !
+u = grass + wycieraczka-wejscie
 , = grass2
 S = grass2 + palm-a !
 m = grass2 + palm-b !
@@ -39,8 +40,8 @@ p = ocean + lodz !
 f = path !
 k = path + pochodnia !
 h = path + ruiny-swiatyni !
-v = path + sign !
-w = path + stragan-owoce !
+w = path + sign !
+x = path + stragan-owoce !
 q = planks
 C = rock
 E = rock + rock-dark !
@@ -51,7 +52,7 @@ X = sand + flaming !
 H = sand + krab !
 J = sand + lezak-a !
 O = sand + lezak-b !
-y = sand + palm-a !
+z = sand + palm-a !
 N = sand + palm-b !
 I = sand + parasol-a !
 R = sand + parasol-b !
@@ -103,6 +104,9 @@ water : 0.12 : lily
 90,14,124,74 | Dżungla
 100,27,116,39 | Ruiny Świątyni
 84,12,124,24 | Wulkaniczne Klify
+
+[doors]
+52,64 | las-palmas-chatka | Chatka rybaka
 
 [grid]
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -170,23 +174,23 @@ AAqqqqqqqqqqqqqqqqqqq_I_...,,,,,,,.............P....................o..P........
 AAAAAAAAAAAAAABB_______......,,,,.................rrrrr..rrrrr......rrrrr..rrrrr....j...j..,TTTTUTZTTTTZ--UTTTTTTaTUTTUTTZTMLLLL
 AAAAAAAApAAAAABB_______......................o....rrrrr..rrrrr..j...rrrrr.Wrrrrr............TTTTTTZTTTTT--TTTTTZTTTTTTTTTTTMMLMM
 AAAAAAAAAAAAAABB_______...........................rrsrrj.rrtrr......rrsrr..rrtrr............TUTaTTTTTTTa--TTTTUTTTTUTTTTaTTLMMLM
-AAAAAAAAAAAAAAABB___J___........................................................j...........TTTTYTTUTTTT--TTTTTTYZTTTTTTTTTLLLMM
+AAAAAAAAAAAAAAABB___J___............................u...........................j...........TTTTYTTUTTTT--TTTTTTYZTTTTTTTTTLLLMM
 AAAAAAAAAAAAAAABB_______.....................P....k---------------------------------k.......TTTTTTTTTTTT--TTTTTTUTTTTTUTTTTLMMMM
 AAAAAAAAAAAAAAAABB_______.........................-----------------------------------.......UTTTTTaTTTTT--TaTTTYTTTTUTTTaTTTLLMM
-AAAAAAAAAAAAAAAABB_______.....u...............e...----------v------------------------.......TTTTUTTTTUTT--TTTTTZTTTTTTTTTTTTLLMM
+AAAAAAAAAAAAAAAABB_______.....v...............e...----------w------------------------.......TTTTUTTTTUTT--TTTTTZTTTTTTTTTTTTLLMM
 AAAAAAAAAAAAAAAAABB_------------------------j----------------------------------------..j....TYaTTYTTTTTT--TTTTaTaTTTZTTTTTaTMMML
 AAAAAAAAAAAAAAAAAABB-----------------------------------------k----k------------------.....j,TTTTZTUTTTTT--TTTTTTTTTTZTTTTTTTMLLM
 AAAAAAAAAAAAAAAAAABBJ______...,...................-----------------------------------......,TTTTTTTZTUTTTTTZTTTUTTTTTTUTTTTTLLML
 AAAAAAAAAAAAAAAAAABB_____R_...,,............j.....---------------------------------ffrrr...,TaTTTTTTTTTTTTTTTTTZTTTTTYTTTZTMMMMM
-AAAAAAAAAAAAAAAAAABB_______...,,..................------fwf---------fwf------------ffrrr.o.,TTTTTUTaTTTTTTTUTTUTTTTTTTTUTTLMMMLL
-AAAAAAAAAAAAAAAAABB_______........................k--------------------------------ffxrr...,TaTTTTTTTTTZTTTTTTTTTTTTTaTTTMLMMMMM
+AAAAAAAAAAAAAAAAAABB_______...,,..................------fxf---------fxf------------ffrrr.o.,TTTTTUTaTTTTTTTUTTUTTTTTTTTUTTLMMMLL
+AAAAAAAAAAAAAAAAABB_______........................k--------------------------------ffyrr...,TaTTTTTTTTTZTTTTTTTTTTTTTaTTTMLMMMMM
 AAAAAAAAAAAAAAAAABB_______...................W.....---j.......----.....---W...---........j.......................,,,.....LLLLMMM
 AAAAAAAAAAAAAAAABB_______..........................---........----.....---....---........................................LLLMMLL
 AAAAAAAAAAAAAAABB_______...........................---.......j----.o...---....---.......o...................,,............LLLLLL
 AAAAAAAAAAAAAABB_J_____...........................rrrrr.......----....rrrrr.jrrrrr.........................,,,,...........MLLLLM
 AAAAAAAAAAAAAABB_______..........................jrrrrr.......----..e.rrrrr..rrrrr.........................,,,,............MMMMM
 AAAAAAAAAAAAABB_______.............,,.......e.....rrtrrj......----....rrsrr..rrtrr.W.......................,,,,............LMLML
-AAAAAAAAAAAAABB______y,,,,,,,....,,,,,........................----.j......e...............................,,,,,,...........MLMMM
+AAAAAAAAAAAAABB______z,,,,,,,....,,,,,........................----.j......e...............................,,,,,,...........MLMMM
 AAAAAAAAAAAAABB_______,,,,,,,,,,,,,,,,,..........j............----..........................,,,,,,,,.....,,,,,,,...........MLLLM
 AAAAAAAAAAAAABBI______,,,,,,,,,,,,,,,,,,,,,..W................----....e.........e...P..o...,,,,,,,,,,,,,,,,,,,,,..........LLMMLL
 AAAAAAAAAAAAABB_______,,,,,,,,,,,,,,,,,,,,,,....e.............----.j......W.e..............,,,,,,,,,,,,,,,,,,,,,..........MLLLLL

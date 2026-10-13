@@ -17,6 +17,8 @@ namespace Buds.World
     /// name = Miasto Ziomków
     /// base = #86c95a              // colour under everything
     /// spawn = 64,50
+    /// kind = interior             // optional: a room inside a building…
+    /// outside = miasto-ziomkow    // …whose way out ([exits]) leads to this district
     ///
     /// [legend]                    // one character = ground [+ prop|variant…] [!solid]
     /// . = grass
@@ -35,6 +37,7 @@ namespace Buds.World
     /// [signs]   x,y | Title | Text
     /// [exits]   x0,y0,x1,y1 | district-id
     /// [zones]   x0,y0,x1,y1 | Name
+    /// [doors]   x,y | interior-id | Name     // x,y = the building's anchor; entered from the cell below
     /// </code>
     /// Prop variants (a|b|c) are chosen per cell with a fixed hash, so every client and the server agree.
     /// </summary>
@@ -88,6 +91,7 @@ namespace Buds.World
                         case "signs": map.Signs.Add(SignLine(line)); break;
                         case "exits": map.Exits.Add(ExitLine(line)); break;
                         case "zones": map.Zones.Add(ZoneLine(line)); break;
+                        case "doors": map.Doors.Add(DoorLine(line)); break;
                         default: throw new FormatException($"unknown section [{section}]");
                     }
                 }
@@ -116,6 +120,11 @@ namespace Buds.World
                 case "id": map.Id = value; break;
                 case "name": map.Name = value; break;
                 case "base": map.BaseColor = Color(value); break;
+                case "kind":
+                    if (value != "interior" && value != "district") throw new FormatException($"unknown kind '{value}'");
+                    map.IsInterior = value == "interior";
+                    break;
+                case "outside": map.Outside = value; break;
                 case "spawn":
                     var xy = Ints(value, 2);
                     map.SpawnX = xy[0];
@@ -195,6 +204,14 @@ namespace Buds.World
             if (parts.Length != 2) throw new FormatException("zone lines look like 'x0,y0,x1,y1 | Name'");
             var r = Ints(parts[0], 4);
             return new Zone { X0 = r[0], Y0 = r[1], X1 = r[2], Y1 = r[3], Name = parts[1].Trim() };
+        }
+
+        static Door DoorLine(string line)
+        {
+            var parts = line.Split('|');
+            if (parts.Length != 3) throw new FormatException("door lines look like 'x,y | interior-id | Name'");
+            var xy = Ints(parts[0], 2);
+            return new Door { X = xy[0], Y = xy[1], Target = parts[1].Trim(), Name = parts[2].Trim() };
         }
 
         static void Grid(WorldMap map, Dictionary<char, LegendEntry> legend, List<string> rows)

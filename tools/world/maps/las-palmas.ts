@@ -273,5 +273,7 @@ export function lasPalmas(): MapCanvas {
     { ground: 'path', chance: 0.03, props: 'muszle' },
     { ground: 'water', chance: 0.12, props: 'lily' },
   );
+  // ---------- doors (rooms: tools/world/maps/interiors.ts) ----------
+  m.door([52, 64], 'las-palmas-chatka', 'Chatka rybaka');
   return m;
 }

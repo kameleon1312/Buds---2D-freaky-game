@@ -1,9 +1,10 @@
+import type { CacheInput } from '../caches';
 import type { Npc, QuestInput } from '../quests';
 
 /** Los Karkos — the dangerous district (from level 7). ~2600 XP. */
 const D = 'los-karkos';
 
-export const LOS_KARKOS: { npcs: Npc[]; quests: QuestInput[] } = {
+export const LOS_KARKOS: { npcs: Npc[]; quests: QuestInput[]; caches: CacheInput[] } = {
   npcs: [
     {
       id: 'rysiek',
@@ -276,6 +277,71 @@ export const LOS_KARKOS: { npcs: Npc[]; quests: QuestInput[] } = {
           ],
         },
       ],
+    },
+  ],
+  // hidden caches (skrytki): revealed when the bud comes close, coins and XP granted by the server once
+  caches: [
+    {
+      id: 'lk-zlom',
+      district: D,
+      x: 100,
+      y: 10,
+      look: 'opona',
+      coins: 60,
+      xp: 25,
+      text: 'Opona na złomowisku, w środku zwitek banknotów. Pies dalej śpi.',
+    },
+    {
+      id: 'lk-kanal',
+      district: D,
+      x: 39,
+      y: 87,
+      look: 'worek',
+      coins: 50,
+      xp: 20,
+      text: 'Worek przy kanale. Lepiej nie pytać, czyj był.',
+    },
+    {
+      id: 'lk-bazar',
+      district: D,
+      x: 50,
+      y: 78,
+      look: 'skrzynka',
+      coins: 55,
+      xp: 20,
+      text: 'Skrzynka spod straganu. Handlarz miał zapasową kasę.',
+    },
+    {
+      id: 'lk-fabryka',
+      district: D,
+      x: 104,
+      y: 90,
+      look: 'cegly',
+      coins: 80,
+      xp: 30,
+      text: 'Za ceglanym murem fabryki: skrytka gangu. Odważnie!',
+    },
+    {
+      id: 'lk-silownia',
+      district: D,
+      map: 'los-karkos-silownia',
+      x: 1,
+      y: 9,
+      look: 'worek',
+      coins: 45,
+      xp: 20,
+      text: 'Worek treningowy z dziurą, a w dziurze monety za karnety.',
+    },
+    {
+      id: 'lk-ruina',
+      district: D,
+      map: 'los-karkos-ruina',
+      x: 5,
+      y: 5,
+      look: 'dzban',
+      coins: 120,
+      xp: 40,
+      text: 'Dzban pod podłogą opuszczonego mieszkania. Ktoś tu kiedyś żył dostatnio.',
     },
   ],
 };

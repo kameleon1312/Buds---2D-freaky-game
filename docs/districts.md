@@ -164,3 +164,25 @@ bazar z budami, ring, siłownia, złomowisko, wejścia do kanałów, zbiry (kilk
 - **NPC i questy** — dane questów w jednym formacie (cel, warunki, nagroda) czytane przez grę i walidowane przez API.
 - **Patrole i pole widzenia** — policja (Miasto Ziomków), straż dworska (Dwór Carski), gangi (Los Karkos).
 - **Ekonomia** — monety z questów, walk i (w Dworze Carskim) z okradania urzędników; wszystko przyznaje serwer.
+
+## Wnętrza budynków
+
+Do części budynków można wejść: przed drzwiami leży zielona wycieraczka, podpowiedź „Wejdź: …” i wystarczy pójść w
+drzwi albo nacisnąć `E`. Wnętrze to osobna mała mapa (`Resources/Maps/<dzielnica>-<miejsce>.txt`, `kind = interior`,
+`outside = <dzielnica>`), a wyjście prowadzi wycieraczką z powrotem przed te same drzwi.
+
+| Dzielnica      | Wnętrza                                     |
+| -------------- | ------------------------------------------- |
+| Miasto Ziomków | Kawiarnia „Ziomal”, Komisariat, Garaż Rysia |
+| Las Palmas     | Chatka rybaka                               |
+| Dwór Carski    | Salon dworku, Urząd Skarbowy                |
+| Los Karkos     | Siłownia „Żelazo”, Opuszczone mieszkanie    |
+
+Pokoje buduje `tools/world/maps/interiors.ts` (ściany w motywie budynku, podłoga, meble z `tools/world/art/interior.ts`),
+a drzwi rejestruje dzielnica przez `m.door(kotwica, id, nazwa)`. `export-maps.ts` sprawdza, że każde drzwi prowadzą do
+pokoju, który wychodzi do tej samej dzielnicy.
+
+## Mapa
+
+`M` albo przycisk „Mapa” pokazuje dzielnicę narysowaną z jej kolorów, z mgłą tam, gdzie Bud jeszcze nie był
+(zapisywaną na urządzeniu), z nazwami miejsc, drzwiami, drogami do innych dzielnic, celami zadań i licznikiem skrytek.

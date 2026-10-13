@@ -5,7 +5,7 @@ import { loadEnv } from '../src/env.js';
 import { createMemoryStore } from '../src/store/memory.js';
 
 const SECRET = 'test-secret-test-secret-test-secret-123';
-const ORIGIN = 'https://pixelpal.example';
+const ORIGIN = 'https://buds.example';
 
 function makeApp() {
   return createApp(

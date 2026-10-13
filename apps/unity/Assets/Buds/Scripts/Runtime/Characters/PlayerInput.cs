@@ -4,15 +4,22 @@ using UnityEngine.InputSystem;
 namespace Buds.Characters
 {
     /// <summary>
-    /// Keyboard (WASD / arrows, E or Space to interact) and a floating touch joystick:
-    /// touch anywhere and drag to walk; a quick tap interacts.
+    /// Keyboard (WASD / arrows, Shift to run, E or Space to interact, M for the map) and a floating touch joystick:
+    /// touch anywhere and drag to walk — a short drag walks slowly, a long one runs; a quick tap interacts.
     /// </summary>
     public sealed class PlayerInput
     {
         const float DeadZonePx = 12f;
         const float TapMaxPx = 10f;
+        /// <summary>Stick drag (share of the screen height) for full walking speed, and for running.</summary>
+        public const float WalkDrag = 0.06f;
+        public const float RunDrag = 0.12f;
 
         public Vector2 Move { get; private set; }
+        /// <summary>Shift held, or the stick pulled far.</summary>
+        public bool Run { get; private set; }
+        /// <summary>M: open or close the map.</summary>
+        public bool MapPressed { get; private set; }
         public bool InteractPressed { get; private set; }
         /// <summary>Escape / Backspace / Q: decline a dialog choice, close a panel.</summary>
         public bool CancelPressed { get; private set; }
@@ -41,6 +48,8 @@ namespace Buds.Characters
             InteractFromKey = pendingInteract;
             CancelPressed = false;
             PanelPressed = false;
+            MapPressed = false;
+            Run = false;
             pendingInteract = false;
             var move = Vector2.zero;
 
@@ -57,6 +66,8 @@ namespace Buds.Characters
                     CancelPressed = true;
                 if (kb.iKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame || kb.cKey.wasPressedThisFrame)
                     PanelPressed = true;
+                if (kb.mKey.wasPressedThisFrame) MapPressed = true;
+                Run = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
             }
 
             var touch = Touchscreen.current?.primaryTouch;
@@ -73,7 +84,11 @@ namespace Buds.Characters
                     StickPosition = touch.position.ReadValue();
                     var drag = StickPosition - StickOrigin;
                     maxDrag = Mathf.Max(maxDrag, drag.magnitude);
-                    if (drag.magnitude > DeadZonePx) move = drag.normalized;
+                    if (drag.magnitude > DeadZonePx)
+                    {
+                        move = drag.normalized * StickStrength(drag.magnitude, Screen.height);
+                        Run = drag.magnitude >= RunDrag * Screen.height;
+                    }
                 }
                 if (touch.press.wasReleasedThisFrame && StickActive)
                 {
@@ -83,8 +98,23 @@ namespace Buds.Characters
             }
 
             if (Override.HasValue) move = Override.Value;
-            if (Blocked) move = Vector2.zero;
+            if (OverrideRun) Run = true;
+            if (Blocked)
+            {
+                move = Vector2.zero;
+                Run = false;
+            }
             Move = move.sqrMagnitude > 1 ? move.normalized : move;
+        }
+
+        /// <summary>Scripted running for automated runs.</summary>
+        public bool OverrideRun { get; set; }
+
+        /// <summary>How hard the stick is pushed (0.35..1) for a drag of <paramref name="px"/> pixels.</summary>
+        public static float StickStrength(float px, float screenHeight)
+        {
+            var full = WalkDrag * screenHeight;
+            return Mathf.Lerp(0.35f, 1f, Mathf.InverseLerp(DeadZonePx, Mathf.Max(DeadZonePx + 1, full), px));
         }
 
         /// <summary>Queues an interaction for the next frame (scripted input).</summary>

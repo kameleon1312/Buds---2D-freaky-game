@@ -22,6 +22,7 @@ namespace Buds.UI
         RectTransform hudXp;
         Text hudXpText;
         GameObject hint;
+        RectTransform hintRect;
         Text hintText;
         GameObject dialog;
         Text dialogTitle;
@@ -45,6 +46,8 @@ namespace Buds.UI
         public bool DialogOpen => dialog && dialog.activeSelf;
         public Transform Root => canvas.transform;
         GameObject budButton;
+        GameObject mapButton;
+        Image fade;
         public bool ChoiceOpen => DialogOpen && choiceRow.activeSelf;
 
         public GameUi()
@@ -56,6 +59,7 @@ namespace Buds.UI
             BuildTracker();
             BuildStick();
             BuildToast();
+            BuildFade();
         }
 
         // ---------- pairing ----------
@@ -178,6 +182,7 @@ namespace Buds.UI
             hintText = UiKit.Pill("Hint", canvas.transform, "", UiKit.Buds400, 34, new Vector2(300, 72), out var hrt);
             UiKit.Place(hrt, new Vector2(0.5f, 0), new Vector2(0, 140), hrt.sizeDelta);
             hint = hrt.gameObject;
+            hintRect = hrt;
             hint.SetActive(false);
         }
 
@@ -194,7 +199,10 @@ namespace Buds.UI
         public void SetHint(string text)
         {
             hint.SetActive(!string.IsNullOrEmpty(text) && !DialogOpen);
+            if (hintText.text == (text ?? "")) return;
             hintText.text = text ?? "";
+            // one line, as wide as the text
+            hintRect.sizeDelta = new Vector2(Mathf.Max(300, hintText.preferredWidth + 72), hintRect.sizeDelta.y);
         }
 
         // ---------- dialog ----------
@@ -289,6 +297,47 @@ namespace Buds.UI
             budButton = button.gameObject;
         }
 
+        /// <summary>"Mapa" button next to "Twój Bud" (opens the map screen).</summary>
+        public void ShowMapButton(Action onClick)
+        {
+            if (mapButton) return;
+            var button = UiKit.Button("MapButton", canvas.transform, "Mapa  [M]", new Vector2(190, 62), onClick, UiKit.Tone.Rep, 28);
+            UiKit.Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(290, -164), new Vector2(190, 62), new Vector2(0, 1));
+            mapButton = button.gameObject;
+        }
+
+        // ---------- fade (walking through doors and between districts) ----------
+
+        void BuildFade()
+        {
+            fade = UiKit.Panel("Fade", canvas.transform, new Color(UiKit.Surface900.r, UiKit.Surface900.g, UiKit.Surface900.b, 0));
+            UiKit.Stretch(fade.rectTransform);
+            fade.raycastTarget = false;
+            fade.gameObject.SetActive(false);
+        }
+
+        /// <summary>Fades the screen to (1) or from (0) dark over a few frames.</summary>
+        public async Awaitable FadeTo(float alpha, float seconds)
+        {
+            fade.gameObject.SetActive(true);
+            fade.transform.SetAsLastSibling();
+            var from = fade.color.a;
+            for (var t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+            {
+                SetFade(Mathf.Lerp(from, alpha, Mathf.SmoothStep(0, 1, t / seconds)));
+                await Awaitable.NextFrameAsync();
+            }
+            SetFade(alpha);
+            if (alpha <= 0) fade.gameObject.SetActive(false);
+        }
+
+        void SetFade(float a)
+        {
+            var c = fade.color;
+            c.a = a;
+            fade.color = c;
+        }
+
         // ---------- quest tracker (top right) ----------
 
         void BuildTracker()
@@ -377,6 +426,8 @@ namespace Buds.UI
             var offset = Vector2.ClampMagnitude((input.StickPosition - input.StickOrigin) / scale, 70);
             stickBase.rectTransform.anchoredPosition = origin;
             stickKnob.rectTransform.anchoredPosition = origin + offset;
+            // the knob turns gold while running
+            stickKnob.color = input.Run ? new Color(1f, 0.79f, 0.24f, 0.9f) : new Color(0.965f, 0.949f, 0.914f, 0.85f);
         }
 
         static void Place(RectTransform rt, float x, float y, float w, float h)
