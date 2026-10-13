@@ -22,6 +22,8 @@ namespace Buds.Core
         WorldView world;
         BudController player;
         Sign nearby;
+        int level = 1;
+        Exit atExit;
 
         async void Start()
         {
@@ -144,7 +146,8 @@ namespace Buds.Core
             cam.SnapToTarget();
 
             ui.HideLoading();
-            ui.ShowHud(name, Progression.Level(xp), xp, Progression.NextLevelXp(xp));
+            level = Progression.Level(xp);
+            ui.ShowHud(name, level, xp, Progression.NextLevelXp(xp));
 
             var shots = CommandLine.Get("-buds-autoshot");
             if (shots != null) _ = AutoPilot(shots);
@@ -157,12 +160,28 @@ namespace Buds.Core
             input.Blocked = ui.DialogOpen;
             ui.UpdateStick(input);
 
+            CheckExit();
             nearby = FindNearbySign();
             ui.SetHint(nearby != null ? "Czytaj  [E]" : null);
 
             if (!input.InteractPressed) return;
             if (ui.DialogOpen) ui.HideDialog();
             else if (nearby != null) ui.ShowDialog(nearby.Title, nearby.Text);
+        }
+
+        /// <summary>Walking onto a road out of the map tells you where it leads (travel comes with the next district).</summary>
+        void CheckExit()
+        {
+            var cell = player.MapCell(world.Map.Height);
+            Exit exit = null;
+            foreach (var e in world.Map.Exits)
+                if (e.Contains(cell.x, cell.y)) exit = e;
+            if (exit == atExit) return;
+            atExit = exit;
+            if (exit == null) return;
+            var district = Districts.Get(exit.DistrictId);
+            if (district != null && !Districts.CanEnter(district.Id, level))
+                ui.ShowDialog(district.Name, Districts.ClosedReason(district, level));
         }
 
         Sign FindNearbySign()

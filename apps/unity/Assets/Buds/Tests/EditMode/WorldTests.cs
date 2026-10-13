@@ -36,7 +36,8 @@ namespace Buds.Tests
             for (var y = 0; y < map.Height; y++)
             {
                 Assert.IsTrue(Tiles.IsSolid(map.Objects[y, 0]), $"west edge y={y}");
-                Assert.IsTrue(Tiles.IsSolid(map.Objects[y, map.Width - 1]), $"east edge y={y}");
+                var eastExit = y is 17 or 18;
+                Assert.AreEqual(!eastExit, Tiles.IsSolid(map.Objects[y, map.Width - 1]), $"east edge y={y}");
             }
         }
 
@@ -95,6 +96,42 @@ namespace Buds.Tests
                 if (map.Above[y, x] == Tiles.Empty) continue;
                 Assert.AreEqual(Tiles.TreeTop, map.Above[y, x]);
                 Assert.AreEqual(Tiles.TreeTrunk, map.Objects[y + 1, x], $"canopy at ({x},{y})");
+            }
+        }
+    }
+
+    public class DistrictTests
+    {
+        [Test]
+        public void StartsInPaczkowoAndUnlocksInOrder()
+        {
+            Assert.AreEqual(Districts.Start, Districts.All[0].Id);
+            Assert.IsTrue(Districts.CanEnter(Districts.Start, 1));
+            for (var i = 1; i < Districts.All.Length; i++)
+                Assert.GreaterOrEqual(Districts.All[i].UnlockLevel, Districts.All[i - 1].UnlockLevel);
+        }
+
+        [Test]
+        public void UnfinishedOrUnknownDistrictsAreClosed()
+        {
+            Assert.IsFalse(Districts.CanEnter("las-palmos", 99));
+            Assert.IsFalse(Districts.CanEnter("nowhere", 99));
+            StringAssert.Contains("poziomu 4", Districts.ClosedReason(Districts.Get("las-palmos"), 1));
+        }
+
+        [Test]
+        public void VillageExitsAreRoadsAtTheMapEdgeToKnownDistricts()
+        {
+            var map = Village.Build();
+            // the start district is the hub: one road to every other district
+            Assert.AreEqual(Districts.All.Length - 1, map.Exits.Count);
+            foreach (var exit in map.Exits)
+            {
+                Assert.IsNotNull(Districts.Get(exit.DistrictId), exit.DistrictId);
+                Assert.IsTrue(exit.Y0 == 0 || exit.Y1 == map.Height - 1 || exit.X0 == 0 || exit.X1 == map.Width - 1);
+                for (var y = exit.Y0; y <= exit.Y1; y++)
+                for (var x = exit.X0; x <= exit.X1; x++)
+                    Assert.IsTrue(map.IsWalkable(x, y), $"exit cell ({x},{y})");
             }
         }
     }

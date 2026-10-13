@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import type { BudLook, BudResponse, CreateBudResponse, LeaderboardResponse } from '@buds/shared';
+import {
+  CATALOG,
+  type ApiError,
+  type BudLook,
+  type BudResponse,
+  type CatalogItem,
+  type CatalogResponse,
+  type CreateBudResponse,
+  type LeaderboardResponse,
+  type OwnedItemsResponse,
+} from '@buds/shared';
 import { createApp } from '../src/app.js';
 import { loadEnv } from '../src/env.js';
 import { createMemoryStore } from '../src/store/memory.js';
@@ -205,5 +215,54 @@ describe('GET /v1/buds/:slug/sheet.png', () => {
 
   it('404s for unknown buds', async () => {
     expect((await makeApp().request('/v1/buds/nobody-abcd/sheet.png')).status).toBe(404);
+  });
+});
+
+describe('items and catalog', () => {
+  it('serves the catalog publicly, with reserved premium slots marked unavailable', async () => {
+    const res = await makeApp().request('/v1/catalog');
+    expect(res.status).toBe(200);
+    const { items } = (await res.json()) as CatalogResponse;
+    expect(items.some((i) => i.id === 'outfit-bluza' && i.price.currency === 'free')).toBe(true);
+    for (const item of items.filter((i) => i.premium)) expect(item.available).toBe(false);
+  });
+
+  it('lists owned items only for the authenticated bud', async () => {
+    const store = createMemoryStore();
+    const app = createApp(
+      loadEnv({ SUPABASE_JWT_SECRET: 'x'.repeat(32), CREATE_LIMIT_PER_MINUTE: '100' }),
+      { store },
+    );
+    const { bud, token } = await createBud(app);
+    expect((await app.request('/v1/buds/me/items')).status).toBe(401);
+
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+    expect(
+      ((await (await app.request('/v1/buds/me/items', auth)).json()) as OwnedItemsResponse).items,
+    ).toEqual([]);
+
+    await store.grantItem(bud.slug, 'outfit-premium-slot', 'reward');
+    await store.grantItem(bud.slug, 'outfit-premium-slot', 'reward'); // idempotent
+    const { items } = (await (
+      await app.request('/v1/buds/me/items', auth)
+    ).json()) as OwnedItemsResponse;
+    expect(items).toEqual([
+      expect.objectContaining({ itemId: 'outfit-premium-slot', source: 'reward' }),
+    ]);
+  });
+
+  it('rejects a new bud wearing an item it does not own', async () => {
+    const catalog: CatalogItem[] = CATALOG.map((i) =>
+      i.id === 'outfit-kurtka'
+        ? { ...i, premium: true, price: { currency: 'gems', amount: 300 } }
+        : i,
+    );
+    const app = createApp(
+      loadEnv({ SUPABASE_JWT_SECRET: 'x'.repeat(32), CREATE_LIMIT_PER_MINUTE: '100' }),
+      { store: createMemoryStore(), catalog },
+    );
+    const res = await app.request('/v1/buds', post({ name: 'Zuzia', look }));
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as ApiError).error.code).toBe('item_locked');
   });
 });

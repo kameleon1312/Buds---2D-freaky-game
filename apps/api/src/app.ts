@@ -5,8 +5,13 @@ import { HTTPException } from 'hono/http-exception';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import {
+  CATALOG,
   PAIR_CODE_TTL_MINUTES,
   budSlugSchema,
+  lockedItems,
+  type CatalogItem,
+  type CatalogResponse,
+  type OwnedItemsResponse,
   createBudSchema,
   redeemPairSchema,
   type ApiError,
@@ -33,9 +38,13 @@ import type { BudStore } from './store/types.js';
 const VERSION = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) ?? 'dev';
 const startedAt = Date.now();
 
-export type AppDeps = { store: BudStore };
+export type AppDeps = {
+  store: BudStore;
+  /** Injected so tests can price items; production uses the shared catalog. */
+  catalog?: readonly CatalogItem[];
+};
 
-export function createApp(env: Env, { store }: AppDeps) {
+export function createApp(env: Env, { store, catalog = CATALOG }: AppDeps) {
   const app = new Hono<{ Variables: AuthVariables & PlayerVariables }>();
 
   app.use('*', requestId());
@@ -81,12 +90,33 @@ export function createApp(env: Env, { store }: AppDeps) {
       const message = input.error.issues[0]?.message ?? 'Invalid input';
       return c.json<ApiError>({ error: { code: 'invalid_input', message } }, 400);
     }
+    // a brand-new bud owns nothing beyond the free starter set
+    const locked = lockedItems(input.data.look, new Set(), catalog);
+    if (locked.length) {
+      return c.json<ApiError>(
+        { error: { code: 'item_locked', message: `Nie masz jeszcze: ${locked.join(', ')}` } },
+        403,
+      );
+    }
     const token = newPlayerToken();
     const bud = await store.create(input.data, hashToken(token));
     return c.json<CreateBudResponse>({ bud, token }, 201);
   });
 
   app.get('/v1/buds/me', requirePlayer(store), (c) => c.json<BudResponse>({ bud: c.get('bud') }));
+
+  // items granted beyond the starter set; only the server writes these
+  app.get('/v1/buds/me/items', requirePlayer(store), async (c) =>
+    c.json<OwnedItemsResponse>({ items: await store.items(c.get('bud').slug) }),
+  );
+
+  // ---------- catalog ----------
+
+  app.get('/v1/catalog', (c) =>
+    c.json<CatalogResponse>({ items: [...catalog] }, 200, {
+      'Cache-Control': 'public, max-age=300',
+    }),
+  );
 
   // web shows this code; the game redeems it for its own token
   app.post('/v1/buds/me/pair-code', requirePlayer(store), async (c) => {

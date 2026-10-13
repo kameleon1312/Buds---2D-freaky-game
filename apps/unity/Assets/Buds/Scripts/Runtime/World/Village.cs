@@ -2,6 +2,18 @@ using System.Collections.Generic;
 
 namespace Buds.World
 {
+    /// <summary>Road leaving the map towards another district (inclusive cell rectangle, map coords).</summary>
+    public sealed class Exit
+    {
+        public int X0;
+        public int Y0;
+        public int X1;
+        public int Y1;
+        public string DistrictId;
+
+        public bool Contains(int x, int y) => x >= X0 && x <= X1 && y >= Y0 && y <= Y1;
+    }
+
     public sealed class Sign
     {
         public int X;
@@ -24,13 +36,18 @@ namespace Buds.World
         public int SpawnX;
         public int SpawnY;
         public List<Sign> Signs = new();
+        public List<Exit> Exits = new();
 
         public bool IsWalkable(int x, int y) =>
             x >= 0 && y >= 0 && x < Width && y < Height &&
             !Tiles.IsSolid(Ground[y, x]) && !Tiles.IsSolid(Objects[y, x]);
     }
 
-    /// <summary>The starting village, Pączkowo. Deterministic: everyone gets the same map.</summary>
+    /// <summary>
+    /// Starting map of Miasto Ziomków (a small placeholder until the full district from docs/districts.md is built).
+    /// Roads leave north to Las Palmos, south to Dwór Carski and east to Los Karkos. Deterministic: everyone gets
+    /// the same map.
+    /// </summary>
     public static class Village
     {
         const int W = 48;
@@ -65,6 +82,15 @@ namespace Buds.World
                 map.Objects[y, x] = Tiles.Empty;
                 map.Ground[y, x] = Tiles.Path;
             }
+            foreach (var y in new[] { 17, 18 })
+            foreach (var x in new[] { W - 2, W - 1 })
+            {
+                map.Objects[y, x] = Tiles.Empty;
+                map.Ground[y, x] = Tiles.Path;
+            }
+            map.Exits.Add(new Exit { X0 = 23, Y0 = 0, X1 = 24, Y1 = 0, DistrictId = "las-palmos" });
+            map.Exits.Add(new Exit { X0 = 23, Y0 = H - 1, X1 = 24, Y1 = H - 1, DistrictId = "dwor-carski" });
+            map.Exits.Add(new Exit { X0 = W - 1, Y0 = 17, X1 = W - 1, Y1 = 18, DistrictId = "los-karkos" });
 
             // plaza with the notice board
             Path(map, reserved, 19, 14, 28, 21);
@@ -74,8 +100,8 @@ namespace Buds.World
             {
                 X = 21,
                 Y = 15,
-                Title = "Rynek w Pączkowie",
-                Text = "Witaj w wiosce! Mieszkańcy niedługo wrócą z pola i będą mieli dla ciebie zadania. Na razie rozejrzyj się po okolicy.",
+                Title = "Miasto Ziomków",
+                Text = "Witaj w Mieście Ziomków! Drogi prowadzą do Las Palmos (północ), Dworu Carskiego (południe) i Los Karkos (wschód). Mieszkańcy niedługo będą mieli dla ciebie zadania.",
             });
 
             // cottages, each with a path down to the road

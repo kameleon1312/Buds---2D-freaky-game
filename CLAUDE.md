@@ -38,7 +38,9 @@ Look at the autopilot screenshots after any gameplay or rendering change — tes
 - Visual style follows the Buds design system (tokens: surface/paper/ink, lime `buds`, `gold` for the single call to action per screen, `rep` secondary, `alert` destructive; outlined interactive elements, hard lips/drops, no soft shadows or gradients, no emoji in UI). Web tokens live in `apps/web/app/globals.css`, Unity tokens and components in `UiKit.cs` — keep them in sync.
 - Fonts: Rubik everywhere. Web loads it via `next/font`; Unity uses static Rubik-Black/Rubik-Bold instances (fontTools) because legacy Text can't drive a variable font's weight axis.
 - Level curve lives in `packages/shared/src/level.ts` and is mirrored in `Progression.cs` — change both together.
-- XP must only ever be granted by the server (game reports events, API validates). Never trust client-side XP.
+- XP, coins, gems and owned items must only ever be granted by the server (game reports events, API validates). Never trust the client.
+- Monetisation groundwork: one item catalog in `packages/shared/src/catalog.ts` (kinds, design-system rarities, `free`/`coins`/`gems`, `premium`, `available`); ownership in `bud_items` (server-written). The API rejects looks that wear items the bud doesn't own (`lockedItems`). No pay-to-win: real money buys looks and convenience, not combat power. Plan and order of work: `docs/roadmap.md`.
+- Districts: Miasto Ziomków (start, hub), Las Palmos, Dwór Carski, Los Karkos — design in `docs/districts.md`, registry in `packages/shared/src/districts.ts`, mirrored in Unity `Districts.cs` (change both together). A district is a big map (city centre + outskirts) and, later, its own multiplayer room.
 - Guest auth: `Authorization: Bearer <player token>`; only sha256 hashes are stored. One bud can have many tokens (one per device).
 - Every request/response shape lives in `packages/shared` as a zod schema. New API behaviour touching auth, CORS, headers or limits needs a test.
 - Migrations: never edit one that is already on `main`; every new table gets RLS enabled.

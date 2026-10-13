@@ -29,6 +29,12 @@ namespace Buds.World
 
             Colliders(root.transform, "Ground", map.Ground, map);
             Colliders(root.transform, "Objects", map.Objects, map);
+            // the map's outline: road exits lead to other districts, never into the void
+            root.AddComponent<EdgeCollider2D>().points = new[]
+            {
+                new Vector2(0, 0), new Vector2(map.Width, 0), new Vector2(map.Width, map.Height), new Vector2(0, map.Height),
+                new Vector2(0, 0),
+            };
             var material = SpriteMaterial();
             Ground(root.transform, map, material);
             Props(root.transform, map, PropArt.Load());

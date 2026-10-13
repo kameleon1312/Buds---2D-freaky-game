@@ -1,4 +1,4 @@
-import type { BudRecord } from '@buds/shared';
+import type { BudRecord, OwnedItem } from '@buds/shared';
 import { makeSlug } from './slug.js';
 import type { BudStore } from './types.js';
 
@@ -7,6 +7,7 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const buds = new Map<string, BudRecord>();
   const tokens = new Map<string, string>(); // tokenHash -> slug
   const pairCodes = new Map<string, { slug: string; expiresAt: Date }>();
+  const owned = new Map<string, OwnedItem[]>(); // slug -> granted items
   const copy = (bud: BudRecord | undefined) => (bud ? { ...bud, look: { ...bud.look } } : null);
 
   return {
@@ -47,6 +48,16 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
         .sort((a, b) => b.xp - a.xp || a.createdAt.localeCompare(b.createdAt))
         .slice(0, limit)
         .map((b) => copy(b) as BudRecord);
+    },
+
+    async items(slug) {
+      return (owned.get(slug) ?? []).map((i) => ({ ...i }));
+    },
+
+    async grantItem(slug, itemId, source) {
+      const list = owned.get(slug) ?? [];
+      if (list.some((i) => i.itemId === itemId)) return;
+      owned.set(slug, [...list, { itemId, source, acquiredAt: now().toISOString() }]);
     },
   };
 }

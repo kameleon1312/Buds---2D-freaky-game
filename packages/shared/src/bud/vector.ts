@@ -12,6 +12,9 @@ import type { BudLook } from './look';
 export const VIEW_W = 160;
 export const VIEW_H = 240;
 const PLACE = 'translate(5 32.5) scale(1.25)';
+/** The torso and head sit this much lower than in the design sheet: shorter, chunkier legs. */
+const BODY_DROP = 6;
+const HIP_Y = 106 + BODY_DROP;
 
 export const FACINGS = ['down', 'side', 'up'] as const;
 /** `side` faces left; mirror it for right. */
@@ -478,7 +481,7 @@ function legsFront(pen: Pen, { p, frame }: Ctx) {
   ] as const) {
     const ground = lifted ? 145 : 150;
     // a little taper from the hip to the ankle; feet turn slightly outwards
-    pen.shaded(limb(x, 106, 7.5, foot, ground - 12, 5.5), p.pants, -2, -2);
+    pen.shaded(limb(x, HIP_Y, 7.5, foot, ground - 12, 5.5), p.pants, -2, -2);
     shoe(pen, foot, ground, p, 0);
   }
 }
@@ -503,7 +506,7 @@ function legsSide(pen: Pen, { p, frame }: Ctx) {
   legs.forEach(([x, lifted], i) => {
     const ground = lifted ? 145 : 150;
     const pants: Pair = i === 0 ? [p.pants[1], p.pants[1]] : p.pants;
-    pen.shaded(limb(60 + (x - 60) * 0.5, 106, 7.5, x, ground - 12, 5.5), pants, -2, -2);
+    pen.shaded(limb(60 + (x - 60) * 0.5, HIP_Y, 7.5, x, ground - 12, 5.5), pants, -2, -2);
     shoe(pen, x, ground, i === 0 ? { ...p, shoes: [p.shoes[1], p.shoes[1]] } : p, -1);
   });
 }
@@ -623,7 +626,7 @@ export function budFrameMarkup(
   if (facing === 'side') {
     legsSide(pen, ctx);
     const swing = frame === 1 ? 22 : frame === 2 ? -22 : 0;
-    pen.group(`translate(0 ${bob})`, (up) => {
+    pen.group(`translate(0 ${bob + BODY_DROP})`, (up) => {
       // far arm behind the body, swinging opposite
       up.group(`rotate(${-swing} 60 74)`, (a) => {
         const dark: Ctx = {
@@ -640,7 +643,7 @@ export function budFrameMarkup(
     legsFront(pen, ctx);
     const leftHand = frame === 1 ? 103 : frame === 2 ? 109 : 107;
     const rightHand = frame === 2 ? 103 : frame === 1 ? 109 : 107;
-    pen.group(`translate(0 ${bob})`, (up) => {
+    pen.group(`translate(0 ${bob + BODY_DROP})`, (up) => {
       torsoFront(up, ctx, facing === 'up');
       arm(up, 40, 33, leftHand, ctx);
       arm(up, 80, 87, rightHand, ctx);

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { budLookSchema, type BudRecord } from '@buds/shared';
+import { budLookSchema, ownedItemSchema, type BudRecord } from '@buds/shared';
 import { makeSlug } from './slug.js';
 import type { BudStore } from './types.js';
 
@@ -115,6 +115,28 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
         .limit(limit);
       if (error) throw error;
       return (data as BudRow[]).map(toRecord);
+    },
+
+    async items(slug) {
+      const { data, error } = await db
+        .from('bud_items')
+        .select('item_id, source, acquired_at')
+        .eq('bud_id', await idBySlug(slug))
+        .order('acquired_at', { ascending: true });
+      if (error) throw error;
+      return (data as { item_id: string; source: string; acquired_at: string }[]).map((r) =>
+        ownedItemSchema.parse({ itemId: r.item_id, source: r.source, acquiredAt: r.acquired_at }),
+      );
+    },
+
+    async grantItem(slug, itemId, source) {
+      const { error } = await db
+        .from('bud_items')
+        .upsert(
+          { bud_id: await idBySlug(slug), item_id: itemId, source },
+          { onConflict: 'bud_id,item_id', ignoreDuplicates: true },
+        );
+      if (error) throw error;
     },
   };
 }
