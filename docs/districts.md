@@ -9,9 +9,9 @@ Rejestr (nazwy, progi poziomu, status): `packages/shared/src/districts.ts`, lust
 | #   | Dzielnica          | Wejście od poziomu | Klimat                      | Główna mechanika                                              |
 | --- | ------------------ | ------------------ | --------------------------- | ------------------------------------------------------------- |
 | 1   | **Miasto Ziomków** | start              | codzienne życie, ulica      | freestyle, graffiti i ukrywanie się przed policją             |
-| 2   | **Las Palmas**     | 4                  | tropiki, plaże, ocean       | eksploracja, zwierzęta, zadania na wodzie                     |
-| 3   | **Dwór Carski**    | 8                  | arystokracja, cegła, dworek | zagadki logiczne, okradanie nieuczciwych urzędników           |
-| 4   | **Los Karkos**     | 12                 | bieda, ruiny, graffiti      | ciągłe zaczepki, trening walki i przetrwania, sklepy z bronią |
+| 2   | **Las Palmas**     | 3                  | tropiki, plaże, ocean       | eksploracja, zwierzęta, zadania na wodzie                     |
+| 3   | **Dwór Carski**    | 5                  | arystokracja, cegła, dworek | zagadki logiczne, okradanie nieuczciwych urzędników           |
+| 4   | **Los Karkos**     | 7                  | bieda, ruiny, graffiti      | ciągłe zaczepki, trening walki i przetrwania, sklepy z bronią |
 
 Kolejność progów rośnie z trudnością: Miasto Ziomków uczy podstaw, Las Palmas to spokojna eksploracja,
 Dwór Carski wymaga myślenia i pierwszych walk, Los Karkos to sprawdzian dla doświadczonych.
@@ -68,7 +68,7 @@ pierwsze zlecenia graffiti.
 **Grafika do zrobienia:** bloki i kamienice, sklepy z szyldami, ławki, latarnie, przystanek, skatepark,
 boisko, wiadukt, ściany pod graffiti (z rysowanym wzorem), radiowóz, policjant (postać NPC), raperzy.
 
-## 2. Las Palmas (poziom 4)
+## 2. Las Palmas (poziom 3)
 
 **Klimat:** tropiki — palmy, plaże, turkusowy ocean, hawajskie chatki na palach, kwiaty, egzotyczne zwierzęta.
 Najbardziej kolorowa i najspokojniejsza dzielnica.
@@ -96,7 +96,7 @@ zwierzak-towarzysz (papuga na ramieniu).
 **Grafika do zrobienia:** palmy (kilka wariantów), piasek i ocean z falą przy brzegu, chatki na palach,
 pomost, łodzie, stragany z owocami, kwiaty tropikalne, zwierzęta (z animacją), wodospad, ruiny.
 
-## 3. Dwór Carski (poziom 8)
+## 3. Dwór Carski (poziom 5)
 
 **Klimat:** arystokracja i przepych — ceglane kamienice, brukowane ulice, latarnie gazowe, ogrody
 z żywopłotami, a w centrum wielki dworek. Za fasadą — nieuczciwi urzędnicy.
@@ -124,7 +124,7 @@ i większy łup. Kradzież podnosi „poszukiwanie” — straż dworska zaczyna
 **Grafika do zrobienia:** ceglane kamienice, dworek (duży, z detalami), bruk, latarnie gazowe, żywopłoty
 i fontanny, powozy, urzędnicy w cylindrach (NPC/przeciwnicy), straż dworska, sejf i worki z monetami.
 
-## 4. Los Karkos (poziom 12)
+## 4. Los Karkos (poziom 7)
 
 **Klimat:** niebezpiecznie — bieda, zaniedbane ulice, w centrum opuszczone budynki pokryte graffiti,
 płoty z siatki, wraki aut, beczki z ogniem. Fikcyjne miejsce: zło to konkretne gangi i typy spod ciemnej

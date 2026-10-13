@@ -1,0 +1,1672 @@
+{
+  "npcs": [
+    {
+      "id": "wiktor",
+      "name": "Wiktor",
+      "district": "miasto-ziomkow",
+      "x": 61,
+      "y": 51,
+      "lines": [
+        "Rynek to serce miasta. Stąd wszędzie blisko.",
+        "Jak się zgubisz, wracaj do fontanny."
+      ]
+    },
+    {
+      "id": "halina",
+      "name": "Pani Halina",
+      "district": "miasto-ziomkow",
+      "x": 69,
+      "y": 45,
+      "lines": [
+        "Za moich czasów to się chodziło piechotą!",
+        "Ładny dziś dzień, prawda?"
+      ]
+    },
+    {
+      "id": "nowak",
+      "name": "Sierżant Nowak",
+      "district": "miasto-ziomkow",
+      "x": 70,
+      "y": 57,
+      "lines": [
+        "Graffiti to wandalizm. Tak przynajmniej mówi regulamin.",
+        "Mam cię na oku, młody."
+      ]
+    },
+    {
+      "id": "basia",
+      "name": "Basia",
+      "district": "miasto-ziomkow",
+      "x": 24,
+      "y": 37,
+      "lines": [
+        "W parku zawsze coś się dzieje!",
+        "Widziałeś kaczki na stawie?"
+      ]
+    },
+    {
+      "id": "kuba",
+      "name": "Kuba Deska",
+      "district": "miasto-ziomkow",
+      "x": 97,
+      "y": 38,
+      "lines": [
+        "Deska, rampa, luz. Tyle mi trzeba.",
+        "Wkrótce bitwy freestylowe. Będziesz?"
+      ]
+    },
+    {
+      "id": "zdzisiek",
+      "name": "Pan Zdzisiek",
+      "district": "miasto-ziomkow",
+      "x": 31,
+      "y": 22,
+      "lines": [
+        "Pomidory w tym roku jak malowane.",
+        "Działka to najlepsza siłownia."
+      ]
+    },
+    {
+      "id": "ola",
+      "name": "Ola",
+      "district": "miasto-ziomkow",
+      "x": 35,
+      "y": 84,
+      "lines": [
+        "Ściany w tym mieście są za szare.",
+        "Psst. Policja patroluje tory po zmroku."
+      ]
+    },
+    {
+      "id": "marek",
+      "name": "Listonosz Marek",
+      "district": "miasto-ziomkow",
+      "x": 106,
+      "y": 43,
+      "lines": [
+        "Przesyłki same się nie doręczą.",
+        "Autobus znowu się spóźnia."
+      ]
+    },
+    {
+      "id": "kahu",
+      "name": "Kahu",
+      "district": "las-palmas",
+      "x": 60,
+      "y": 70,
+      "lines": [
+        "Aloha! Tu nikt się nie spieszy.",
+        "Najlepsze kokosy są przy chatkach."
+      ]
+    },
+    {
+      "id": "leilani",
+      "name": "Leilani",
+      "district": "las-palmas",
+      "x": 83,
+      "y": 76,
+      "lines": [
+        "Coś zimnego? Mamy sok z kokosa!",
+        "Bar otwarty do zachodu słońca."
+      ]
+    },
+    {
+      "id": "tomasz",
+      "name": "Rybak Tomasz",
+      "district": "las-palmas",
+      "x": 24,
+      "y": 59,
+      "lines": [
+        "Ryba bierze rano. Teraz to tylko czekanie.",
+        "Morze daje i morze zabiera."
+      ]
+    },
+    {
+      "id": "mia",
+      "name": "Mia",
+      "district": "las-palmas",
+      "x": 28,
+      "y": 74,
+      "lines": [
+        "Fala dziś idealna!",
+        "Deska, słońce, ocean — czego chcieć więcej?"
+      ]
+    },
+    {
+      "id": "profesor",
+      "name": "Profesor Kowalski",
+      "district": "las-palmas",
+      "x": 103,
+      "y": 41,
+      "lines": [
+        "Te ruiny mają tysiąc lat. Albo dwa.",
+        "Archeologia to cierpliwość. I dużo komarów."
+      ]
+    },
+    {
+      "id": "nalu",
+      "name": "Nalu",
+      "district": "las-palmas",
+      "x": 63,
+      "y": 36,
+      "lines": [
+        "Ciii… flamingi śpią.",
+        "Każdy flaming ma swoje imię. Ten to Rysio."
+      ]
+    },
+    {
+      "id": "alfred",
+      "name": "Kamerdyner Alfred",
+      "district": "dwor-carski",
+      "x": 60,
+      "y": 45,
+      "lines": [
+        "Hrabina przyjmuje gości tylko po umówieniu.",
+        "Herbata o piątej. Zawsze o piątej."
+      ]
+    },
+    {
+      "id": "eleonora",
+      "name": "Hrabina Eleonora",
+      "district": "dwor-carski",
+      "x": 68,
+      "y": 64,
+      "lines": [
+        "Róże w tym roku kwitną wyjątkowo.",
+        "W tym dworze ściany mają uszy."
+      ]
+    },
+    {
+      "id": "feliks",
+      "name": "Ogrodnik Feliks",
+      "district": "dwor-carski",
+      "x": 54,
+      "y": 62,
+      "lines": [
+        "Żywopłot trzeba przycinać co tydzień.",
+        "Labirynt sadził jeszcze mój dziadek."
+      ]
+    },
+    {
+      "id": "irena",
+      "name": "Detektyw Irena",
+      "district": "dwor-carski",
+      "x": 30,
+      "y": 24,
+      "lines": [
+        "Każdy coś ukrywa. Pytanie tylko co.",
+        "Kamienice mówią więcej niż ludzie."
+      ]
+    },
+    {
+      "id": "pompejusz",
+      "name": "Urzędnik Pompejusz",
+      "district": "dwor-carski",
+      "x": 82,
+      "y": 23,
+      "lines": [
+        "Proszę wypełnić wniosek w trzech egzemplarzach.",
+        "Urząd nieczynny. Wróć jutro. Albo za rok."
+      ]
+    },
+    {
+      "id": "zofia",
+      "name": "Kasjerka Zofia",
+      "district": "dwor-carski",
+      "x": 104,
+      "y": 23,
+      "lines": [
+        "Bank otwarty od dziewiątej.",
+        "Liczby się nie zgadzają… znowu."
+      ]
+    },
+    {
+      "id": "jozef",
+      "name": "Stajenny Józef",
+      "district": "dwor-carski",
+      "x": 98,
+      "y": 70,
+      "lines": [
+        "Konie wiedzą więcej, niż myślisz.",
+        "Siano, woda, szczotka. I tak codziennie."
+      ]
+    },
+    {
+      "id": "rysiek",
+      "name": "Rysiek z Bazaru",
+      "district": "los-karkos",
+      "x": 40,
+      "y": 82,
+      "lines": [
+        "Tu wszystko ma swoją cenę.",
+        "Nie pytaj, skąd towar."
+      ]
+    },
+    {
+      "id": "jola",
+      "name": "Jola",
+      "district": "los-karkos",
+      "x": 63,
+      "y": 45,
+      "lines": [
+        "Sprzęt dobry, ceny uczciwe. Prawie.",
+        "Bez ochraniaczy do fabryki nie idź."
+      ]
+    },
+    {
+      "id": "bogdan",
+      "name": "Trener Bogdan",
+      "district": "los-karkos",
+      "x": 104,
+      "y": 64,
+      "lines": [
+        "Gardę wyżej!",
+        "Siła to nie wszystko. Liczy się głowa."
+      ]
+    },
+    {
+      "id": "szymek",
+      "name": "Szymek",
+      "district": "los-karkos",
+      "x": 40,
+      "y": 35,
+      "lines": [
+        "Mieszkam tu od zawsze. Nie jest tak źle…",
+        "Uważaj na typów spod bloku numer cztery."
+      ]
+    },
+    {
+      "id": "waldek",
+      "name": "Złomiarz Waldek",
+      "district": "los-karkos",
+      "x": 108,
+      "y": 32,
+      "lines": [
+        "Złom to złoto, tylko trzeba umieć patrzeć.",
+        "Pies? Jaki pies? Śpi."
+      ]
+    },
+    {
+      "id": "kos",
+      "name": "Kos",
+      "district": "los-karkos",
+      "x": 61,
+      "y": 86,
+      "lines": [
+        "Nie widziałeś mnie.",
+        "Słucham, co mówią na dzielnicy."
+      ]
+    }
+  ],
+  "quests": [
+    {
+      "id": "witaj-w-miescie",
+      "title": "Witaj w mieście",
+      "district": "miasto-ziomkow",
+      "giver": "wiktor",
+      "xp": 60,
+      "minLevel": 1,
+      "requires": [],
+      "intro": "Nowy w mieście? Przywitaj się z sąsiadami: Pani Halina stoi przy fontannie, a Sierżant Nowak pilnuje komisariatu.",
+      "done": "Widzę, że już cię tu znają. Witaj w Mieście Ziomków!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "halina",
+          "text": "Dzień dobry, dziecko! Jak będziesz miał chwilę, przyjdź do mnie, mam drobną prośbę.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "nowak",
+          "text": "Nowa twarz, co? Tylko bez głupot na moim rewirze.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "zakupy-haliny",
+      "title": "Zakupy dla sąsiadki",
+      "district": "miasto-ziomkow",
+      "giver": "halina",
+      "xp": 50,
+      "minLevel": 1,
+      "requires": [
+        "witaj-w-miescie"
+      ],
+      "intro": "Upuściłam siatki z zakupami, jak biegłam na autobus. Leżą gdzieś przy rynku. Pozbierasz?",
+      "done": "Wszystko jest! Złote z ciebie dziecko.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Siatki z zakupami",
+          "item": "zakupy",
+          "spots": [
+            {
+              "x": 57,
+              "y": 39
+            },
+            {
+              "x": 72,
+              "y": 44
+            },
+            {
+              "x": 66,
+              "y": 57
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zgubiony-pies",
+      "title": "Zgubiony pies",
+      "district": "miasto-ziomkow",
+      "giver": "nowak",
+      "xp": 60,
+      "minLevel": 1,
+      "requires": [
+        "witaj-w-miescie"
+      ],
+      "intro": "Zgłoszenie: zaginął pies Pani Haliny, Burek. Ostatnio widziany przy stawie w parku. Sprawdzisz?",
+      "done": "Burek już w domu? Dobra robota. Może będą z ciebie ludzie.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 22,
+          "y": 45,
+          "radius": 2,
+          "label": "Staw w Parku Miejskim",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "basia",
+          "text": "Burek? Tak! Pobiegł za mną do domu Pani Haliny. Już jest bezpieczny.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "ulotki-basi",
+      "title": "Ulotki na koncert",
+      "district": "miasto-ziomkow",
+      "giver": "basia",
+      "xp": 50,
+      "minLevel": 1,
+      "requires": [],
+      "intro": "W sobotę gramy koncert w parku! Roznieś ulotki: Kuba na skateparku, Pan Zdzisiek na działkach i listonosz Marek przy przystanku.",
+      "done": "Super! Teraz całe miasto przyjdzie.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "kuba",
+          "text": "Koncert? Wpadnę na deskę. Dzięki!",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "zdzisiek",
+          "text": "Koncert w parku? Za moich czasów grało się na akordeonie. Przyjdę.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "marek",
+          "text": "Ulotka? Przypnę na przystanku, wszyscy zobaczą.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "zbiory-zdzisia",
+      "title": "Zbiory na działce",
+      "district": "miasto-ziomkow",
+      "giver": "zdzisiek",
+      "xp": 70,
+      "minLevel": 1,
+      "requires": [],
+      "intro": "Pomidory dojrzały, a mnie strzyka w krzyżu. Zbierzesz pięć z grządek?",
+      "done": "Piękne! Weź jednego dla siebie.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pomidory",
+          "item": "pomidor",
+          "spots": [
+            {
+              "x": 11,
+              "y": 11
+            },
+            {
+              "x": 15,
+              "y": 10
+            },
+            {
+              "x": 24,
+              "y": 18
+            },
+            {
+              "x": 26,
+              "y": 19
+            },
+            {
+              "x": 36,
+              "y": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "puszki-oli",
+      "title": "Puszki z farbą",
+      "district": "miasto-ziomkow",
+      "giver": "ola",
+      "xp": 80,
+      "minLevel": 2,
+      "requires": [],
+      "intro": "Ktoś rozrzucił moje puszki z farbą przy garażach. Pozbierasz je, zanim zobaczy je patrol?",
+      "done": "Dzięki! Weź ten złoty spray — jest wyjątkowy. Niedługo pokażę ci, jak to się robi.",
+      "rewardItem": "spray-zloty",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Puszki z farbą",
+          "item": "puszka",
+          "spots": [
+            {
+              "x": 14,
+              "y": 88
+            },
+            {
+              "x": 26,
+              "y": 89
+            },
+            {
+              "x": 40,
+              "y": 88
+            },
+            {
+              "x": 52,
+              "y": 88
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "paczka-na-wzgorze",
+      "title": "Paczka na Wzgórze",
+      "district": "miasto-ziomkow",
+      "giver": "marek",
+      "xp": 60,
+      "minLevel": 1,
+      "requires": [],
+      "intro": "Mam przesyłkę dla kogoś na Wzgórzu, a autobus nie przyjeżdża. Zaniesiesz ją pod tablicę na górze?",
+      "done": "Doręczone? Jesteś lepszy niż poczta!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 72,
+          "y": 13,
+          "radius": 3,
+          "label": "Tablica na Wzgórzu",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "pierwszy-trik",
+      "title": "Pierwszy trik",
+      "district": "miasto-ziomkow",
+      "giver": "kuba",
+      "xp": 70,
+      "minLevel": 1,
+      "requires": [
+        "ulotki-basi"
+      ],
+      "intro": "Chcesz jeździć? Najpierw obejdź wszystkie rampy i zobacz, jak są zbudowane.",
+      "done": "Masz to we krwi. Masz tu moją starą deskę — przyda ci się.",
+      "rewardItem": "deskorolka",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 91,
+          "y": 35,
+          "radius": 1,
+          "label": "Pierwsza rampa",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 95,
+          "y": 35,
+          "radius": 1,
+          "label": "Druga rampa",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 101,
+          "y": 35,
+          "radius": 1,
+          "label": "Trzecia rampa",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "aloha",
+      "title": "Aloha!",
+      "district": "las-palmas",
+      "giver": "kahu",
+      "xp": 150,
+      "minLevel": 3,
+      "requires": [],
+      "intro": "Pierwszy raz w Las Palmas? Przywitaj się z Leilani w barze na plaży i z rybakiem Tomaszem na pomoście.",
+      "done": "Teraz jesteś jednym z nas. Aloha!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "leilani",
+          "text": "Aloha! Wpadaj do baru, kiedy chcesz. Przyda mi się pomoc z kokosami.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "tomasz",
+          "text": "Nowy? Dobrze. Rybak zawsze potrzebuje rąk do pracy.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "kokosy-dla-baru",
+      "title": "Kokosy dla baru",
+      "district": "las-palmas",
+      "giver": "leilani",
+      "xp": 180,
+      "minLevel": 3,
+      "requires": [
+        "aloha"
+      ],
+      "intro": "Skończyły mi się kokosy! Leżą pod palmami w miasteczku. Przyniesiesz pięć?",
+      "done": "Idealne! Pierwszy sok na koszt firmy.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Kokosy",
+          "item": "kokos",
+          "spots": [
+            {
+              "x": 48,
+              "y": 57
+            },
+            {
+              "x": 70,
+              "y": 53
+            },
+            {
+              "x": 88,
+              "y": 60
+            },
+            {
+              "x": 58,
+              "y": 84
+            },
+            {
+              "x": 80,
+              "y": 77
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sieci-rybaka",
+      "title": "Sieci rybaka",
+      "district": "las-palmas",
+      "giver": "tomasz",
+      "xp": 200,
+      "minLevel": 3,
+      "requires": [],
+      "intro": "Sztorm porwał moje pływaki od sieci. Fale wyrzuciły je na plażę koło pomostu. Pozbierasz cztery?",
+      "done": "Są wszystkie! Jutro będzie ryba na kolację.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pływaki od sieci",
+          "item": "siec",
+          "spots": [
+            {
+              "x": 17,
+              "y": 64
+            },
+            {
+              "x": 20,
+              "y": 67
+            },
+            {
+              "x": 26,
+              "y": 70
+            },
+            {
+              "x": 30,
+              "y": 57
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fala-mii",
+      "title": "Polowanie na falę",
+      "district": "las-palmas",
+      "giver": "mia",
+      "xp": 180,
+      "minLevel": 3,
+      "requires": [],
+      "intro": "Szukam miejsca na zawody surfingowe. Sprawdź trzy plaże i powiedz mi, gdzie fala jest najlepsza.",
+      "done": "Rafa! Wiedziałam. Zawody robimy tam.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 18,
+          "y": 63,
+          "radius": 1,
+          "label": "Plaża przy pomoście",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 20,
+          "y": 74,
+          "radius": 1,
+          "label": "Plaża Aloha",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 40,
+          "y": 18,
+          "radius": 2,
+          "label": "Plaża przy rafie",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "zlota-maska",
+      "title": "Złota maska",
+      "district": "las-palmas",
+      "giver": "profesor",
+      "xp": 260,
+      "minLevel": 4,
+      "requires": [],
+      "intro": "Legenda mówi o złotej masce ze świątyni. Wejdź na ruiny, a potem znajdź w dżungli trzy odłamki maski.",
+      "done": "Niesamowite! Maska jest prawdziwa. Napiszę o tobie w swojej książce.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 108,
+          "y": 37,
+          "radius": 1,
+          "label": "Schody świątyni",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Odłamki maski",
+          "item": "odlamek",
+          "spots": [
+            {
+              "x": 96,
+              "y": 30
+            },
+            {
+              "x": 114,
+              "y": 44
+            },
+            {
+              "x": 118,
+              "y": 29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "piora-flamingow",
+      "title": "Pióra flamingów",
+      "district": "las-palmas",
+      "giver": "nalu",
+      "xp": 150,
+      "minLevel": 3,
+      "requires": [],
+      "intro": "Plotę wianek z piór flamingów. Zbierz trzy pióra przy lagunie — tylko cicho!",
+      "done": "Piękne! Ten wianek jest dla ciebie.",
+      "rewardItem": "wianek-aloha",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pióra flamingów",
+          "item": "pioro",
+          "spots": [
+            {
+              "x": 60,
+              "y": 33
+            },
+            {
+              "x": 78,
+              "y": 35
+            },
+            {
+              "x": 66,
+              "y": 38
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skarb-rafy",
+      "title": "Skarb rafy",
+      "district": "las-palmas",
+      "giver": "tomasz",
+      "xp": 220,
+      "minLevel": 4,
+      "requires": [
+        "sieci-rybaka"
+      ],
+      "intro": "Przy odpływie na rafie widać perły. Idź na rafę i przynieś dwie.",
+      "done": "Perły! A to muszla, która przynosi szczęście. Weź ją.",
+      "rewardItem": "muszla-szczescia",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 44,
+          "y": 19,
+          "radius": 3,
+          "label": "Rafa",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Perły",
+          "item": "perla",
+          "spots": [
+            {
+              "x": 36,
+              "y": 19
+            },
+            {
+              "x": 52,
+              "y": 21
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "audiencja",
+      "title": "Audiencja u hrabiny",
+      "district": "dwor-carski",
+      "giver": "alfred",
+      "xp": 250,
+      "minLevel": 5,
+      "requires": [],
+      "intro": "Hrabina chce cię poznać. Zgłoś się do niej w ogrodzie różanym, a potem przedstaw się ogrodnikowi.",
+      "done": "Hrabina jest zadowolona. To rzadkie.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "eleonora",
+          "text": "A więc to ty. Słyszałam o tobie. Może przydasz się dworowi.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "feliks",
+          "text": "Witaj w ogrodzie! Mam problem, ale o tym później.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "klucz-ogrodnika",
+      "title": "Klucz w labiryncie",
+      "district": "dwor-carski",
+      "giver": "feliks",
+      "xp": 280,
+      "minLevel": 5,
+      "requires": [
+        "audiencja"
+      ],
+      "intro": "Zgubiłem klucz do szklarni gdzieś w labiryncie, przy posągu w samym środku. Znajdziesz drogę?",
+      "done": "Mój klucz! Przeszedłeś labirynt — mało komu się to udaje.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Klucz do szklarni",
+          "item": "klucz",
+          "spots": [
+            {
+              "x": 23,
+              "y": 70
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "herbatka",
+      "title": "Herbatka o piątej",
+      "district": "dwor-carski",
+      "giver": "alfred",
+      "xp": 200,
+      "minLevel": 5,
+      "requires": [
+        "audiencja"
+      ],
+      "intro": "Goście zostawili filiżanki w ogrodzie. Przynieś trzy, zanim hrabina zauważy.",
+      "done": "Komplet. Hrabina nic nie zauważy — dziękuję.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Filiżanki",
+          "item": "filizanka",
+          "spots": [
+            {
+              "x": 48,
+              "y": 58
+            },
+            {
+              "x": 80,
+              "y": 63
+            },
+            {
+              "x": 57,
+              "y": 71
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "listy-z-kamienic",
+      "title": "Zaginione listy",
+      "district": "dwor-carski",
+      "giver": "irena",
+      "xp": 260,
+      "minLevel": 5,
+      "requires": [],
+      "intro": "Ktoś rozrzucił listy hrabiny po kamienicach. Zbierz cztery, zanim przeczytają je plotkarze.",
+      "done": "Te listy wiele wyjaśniają… Urzędnicy mają tu coś na sumieniu.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Listy hrabiny",
+          "item": "list",
+          "spots": [
+            {
+              "x": 12,
+              "y": 27
+            },
+            {
+              "x": 40,
+              "y": 21
+            },
+            {
+              "x": 25,
+              "y": 37
+            },
+            {
+              "x": 50,
+              "y": 40
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zbiegly-kucyk",
+      "title": "Zbiegły kucyk",
+      "district": "dwor-carski",
+      "giver": "jozef",
+      "xp": 280,
+      "minLevel": 5,
+      "requires": [],
+      "intro": "Kucyk Pędziwiatr uciekł ze stajni! Idź po śladach kopyt: kamienice, park, a potem z powrotem na wybieg.",
+      "done": "Wrócił sam na wybieg! Pewnie szedł za tobą. Dzięki!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 30,
+          "y": 40,
+          "radius": 2,
+          "label": "Ślady przy kamienicach",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 64,
+          "y": 74,
+          "radius": 2,
+          "label": "Ślady w parku",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 110,
+          "y": 80,
+          "radius": 2,
+          "label": "Wybieg przy stajni",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "nieuczciwy-urzednik",
+      "title": "Nieuczciwy urzędnik",
+      "district": "dwor-carski",
+      "giver": "zofia",
+      "xp": 350,
+      "minLevel": 6,
+      "requires": [],
+      "intro": "W kasie brakuje pieniędzy, a Pompejusz ciągle się uśmiecha. Porozmawiaj z nim, a potem odzyskaj monety, które pochował po dzielnicy.",
+      "done": "Wszystko się zgadza! Pompejusz ma kłopoty. Ten monokl jest dla ciebie — od banku.",
+      "rewardItem": "monokl",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "pompejusz",
+          "text": "Monety? Jakie monety? Proszę złożyć wniosek… ekhm, idź już.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Ukradzione monety",
+          "item": "moneta",
+          "spots": [
+            {
+              "x": 96,
+              "y": 12
+            },
+            {
+              "x": 112,
+              "y": 25
+            },
+            {
+              "x": 74,
+              "y": 30
+            },
+            {
+              "x": 118,
+              "y": 40
+            },
+            {
+              "x": 100,
+              "y": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tajemnica-dworu",
+      "title": "Tajemnica dworu",
+      "district": "dwor-carski",
+      "giver": "eleonora",
+      "xp": 480,
+      "minLevel": 6,
+      "requires": [
+        "klucz-ogrodnika",
+        "listy-z-kamienic"
+      ],
+      "intro": "Urzędnicy chcą przejąć dwór. Znajdź trzy dokumenty, które to udowodnią, i pokaż je detektyw Irenie.",
+      "done": "Mamy ich! Dwór jest bezpieczny. Przyjmij ten cylinder — nosił go mój pradziad.",
+      "rewardItem": "cylinder",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Dokumenty",
+          "item": "dokument",
+          "spots": [
+            {
+              "x": 75,
+              "y": 44
+            },
+            {
+              "x": 120,
+              "y": 12
+            },
+            {
+              "x": 52,
+              "y": 39
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "irena",
+          "text": "To wystarczy, żeby ich zamknąć. Świetna robota.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "nowy-na-dzielnicy",
+      "title": "Nowy na dzielnicy",
+      "district": "los-karkos",
+      "giver": "rysiek",
+      "xp": 300,
+      "minLevel": 7,
+      "requires": [],
+      "intro": "Nowy? Tu przetrwasz tylko ze znajomościami. Pogadaj z Jolą od sprzętu i z trenerem Bogdanem przy ringu.",
+      "done": "No, teraz cię kojarzą. To dużo warte.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "jola",
+          "text": "Od Ryśka? Dobra. Jak będziesz czegoś potrzebować, wiesz, gdzie mnie szukać.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "bogdan",
+          "text": "Chcesz się bić? Najpierw trening. Wróć do mnie, jak będziesz gotowy.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "trening",
+      "title": "Trening z Bogdanem",
+      "district": "los-karkos",
+      "giver": "bogdan",
+      "xp": 380,
+      "minLevel": 7,
+      "requires": [
+        "nowy-na-dzielnicy"
+      ],
+      "intro": "Trzy okrążenia wokół ringu, biegiem! Dotknij każdego narożnika placu.",
+      "done": "Kondycja jest. Masz moje stare rękawice — zasłużyłeś.",
+      "rewardItem": "rekawice-bokserskie",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 112,
+          "y": 57,
+          "radius": 1,
+          "label": "Narożnik przy siłowni",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 104,
+          "y": 52,
+          "radius": 1,
+          "label": "Narożnik przy drodze",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 114,
+          "y": 66,
+          "radius": 1,
+          "label": "Narożnik przy beczkach",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "czesci-dla-waldka",
+      "title": "Części dla Waldka",
+      "district": "los-karkos",
+      "giver": "waldek",
+      "xp": 360,
+      "minLevel": 7,
+      "requires": [],
+      "intro": "Składam motor ze złomu. Brakuje mi pięciu części — leżą gdzieś na złomowisku. Tylko nie obudź psa.",
+      "done": "Komplet! Jak motor odpali, przewiozę cię po dzielnicy.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Części do motoru",
+          "item": "czesc",
+          "spots": [
+            {
+              "x": 98,
+              "y": 5
+            },
+            {
+              "x": 110,
+              "y": 12
+            },
+            {
+              "x": 100,
+              "y": 20
+            },
+            {
+              "x": 118,
+              "y": 24
+            },
+            {
+              "x": 96,
+              "y": 27
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apteczki",
+      "title": "Apteczki dla kumpla",
+      "district": "los-karkos",
+      "giver": "szymek",
+      "xp": 340,
+      "minLevel": 7,
+      "requires": [],
+      "intro": "Mój kumpel oberwał od typów spod bloku. Po blokach są porozrzucane apteczki — zbierz cztery.",
+      "done": "Dzięki… Nie każdy by pomógł komuś stąd.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Apteczki",
+          "item": "apteczka",
+          "spots": [
+            {
+              "x": 28,
+              "y": 31
+            },
+            {
+              "x": 52,
+              "y": 54
+            },
+            {
+              "x": 80,
+              "y": 36
+            },
+            {
+              "x": 70,
+              "y": 66
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dostawa-bazar",
+      "title": "Dostawa na bazar",
+      "district": "los-karkos",
+      "giver": "jola",
+      "xp": 320,
+      "minLevel": 7,
+      "requires": [],
+      "intro": "Moje skrzynki ze sprzętem utknęły na bazarze. Przynieś trzy, zanim Rysiek je „pożyczy”.",
+      "done": "Wszystkie całe. Dobrze mieć kogoś zaufanego.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Skrzynki ze sprzętem",
+          "item": "skrzynka",
+          "spots": [
+            {
+              "x": 30,
+              "y": 78
+            },
+            {
+              "x": 45,
+              "y": 82
+            },
+            {
+              "x": 56,
+              "y": 86
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "szpieg-fabryki",
+      "title": "Oczy na fabrykę",
+      "district": "los-karkos",
+      "giver": "kos",
+      "xp": 450,
+      "minLevel": 8,
+      "requires": [],
+      "intro": "Gang z fabryki coś szykuje. Sprawdź bramę fabryki i most nad kanałem, potem powiedz Ryśkowi, co widziałeś.",
+      "done": "Dobra robota. Teraz wiemy, kiedy się ruszą.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 111,
+          "y": 74,
+          "radius": 1,
+          "label": "Brama fabryki",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 61,
+          "y": 89,
+          "radius": 1,
+          "label": "Most nad kanałem",
+          "item": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "rysiek",
+          "text": "Fabryka i most? Czyli przewożą towar nocą. Dzięki za cynk.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "naszywki-gangu",
+      "title": "Naszywki gangu",
+      "district": "los-karkos",
+      "giver": "rysiek",
+      "xp": 450,
+      "minLevel": 8,
+      "requires": [
+        "szpieg-fabryki"
+      ],
+      "intro": "Zabierz gangowi ich naszywki z dziedzińca fabryki. Bez nich nikt ich nie będzie się bał.",
+      "done": "Hah! Cała dzielnica o tym usłyszy. Ta kurtka jest teraz twoja.",
+      "rewardItem": "kurtka-karkos",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Naszywki gangu",
+          "item": "naszywka",
+          "spots": [
+            {
+              "x": 100,
+              "y": 78
+            },
+            {
+              "x": 118,
+              "y": 80
+            },
+            {
+              "x": 104,
+              "y": 89
+            },
+            {
+              "x": 120,
+              "y": 88
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "outfit-bluza",
+      "name": "Bluza",
+      "kind": "outfit",
+      "rarity": "common"
+    },
+    {
+      "id": "outfit-tshirt",
+      "name": "T-shirt",
+      "kind": "outfit",
+      "rarity": "common"
+    },
+    {
+      "id": "outfit-kurtka",
+      "name": "Bomberka",
+      "kind": "outfit",
+      "rarity": "common"
+    },
+    {
+      "id": "outfit-ogrodniczki",
+      "name": "Ogrodniczki",
+      "kind": "outfit",
+      "rarity": "common"
+    },
+    {
+      "id": "headwear-czapka",
+      "name": "Czapka",
+      "kind": "headwear",
+      "rarity": "common"
+    },
+    {
+      "id": "headwear-daszek",
+      "name": "Czapka z daszkiem",
+      "kind": "headwear",
+      "rarity": "common"
+    },
+    {
+      "id": "headwear-sluchawki",
+      "name": "Słuchawki",
+      "kind": "headwear",
+      "rarity": "common"
+    },
+    {
+      "id": "deskorolka",
+      "name": "Deskorolka Kuby",
+      "kind": "accessory",
+      "rarity": "uncommon"
+    },
+    {
+      "id": "spray-zloty",
+      "name": "Złoty spray",
+      "kind": "accessory",
+      "rarity": "rare"
+    },
+    {
+      "id": "wianek-aloha",
+      "name": "Wianek Aloha",
+      "kind": "headwear",
+      "rarity": "uncommon"
+    },
+    {
+      "id": "muszla-szczescia",
+      "name": "Muszla szczęścia",
+      "kind": "accessory",
+      "rarity": "rare"
+    },
+    {
+      "id": "monokl",
+      "name": "Monokl",
+      "kind": "accessory",
+      "rarity": "rare"
+    },
+    {
+      "id": "cylinder",
+      "name": "Cylinder",
+      "kind": "headwear",
+      "rarity": "epic"
+    },
+    {
+      "id": "rekawice-bokserskie",
+      "name": "Rękawice bokserskie",
+      "kind": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "id": "kurtka-karkos",
+      "name": "Kurtka z naszywkami",
+      "kind": "outfit",
+      "rarity": "epic"
+    }
+  ],
+  "skills": [
+    {
+      "id": "flow",
+      "name": "Flow",
+      "description": "Freestyle: dłuższe combo i lepsze rymy w bitwach.",
+      "district": "miasto-ziomkow"
+    },
+    {
+      "id": "graffiti",
+      "name": "Graffiti",
+      "description": "Malujesz szybciej, a patrole słyszą cię z mniejszej odległości.",
+      "district": "miasto-ziomkow"
+    },
+    {
+      "id": "surfing",
+      "name": "Surfing",
+      "description": "Dłuższe nurkowanie i lepsze wyczucie fali.",
+      "district": "las-palmas"
+    },
+    {
+      "id": "spryt",
+      "name": "Spryt",
+      "description": "Podpowiedzi w zagadkach i szybsze otwieranie sejfów urzędników.",
+      "district": "dwor-carski"
+    },
+    {
+      "id": "walka",
+      "name": "Walka",
+      "description": "Mocniejsze ciosy i szybszy unik w potyczkach.",
+      "district": "los-karkos"
+    },
+    {
+      "id": "przetrwanie",
+      "name": "Instynkt przetrwania",
+      "description": "Wcześniej wyczuwasz zaczepki i zasadzki.",
+      "district": "los-karkos"
+    }
+  ],
+  "skillMaxRank": 5
+}

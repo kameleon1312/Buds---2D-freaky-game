@@ -309,9 +309,9 @@ export function miastoZiomkow(): MapCanvas {
   m.sprinkle([100, 38, 124, 56], ['tree-a', 'tree-b'], 0.08, ['grass', 'grass2'], 81, {
     spacing: 2,
   });
-  m.sign(118, 45, 'Do Los Karkos', 'Dalej robi się niebezpiecznie. Wejście od poziomu 12.');
-  m.sign(64 - 3, 3, 'Do Las Palmas', 'Tropiki, plaże i ocean. Wejście od poziomu 4.');
-  m.sign(66, 88, 'Do Dworu Carskiego', 'Dworek, cegła i zagadki. Wejście od poziomu 8.');
+  m.sign(118, 45, 'Do Los Karkos', 'Dalej robi się niebezpiecznie. Wejście od poziomu 7.');
+  m.sign(64 - 3, 3, 'Do Las Palmas', 'Tropiki, plaże i ocean. Wejście od poziomu 3.');
+  m.sign(66, 88, 'Do Dworu Carskiego', 'Dworek, cegła i zagadki. Wejście od poziomu 5.');
 
   // roads cut through the forest at the exits
   m.road('v', 0, 8, 62, 4, { sidewalk: false });

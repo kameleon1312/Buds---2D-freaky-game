@@ -6,6 +6,19 @@ import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import {
   CATALOG,
+  CONTENT,
+  SKILLS,
+  SKILL_MAX_RANK,
+  skillIdSchema,
+  skillPointsForLevel,
+  type SkillsResponse,
+  type WalletResponse,
+  levelFromXp,
+  questBlocker,
+  questIdSchema,
+  type CompleteQuestResponse,
+  type DistrictContent,
+  type QuestsResponse,
   PAIR_CODE_TTL_MINUTES,
   budSlugSchema,
   lockedItems,
@@ -42,9 +55,11 @@ export type AppDeps = {
   store: BudStore;
   /** Injected so tests can price items; production uses the shared catalog. */
   catalog?: readonly CatalogItem[];
+  /** NPCs and quests; production uses the shared content. */
+  content?: DistrictContent;
 };
 
-export function createApp(env: Env, { store, catalog = CATALOG }: AppDeps) {
+export function createApp(env: Env, { store, catalog = CATALOG, content = CONTENT }: AppDeps) {
   const app = new Hono<{ Variables: AuthVariables & PlayerVariables }>();
 
   app.use('*', requestId());
@@ -108,6 +123,94 @@ export function createApp(env: Env, { store, catalog = CATALOG }: AppDeps) {
   // items granted beyond the starter set; only the server writes these
   app.get('/v1/buds/me/items', requirePlayer(store), async (c) =>
     c.json<OwnedItemsResponse>({ items: await store.items(c.get('bud').slug) }),
+  );
+
+  // ---------- quests ----------
+
+  app.get('/v1/buds/me/quests', requirePlayer(store), async (c) =>
+    c.json<QuestsResponse>({ completed: await store.completedQuests(c.get('bud').slug) }),
+  );
+
+  /**
+   * The game reports a finished quest; the server checks that it exists, its requirements and level, and grants
+   * the XP exactly once. (Checking *how* it was done needs the server-authoritative multiplayer world.)
+   */
+  app.post('/v1/buds/me/quests/:id/complete', requirePlayer(store), async (c) => {
+    const questId = questIdSchema.safeParse(c.req.param('id'));
+    const quest = questId.success ? content.quests.find((q) => q.id === questId.data) : undefined;
+    if (!quest) throw new HTTPException(404, { message: 'Nie ma takiego zadania' });
+    const bud = c.get('bud');
+    const completed = new Set(await store.completedQuests(bud.slug));
+    const blocker = questBlocker(quest, bud.xp, completed);
+    if (blocker) {
+      const message = {
+        already_completed: 'To zadanie jest już wykonane',
+        level_too_low: `To zadanie wymaga poziomu ${quest.minLevel}`,
+        requires_other_quest: 'Najpierw wykonaj wcześniejsze zadania',
+      }[blocker];
+      return c.json<ApiError>({ error: { code: blocker, message } }, 409);
+    }
+    const xp = await store.completeQuest(bud.slug, quest.id, quest.xp);
+    if (xp === null) {
+      return c.json<ApiError>(
+        { error: { code: 'already_completed', message: 'To zadanie jest już wykonane' } },
+        409,
+      );
+    }
+    if (quest.rewardItem) await store.grantItem(bud.slug, quest.rewardItem, 'reward');
+    const before = levelFromXp(bud.xp).level;
+    const level = levelFromXp(xp).level;
+    return c.json<CompleteQuestResponse>({
+      questId: quest.id,
+      xpGained: quest.xp,
+      xp,
+      level,
+      levelUp: level > before,
+      item: quest.rewardItem ?? null,
+    });
+  });
+
+  // ---------- skills and wallet ----------
+
+  const skillsOf = async (slug: string, xp: number): Promise<SkillsResponse> => {
+    const ranks = new Map((await store.skills(slug)).map((s) => [s.id, s.rank]));
+    const points = skillPointsForLevel(levelFromXp(xp).level);
+    const spent = [...ranks.values()].reduce((a, b) => a + b, 0);
+    return {
+      points,
+      available: Math.max(0, points - spent),
+      skills: SKILLS.map((s) => ({ id: s.id, rank: ranks.get(s.id) ?? 0 })),
+    };
+  };
+
+  app.get('/v1/buds/me/skills', requirePlayer(store), async (c) => {
+    const bud = c.get('bud');
+    return c.json<SkillsResponse>(await skillsOf(bud.slug, bud.xp));
+  });
+
+  /** Spends one skill point (points = level - 1). The server checks free points and the max rank. */
+  app.post('/v1/buds/me/skills/:id/upgrade', requirePlayer(store), async (c) => {
+    const skill = skillIdSchema.safeParse(c.req.param('id'));
+    if (!skill.success) throw new HTTPException(404, { message: 'Nie ma takiej umiejętności' });
+    const bud = c.get('bud');
+    const points = skillPointsForLevel(levelFromXp(bud.xp).level);
+    const rank = await store.upgradeSkill(bud.slug, skill.data, points, SKILL_MAX_RANK);
+    if (rank === null) {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'no_skill_point',
+            message: 'Brak wolnych punktów albo umiejętność jest na maksimum',
+          },
+        },
+        409,
+      );
+    }
+    return c.json<SkillsResponse>(await skillsOf(bud.slug, bud.xp));
+  });
+
+  app.get('/v1/buds/me/wallet', requirePlayer(store), async (c) =>
+    c.json<WalletResponse>(await store.wallet(c.get('bud').slug)),
   );
 
   // ---------- catalog ----------

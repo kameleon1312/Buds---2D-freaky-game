@@ -17,9 +17,9 @@ namespace Buds.World
         public static readonly District[] All =
         {
             new() { Id = "miasto-ziomkow", Name = "Miasto Ziomków", UnlockLevel = 1, Open = true, Blurb = "Tu zaczynasz. Codzienne życie, freestyle i graffiti pod nosem policji." },
-            new() { Id = "las-palmas", Name = "Las Palmas", UnlockLevel = 4, Open = true, Blurb = "Tropiki: plaże, ocean, hawajskie chatki i egzotyczne zwierzaki." },
-            new() { Id = "dwor-carski", Name = "Dwór Carski", UnlockLevel = 8, Open = true, Blurb = "Cegła, dworek i zagadki. Nieuczciwi urzędnicy w cylindrach." },
-            new() { Id = "los-karkos", Name = "Los Karkos", UnlockLevel = 12, Open = true, Blurb = "Niebezpiecznie. Opuszczone bloki, zaczepki i trening przetrwania." },
+            new() { Id = "las-palmas", Name = "Las Palmas", UnlockLevel = 3, Open = true, Blurb = "Tropiki: plaże, ocean, hawajskie chatki i egzotyczne zwierzaki." },
+            new() { Id = "dwor-carski", Name = "Dwór Carski", UnlockLevel = 5, Open = true, Blurb = "Cegła, dworek i zagadki. Nieuczciwi urzędnicy w cylindrach." },
+            new() { Id = "los-karkos", Name = "Los Karkos", UnlockLevel = 7, Open = true, Blurb = "Niebezpiecznie. Opuszczone bloki, zaczepki i trening przetrwania." },
         };
 
         public static District Get(string id)

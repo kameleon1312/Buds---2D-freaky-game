@@ -1250,6 +1250,216 @@
         1,
         1
       ]
+    },
+    {
+      "name": "marker-quest",
+      "pivotX": 0.4987,
+      "pivotY": 0.0625,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "marker-turnin",
+      "pivotX": 0.4987,
+      "pivotY": 0.0625,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "marker-progress",
+      "pivotX": 0.4987,
+      "pivotY": 0.0625,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "target-ring",
+      "pivotX": 0.4987,
+      "pivotY": 0.393,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-zakupy",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-pomidor",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-puszka",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-kokos",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-siec",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-odlamek",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-pioro",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-perla",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-klucz",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-filizanka",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-list",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-moneta",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-dokument",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-czesc",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-apteczka",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-skrzynka",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-naszywka",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     }
   ]
 }

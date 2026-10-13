@@ -125,6 +125,27 @@ export const CATALOG: readonly CatalogItem[] = [
     premium: false,
     available: false,
   },
+  // quest rewards (granted by the server on completion; later also in the coin shop)
+  ...(
+    [
+      ['deskorolka', 'accessory', 'Deskorolka Kuby', 'uncommon', 400],
+      ['spray-zloty', 'accessory', 'Złoty spray', 'rare', 900],
+      ['wianek-aloha', 'headwear', 'Wianek Aloha', 'uncommon', 500],
+      ['muszla-szczescia', 'accessory', 'Muszla szczęścia', 'rare', 1200],
+      ['monokl', 'accessory', 'Monokl', 'rare', 1400],
+      ['cylinder', 'headwear', 'Cylinder', 'epic', 2500],
+      ['rekawice-bokserskie', 'weapon', 'Rękawice bokserskie', 'rare', 1800],
+      ['kurtka-karkos', 'outfit', 'Kurtka z naszywkami', 'epic', 3000],
+    ] as const
+  ).map(([id, kind, name, rarity, coins]): CatalogItem => ({
+    id,
+    kind,
+    name,
+    rarity,
+    price: { currency: 'coins', amount: coins },
+    premium: false,
+    available: true,
+  })),
 ];
 
 export const catalogItem = (id: string, catalog: readonly CatalogItem[] = CATALOG) =>

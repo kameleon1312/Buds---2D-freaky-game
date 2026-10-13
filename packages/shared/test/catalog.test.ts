@@ -79,8 +79,8 @@ describe('districts', () => {
 
   it('gates entry by level and readiness', () => {
     expect(canEnterDistrict('miasto-ziomkow', 1)).toBe(true);
-    expect(canEnterDistrict('los-karkos', 11)).toBe(false);
-    expect(canEnterDistrict('los-karkos', 12)).toBe(true);
+    expect(canEnterDistrict('los-karkos', 6)).toBe(false);
+    expect(canEnterDistrict('los-karkos', 7)).toBe(true);
     expect(canEnterDistrict('nowhere', 99)).toBe(false);
   });
 });

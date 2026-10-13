@@ -14,6 +14,12 @@ namespace Buds.Characters
 
         public Vector2 Move { get; private set; }
         public bool InteractPressed { get; private set; }
+        /// <summary>Escape / Backspace / Q: decline a dialog choice, close a panel.</summary>
+        public bool CancelPressed { get; private set; }
+        /// <summary>I / Tab / C: open or close the Bud panel.</summary>
+        public bool PanelPressed { get; private set; }
+        /// <summary>True when this frame's interaction came from a key (not a screen tap, which may hit a UI button).</summary>
+        public bool InteractFromKey { get; private set; }
 
         /// <summary>Joystick state for drawing (screen pixels); Active false when not touching.</summary>
         public bool StickActive { get; private set; }
@@ -32,6 +38,9 @@ namespace Buds.Characters
         public void Update()
         {
             InteractPressed = pendingInteract;
+            InteractFromKey = pendingInteract;
+            CancelPressed = false;
+            PanelPressed = false;
             pendingInteract = false;
             var move = Vector2.zero;
 
@@ -43,7 +52,11 @@ namespace Buds.Characters
                 if (kb.wKey.isPressed || kb.upArrowKey.isPressed) move.y += 1;
                 if (kb.sKey.isPressed || kb.downArrowKey.isPressed) move.y -= 1;
                 if (kb.eKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame || kb.enterKey.wasPressedThisFrame)
-                    InteractPressed = true;
+                    InteractPressed = InteractFromKey = true;
+                if (kb.escapeKey.wasPressedThisFrame || kb.backspaceKey.wasPressedThisFrame || kb.qKey.wasPressedThisFrame)
+                    CancelPressed = true;
+                if (kb.iKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame || kb.cKey.wasPressedThisFrame)
+                    PanelPressed = true;
             }
 
             var touch = Touchscreen.current?.primaryTouch;

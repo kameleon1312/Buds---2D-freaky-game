@@ -48,6 +48,60 @@ namespace Buds.Api
             return Parse<BudResponse>(req).bud;
         }
 
+        /// <summary>Ids of the quests this bud has completed (server is the source of truth).</summary>
+        public async Awaitable<string[]> GetCompletedQuests(string token)
+        {
+            using var req = UnityWebRequest.Get($"{baseUrl}/v1/buds/me/quests");
+            req.timeout = TimeoutSeconds;
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await req.SendWebRequest();
+            return Parse<QuestsResponse>(req).completed ?? Array.Empty<string>();
+        }
+
+        /// <summary>Reports a finished quest; the server validates it and grants the XP once.</summary>
+        public async Awaitable<CompleteQuestResponse> CompleteQuest(string token, string questId)
+        {
+            using var req = new UnityWebRequest($"{baseUrl}/v1/buds/me/quests/{Uri.EscapeDataString(questId)}/complete",
+                UnityWebRequest.kHttpVerbPOST)
+            {
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await req.SendWebRequest();
+            return Parse<CompleteQuestResponse>(req);
+        }
+
+        public async Awaitable<OwnedItemDto[]> GetItems(string token) =>
+            (await Get<OwnedItemsResponse>("/v1/buds/me/items", token)).items ?? Array.Empty<OwnedItemDto>();
+
+        public Awaitable<SkillsResponse> GetSkills(string token) => Get<SkillsResponse>("/v1/buds/me/skills", token);
+
+        public Awaitable<WalletResponse> GetWallet(string token) => Get<WalletResponse>("/v1/buds/me/wallet", token);
+
+        /// <summary>Spends one skill point; the server checks free points and the maximum rank.</summary>
+        public async Awaitable<SkillsResponse> UpgradeSkill(string token, string skillId)
+        {
+            using var req = new UnityWebRequest($"{baseUrl}/v1/buds/me/skills/{Uri.EscapeDataString(skillId)}/upgrade",
+                UnityWebRequest.kHttpVerbPOST)
+            {
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await req.SendWebRequest();
+            return Parse<SkillsResponse>(req);
+        }
+
+        async Awaitable<T> Get<T>(string path, string token)
+        {
+            using var req = UnityWebRequest.Get(baseUrl + path);
+            req.timeout = TimeoutSeconds;
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await req.SendWebRequest();
+            return Parse<T>(req);
+        }
+
         /// <summary>384×576 sheet (128×192 per frame): columns = walk frames 0..2, rows = down, side, up.</summary>
         public async Awaitable<Texture2D> GetSheet(string slug)
         {
@@ -90,7 +144,7 @@ namespace Buds.Api
 
             return status switch
             {
-                400 or 404 when !string.IsNullOrEmpty(apiMessage) => apiMessage,
+                400 or 404 or 409 when !string.IsNullOrEmpty(apiMessage) => apiMessage,
                 401 => "Sesja wygasła. Połącz się ponownie kodem ze strony.",
                 429 => "Za dużo prób. Odczekaj minutę.",
                 >= 500 => "Serwer ma chwilowe problemy. Spróbuj za moment.",

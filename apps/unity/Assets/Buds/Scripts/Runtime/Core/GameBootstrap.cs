@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Buds.Api;
 using Buds.Characters;
+using Buds.Quests;
 using Buds.UI;
 using Buds.World;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace Buds.Core
     /// Flow: saved session → load bud → world; otherwise pairing screen (code from the website) or guest play.
     /// </summary>
     [DefaultExecutionOrder(100)] // after BudController has read input this frame
-    public sealed class GameBootstrap : MonoBehaviour
+    public sealed partial class GameBootstrap : MonoBehaviour
     {
         const float InteractRange = 1.75f; // tiles, feet to sign centre
 
@@ -26,6 +27,12 @@ namespace Buds.Core
         Exit atExit;
         Zone atZone;
         BudSheet sheet;
+        PlayerSession session; // null in guest mode
+        string budName;
+        int xp;
+        QuestLog quests;
+        QuestWorld questWorld;
+        NpcView nearbyNpc;
 
         async void Start()
         {
@@ -66,8 +73,9 @@ namespace Buds.Core
             try
             {
                 var bud = await api.GetMe(session.Token);
+                look = bud.look;
                 var sheet = await api.GetSheet(bud.slug);
-                EnterWorld(bud.name, bud.xp, new BudSheet(sheet));
+                EnterWorld(bud.name, bud.xp, new BudSheet(sheet), session, await LoadCompleted(session));
             }
             catch (ApiException e) when (e.Status == 401)
             {
@@ -110,10 +118,13 @@ namespace Buds.Core
             try
             {
                 var res = await api.Pair(code);
-                new PlayerSession(res.token, res.bud.slug).Save();
+                look = res.bud.look;
+                var paired = new PlayerSession(res.token, res.bud.slug);
+                paired.Save();
                 var sheet = await api.GetSheet(res.bud.slug);
+                var completed = await LoadCompleted(paired);
                 HidePairing();
-                EnterWorld(res.bud.name, res.bud.xp, new BudSheet(sheet));
+                EnterWorld(res.bud.name, res.bud.xp, new BudSheet(sheet), paired, completed);
             }
             catch (ApiException e)
             {
@@ -130,14 +141,21 @@ namespace Buds.Core
                 Debug.LogError("Missing Resources/Sheets/guest.png");
                 return;
             }
-            EnterWorld("Gość", 0, new BudSheet(sheet));
+            // matches tools/export-guest-sheet.ts
+            look = new BudLookDto { gender = "on", mood = "radosny", hair = "krotkie", outfit = "bluza" };
+            EnterWorld("Gość", 0, new BudSheet(sheet), null, null);
         }
 
-        void EnterWorld(string name, int xp, BudSheet budSheet)
+        void EnterWorld(string name, int budXp, BudSheet budSheet, PlayerSession budSession, string[] completed)
         {
             sheet = budSheet;
+            session = budSession;
+            budName = name;
+            xp = budXp;
             level = Progression.Level(xp);
             ui.ShowHud(name, level, xp, Progression.NextLevelXp(xp));
+            SetUpQuests(completed);
+            SetUpPanel();
             // dev/test: start in another district (-buds-district las-palmas)
             LoadDistrict(CommandLine.Get("-buds-district") ?? Districts.Start, null);
             ui.HideLoading();
@@ -154,6 +172,8 @@ namespace Buds.Core
 
             var map = MapFormat.Load(districtId);
             world = WorldView.Create(map);
+            questWorld = QuestWorld.Create(world, quests);
+            UpdateTracker();
             var at = fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
             player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
 
@@ -172,17 +192,32 @@ namespace Buds.Core
             if (!player) return;
             ui.Tick();
             var input = player.Input;
-            input.Blocked = ui.DialogOpen;
+            input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false);
             ui.UpdateStick(input);
+
+            if (UpdatePanel(input)) return;
+
+            // quest offers wait for a choice: E / Enter accepts, Esc / Q declines, or tap a button
+            if (ui.ChoiceOpen)
+            {
+                if (input.InteractPressed && input.InteractFromKey) ui.ChooseAccept();
+                else if (input.CancelPressed) ui.ChooseDecline();
+                return;
+            }
 
             var cell = player.MapCell(world.Map.Height);
             CheckZone(cell);
             if (CheckExit(cell)) return;
-            nearby = FindNearbySign();
-            ui.SetHint(nearby != null ? "Czytaj  [E]" : null);
+            CheckQuestProgress(cell);
+
+            var feet = (Vector2)player.transform.position;
+            nearbyNpc = questWorld.NearestNpc(feet, InteractRange);
+            nearby = nearbyNpc ? null : FindNearbySign();
+            ui.SetHint(nearbyNpc ? $"Rozmawiaj: {nearbyNpc.Data.name}  [E]" : nearby != null ? "Czytaj  [E]" : null);
 
             if (!input.InteractPressed) return;
             if (ui.DialogOpen) ui.HideDialog();
+            else if (nearbyNpc) TalkTo(nearbyNpc);
             else if (nearby != null) ui.ShowDialog(nearby.Title, nearby.Text);
         }
 
@@ -289,6 +324,8 @@ namespace Buds.Core
                     await Shot("04-dialog.png");
                     input.PressInteract();
                 }
+
+                if (CommandLine.Has("-buds-quest-demo")) await QuestDemo(Shot);
 
                 // tour: every zone of every district (or just the current one without -buds-tour)
                 var districts = CommandLine.Has("-buds-tour") ? Districts.All : new[] { Districts.Get(map.Id) };

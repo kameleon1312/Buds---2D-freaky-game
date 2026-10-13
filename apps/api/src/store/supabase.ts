@@ -129,6 +129,59 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       );
     },
 
+    async skills(slug) {
+      const { data, error } = await db
+        .from('bud_skills')
+        .select('skill_id, rank')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return (data as { skill_id: string; rank: number }[]).map((r) => ({
+        id: r.skill_id,
+        rank: r.rank,
+      }));
+    },
+
+    async upgradeSkill(slug, skillId, points, maxRank) {
+      const { data, error } = await db.rpc('upgrade_skill', {
+        p_bud: await idBySlug(slug),
+        p_skill: skillId,
+        p_points: points,
+        p_max: maxRank,
+      });
+      if (error) throw error;
+      return (data as number | null) ?? null;
+    },
+
+    async wallet(slug) {
+      const { data, error } = await db
+        .from('bud_wallets')
+        .select('coins, gems')
+        .eq('bud_id', await idBySlug(slug))
+        .maybeSingle();
+      if (error) throw error;
+      const row = data as { coins: number; gems: number } | null;
+      return { coins: row?.coins ?? 0, gems: row?.gems ?? 0 };
+    },
+
+    async completedQuests(slug) {
+      const { data, error } = await db
+        .from('bud_quests')
+        .select('quest_id')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return (data as { quest_id: string }[]).map((r) => r.quest_id);
+    },
+
+    async completeQuest(slug, questId, xp) {
+      const { data, error } = await db.rpc('complete_quest', {
+        p_bud: await idBySlug(slug),
+        p_quest: questId,
+        p_xp: xp,
+      });
+      if (error) throw error;
+      return (data as number | null) ?? null;
+    },
+
     async grantItem(slug, itemId, source) {
       const { error } = await db
         .from('bud_items')

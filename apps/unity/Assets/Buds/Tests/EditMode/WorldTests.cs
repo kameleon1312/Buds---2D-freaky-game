@@ -114,10 +114,10 @@ TT#TT
         [Test]
         public void LevelGatesTheOtherDistricts()
         {
-            Assert.IsFalse(Districts.CanEnter("las-palmas", 3));
-            Assert.IsTrue(Districts.CanEnter("las-palmas", 4));
+            Assert.IsFalse(Districts.CanEnter("las-palmas", 2));
+            Assert.IsTrue(Districts.CanEnter("las-palmas", 3));
             Assert.IsFalse(Districts.CanEnter("nowhere", 99));
-            StringAssert.Contains("poziomu 12", Districts.ClosedReason(Districts.Get("los-karkos"), 1));
+            StringAssert.Contains("poziomu 7", Districts.ClosedReason(Districts.Get("los-karkos"), 1));
         }
     }
 

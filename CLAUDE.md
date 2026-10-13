@@ -33,6 +33,8 @@ apps/unity/Builds/Windows/Buds.exe -screen-fullscreen 0 -buds-guest -buds-tour -
 # world art and maps (run from apps/api, which has resvg); --preview out.png [filter] renders a contact sheet
 pnpm exec tsx ../../tools/world/export-art.ts
 pnpm exec tsx ../../tools/world/export-maps.ts
+pnpm exec tsx ../../tools/world/export-quests.ts   # NPCs + quests → Unity JSON and NPC sheets (validated against the maps)
+# quest flow end to end: Buds.exe -buds-pair CODE -buds-api http://localhost:4000 -buds-quest-demo -buds-autoshot <dir>
 ```
 
 Look at the autopilot screenshots after any gameplay or rendering change — tests don't show what the game looks like.
@@ -45,6 +47,7 @@ Look at the autopilot screenshots after any gameplay or rendering change — tes
 - Level curve lives in `packages/shared/src/level.ts` and is mirrored in `Progression.cs` — change both together.
 - XP, coins, gems and owned items must only ever be granted by the server (game reports events, API validates). Never trust the client.
 - Monetisation groundwork: one item catalog in `packages/shared/src/catalog.ts` (kinds, design-system rarities, `free`/`coins`/`gems`, `premium`, `available`); ownership in `bud_items` (server-written). The API rejects looks that wear items the bud doesn't own (`lockedItems`). No pay-to-win: real money buys looks and convenience, not combat power. Plan and order of work: `docs/roadmap.md`.
+- NPCs and quests: content per district in `packages/shared/src/content/<district>.ts` (schema/rules in `quests.ts`, how-to in `docs/questy.md`). Quests can grant a catalog item (`rewardItem`). Skills (`packages/shared/src/skills.ts`): one point per level, spent only through `POST /v1/buds/me/skills/:id/upgrade` (atomic `upgrade_skill` SQL function); the in-game Bud panel (`BudPanel.cs`, `GameBootstrap.Panel.cs`) shows profile, inventory and skills. Item/skill icons live in `tools/world/art/icons.ts`. The API grants quest XP once via `POST /v1/buds/me/quests/:id/complete` (validated with `questBlocker`, atomic `complete_quest` SQL function). After editing content run `tools/world/export-quests.ts`; the game logic lives in `QuestLog` (plain class) and `QuestWorld`/`GameBootstrap.Quests.cs`.
 - Districts: Miasto Ziomków (start, hub), Las Palmas, Dwór Carski, Los Karkos — design in `docs/districts.md`, registry in `packages/shared/src/districts.ts`, mirrored in Unity `Districts.cs` (change both together). A district is a big map (city centre + outskirts) and, later, its own multiplayer room.
 - Guest auth: `Authorization: Bearer <player token>`; only sha256 hashes are stored. One bud can have many tokens (one per device).
 - Every request/response shape lives in `packages/shared` as a zod schema. New API behaviour touching auth, CORS, headers or limits needs a test.

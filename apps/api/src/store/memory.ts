@@ -8,6 +8,8 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const tokens = new Map<string, string>(); // tokenHash -> slug
   const pairCodes = new Map<string, { slug: string; expiresAt: Date }>();
   const owned = new Map<string, OwnedItem[]>(); // slug -> granted items
+  const quests = new Map<string, Set<string>>(); // slug -> completed quest ids
+  const skills = new Map<string, Map<string, number>>(); // slug -> skill -> rank
   const copy = (bud: BudRecord | undefined) => (bud ? { ...bud, look: { ...bud.look } } : null);
 
   return {
@@ -58,6 +60,42 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
       const list = owned.get(slug) ?? [];
       if (list.some((i) => i.itemId === itemId)) return;
       owned.set(slug, [...list, { itemId, source, acquiredAt: now().toISOString() }]);
+    },
+
+    async skills(slug) {
+      return [...(skills.get(slug) ?? new Map<string, number>())].map(([id, rank]) => ({
+        id,
+        rank,
+      }));
+    },
+
+    async upgradeSkill(slug, skillId, points, maxRank) {
+      const ranks = skills.get(slug) ?? new Map<string, number>();
+      const spent = [...ranks.values()].reduce((a, b) => a + b, 0);
+      const rank = ranks.get(skillId) ?? 0;
+      if (spent >= points || rank >= maxRank) return null;
+      ranks.set(skillId, rank + 1);
+      skills.set(slug, ranks);
+      return rank + 1;
+    },
+
+    async wallet() {
+      return { coins: 0, gems: 0 };
+    },
+
+    async completedQuests(slug) {
+      return [...(quests.get(slug) ?? [])];
+    },
+
+    async completeQuest(slug, questId, xp) {
+      const bud = buds.get(slug);
+      if (!bud) throw new Error(`Bud ${slug} not found`);
+      const done = quests.get(slug) ?? new Set<string>();
+      if (done.has(questId)) return null;
+      done.add(questId);
+      quests.set(slug, done);
+      bud.xp += xp;
+      return bud.xp;
     },
   };
 }

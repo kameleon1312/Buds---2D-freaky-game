@@ -47,6 +47,59 @@ namespace Buds.Api
     }
 
     [Serializable]
+    public class QuestsResponse
+    {
+        public string[] completed;
+    }
+
+    [Serializable]
+    public class CompleteQuestResponse
+    {
+        public string questId;
+        public int xpGained;
+        public int xp;
+        public int level;
+        public bool levelUp;
+        public string item;
+    }
+
+    [Serializable]
+    public class OwnedItemDto
+    {
+        public string itemId;
+        public string source;
+        public string acquiredAt;
+    }
+
+    [Serializable]
+    public class OwnedItemsResponse
+    {
+        public OwnedItemDto[] items;
+    }
+
+    [Serializable]
+    public class SkillRankDto
+    {
+        public string id;
+        public int rank;
+    }
+
+    [Serializable]
+    public class SkillsResponse
+    {
+        public int points;
+        public int available;
+        public SkillRankDto[] skills;
+    }
+
+    [Serializable]
+    public class WalletResponse
+    {
+        public int coins;
+        public int gems;
+    }
+
+    [Serializable]
     public class ApiErrorBody
     {
         public ApiErrorDetail error;

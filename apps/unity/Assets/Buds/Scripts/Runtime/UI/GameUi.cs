@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Buds.Characters;
 using Buds.Core;
 using UnityEngine;
@@ -25,6 +26,15 @@ namespace Buds.UI
         GameObject dialog;
         Text dialogTitle;
         Text dialogBody;
+        Text dialogMore;
+        GameObject choiceRow;
+        Text acceptLabel;
+        Text declineLabel;
+        Action onAccept;
+        Action onDecline;
+        GameObject tracker;
+        RectTransform trackerRect;
+        Text trackerText;
         Image stickBase;
         Image stickKnob;
         GameObject toast;
@@ -33,6 +43,9 @@ namespace Buds.UI
         float toastUntil;
 
         public bool DialogOpen => dialog && dialog.activeSelf;
+        public Transform Root => canvas.transform;
+        GameObject budButton;
+        public bool ChoiceOpen => DialogOpen && choiceRow.activeSelf;
 
         public GameUi()
         {
@@ -40,6 +53,7 @@ namespace Buds.UI
             BuildLoading();
             BuildHud();
             BuildDialog();
+            BuildTracker();
             BuildStick();
             BuildToast();
         }
@@ -187,14 +201,32 @@ namespace Buds.UI
 
         void BuildDialog()
         {
-            var body = UiKit.Window("Dialog", canvas.transform, new Vector2(700, 330), "", HideDialog, out var rt,
+            var body = UiKit.Window("Dialog", canvas.transform, new Vector2(760, 390), "", CloseDialog, out var rt,
                 out dialogTitle);
-            UiKit.Place(rt, new Vector2(0.5f, 0), new Vector2(0, 48), rt.sizeDelta, new Vector2(0.5f, 0));
-            dialogBody = UiKit.Label("Body", body, "", 30, UiKit.Ink, false, TextAnchor.UpperLeft);
+            UiKit.Place(rt, new Vector2(0.5f, 0), new Vector2(0, 40), rt.sizeDelta, new Vector2(0.5f, 0));
+            dialogBody = UiKit.Label("Body", body, "", 29, UiKit.Ink, false, TextAnchor.UpperLeft);
             UiKit.Stretch(dialogBody.rectTransform, 0, 30, 0, 0);
             dialogBody.lineSpacing = 1.1f;
-            var more = UiKit.Label("More", body, "dotknij lub E", 22, UiKit.InkSoft, false, TextAnchor.LowerRight);
-            UiKit.Stretch(more.rectTransform);
+            dialogMore = UiKit.Label("More", body, "dotknij lub E", 22, UiKit.InkSoft, false, TextAnchor.LowerRight);
+            UiKit.Stretch(dialogMore.rectTransform);
+
+            // accept (gold, the one call to action) / decline (secondary) for quest offers
+            var row = UiKit.Rect("Choices", body);
+            row.anchorMin = new Vector2(0, 0);
+            row.anchorMax = new Vector2(1, 0);
+            row.pivot = new Vector2(0.5f, 0);
+            row.sizeDelta = new Vector2(0, 76);
+            row.anchoredPosition = new Vector2(0, 4);
+            var accept = UiKit.Button("Accept", row, "Przyjmij", new Vector2(250, 72), ChooseAccept, UiKit.Tone.Gold, 32);
+            UiKit.Place((RectTransform)accept.transform, new Vector2(1, 0), Vector2.zero, new Vector2(250, 72), new Vector2(1, 0));
+            acceptLabel = accept.GetComponentInChildren<Text>();
+            var decline = UiKit.Button("Decline", row, "Później", new Vector2(200, 72), ChooseDecline, UiKit.Tone.Rep, 30);
+            UiKit.Place((RectTransform)decline.transform, new Vector2(1, 0), new Vector2(-270, 0), new Vector2(200, 72),
+                new Vector2(1, 0));
+            declineLabel = decline.GetComponentInChildren<Text>();
+            choiceRow = row.gameObject;
+            choiceRow.SetActive(false);
+
             dialog = rt.gameObject;
             dialog.SetActive(false);
         }
@@ -203,18 +235,102 @@ namespace Buds.UI
         {
             dialogTitle.text = title;
             dialogBody.text = text;
+            choiceRow.SetActive(false);
+            dialogMore.gameObject.SetActive(true);
+            onAccept = onDecline = null;
             dialog.SetActive(true);
             hint.SetActive(false);
         }
 
-        public void HideDialog() => dialog.SetActive(false);
+        /// <summary>Dialog with two buttons (E / Enter = accept, Esc / Q = decline, or tap).</summary>
+        public void ShowChoice(string title, string text, string accept, string decline, Action accepted, Action declined)
+        {
+            ShowDialog(title, text);
+            acceptLabel.text = accept;
+            declineLabel.text = decline;
+            onAccept = accepted;
+            onDecline = declined;
+            choiceRow.SetActive(true);
+            dialogMore.gameObject.SetActive(false);
+        }
+
+        public void ChooseAccept()
+        {
+            var a = onAccept;
+            HideDialog();
+            a?.Invoke();
+        }
+
+        public void ChooseDecline()
+        {
+            var d = onDecline;
+            HideDialog();
+            d?.Invoke();
+        }
+
+        void CloseDialog()
+        {
+            if (ChoiceOpen) ChooseDecline();
+            else HideDialog();
+        }
+
+        public void HideDialog()
+        {
+            dialog.SetActive(false);
+            onAccept = onDecline = null;
+        }
+
+        /// <summary>"Twój Bud" button under the HUD plate (opens the Bud panel).</summary>
+        public void ShowBudButton(Action onClick)
+        {
+            if (budButton) return;
+            var button = UiKit.Button("BudButton", canvas.transform, "Twój Bud  [I]", new Vector2(250, 62), onClick, UiKit.Tone.Rep, 28);
+            UiKit.Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(24, -164), new Vector2(250, 62), new Vector2(0, 1));
+            budButton = button.gameObject;
+        }
+
+        // ---------- quest tracker (top right) ----------
+
+        void BuildTracker()
+        {
+            var plate = UiKit.OutlinedBox("Tracker", canvas.transform, UiKit.Surface800, UiKit.RadiusM);
+            trackerRect = (RectTransform)plate.transform.parent;
+            UiKit.Place(trackerRect, new Vector2(1, 1), new Vector2(-24, -116), new Vector2(400, 120), new Vector2(1, 1)); // below the zone toast
+            trackerText = UiKit.Label("Text", plate.transform, "", 25, UiKit.TextOnDark, false, TextAnchor.UpperLeft);
+            UiKit.Stretch(trackerText.rectTransform, 18, 12, 18, 12);
+            trackerText.lineSpacing = 1.05f;
+            tracker = trackerRect.gameObject;
+            tracker.SetActive(false);
+        }
+
+        /// <summary>Lists active quests: title (lime) and what to do next. Empty list hides the panel.</summary>
+        public void SetQuests(IReadOnlyList<(string title, string objective)> quests)
+        {
+            if (quests.Count == 0)
+            {
+                tracker.SetActive(false);
+                return;
+            }
+            var sb = new System.Text.StringBuilder();
+            for (var i = 0; i < quests.Count && i < 3; i++)
+            {
+                if (i > 0) sb.Append('\n');
+                sb.Append("<b><color=#a3e635>").Append(quests[i].title).Append("</color></b>\n").Append(quests[i].objective);
+            }
+            if (quests.Count > 3) sb.Append($"\n<color=#a9afbd>+{quests.Count - 3} więcej</color>");
+            trackerText.text = sb.ToString();
+            tracker.SetActive(true);
+            Canvas.ForceUpdateCanvases();
+            trackerRect.sizeDelta = new Vector2(400, trackerText.preferredHeight + 28);
+        }
 
         // ---------- toast (district / zone name) ----------
 
         void BuildToast()
         {
             toastText = UiKit.Pill("Toast", canvas.transform, "", UiKit.Surface800, 34, new Vector2(400, 70), out toastRect);
-            UiKit.Place(toastRect, new Vector2(0.5f, 1), new Vector2(0, -30), toastRect.sizeDelta, new Vector2(0.5f, 1));
+            // a bit right of centre, so a long toast never covers the HUD plate on the left
+            UiKit.Place(toastRect, new Vector2(0.5f, 1), new Vector2(70, -30), toastRect.sizeDelta, new Vector2(0.5f, 1));
             toast = toastRect.gameObject;
             toast.SetActive(false);
         }

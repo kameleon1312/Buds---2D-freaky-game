@@ -7,6 +7,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
+import { ICONS } from './art/icons';
 import { ALL_PROPS } from './art/index';
 import { T } from './art/kit';
 
@@ -74,4 +75,23 @@ if (args[0] === '--preview') {
   }
   writeFileSync(`${dir}props.json`, JSON.stringify({ ppu: PPU, props: manifest }, null, 2) + '\n');
   console.info(`wrote ${manifest.length} props to ${dir}`);
+
+  // Bud panel icons: Resources/Items/<item>.png and Resources/Skills/<skill>.png (128 px)
+  for (const [folder, icons] of [
+    ['Items', ICONS.items],
+    ['Skills', ICONS.skills],
+  ] as const) {
+    const out = fileURLToPath(
+      new URL(`../../apps/unity/Assets/Buds/Resources/${folder}/`, import.meta.url),
+    );
+    mkdirSync(out, { recursive: true });
+    for (const [name, icon] of Object.entries(icons)) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">${icon.body}</svg>`;
+      writeFileSync(
+        `${out}${name}.png`,
+        new Resvg(svg, { fitTo: { mode: 'zoom', value: 2 } }).render().asPng(),
+      );
+    }
+    console.info(`wrote ${Object.keys(icons).length} icons to ${out}`);
+  }
 }

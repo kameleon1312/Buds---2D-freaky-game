@@ -6,9 +6,13 @@ import {
   type BudResponse,
   type CatalogItem,
   type CatalogResponse,
+  type CompleteQuestResponse,
   type CreateBudResponse,
   type LeaderboardResponse,
   type OwnedItemsResponse,
+  type QuestsResponse,
+  type SkillsResponse,
+  type WalletResponse,
 } from '@buds/shared';
 import { createApp } from '../src/app.js';
 import { loadEnv } from '../src/env.js';
@@ -264,5 +268,131 @@ describe('items and catalog', () => {
     const res = await app.request('/v1/buds', post({ name: 'Zuzia', look }));
     expect(res.status).toBe(403);
     expect(((await res.json()) as ApiError).error.code).toBe('item_locked');
+  });
+});
+
+describe('quests', () => {
+  async function setup() {
+    const store = createMemoryStore();
+    const app = createApp(
+      loadEnv({ SUPABASE_JWT_SECRET: 'x'.repeat(32), CREATE_LIMIT_PER_MINUTE: '100' }),
+      { store },
+    );
+    const { bud, token } = await createBud(app);
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+    const complete = (id: string) =>
+      app.request(`/v1/buds/me/quests/${id}/complete`, { method: 'POST', ...auth });
+    return { app, store, bud, auth, complete };
+  }
+
+  it('requires the player token', async () => {
+    const { app } = await setup();
+    expect((await app.request('/v1/buds/me/quests')).status).toBe(401);
+    const res = await app.request('/v1/buds/me/quests/witaj-w-miescie/complete', {
+      method: 'POST',
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it('grants XP once and reports level ups', async () => {
+    const { app, auth, complete } = await setup();
+    const res = await complete('witaj-w-miescie');
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CompleteQuestResponse;
+    expect(body).toMatchObject({
+      questId: 'witaj-w-miescie',
+      xpGained: 60,
+      xp: 60,
+      level: 1,
+      levelUp: false,
+    });
+
+    const again = await complete('witaj-w-miescie');
+    expect(again.status).toBe(409);
+    expect(((await again.json()) as ApiError).error.code).toBe('already_completed');
+
+    const second = (await (await complete('zakupy-haliny')).json()) as CompleteQuestResponse;
+    expect(second).toMatchObject({ xp: 110, level: 2, levelUp: true });
+
+    const me = (await (await app.request('/v1/buds/me', auth)).json()) as BudResponse;
+    expect(me.bud.xp).toBe(110);
+    const list = (await (await app.request('/v1/buds/me/quests', auth)).json()) as QuestsResponse;
+    expect(list.completed.sort()).toEqual(['witaj-w-miescie', 'zakupy-haliny']);
+  });
+
+  it('enforces requirements and minimum level', async () => {
+    const { complete } = await setup();
+    const early = await complete('zakupy-haliny');
+    expect(early.status).toBe(409);
+    expect(((await early.json()) as ApiError).error.code).toBe('requires_other_quest');
+    const paint = await complete('puszki-oli');
+    expect(((await paint.json()) as ApiError).error.code).toBe('level_too_low');
+  });
+
+  it('rejects unknown or malformed quest ids', async () => {
+    const { complete } = await setup();
+    expect((await complete('nie-ma-takiego')).status).toBe(404);
+    expect((await complete('BAD%20ID')).status).toBe(404);
+  });
+});
+
+describe('rewards, skills and wallet', () => {
+  async function setup() {
+    const store = createMemoryStore();
+    const app = createApp(
+      loadEnv({ SUPABASE_JWT_SECRET: 'x'.repeat(32), CREATE_LIMIT_PER_MINUTE: '100' }),
+      { store },
+    );
+    const { bud, token } = await createBud(app);
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+    const post = (path: string) => app.request(path, { method: 'POST', ...auth });
+    return { app, store, bud, auth, post };
+  }
+
+  it('grants the quest reward item', async () => {
+    const { app, auth, post } = await setup();
+    for (const id of ['witaj-w-miescie', 'ulotki-basi'])
+      expect((await post(`/v1/buds/me/quests/${id}/complete`)).status).toBe(200);
+    const res = (await (
+      await post('/v1/buds/me/quests/pierwszy-trik/complete')
+    ).json()) as CompleteQuestResponse;
+    expect(res.item).toBe('deskorolka');
+    const items = (await (
+      await app.request('/v1/buds/me/items', auth)
+    ).json()) as OwnedItemsResponse;
+    expect(items.items.map((i) => i.itemId)).toEqual(['deskorolka']);
+  });
+
+  it('gives one skill point per level and refuses to overspend', async () => {
+    const { app, store, bud, auth, post } = await setup();
+    expect((await app.request('/v1/buds/me/skills')).status).toBe(401);
+    let skills = (await (await app.request('/v1/buds/me/skills', auth)).json()) as SkillsResponse;
+    expect(skills).toMatchObject({ points: 0, available: 0 });
+    expect(skills.skills.every((s) => s.rank === 0)).toBe(true);
+    expect((await post('/v1/buds/me/skills/flow/upgrade')).status).toBe(409);
+
+    await store.completeQuest(bud.slug, 'test', 400); // level 3 → 2 points
+    expect((await post('/v1/buds/me/skills/flow/upgrade')).status).toBe(200);
+    skills = (await (await post('/v1/buds/me/skills/walka/upgrade')).json()) as SkillsResponse;
+    expect(skills).toMatchObject({ points: 2, available: 0 });
+    expect(skills.skills.find((s) => s.id === 'flow')?.rank).toBe(1);
+    expect((await post('/v1/buds/me/skills/flow/upgrade')).status).toBe(409);
+    expect((await post('/v1/buds/me/skills/nieistnieje/upgrade')).status).toBe(404);
+  });
+
+  it('caps a skill at the maximum rank', async () => {
+    const { bud, store, post } = await setup();
+    await store.completeQuest(bud.slug, 'test', 10_000); // level 11 → 10 points
+    for (let i = 0; i < 5; i++)
+      expect((await post('/v1/buds/me/skills/spryt/upgrade')).status).toBe(200);
+    expect((await post('/v1/buds/me/skills/spryt/upgrade')).status).toBe(409);
+  });
+
+  it('shows an empty wallet', async () => {
+    const { app, auth } = await setup();
+    expect((await app.request('/v1/buds/me/wallet')).status).toBe(401);
+    expect(
+      (await (await app.request('/v1/buds/me/wallet', auth)).json()) as WalletResponse,
+    ).toEqual({ coins: 0, gems: 0 });
   });
 });
