@@ -21,7 +21,14 @@ export const VIEW_W = 160;
 export const VIEW_H = 240;
 const PLACE = 'translate(5 32.5) scale(1.25)';
 /** The torso and head sit this much lower than in the design sheet: shorter, chunkier legs. */
-const BODY_DROP = 6;
+const BODY_DROP = 9;
+/**
+ * The body (legs, torso, arms) is drawn this much wider than the design sheet around the centre line; the head keeps
+ * its shape. Sturdier figures that read well at game size, like the chunky heroes of mobile RPGs.
+ */
+const BULK = 1.2;
+const BULK_SIDE = 1.12;
+const widen = (k: number) => `translate(60 0) scale(${k} 1) translate(-60 0)`;
 const HIP_Y = 106 + BODY_DROP;
 
 export const FACINGS = ['down', 'side', 'up'] as const;
@@ -1040,37 +1047,47 @@ export function budFrameMarkup(
   const bob = frame === 0 ? 0 : -1.5;
 
   if (facing === 'side') {
-    legsSide(pen, ctx);
+    pen.group(widen(BULK_SIDE), (legs) => legsSide(legs, ctx));
     const swing = frame === 1 ? 22 : frame === 2 ? -22 : 0;
     pen.group(`translate(0 ${bob + BODY_DROP})`, (up) => {
       // far arm behind the body, swinging opposite
-      up.group(`rotate(${-swing} 60 74)`, (a) => {
-        const dark: Ctx = {
-          ...ctx,
-          p: { ...ctx.p, top: [ctx.p.top[1], ctx.p.top[1]], skin: [ctx.p.skin[1], ctx.p.skin[1]] },
-        };
-        arm(a, 60, 61, 107, dark);
-      });
-      torsoSide(up, ctx);
+      up.group(widen(BULK_SIDE), (b) =>
+        b.group(`rotate(${-swing} 60 74)`, (a) => {
+          const dark: Ctx = {
+            ...ctx,
+            p: {
+              ...ctx.p,
+              top: [ctx.p.top[1], ctx.p.top[1]],
+              skin: [ctx.p.skin[1], ctx.p.skin[1]],
+            },
+          };
+          arm(a, 60, 61, 107, dark);
+        }),
+      );
+      up.group(widen(BULK_SIDE), (b) => torsoSide(b, ctx));
       head(up, ctx, 'side');
-      up.group(`rotate(${swing} 60 74)`, (a) => arm(a, 60, 61, 107, ctx));
+      up.group(widen(BULK_SIDE), (b) =>
+        b.group(`rotate(${swing} 60 74)`, (a) => arm(a, 60, 61, 107, ctx)),
+      );
     });
   } else {
-    legsFront(pen, ctx);
+    pen.group(widen(BULK), (legs) => legsFront(legs, ctx));
     const leftHand = frame === 1 ? 103 : frame === 2 ? 109 : 107;
     const rightHand = frame === 2 ? 103 : frame === 1 ? 109 : 107;
     pen.group(`translate(0 ${bob + BODY_DROP})`, (up) => {
-      torsoFront(up, ctx, facing === 'up');
-      arm(up, 40, 33, leftHand, ctx);
-      arm(up, 80, 87, rightHand, ctx);
-      // soft shadow the head casts on the collar
-      if (facing === 'down')
-        up.raw(`<ellipse cx="60" cy="69" rx="13" ry="3.5" fill="${ctx.p.top[1]}" opacity="0.8"/>`);
+      up.group(widen(BULK), (b) => {
+        torsoFront(b, ctx, facing === 'up');
+        arm(b, 40, 33, leftHand, ctx);
+        arm(b, 80, 87, rightHand, ctx);
+        // soft shadow the head casts on the collar
+        if (facing === 'down')
+          b.raw(`<ellipse cx="60" cy="69" rx="13" ry="3.5" fill="${ctx.p.top[1]}" opacity="0.8"/>`);
+      });
       head(up, ctx, facing);
     });
   }
 
-  const body = `<ellipse cx="60" cy="151" rx="28" ry="5" fill="${OUT}" opacity="0.22"/>${pen}`;
+  const body = `<ellipse cx="60" cy="151" rx="33" ry="6" fill="${OUT}" opacity="0.22"/>${pen}`;
   const prefix = `b${hash(body)}-`;
   return `<g transform="${PLACE}">${body.replace(/@@/g, prefix)}</g>`;
 }

@@ -37,6 +37,8 @@ namespace Buds.Core
         async void Start()
         {
             Application.targetFrameRate = 60;
+            // before a world is loaded the camera only shows behind the UI (notch side): keep it dark, not green
+            if (Camera.main) Camera.main.backgroundColor = UiKit.Surface900;
             // landscape only, either way round (also set in the player settings)
             Screen.autorotateToPortrait = false;
             Screen.autorotateToPortraitUpsideDown = false;

@@ -114,6 +114,15 @@ export function getAccountBuds(accessToken: string): Promise<AccountBudsResponse
   return request('/v1/account/buds', accountBudsResponseSchema, { headers: bearer(accessToken) });
 }
 
+/** Links a bud from the game: the code it shows under Twój Bud → Połącz z kontem. */
+export function linkBud(accessToken: string, code: string): Promise<AccountBud> {
+  return request('/v1/account/buds/link', accountBudSchema, {
+    method: 'POST',
+    headers: { ...bearer(accessToken), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  });
+}
+
 /** Links the guest bud this browser created to the account. */
 export function claimBud(accessToken: string, guestToken: string): Promise<AccountBud> {
   return request('/v1/account/buds/claim', accountBudSchema, {

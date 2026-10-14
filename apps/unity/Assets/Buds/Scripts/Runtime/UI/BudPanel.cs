@@ -31,6 +31,8 @@ namespace Buds.UI
         /// <summary>Energy drinks carried (item -> count) and running boosts (buff -> end, in realtimeSinceStartup).</summary>
         public readonly Dictionary<string, int> Drinks = new();
         public readonly Dictionary<string, float> Buffs = new();
+        /// <summary>The code to type on the website (Twoje konto → Bud z gry), once asked for.</summary>
+        public string LinkCode;
         public int Points;
         public int Available;
         public int Coins;
@@ -69,6 +71,9 @@ namespace Buds.UI
         readonly Action<string, string> onEquip;
         readonly Action<string> onBuy;
         readonly Action<string> onDrink;
+        readonly Action onLink;
+        Button linkButton;
+        Text linkText;
         readonly GameObject root;
         readonly RectTransform[] pages = new RectTransform[Tabs];
         readonly Button[] tabs = new Button[Tabs];
@@ -127,8 +132,9 @@ namespace Buds.UI
         public bool IsOpen => root.activeSelf;
 
         public BudPanel(Transform canvas, QuestContent content, Action<string> onUpgrade, Action<string, string> onEquip,
-            Action<string> onBuy, Action<string> onDrink)
+            Action<string> onBuy, Action<string> onDrink, Action onLink)
         {
+            this.onLink = onLink;
             this.content = content;
             this.onUpgrade = onUpgrade;
             this.onEquip = onEquip;
@@ -270,8 +276,14 @@ namespace Buds.UI
             UiKit.Stretch(xpText.rectTransform, 0, 2, 0, 0);
 
             statsText = UiKit.Label("Stats", page, "", 24, UiKit.Ink, false, TextAnchor.UpperLeft);
-            UiKit.Place(statsText.rectTransform, new Vector2(0, 1), new Vector2(330, -150), new Vector2(740, 400), new Vector2(0, 1));
+            UiKit.Place(statsText.rectTransform, new Vector2(0, 1), new Vector2(330, -150), new Vector2(740, 300), new Vector2(0, 1));
             statsText.lineSpacing = 1.05f;
+
+            // link the bud to an account on the website: a code to type in Twoje konto
+            linkButton = UiKit.Button("Link", page, "Połącz z kontem", new Vector2(300, 70), () => onLink(), UiKit.Tone.Buds, 28);
+            UiKit.Place((RectTransform)linkButton.transform, new Vector2(0, 1), new Vector2(0, -462), new Vector2(300, 70), new Vector2(0, 1));
+            linkText = UiKit.Label("LinkText", page, "", 21, UiKit.Ink, false, TextAnchor.MiddleLeft);
+            UiKit.Place(linkText.rectTransform, new Vector2(0, 1), new Vector2(330, -452), new Vector2(740, 96), new Vector2(0, 1));
         }
 
         void RefreshProfile()
@@ -294,10 +306,17 @@ namespace Buds.UI
             sb.Append("<b>Dzielnice:</b>\n");
             foreach (var (name, level, open) in data.Districts)
                 sb.Append(open ? $"   <color=#5d9a12>{name}</color> — otwarta\n" : $"   <color=#55514a>{name} — od poziomu {level}</color>\n");
-            if (data.Guest) sb.Append("\n<i>Grasz jako gość — połącz Buda ze strony, żeby zapisywać postępy.</i>");
+            if (data.Guest) sb.Append("\n<i>Grasz jako gość: stwórz Buda, żeby zapisywać postępy.</i>");
             else if (data.Loading) sb.Append("\n<i>Wczytuję dane z serwera…</i>");
             else if (data.Error != null) sb.Append($"\n<color=#bd1c31>{data.Error}</color>");
             statsText.text = sb.ToString();
+
+            linkButton.interactable = !data.Guest && !data.Loading;
+            linkText.text = data.Guest
+                ? "<color=#55514a>Gość nie ma konta. Stwórz Buda w grze, a potem połącz go z kontem na stronie.</color>"
+                : data.LinkCode != null
+                    ? $"Kod: <b><size=34>{data.LinkCode}</size></b>\nNa stronie Buds otwórz Twoje konto → „Bud z gry” i wpisz ten kod (ważny 10 minut)."
+                    : "<color=#55514a>Zapisz Buda na swoim koncie: postępy, ekwipunek i monety przetrwają zmianę telefonu.</color>";
         }
 
         // ---------- gear: paper doll laid out like the body, stats, picker ----------

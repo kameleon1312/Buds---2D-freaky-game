@@ -159,6 +159,10 @@ namespace Buds.Api
         public Awaitable<BuyResponse> BuyPremium(string token, string itemId) =>
             Post<BuyResponse>($"/v1/premium/{Uri.EscapeDataString(itemId)}/buy", token, "{}");
 
+        /// <summary>A short-lived code that links this bud to an account on the website (or pairs another device).</summary>
+        public Awaitable<PairCodeDto> CreatePairCode(string token) =>
+            Post<PairCodeDto>("/v1/buds/me/pair-code", token, "{}");
+
         /// <summary>A training round: the server grants training XP for the mini-game score (0..5) once per cooldown.</summary>
         public Awaitable<TrainResponse> Train(string token, string spotId, int score) =>
             Post<TrainResponse>($"/v1/buds/me/training/{Uri.EscapeDataString(spotId)}", token, $"{{\"score\":{score}}}");

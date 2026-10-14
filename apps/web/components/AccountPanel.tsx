@@ -11,7 +11,7 @@ import {
   moodLabel,
   type AccountBud,
 } from '@buds/shared';
-import { accountPairCode, claimBud, getAccountBuds, getMyBud } from '@/lib/api';
+import { accountPairCode, claimBud, getAccountBuds, getMyBud, linkBud } from '@/lib/api';
 import { getPlayer } from '@/lib/player';
 import { authMessage, supabase, useSession } from '@/lib/supabase';
 import { plural } from '@/lib/plural';
@@ -25,9 +25,11 @@ export function AccountPanel() {
   if (!supabase()) {
     return (
       <section className="card panel">
-        <h2>Konta wkrótce</h2>
+        <h2>Konta są wyłączone</h2>
         <p className="muted">
-          Ta wersja strony działa bez kont. Twój Bud jest zapisany w tej przeglądarce.
+          Ta wersja strony nie ma ustawionego połączenia z Supabase (NEXT_PUBLIC_SUPABASE_URL i
+          NEXT_PUBLIC_SUPABASE_ANON_KEY), więc logowanie i rejestracja nie działają. Twój Bud jest
+          zapisany w tej przeglądarce.
         </p>
       </section>
     );
@@ -248,6 +250,8 @@ function Dashboard({ email, token }: { email: string; token: string }) {
         </section>
       )}
 
+      <LinkFromGame token={token} onLinked={load} />
+
       {error && <p className="form-error on-dark">{error}</p>}
       {buds === null && !error && <p className="muted">Wczytuję twoje Budy…</p>}
       {buds?.length === 0 && (
@@ -271,6 +275,59 @@ function Dashboard({ email, token }: { email: string; token: string }) {
         </p>
       )}
     </div>
+  );
+}
+
+/** A bud made in the game joins the account with the code the game shows (Twój Bud → Połącz z kontem). */
+function LinkFromGame({ token, onLinked }: { token: string; onLinked: () => Promise<void> }) {
+  const [code, setCode] = useState('');
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState('');
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    setDone('');
+    const clean = code.trim().toUpperCase();
+    if (clean.length !== 6) return setError('Kod ma 6 znaków.');
+    setPending(true);
+    try {
+      const linked = await linkBud(token, clean);
+      setDone(`${linked.bud.name} jest teraz na twoim koncie.`);
+      setCode('');
+      await onLinked();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nie udało się połączyć Buda.');
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <section className="card panel">
+      <h2>Bud z gry</h2>
+      <p className="muted">
+        Masz Buda stworzonego w grze? W grze otwórz „Twój Bud” → „Połącz z kontem” i wpisz tutaj
+        kod.
+      </p>
+      <form className="link-form" onSubmit={onSubmit} noValidate>
+        <input
+          className="input code-input"
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder="KOD"
+          maxLength={6}
+          autoComplete="off"
+          aria-label="Kod z gry"
+        />
+        <button type="submit" className="btn btn-buds" disabled={pending}>
+          {pending ? 'Łączę…' : 'Połącz'}
+        </button>
+      </form>
+      {error && <p className="form-error">{error}</p>}
+      {done && <p className="notice">{done}</p>}
+    </section>
   );
 }
 

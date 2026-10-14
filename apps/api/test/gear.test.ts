@@ -275,6 +275,35 @@ describe('accounts', () => {
     expect((await claim('x'.repeat(40), alice)).status).toBe(404);
   });
 
+  it('links a bud from the game with the code it shows, once', async () => {
+    const { app, json, create } = setup();
+    const { body } = await create('Zgry');
+    const alice = await es256('alice');
+    const gameCode = async () =>
+      (
+        (await (
+          await app.request('/v1/buds/me/pair-code', { method: 'POST', ...json({}, body.token) })
+        ).json()) as PairCodeResponse
+      ).code;
+    const link = (code: string, account?: string) =>
+      app.request('/v1/account/buds/link', { method: 'POST', ...json({ code }, account) });
+
+    expect((await link(await gameCode())).status).toBe(401); // signed-in users only
+    const code = await gameCode();
+    let res = await link(code, alice);
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as AccountBud).bud.slug).toBe(body.bud.slug);
+    // the code is used up
+    res = await link(code, alice);
+    expect(res.status).toBe(404);
+    expect(((await res.json()) as ApiError).error.code).toBe('invalid_code');
+    // another account can't take it with a new code
+    res = await link(await gameCode(), await es256('bob'));
+    expect(res.status).toBe(409);
+    expect(((await res.json()) as ApiError).error.code).toBe('bud_taken');
+    expect((await link('ab', alice)).status).toBe(400);
+  });
+
   it('limits buds per account', async () => {
     const { create } = setup();
     const alice = await es256('alice');

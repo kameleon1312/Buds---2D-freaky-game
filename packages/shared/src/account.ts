@@ -28,6 +28,12 @@ export type AccountBud = z.infer<typeof accountBudSchema>;
 export const accountBudsResponseSchema = z.object({ buds: z.array(accountBudSchema) });
 export type AccountBudsResponse = z.infer<typeof accountBudsResponseSchema>;
 
+/**
+ * Links a bud made in the game: the game shows a pairing code (POST /v1/buds/me/pair-code) and the signed-in
+ * website account redeems it (POST /v1/account/buds/link). The code proves the player has the bud.
+ */
+export { redeemPairSchema as linkBudRequestSchema } from './schemas';
+
 /** Links a guest bud: the guest token proves the browser created it. */
 export const claimBudRequestSchema = z.object({ token: z.string().min(16).max(200) });
 export type ClaimBudRequest = z.infer<typeof claimBudRequestSchema>;

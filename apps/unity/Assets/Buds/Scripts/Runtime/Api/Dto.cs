@@ -97,6 +97,13 @@ namespace Buds.Api
     }
 
     [Serializable]
+    public class PairCodeDto
+    {
+        public string code;
+        public string expiresAt;
+    }
+
+    [Serializable]
     public class PairRequest
     {
         public string code;

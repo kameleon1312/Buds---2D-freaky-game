@@ -25,7 +25,7 @@ namespace Buds.Core
         void SetUpPanel()
         {
             panel ??= new BudPanel(ui.Root, quests.Content, id => _ = UpgradeSkill(id), (slot, id) => _ = Equip(slot, id),
-                id => _ = Buy(id), id => _ = Drink(id));
+                id => _ = Buy(id), id => _ = Drink(id), () => _ = LinkAccount());
             ui.ShowBudButton(() => _ = OpenPanel());
         }
 
@@ -161,6 +161,25 @@ namespace Buds.Core
                 ApplySkills(await api.UpgradeSkill(session.Token, skillId));
                 panelData.Error = null;
                 ui.ShowToast("Umiejętność ulepszona!");
+            }
+            catch (ApiException e)
+            {
+                panelData.Error = e.Message;
+            }
+            panelData.Loading = false;
+            if (panel.IsOpen) panel.Refresh(panelData);
+        }
+
+        /// <summary>Asks the server for a code the player types on the website to put this bud on their account.</summary>
+        async Awaitable LinkAccount()
+        {
+            if (session == null || panelData == null || panelData.Loading) return;
+            panelData.Loading = true;
+            panel.Refresh(panelData);
+            try
+            {
+                panelData.LinkCode = (await api.CreatePairCode(session.Token)).code;
+                panelData.Error = null;
             }
             catch (ApiException e)
             {

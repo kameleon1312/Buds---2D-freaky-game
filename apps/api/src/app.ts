@@ -566,6 +566,58 @@ export function createApp(
     });
   });
 
+  /**
+   * Links a bud from the game: the game shows a pairing code (Twój Bud → Połącz z kontem) and the signed-in user
+   * types it on the website. The code is used up; a bud of another account stays where it is.
+   */
+  app.post(
+    '/v1/account/buds/link',
+    rateLimit(env.CREATE_LIMIT_PER_MINUTE),
+    requireAuth(keys),
+    async (c) => {
+      const input = redeemPairSchema.safeParse(await c.req.json().catch(() => null));
+      if (!input.success) {
+        return c.json<ApiError>(
+          { error: { code: 'invalid_input', message: 'Kod ma 6 znaków' } },
+          400,
+        );
+      }
+      const user = c.get('user');
+      const mine = await store.budsOfUser(user.id);
+      if (mine.length >= MAX_BUDS_PER_ACCOUNT) {
+        return c.json<ApiError>(
+          {
+            error: {
+              code: 'too_many_buds',
+              message: `Na jednym koncie zmieści się ${MAX_BUDS_PER_ACCOUNT} Budów`,
+            },
+          },
+          409,
+        );
+      }
+      const slug = await store.redeemPairCode(input.data.code, new Date());
+      if (!slug) {
+        return c.json<ApiError>(
+          {
+            error: {
+              code: 'invalid_code',
+              message: 'Ten kod jest nieważny albo wygasł. Wygeneruj nowy w grze.',
+            },
+          },
+          404,
+        );
+      }
+      const result = await store.claimBud(slug, user.id);
+      if (result === 'taken') {
+        return c.json<ApiError>(
+          { error: { code: 'bud_taken', message: 'Ten Bud należy już do innego konta' } },
+          409,
+        );
+      }
+      return c.json<AccountBud>(await accountBud(slug));
+    },
+  );
+
   /** Links the guest bud this browser created (proved by its guest token) to the account. */
   app.post('/v1/account/buds/claim', requireAuth(keys), async (c) => {
     const input = claimBudRequestSchema.safeParse(await c.req.json().catch(() => null));

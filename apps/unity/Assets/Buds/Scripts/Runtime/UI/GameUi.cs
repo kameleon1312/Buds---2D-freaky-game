@@ -81,13 +81,17 @@ namespace Buds.UI
             if (pairScreen) UnityEngine.Object.Destroy(pairScreen);
             HideLoading();
 
-            var bg = UiKit.Panel("Pair", Root, UiKit.Surface900);
+            // the dark background covers the whole screen (notch side too); the content stays in the safe area
+            var bg = UiKit.Panel("Pair", canvas.transform, UiKit.Surface900);
             bg.raycastTarget = true;
             UiKit.Stretch(bg.rectTransform);
             pairScreen = bg.gameObject;
+            var area = UiKit.Rect("Safe", bg.transform);
+            UiKit.Stretch(area);
+            area.gameObject.AddComponent<SafeArea>();
 
             // landscape: the logo and a word about the game on the left, the card on the right; scaled to fit
-            var group = UiKit.Rect("Group", bg.transform);
+            var group = UiKit.Rect("Group", area);
             Place(group, 0, 0, 1180, 620);
             group.gameObject.AddComponent<FitInParent>();
 
@@ -470,9 +474,11 @@ namespace Buds.UI
 
         void BuildToast()
         {
-            toastText = UiKit.Pill("Toast", Root, "", UiKit.Surface800, 32, new Vector2(400, 66), out toastRect);
-            // centred, under the button row (the plate is top left, the buttons top right)
-            UiKit.Place(toastRect, new Vector2(0.5f, 1), new Vector2(0, -24 - ButtonH - 16), toastRect.sizeDelta, new Vector2(0.5f, 1));
+            // a slim banner at the top: it tells where you are without covering the game
+            toastText = UiKit.Pill("Toast", Root, "", new Color(UiKit.Surface800.r, UiKit.Surface800.g, UiKit.Surface800.b, 0.85f), 20,
+                new Vector2(240, 40), out toastRect);
+            UiKit.Place(toastRect, new Vector2(0.5f, 1), new Vector2(0, -16), toastRect.sizeDelta, new Vector2(0.5f, 1));
+            toastText.horizontalOverflow = HorizontalWrapMode.Overflow; // always one line
             toast = toastRect.gameObject;
             toast.SetActive(false);
         }
@@ -481,7 +487,7 @@ namespace Buds.UI
         public void ShowToast(string text, float seconds = 2.8f)
         {
             toastText.text = UiKit.Keys(text);
-            var width = Mathf.Max(240, toastText.preferredWidth + 72);
+            var width = Mathf.Max(160, toastText.preferredWidth + 44);
             toastRect.sizeDelta = new Vector2(width, toastRect.sizeDelta.y);
             // centred, but never over the player plate and the quests on the left
             var screen = ((RectTransform)Root).rect.width;

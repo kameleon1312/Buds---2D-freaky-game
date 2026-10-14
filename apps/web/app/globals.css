@@ -312,6 +312,21 @@ h3 {
   padding: 10px var(--space-3);
 }
 
+/* a game code next to its button (account: link a bud from the game) */
+.link-form {
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+  margin-top: var(--space-3);
+}
+
+.code-input {
+  max-width: 220px;
+  text-align: center;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
 .input::placeholder {
   color: var(--ink-soft);
   font-weight: 500;

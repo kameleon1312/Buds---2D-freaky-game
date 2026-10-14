@@ -14,10 +14,28 @@ Zalecane: Settings → Branches → ochrona `main` z wymaganymi checkami CI.
 
 1. Import repozytorium w Vercel.
 2. **Root Directory**: `apps/web` (Vercel wykryje monorepo pnpm i `vercel.json`).
-3. Zmienne środowiskowe: `NEXT_PUBLIC_API_URL` (domena z Railway), `NEXT_PUBLIC_SITE_URL`
-   (docelowa domena strony — trafia do linków i tagów OG).
+3. Zmienne środowiskowe:
+   - `NEXT_PUBLIC_API_URL` — domena API z Railway (`https://…up.railway.app`),
+   - `NEXT_PUBLIC_SITE_URL` — adres strony (najpierw `https://<projekt>.vercel.app`, potem twoja domena),
+   - `NEXT_PUBLIC_SUPABASE_URL` i `NEXT_PUBLIC_SUPABASE_ANON_KEY` — te same publiczne wartości co w `.env`
+     (bez nich konta na stronie są wyłączone). Klucza secret tu **nie** wpisuj.
+4. Po zmianie zmiennych w Vercel: Deployments → **Redeploy** (zmienne `NEXT_PUBLIC_*` są wklejane w kod przy budowaniu).
 
 Status deploymentu pojawi się jako check „Vercel” przy commitach.
+
+### Własna domena (później)
+
+1. Vercel → projekt → Settings → **Domains** → dodaj domenę i ustaw u rejestratora rekordy DNS, które pokaże Vercel.
+2. Zmień adres strony wszędzie, gdzie występuje: `NEXT_PUBLIC_SITE_URL` (Vercel, potem Redeploy), `WEB_ORIGIN`
+   (Railway — inaczej przeglądarka zablokuje zapytania do API przez CORS) i w Supabase → Authentication → URL
+   Configuration (Site URL i Redirect URLs `…/konto`, `…/konto/nowe-haslo`).
+3. Opcjonalnie domena dla API (np. `api.twojadomena.pl`) w Railway → Networking → Custom Domain; wtedy zmień
+   `NEXT_PUBLIC_API_URL` w Vercel i adres w grze (`PlayerSession.DefaultApiBaseUrl`).
+
+### Lokalnie: zmienne strony
+
+Po dopisaniu albo zmianie `NEXT_PUBLIC_*` w `.env` zatrzymaj `pnpm dev` i uruchom go ponownie — strona wczytuje je przy
+starcie. Jeśli `/konto` dalej pisze „Konta są wyłączone”, usuń `apps/web/.next` i uruchom ponownie.
 
 ## Railway (API)
 

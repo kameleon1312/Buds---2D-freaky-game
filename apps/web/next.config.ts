@@ -15,8 +15,17 @@ const securityHeaders = [
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
 ];
 
+// the public values the browser needs, passed explicitly: Next.js inlines them at compile time and rebuilds when
+// they change (values from the repo-root .env would otherwise stay cached in .next after editing .env)
+const publicEnv = Object.fromEntries(
+  Object.entries(process.env).filter(
+    (entry): entry is [string, string] => entry[0].startsWith('NEXT_PUBLIC_') && !!entry[1],
+  ),
+);
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  env: publicEnv,
   // a separate output dir lets a production build run next to `pnpm dev` (BUDS_DIST_DIR=.next-build)
   distDir: process.env.BUDS_DIST_DIR || '.next',
   poweredByHeader: false,

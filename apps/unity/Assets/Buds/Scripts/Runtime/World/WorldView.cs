@@ -26,7 +26,8 @@ namespace Buds.World
         public static readonly Quaternion Upright = Quaternion.Euler(-Tilt, 0, 0);
         /// <summary>Characters are drawn this much bigger than their sheet, and a bit wider: sturdier next to the props.</summary>
         public const float CharacterScale = 1.35f;
-        public const float CharacterWidth = 1.12f;
+        /// <summary>1: the sheets themselves are drawn sturdy now (BULK in packages/shared vector.ts).</summary>
+        public const float CharacterWidth = 1f;
 
         /// <summary>The standing child for a character: bigger and a little wider than its sheet.</summary>
         public static Transform StandCharacter(Transform parent)
