@@ -369,6 +369,40 @@ namespace Buds.UI
             return content;
         }
 
+        /// <summary>
+        /// A square HUD button with a picture and a short outlined caption under it (Twój Bud, Mapa…), in the
+        /// secondary colour. Returns the button; <paramref name="icon"/> and <paramref name="caption"/> can be changed later.
+        /// </summary>
+        public static Button IconButton(string name, Transform parent, Sprite picture, string label, float size, Action onClick,
+            out Image icon, out Text caption)
+        {
+            var button = Button(name, parent, "", new Vector2(size, size), onClick, Tone.Rep, 20);
+            var face = button.transform.Find("Face") ?? button.transform;
+            icon = Rect("Icon", face).gameObject.AddComponent<Image>();
+            icon.sprite = picture;
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            Stretch(icon.rectTransform, size * 0.1f);
+            caption = Outlined("Caption", button.transform, Keys(label), 22);
+            // small text: the outline alone, the hard drop would read as a second copy
+            foreach (var effect in caption.GetComponents<Shadow>())
+                if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
+            Place(caption.rectTransform, new Vector2(0.5f, 0), new Vector2(0, -30), new Vector2(size + 60, 30), new Vector2(0.5f, 0));
+            return button;
+        }
+
+        static readonly Dictionary<string, Sprite> pictures = new();
+
+        /// <summary>A picture from Resources (Ui/bud, Items/mount-rower…), cached; null when missing.</summary>
+        public static Sprite Picture(string path)
+        {
+            if (pictures.TryGetValue(path, out var cached)) return cached;
+            var tex = Resources.Load<Texture2D>(path);
+            var sprite = tex ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100) : null;
+            pictures[path] = sprite;
+            return sprite;
+        }
+
         /// <summary>Red round close button in a window's top-right corner (inside the title bar, never off screen), with an X.</summary>
         public static Button CloseButton(Transform window, Action onClose)
         {

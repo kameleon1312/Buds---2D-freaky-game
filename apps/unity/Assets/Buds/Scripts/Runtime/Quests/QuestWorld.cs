@@ -22,7 +22,12 @@ namespace Buds.Quests
             var view = go.AddComponent<NpcView>();
             view.Data = data;
             view.sheet = sheet;
-            view.body = go.AddComponent<SpriteRenderer>();
+            // 2.5D: a shadow on the ground, the body and its marker stand up towards the camera
+            WorldView.Shadow(go.transform, 0.9f);
+            var visual = WorldView.StandCharacter(go.transform);
+            var bodyGo = new GameObject("Body");
+            bodyGo.transform.SetParent(visual, false);
+            view.body = bodyGo.AddComponent<SpriteRenderer>();
             view.body.sprite = sheet.Get(Facing.Down, 0);
             view.body.sortingOrder = WorldView.SortOrderFor(feet.y);
             var box = go.AddComponent<BoxCollider2D>(); // same footprint as the player's feet
@@ -30,7 +35,7 @@ namespace Buds.Quests
             box.offset = new Vector2(0, 2.5f / 16);
 
             var m = new GameObject("Marker");
-            m.transform.SetParent(go.transform, false);
+            m.transform.SetParent(visual, false);
             view.marker = m.AddComponent<SpriteRenderer>();
             view.marker.sortingOrder = 20000; // always above the world
             view.phase = (data.x * 0.37f + data.y * 0.11f) % 1f;
@@ -153,6 +158,7 @@ namespace Buds.Quests
             var r = go.AddComponent<SpriteRenderer>();
             r.sprite = art.Get(name);
             r.sortingOrder = flat ? -90 : WorldView.SortOrderFor(position.y);
+            if (!flat) go.transform.localRotation = WorldView.Upright;
             return go;
         }
 

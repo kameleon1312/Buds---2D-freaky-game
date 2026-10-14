@@ -26,6 +26,7 @@ namespace Buds.Characters
         BudSheet sheet;
         Rigidbody2D body;
         SpriteRenderer sprite;
+        Transform visual; // stands up towards the camera; the body (physics) stays flat
         float animTime;
         bool wasMoving;
         float dustTimer;
@@ -52,9 +53,9 @@ namespace Buds.Characters
             if (!rideBehind)
             {
                 rideBehind = new GameObject("Ride (behind)").AddComponent<SpriteRenderer>();
-                rideBehind.transform.SetParent(transform, false);
+                rideBehind.transform.SetParent(visual, false);
                 rideOver = new GameObject("Ride (over)").AddComponent<SpriteRenderer>();
-                rideOver.transform.SetParent(transform, false);
+                rideOver.transform.SetParent(visual, false);
             }
             ShowRide();
         }
@@ -96,9 +97,11 @@ namespace Buds.Characters
             box.offset = FeetOffset;
             box.edgeRadius = 0.02f; // slightly rounded: glides along walls instead of catching on tile seams
 
-            // the sprite is a child so it can bounce without moving the body
+            // the sprite is a child of a standing "Visual" (2.5D), so it can bounce without moving the body
+            WorldView.Shadow(go.transform, 0.9f);
+            var visual = WorldView.StandCharacter(go.transform);
             var art = new GameObject("Sprite");
-            art.transform.SetParent(go.transform, false);
+            art.transform.SetParent(visual, false);
             var sprite = art.AddComponent<SpriteRenderer>();
             sprite.sortingOrder = WorldView.SortOrderFor(position.y);
             sprite.sprite = sheet.Get(Facing.Down, 0);
@@ -107,6 +110,7 @@ namespace Buds.Characters
             bud.sheet = sheet;
             bud.body = body;
             bud.sprite = sprite;
+            bud.visual = visual;
             bud.dust = new Dust(go.transform.parent);
             return bud;
         }

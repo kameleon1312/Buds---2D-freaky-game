@@ -410,7 +410,43 @@ const ICONS_SKILLS: Record<string, Icon> = {
   },
 };
 
+/** HUD buttons (Resources/Ui): the treasure map. The bud's head is the app icon (Assets/Buds/buds). */
+const ICONS_UI: Record<string, Icon> = {
+  mapa: {
+    body:
+      // parchment with rolled ends
+      shaded(
+        'M10 14Q20 10 32 14Q44 18 54 14V50Q44 54 32 50Q20 46 10 50Z',
+        ['#f3dfa8', '#d8bd7a'],
+        LINE,
+        -3,
+        -3,
+      ) +
+      shaded(rr(6, 10, 8, 44, 4), ['#e6cc8c', '#c4a35f'], LINE, -1, -1, 2.5) +
+      shaded(rr(50, 10, 8, 44, 4), ['#e6cc8c', '#c4a35f'], LINE, -1, -1, 2.5) +
+      // a bit of land and sea
+      flat('M18 22Q24 18 30 22Q34 28 28 32Q22 34 18 30Z', '#9fd27a', '#5f9a3a', 1.5) +
+      flat('M36 34Q42 30 46 34Q48 40 42 42Q36 42 36 34Z', '#9fd27a', '#5f9a3a', 1.5) +
+      // the dotted way to the treasure
+      stroke('M22 28Q26 38 34 36Q40 34 42 26', '#8a4a0b', 2.5, 0.9) +
+      [
+        [24, 33],
+        [30, 37],
+        [37, 35],
+      ]
+        .map(([x, y]) => flat(circ(x!, y!, 1.2), '#f3dfa8', '#f3dfa8', 0))
+        .join('') +
+      // the X
+      stroke('M38 20l8 8M46 20l-8 8', '#bd1c31', 5) +
+      stroke('M38 20l8 8M46 20l-8 8', '#ff3d50', 2.6) +
+      // compass
+      flat(circ(20, 42, 4.5), '#ffffff', LINE, 1.5) +
+      flat('M20 38L21.5 42L20 46L18.5 42Z', '#ff3d50', LINE, 0.8),
+  },
+};
+
 export const ICONS = {
   items: { ...GEAR_ICONS, ...RIDE_ICONS, ...ICONS_ITEMS },
   skills: ICONS_SKILLS,
+  ui: ICONS_UI,
 };

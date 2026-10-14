@@ -328,54 +328,58 @@ namespace Buds.UI
             onAccept = onDecline = null;
         }
 
-        // the top-right button row, right to left: Twój Bud, Mapa, the ride
-        const float ButtonH = 66;
+        // the top-right column of picture buttons, top to bottom: Twój Bud, Mapa, the ride
+        const float ButtonH = 66; // the old row height: the toast still sits below it
+        const float IconSize = 92;
+        const float IconStep = IconSize + 44; // button + caption + gap
         const float BudW = 230, MapW = 180, RideW = 210, Gap = 14;
         /// <summary>Right edge of the left column (player plate, quests) in UI units.</summary>
         const float LeftColumn = 24 + 380;
 
-        static void TopRight(Button button, float right, float width)
+        /// <summary>Puts a picture button into the right column (row 0 at the top).</summary>
+        static void RightColumn(Button button, int row)
         {
-            UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-right, -24), new Vector2(width, ButtonH),
-                new Vector2(1, 1));
+            UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-28, -24 - row * IconStep),
+                new Vector2(IconSize, IconSize), new Vector2(1, 1));
             button.transform.SetAsFirstSibling(); // under panels opened later
         }
 
-        /// <summary>"Twój Bud" button, top right (opens the Bud panel).</summary>
+        /// <summary>"Twój Bud": the bud's head, top right (opens the Bud panel).</summary>
         public void ShowBudButton(Action onClick)
         {
             if (budButton) return;
-            var button = UiKit.Button("BudButton", Root, UiKit.Keys("Twój Bud  [I]"), new Vector2(BudW, ButtonH), onClick, UiKit.Tone.Rep, 28);
-            TopRight(button, 24, BudW);
+            var button = UiKit.IconButton("BudButton", Root, UiKit.Picture("Ui/bud"), "Twój Bud  [I]", IconSize, onClick, out _, out _);
+            RightColumn(button, 0);
             budButton = button.gameObject;
         }
 
-        /// <summary>"Mapa" button left of "Twój Bud" (opens the map screen).</summary>
+        /// <summary>"Mapa": the treasure map, under "Twój Bud" (opens the map screen).</summary>
         public void ShowMapButton(Action onClick)
         {
             if (mapButton) return;
-            var button = UiKit.Button("MapButton", Root, UiKit.Keys("Mapa  [M]"), new Vector2(MapW, ButtonH), onClick, UiKit.Tone.Rep, 28);
-            TopRight(button, 24 + BudW + Gap, MapW);
+            var button = UiKit.IconButton("MapButton", Root, UiKit.Picture("Ui/mapa"), "Mapa  [M]", IconSize, onClick, out _, out _);
+            RightColumn(button, 1);
             mapButton = button.gameObject;
         }
 
         GameObject rideButton;
         Text rideLabel;
+        Image rideIcon;
         Text buffLine;
 
-        /// <summary>"Wsiądź / Zsiądź [R]" next to the map button, while a ride is worn and the bud is outdoors.</summary>
-        public void SetRideButton(bool visible, string label, Action onClick)
+        /// <summary>The worn ride's picture under the map ("Wsiądź / Zsiądź [R]"), while the bud is outdoors.</summary>
+        public void SetRideButton(bool visible, string label, Action onClick, string mountItem = null)
         {
             if (!rideButton && visible)
             {
-                var button = UiKit.Button("RideButton", Root, label, new Vector2(RideW, ButtonH), onClick, UiKit.Tone.Rep, 26);
-                TopRight(button, 24 + BudW + Gap + MapW + Gap, RideW);
+                var button = UiKit.IconButton("RideButton", Root, null, label, IconSize, onClick, out rideIcon, out rideLabel);
+                RightColumn(button, 2);
                 rideButton = button.gameObject;
-                rideLabel = button.GetComponentInChildren<Text>();
             }
             if (!rideButton) return;
             rideButton.SetActive(visible);
             rideLabel.text = UiKit.Keys(label);
+            if (mountItem != null) rideIcon.sprite = UiKit.Picture("Items/" + mountItem);
         }
 
         /// <summary>Running boosts of energy drinks under the HUD buttons ("" hides it).</summary>
@@ -383,10 +387,10 @@ namespace Buds.UI
         {
             if (!buffLine)
             {
-                // under the button row, right aligned
+                // left of the button column, right aligned
                 buffLine = UiKit.Outlined("Buffs", Root, "", 24, UiKit.Gold400);
                 buffLine.alignment = TextAnchor.UpperRight;
-                UiKit.Place(buffLine.rectTransform, new Vector2(1, 1), new Vector2(-28, -24 - ButtonH - 10), new Vector2(760, 34),
+                UiKit.Place(buffLine.rectTransform, new Vector2(1, 1), new Vector2(-28 - IconSize - 24, -30), new Vector2(560, 34),
                     new Vector2(1, 1));
                 buffLine.transform.SetAsFirstSibling();
             }

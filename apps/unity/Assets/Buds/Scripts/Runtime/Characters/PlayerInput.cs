@@ -52,24 +52,7 @@ namespace Buds.Characters
             return (Mathf.Lerp(0.4f, 1f, Mathf.InverseLerp(0.15f, 0.75f, t)), false);
         }
 
-        /// <summary>The axis wins by this factor before the direction switches (no flicker on a diagonal push).</summary>
-        public const float AxisBias = 1.25f;
 
-        /// <summary>
-        /// Classic four-way movement: only up, down, left or right, keeping the push's strength. On a diagonal the
-        /// current axis stays until the other one clearly wins.
-        /// </summary>
-        public static Vector2 FourWay(Vector2 v, bool wasHorizontal)
-        {
-            var ax = Mathf.Abs(v.x);
-            var ay = Mathf.Abs(v.y);
-            if (ax < 0.01f && ay < 0.01f) return Vector2.zero;
-            var horizontal = wasHorizontal ? ax * AxisBias >= ay : ax > ay * AxisBias;
-            var strength = Mathf.Min(1, v.magnitude);
-            return horizontal ? new Vector2(Mathf.Sign(v.x) * strength, 0) : new Vector2(0, Mathf.Sign(v.y) * strength);
-        }
-
-        bool horizontal;
 
         /// <summary>Scripted input for automated runs; overrides devices while set.</summary>
         public Vector2? Override { get; set; }
@@ -167,10 +150,8 @@ namespace Buds.Characters
                 }
             }
 
-            // up, down, left, right only (scripted runs steer the same way)
+            // free movement in every direction, like most RPGs (the facing has its own hysteresis in BudMotor)
             if (Override.HasValue) move = Override.Value;
-            move = FourWay(move, horizontal);
-            if (move.sqrMagnitude > 0) horizontal = move.x != 0;
             if (OverrideRun) Run = true;
             if (Blocked)
             {

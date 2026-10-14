@@ -80,6 +80,7 @@ if (args[0] === '--preview') {
   for (const [folder, icons] of [
     ['Items', ICONS.items],
     ['Skills', ICONS.skills],
+    ['Ui', ICONS.ui],
   ] as const) {
     const out = fileURLToPath(
       new URL(`../../apps/unity/Assets/Buds/Resources/${folder}/`, import.meta.url),

@@ -56,14 +56,15 @@ namespace Buds.Quests
                 var go = new GameObject("Cache " + c.id);
                 go.transform.SetParent(cw.transform, false);
                 go.transform.position = feet;
-                var body = go.AddComponent<SpriteRenderer>();
+                var visual = WorldView.Stand(go.transform);
+                var body = visual.gameObject.AddComponent<SpriteRenderer>();
                 body.sortingOrder = WorldView.SortOrderFor(feet.y);
                 var box = go.AddComponent<BoxCollider2D>(); // blocks like an NPC once it can be seen
                 box.size = new Vector2(0.7f, 0.35f);
                 box.offset = new Vector2(0, 0.17f);
 
                 var glint = new GameObject("Glint").AddComponent<SpriteRenderer>();
-                glint.transform.SetParent(go.transform, false);
+                glint.transform.SetParent(visual, false);
                 glint.transform.localPosition = new Vector3(0.22f, 0.85f, 0);
                 glint.sprite = cw.art.Get("blysk");
                 glint.sortingOrder = body.sortingOrder + 1;

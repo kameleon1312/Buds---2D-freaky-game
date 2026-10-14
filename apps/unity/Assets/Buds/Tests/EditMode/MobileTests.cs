@@ -21,17 +21,11 @@ namespace Buds.Tests
         }
 
         [Test]
-        public void MovesOnlyUpDownLeftOrRight()
+        public void TheCameraSitsFarEnoughToShowTheTiles()
         {
-            Assert.AreEqual(new UnityEngine.Vector2(1, 0), PlayerInput.FourWay(new UnityEngine.Vector2(1, 0.3f).normalized * 1, false).normalized);
-            Assert.AreEqual(new UnityEngine.Vector2(0, -1), PlayerInput.FourWay(new UnityEngine.Vector2(0.2f, -0.9f), true).normalized);
-            // a 45° push keeps the current axis
-            var diag = new UnityEngine.Vector2(0.7f, 0.7f);
-            Assert.AreEqual(0, PlayerInput.FourWay(diag, true).y);
-            Assert.AreEqual(0, PlayerInput.FourWay(diag, false).x);
-            // a half push keeps its strength
-            Assert.AreEqual(0.5f, PlayerInput.FourWay(new UnityEngine.Vector2(0, 0.5f), false).magnitude, 1e-4);
-            Assert.AreEqual(UnityEngine.Vector2.zero, PlayerInput.FourWay(UnityEngine.Vector2.zero, false));
+            // a 32° view 4.25 tiles tall (half) at the focus needs ~14.8 tiles of distance
+            Assert.AreEqual(14.82f, FollowCamera.DistanceFor(4.25f, 32f), 0.01f);
+            Assert.Greater(FollowCamera.DistanceFor(6f, 32f), FollowCamera.DistanceFor(4.25f, 32f));
         }
 
         [TestCase(1080, 420, true, 540)] // 6" phone in landscape: about 2.6" tall

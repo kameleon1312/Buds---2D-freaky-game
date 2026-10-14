@@ -66,7 +66,8 @@ namespace Buds.Core
                 });
             }
             else if (player.Ride != null) player.SetRide(null);
-            ui.SetRideButton(canRide, riding ? "Zsiądź  [R]" : "Wsiądź  [R]", ToggleRide);
+            ui.SetRideButton(canRide, riding ? "Zsiądź  [R]" : "Wsiądź  [R]", ToggleRide,
+                equipped.TryGetValue("mount", out var mountItem) ? mountItem : null);
             ApplySpeed();
         }
 

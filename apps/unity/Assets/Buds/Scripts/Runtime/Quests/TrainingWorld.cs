@@ -28,7 +28,7 @@ namespace Buds.Quests
                 var go = new GameObject("Training " + t.id);
                 go.transform.SetParent(tw.transform, false);
                 go.transform.position = feet;
-                var sprite = go.AddComponent<SpriteRenderer>();
+                var sprite = WorldView.Stand(go.transform).gameObject.AddComponent<SpriteRenderer>();
                 sprite.sprite = art.Get("trening-" + t.look);
                 sprite.sortingOrder = WorldView.SortOrderFor(feet.y);
                 var box = go.AddComponent<BoxCollider2D>();

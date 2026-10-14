@@ -3,8 +3,9 @@ using UnityEngine;
 namespace Buds.Core
 {
     /// <summary>
-    /// Orthographic camera that shows about the same number of tiles on any screen (the art is smooth vector
-    /// renders, so any zoom is fine), follows a target smoothly and stays inside the map.
+    /// 2.5D camera: a perspective camera tilted by WorldView.Tilt, looking north across the flat ground, far enough
+    /// away that about the same number of tiles shows on any screen (OrthoSizeFor). It follows a point on the ground
+    /// smoothly and keeps that point inside the map.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public sealed class FollowCamera : MonoBehaviour
@@ -20,15 +21,34 @@ namespace Buds.Core
         public Rect bounds; // world units
         public float smoothing = 10f;
 
+        /// <summary>Vertical field of view: narrow, so the depth is gentle and the HUD-sized world stays readable.</summary>
+        public const float FieldOfView = 32f;
+
         Camera cam;
         int lastW;
         int lastH;
+        float size; // half the visible height on the ground at the focus, in tiles
+        float distance;
+        Vector3 focus;
 
         void Awake()
         {
             cam = GetComponent<Camera>();
-            cam.orthographic = true;
+            cam.orthographic = false;
+            cam.fieldOfView = FieldOfView;
+            cam.nearClipPlane = 0.3f;
+            cam.farClipPlane = 600f;
+            transform.rotation = Quaternion.Euler(-World.WorldView.Tilt, 0, 0);
         }
+
+        /// <summary>How far from its focus the camera sits so the view is 2·size tall there.</summary>
+        public static float DistanceFor(float halfHeight, float fieldOfView) =>
+            halfHeight / Mathf.Tan(fieldOfView * 0.5f * Mathf.Deg2Rad);
+
+        /// <summary>The bud's feet, a bit north: the point the camera looks at (the bud stands up from its feet).</summary>
+        Vector3 FocusOf(Vector3 target) => new(target.x, target.y + 0.6f, 0);
+
+        void Place() => transform.position = focus - transform.forward * distance;
 
         /// <summary>Half the visible height in tiles so that both target extents fit.</summary>
         public static float OrthoSizeFor(int screenW, int screenH, bool compact = false) =>
@@ -38,7 +58,9 @@ namespace Buds.Core
         public void SnapToTarget()
         {
             Resize();
-            if (target) transform.position = Clamp(new Vector3(target.position.x, target.position.y, -10));
+            if (!target) return;
+            focus = Clamp(FocusOf(target.position));
+            Place();
         }
 
         void Resize()
@@ -46,22 +68,24 @@ namespace Buds.Core
             if (Screen.width == lastW && Screen.height == lastH) return;
             lastW = Screen.width;
             lastH = Screen.height;
-            cam.orthographicSize = OrthoSizeFor(lastW, lastH, UI.UiKit.Mobile);
+            size = OrthoSizeFor(lastW, lastH, UI.UiKit.Mobile);
+            distance = DistanceFor(size, FieldOfView);
         }
 
         void LateUpdate()
         {
             Resize();
             if (!target) return;
-            var goal = Clamp(new Vector3(target.position.x, target.position.y, -10));
-            transform.position = Vector3.Lerp(transform.position, goal, 1 - Mathf.Exp(-smoothing * Time.deltaTime));
+            focus = Vector3.Lerp(focus, Clamp(FocusOf(target.position)), 1 - Mathf.Exp(-smoothing * Time.deltaTime));
+            Place();
         }
 
         Vector3 Clamp(Vector3 p)
         {
             if (bounds.width <= 0) return p;
-            var halfH = cam.orthographicSize;
-            var halfW = halfH * cam.aspect;
+            // the tilted view sees more ground than it is tall: keep the near (bottom) edge inside the map
+            var halfH = size / Mathf.Cos(World.WorldView.Tilt * Mathf.Deg2Rad) * 0.85f;
+            var halfW = size * cam.aspect;
             p.x = bounds.width > halfW * 2 ? Mathf.Clamp(p.x, bounds.xMin + halfW, bounds.xMax - halfW) : bounds.center.x;
             p.y = bounds.height > halfH * 2 ? Mathf.Clamp(p.y, bounds.yMin + halfH, bounds.yMax - halfH) : bounds.center.y;
             return p;

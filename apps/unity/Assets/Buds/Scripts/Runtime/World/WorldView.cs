@@ -9,6 +9,9 @@ namespace Buds.World
     /// <summary>
     /// Shows a WorldMap: smooth flat-coloured ground (styles from the map file) built as chunked meshes,
     /// props as y-sorted sprites from one atlas, and invisible tilemaps for collision. 1 tile = 1 world unit.
+    /// 2.5D: the ground lies flat (the XY plane, where the physics live) and a tilted perspective camera
+    /// (FollowCamera) looks north across it; props and characters stand up facing the camera (Upright), so the world
+    /// gets depth while the map, collisions and art stay the same.
     /// Chunks and sprites outside the camera are culled, so big districts stay cheap on phones.
     /// </summary>
     public sealed class WorldView : MonoBehaviour
@@ -16,6 +19,62 @@ namespace Buds.World
         const int SortGround = -1000; // ground layers count up from here
         const int SortDecor = -100; // flat decorations: flowers, tufts, road markings…
         public const int ChunkTiles = 32;
+
+        /// <summary>Camera tilt from straight down, in degrees (FollowCamera); things that stand up lean back by the same.</summary>
+        public const float Tilt = 40f;
+        /// <summary>Rotation of everything that stands up (props, characters): facing the tilted camera.</summary>
+        public static readonly Quaternion Upright = Quaternion.Euler(-Tilt, 0, 0);
+        /// <summary>Characters are drawn this much bigger than their sheet, and a bit wider: sturdier next to the props.</summary>
+        public const float CharacterScale = 1.35f;
+        public const float CharacterWidth = 1.12f;
+
+        /// <summary>The standing child for a character: bigger and a little wider than its sheet.</summary>
+        public static Transform StandCharacter(Transform parent)
+        {
+            var t = Stand(parent);
+            t.localScale = new Vector3(CharacterScale * CharacterWidth, CharacterScale, 1);
+            return t;
+        }
+
+        /// <summary>A child that stands up (rotated towards the camera); sprites go in here, physics stay on the parent.</summary>
+        public static Transform Stand(Transform parent, string name = "Visual", float scale = 1f)
+        {
+            var t = new GameObject(name).transform;
+            t.SetParent(parent, false);
+            t.localRotation = Upright;
+            t.localScale = Vector3.one * scale;
+            return t;
+        }
+
+        static Sprite shadowSprite;
+
+        /// <summary>A soft dark oval on the ground under a character (flat, under every sprite).</summary>
+        public static SpriteRenderer Shadow(Transform parent, float width)
+        {
+            if (!shadowSprite)
+            {
+                const int w = 64, h = 32;
+                var tex = new Texture2D(w, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+                for (var y = 0; y < h; y++)
+                for (var x = 0; x < w; x++)
+                {
+                    var dx = (x + 0.5f) / w * 2 - 1;
+                    var dy = (y + 0.5f) / h * 2 - 1;
+                    var d = dx * dx + dy * dy;
+                    tex.SetPixel(x, y, new Color(0.11f, 0.16f, 0.08f, Mathf.Clamp01((1 - d) * 2.2f) * 0.32f));
+                }
+                tex.Apply();
+                shadowSprite = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), w);
+            }
+            var go = new GameObject("Shadow");
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = new Vector3(0, 0.08f, 0);
+            go.transform.localScale = new Vector3(width, width, 1);
+            var r = go.AddComponent<SpriteRenderer>();
+            r.sprite = shadowSprite;
+            r.sortingOrder = -96; // on the ground, under every character
+            return r;
+        }
 
         public WorldMap Map { get; private set; }
 
@@ -78,9 +137,10 @@ namespace Buds.World
             var order = SortGround;
 
             var baseMesh = new GroundMesh();
+            // the base reaches far beyond the map: the tilted camera sees further towards the horizon
             baseMesh.Vertices.AddRange(new[]
             {
-                new Vector3(-4, -4), new Vector3(w + 4, -4), new Vector3(w + 4, h + 4), new Vector3(-4, h + 4),
+                new Vector3(-40, -12), new Vector3(w + 40, -12), new Vector3(w + 40, h + 60), new Vector3(-40, h + 60),
             });
             baseMesh.Triangles.AddRange(new[] { 0, 2, 1, 0, 3, 2 });
             Layer(root, "Base", baseMesh, map.BaseColor, order++, material);
@@ -195,6 +255,7 @@ namespace Buds.World
                 var go = new GameObject(spot.Name);
                 go.transform.SetParent(root, false);
                 go.transform.localPosition = new Vector3(spot.X + 0.5f + jx, baseY + 0.1f + jy, 0);
+                if (!flat) go.transform.localRotation = Upright; // buildings, trees, lamps stand up; flowers and markings lie flat
                 var r = go.AddComponent<SpriteRenderer>();
                 r.sprite = sprite;
                 r.sortingOrder = flat ? SortDecor : SortOrderFor(baseY + 0.1f);

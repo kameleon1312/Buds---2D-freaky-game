@@ -26,14 +26,19 @@ namespace Buds.Quests
             var view = go.AddComponent<EnemyView>();
             view.Data = data;
             view.Sheet = sheet;
-            view.body = go.AddComponent<SpriteRenderer>();
+            // 2.5D: a shadow on the ground, the body and its marker stand up towards the camera
+            WorldView.Shadow(go.transform, 0.9f);
+            var visual = WorldView.StandCharacter(go.transform);
+            var bodyGo = new GameObject("Body");
+            bodyGo.transform.SetParent(visual, false);
+            view.body = bodyGo.AddComponent<SpriteRenderer>();
             view.body.sprite = sheet.Get(Facing.Down, 0);
             view.body.sortingOrder = WorldView.SortOrderFor(feet.y);
             view.box = go.AddComponent<BoxCollider2D>();
             view.box.size = new Vector2(10f / 16, 5f / 16);
             view.box.offset = new Vector2(0, 2.5f / 16);
             var m = new GameObject("Marker");
-            m.transform.SetParent(go.transform, false);
+            m.transform.SetParent(visual, false);
             view.marker = m.AddComponent<SpriteRenderer>();
             view.marker.sprite = markerSprite;
             view.marker.sortingOrder = 20000;
