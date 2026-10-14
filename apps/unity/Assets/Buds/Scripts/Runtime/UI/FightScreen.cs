@@ -167,7 +167,7 @@ namespace Buds.UI
                 var rt = (RectTransform)moveButtons[i].transform;
                 UiKit.Place(rt, new Vector2(0, 1), new Vector2(i * step, -StageH - 64), new Vector2(w, 84), new Vector2(0, 1));
                 var m = content.Move(moves[i]);
-                moveLabels[i].text = $"{m?.name ?? moves[i]}  [{i + 1}]";
+                moveLabels[i].text = UiKit.Keys($"{m?.name ?? moves[i]}  [{i + 1}]");
                 moveLabels[i].fontSize = count <= 4 ? 28 : 21;
             }
             var weapon = string.IsNullOrEmpty(fight.bud.weaponItem) ? null : content.Item(fight.bud.weaponItem);

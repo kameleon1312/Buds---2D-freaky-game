@@ -76,6 +76,24 @@ namespace Buds.UI
 
         public static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
 
+        /// <summary>Phone/tablet layout: fixed joystick, bigger UI, closer camera. -buds-mobile simulates it on a PC.</summary>
+        public static bool Mobile => Application.isMobilePlatform || Core.CommandLine.Has("-buds-mobile");
+
+        /// <summary>Drops keyboard hints on phones: "Mapa  [M]" → "Mapa".</summary>
+        public static string Keys(string label) =>
+            Mobile && label != null ? System.Text.RegularExpressions.Regex.Replace(label, @"\s*\[[^\]]+\]", "") : label;
+
+        /// <summary>
+        /// Canvas height in UI units (the game is landscape only). Phones get a shorter canvas, so everything is drawn
+        /// bigger on their small screens; desktops and tablets keep 720.
+        /// </summary>
+        public static float CanvasHeight(float screenHeightPx, float dpi, bool mobile)
+        {
+            if (!mobile) return 720;
+            var inches = screenHeightPx / (dpi > 0 ? dpi : 400);
+            return inches < 3.2f ? 540 : inches < 4.5f ? 620 : 720;
+        }
+
         // ---------- canvas ----------
         public static Canvas CreateCanvas(string name, int sortOrder)
         {
@@ -85,9 +103,12 @@ namespace Buds.UI
             canvas.sortingOrder = sortOrder;
             var scaler = go.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(720, 1280);
+            // landscape everywhere: the canvas is a fixed height, its width follows the screen
+            var simulated = Mobile && !Application.isMobilePlatform; // -buds-mobile on a PC: a 6" phone
+            scaler.referenceResolution = new Vector2(1280,
+                CanvasHeight(simulated ? 1080 : Screen.height, simulated ? 420 : Screen.dpi, Mobile));
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f; // the desktop build is landscape, phones are portrait
+            scaler.matchWidthOrHeight = 1f;
             scaler.referencePixelsPerUnit = 100;
             EnsureEventSystem();
             return canvas;
@@ -241,6 +262,7 @@ namespace Buds.UI
         public static Button Button(string name, Transform parent, string text, Vector2 size, Action onClick,
             Tone tone = Tone.Gold, int fontSize = 40)
         {
+            text = Keys(text);
             var (faceColor, lipColor) = Colors(tone);
             var root = Rect(name, parent);
             root.sizeDelta = size;
@@ -347,12 +369,12 @@ namespace Buds.UI
             return content;
         }
 
-        /// <summary>Red round close button hanging over a window's top-right corner, with an X.</summary>
+        /// <summary>Red round close button in a window's top-right corner (inside the title bar, never off screen), with an X.</summary>
         public static Button CloseButton(Transform window, Action onClose)
         {
             var size = 36 * U;
             var root = Rect("Close", window);
-            Place(root, Vector2.one, new Vector2(10 * U, 10 * U), new Vector2(size, size), Vector2.one);
+            Place(root, Vector2.one, new Vector2(-6 * U, -6 * U), new Vector2(size, size), Vector2.one);
             var hit = root.gameObject.AddComponent<Image>();
             hit.sprite = White;
             hit.color = Color.clear;
@@ -500,6 +522,26 @@ namespace Buds.UI
     }
 
     /// <summary>Scales a fixed-size group down so it always fits its parent (landscape desktop vs portrait phone).</summary>
+    /// <summary>Keeps a full-screen rect inside Screen.safeArea (notches and rounded corners in landscape).</summary>
+    public sealed class SafeArea : MonoBehaviour
+    {
+        Rect applied;
+        Vector2Int size;
+
+        void Update()
+        {
+            var area = Screen.safeArea;
+            if (area == applied && size.x == Screen.width && size.y == Screen.height) return;
+            applied = area;
+            size = new Vector2Int(Screen.width, Screen.height);
+            var rt = (RectTransform)transform;
+            if (Screen.width <= 0 || Screen.height <= 0) return;
+            rt.anchorMin = new Vector2(area.xMin / Screen.width, area.yMin / Screen.height);
+            rt.anchorMax = new Vector2(area.xMax / Screen.width, area.yMax / Screen.height);
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+        }
+    }
+
     public sealed class FitInParent : MonoBehaviour
     {
         void LateUpdate()

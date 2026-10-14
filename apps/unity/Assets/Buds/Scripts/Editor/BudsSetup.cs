@@ -22,10 +22,21 @@ namespace Buds.EditorTools
         public static void Configure()
         {
             ConfigurePlayer();
+            BudsIcons.Configure();
             ConfigureRendering();
             CreateMainScene();
             AssetDatabase.SaveAssets();
             Debug.Log("[BudsSetup] project configured");
+        }
+
+        /// <summary>The game is played in landscape only (either way round).</summary>
+        public static void ConfigureOrientation()
+        {
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
         }
 
         static void ConfigurePlayer()
@@ -34,11 +45,7 @@ namespace Buds.EditorTools
             PlayerSettings.productName = "Buds";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.buds.game");
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone, "com.buds.game");
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
-            PlayerSettings.allowedAutorotateToPortrait = true;
-            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
-            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
-            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+            ConfigureOrientation();
             // plain HTTP only for local development builds; production talks HTTPS
             PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed;

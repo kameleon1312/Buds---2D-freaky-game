@@ -4,8 +4,9 @@ using UnityEngine.InputSystem;
 namespace Buds.Characters
 {
     /// <summary>
-    /// Keyboard (WASD / arrows, Shift to run, E or Space to interact, M for the map) and a floating touch joystick:
-    /// touch anywhere and drag to walk — a short drag walks slowly, a long one runs; a quick tap interacts.
+    /// Keyboard (WASD / arrows, Shift to run, E or Space to interact, M for the map) and touch: on phones a fixed
+    /// joystick in the bottom-right corner (a touch that starts on it steers; pushed to the rim = running; other
+    /// fingers stay free for buttons). Without a fixed stick, a floating one: touch anywhere and drag, tap interacts.
     /// </summary>
     public sealed class PlayerInput
     {
@@ -34,6 +35,41 @@ namespace Buds.Characters
         public bool StickActive { get; private set; }
         public Vector2 StickOrigin { get; private set; }
         public Vector2 StickPosition { get; private set; }
+
+        /// <summary>Fixed joystick (set by the UI each frame): centre and radius in screen pixels.</summary>
+        public bool FixedStick { get; set; }
+        public Vector2 StickCenter { get; set; }
+        public float StickRadius { get; set; } = 100;
+        int stickTouch = -1;
+
+        /// <summary>
+        /// Stick push → walking strength for the fixed stick (EditMode-testable): a light push walks slowly, a full
+        /// one walks at normal speed. The stick never runs (that was too fast on a phone).
+        /// </summary>
+        public static (float strength, bool run) FixedStickPush(float distancePx, float radiusPx)
+        {
+            var t = distancePx / Mathf.Max(1, radiusPx);
+            return (Mathf.Lerp(0.4f, 1f, Mathf.InverseLerp(0.15f, 0.75f, t)), false);
+        }
+
+        /// <summary>The axis wins by this factor before the direction switches (no flicker on a diagonal push).</summary>
+        public const float AxisBias = 1.25f;
+
+        /// <summary>
+        /// Classic four-way movement: only up, down, left or right, keeping the push's strength. On a diagonal the
+        /// current axis stays until the other one clearly wins.
+        /// </summary>
+        public static Vector2 FourWay(Vector2 v, bool wasHorizontal)
+        {
+            var ax = Mathf.Abs(v.x);
+            var ay = Mathf.Abs(v.y);
+            if (ax < 0.01f && ay < 0.01f) return Vector2.zero;
+            var horizontal = wasHorizontal ? ax * AxisBias >= ay : ax > ay * AxisBias;
+            var strength = Mathf.Min(1, v.magnitude);
+            return horizontal ? new Vector2(Mathf.Sign(v.x) * strength, 0) : new Vector2(0, Mathf.Sign(v.y) * strength);
+        }
+
+        bool horizontal;
 
         /// <summary>Scripted input for automated runs; overrides devices while set.</summary>
         public Vector2? Override { get; set; }
@@ -74,8 +110,38 @@ namespace Buds.Characters
                 Run = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
             }
 
-            var touch = Touchscreen.current?.primaryTouch;
-            if (touch != null)
+            var screen = Touchscreen.current;
+            if (screen != null && FixedStick)
+            {
+                foreach (var t in screen.touches)
+                {
+                    var id = t.touchId.ReadValue();
+                    var pos = t.position.ReadValue();
+                    // a finger that lands on the stick (or close to it) takes it over
+                    if (stickTouch < 0 && t.press.wasPressedThisFrame && Vector2.Distance(pos, StickCenter) <= StickRadius * 1.5f)
+                        stickTouch = id;
+                    if (id != stickTouch) continue;
+                    if (!t.press.isPressed)
+                    {
+                        stickTouch = -1;
+                        continue;
+                    }
+                    var drag = pos - StickCenter;
+                    StickOrigin = StickCenter;
+                    StickPosition = StickCenter + Vector2.ClampMagnitude(drag, StickRadius);
+                    var (strength, run) = FixedStickPush(drag.magnitude, StickRadius);
+                    if (drag.magnitude > StickRadius * 0.12f)
+                    {
+                        move = drag.normalized * strength;
+                        Run = Run || run;
+                    }
+                }
+                StickActive = stickTouch >= 0;
+                if (!StickActive) StickPosition = StickOrigin = StickCenter;
+            }
+
+            var touch = screen?.primaryTouch;
+            if (touch != null && !FixedStick)
             {
                 if (touch.press.wasPressedThisFrame)
                 {
@@ -101,7 +167,10 @@ namespace Buds.Characters
                 }
             }
 
+            // up, down, left, right only (scripted runs steer the same way)
             if (Override.HasValue) move = Override.Value;
+            move = FourWay(move, horizontal);
+            if (move.sqrMagnitude > 0) horizontal = move.x != 0;
             if (OverrideRun) Run = true;
             if (Blocked)
             {

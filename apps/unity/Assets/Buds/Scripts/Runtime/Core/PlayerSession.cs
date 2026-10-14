@@ -37,6 +37,13 @@ namespace Buds.Core
             PlayerPrefs.Save();
         }
 
+        static string DevApi()
+        {
+            if (!Debug.isDebugBuild) return null;
+            var file = Resources.Load<TextAsset>("Dev/api");
+            return file && file.text.Trim().StartsWith("http") ? file.text.Trim() : null;
+        }
+
         public static void Clear()
         {
             PlayerPrefs.DeleteKey(TokenKey);
@@ -44,10 +51,17 @@ namespace Buds.Core
             PlayerPrefs.Save();
         }
 
-        /// <summary>Command line wins (automated runs), then the saved dev override, then the default.</summary>
+        /// <summary>
+        /// Command line wins (automated runs), then the address typed on the pairing screen, then (dev builds) the PC
+        /// address baked in by BudsBuild.AndroidDev, then the default.
+        /// </summary>
         public static string ApiBaseUrl
         {
-            get => CommandLine.Get("-buds-api") ?? PlayerPrefs.GetString(ApiKey, DefaultApiBaseUrl);
+            get
+            {
+                var saved = PlayerPrefs.GetString(ApiKey, "");
+                return CommandLine.Get("-buds-api") ?? (saved.Length > 0 ? saved : null) ?? DevApi() ?? DefaultApiBaseUrl;
+            }
             set
             {
                 PlayerPrefs.SetString(ApiKey, value.Trim().TrimEnd('/'));

@@ -83,7 +83,7 @@ namespace Buds.UI
             finished = false;
             title.text = $"{spot.name} · {skillName}";
             hint.text = $"{spot.hint}\n<size=20><color=#55514a>Zatrzymaj złoty znacznik w zielonym polu.</color></size>";
-            actionLabel.text = "Teraz!  [E]";
+            actionLabel.text = UiKit.Keys("Teraz!  [E]");
             action.interactable = true;
             status.text = "";
             root.SetActive(true);
@@ -144,7 +144,7 @@ namespace Buds.UI
             busy = false;
             finished = true;
             status.text = $"Trafienia: {game.Score} / {game.Rounds}\n<size=22>{text}</size>";
-            actionLabel.text = "Dalej  [E]";
+            actionLabel.text = UiKit.Keys("Dalej  [E]");
             action.interactable = true;
         }
 

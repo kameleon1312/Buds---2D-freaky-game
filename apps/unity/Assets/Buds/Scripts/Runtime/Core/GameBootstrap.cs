@@ -37,7 +37,18 @@ namespace Buds.Core
         async void Start()
         {
             Application.targetFrameRate = 60;
+            // landscape only, either way round (also set in the player settings)
+            Screen.autorotateToPortrait = false;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = true;
+            Screen.autorotateToLandscapeRight = true;
+            if (Application.isMobilePlatform) Screen.orientation = ScreenOrientation.AutoRotation;
             ui = new GameUi();
+            // the action button and the dialog act like E
+            ui.Tapped += () =>
+            {
+                if (player) player.Input.PressInteract();
+            };
             api = new BudsApi(PlayerSession.ApiBaseUrl);
 
             var pairCode = CommandLine.Get("-buds-pair");
@@ -385,11 +396,17 @@ namespace Buds.Core
                     var sign = map.Signs[0];
                     Teleport(sign.X, sign.Y + 1);
                     await Shot("03-near-sign.png");
-                    input.PressInteract();
+                    // phones: tap the action button and the dialog like a finger would
+                    if (UiKit.Mobile) Debug.Log($"[AutoPilot] tap action button → {ui.TapForTest(false) ?? "nothing"}");
+                    else input.PressInteract();
                     await Shot("04-dialog.png");
-                    input.PressInteract();
+                    if (UiKit.Mobile) Debug.Log($"[AutoPilot] tap dialog → {ui.TapForTest(true) ?? "nothing"}, open {ui.DialogOpen}");
+                    else input.PressInteract();
+                    await Awaitable.WaitForSecondsAsync(0.2f);
+                    if (UiKit.Mobile) Debug.Log($"[AutoPilot] dialog closed by tap: {!ui.DialogOpen}");
                 }
 
+                if (CommandLine.Has("-buds-panel-demo")) await PanelDemo(Shot);
                 if (CommandLine.Has("-buds-tutorial-demo")) await TutorialDemo(Shot);
                 if (CommandLine.Has("-buds-quest-demo")) await QuestDemo(Shot);
 

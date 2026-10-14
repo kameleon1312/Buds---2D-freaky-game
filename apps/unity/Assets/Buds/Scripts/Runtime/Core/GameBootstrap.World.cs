@@ -285,6 +285,41 @@ namespace Buds.Core
             Debug.Log($"[AutoPilot] gear speed +{gear.Speed}%, motor x{player.Motor.SpeedMultiplier}");
         }
 
+        /// <summary>
+        /// Autopilot (-buds-panel-demo, works for guests): every tab of the Bud panel, the shop with its categories and
+        /// premium, the map, and an NPC talk closed with the dialog's X (tapped like a finger would).
+        /// </summary>
+        async Awaitable PanelDemo(Func<string, Awaitable> shot)
+        {
+            await OpenPanel();
+            await Awaitable.WaitForSecondsAsync(0.3f);
+            for (var tab = 0; tab <= BudPanel.TabShop; tab++)
+            {
+                panel.SelectTab(tab);
+                await shot($"p{tab}-panel.png");
+            }
+            panel.SelectShopItem("mount-motocykl-smok");
+            await shot("p5-sklep-premium.png");
+            panel.Hide();
+            OpenMap();
+            await shot("p6-mapa.png");
+            mapScreen.Hide();
+
+            var npc = questWorld.NearestNpc(player.transform.position, 999);
+            if (npc)
+            {
+                var cell = npc.Data;
+                Teleport(cell.x, cell.y + 1);
+                await Awaitable.WaitForSecondsAsync(0.4f);
+                Debug.Log($"[AutoPilot] tap action → {ui.TapForTest(false) ?? "nothing"}");
+                await shot("p7-npc.png");
+                Debug.Log($"[AutoPilot] tap X → {ui.TapForTest(true, true) ?? "nothing"}");
+                await Awaitable.WaitForSecondsAsync(0.5f);
+                Debug.Log($"[AutoPilot] NPC dialog closed by X and stays closed: {!ui.DialogOpen}");
+                await shot("p8-po-x.png");
+            }
+        }
+
         /// <summary>Tour step: every door of the current district — walk in, look around, find a cache, walk out.</summary>
         async Awaitable VisitRooms(Func<string, Awaitable> shot)
         {

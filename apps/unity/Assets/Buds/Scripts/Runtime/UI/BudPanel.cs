@@ -150,11 +150,18 @@ namespace Buds.UI
             for (var i = 0; i < Tabs; i++)
             {
                 var index = i;
-                tabs[i] = UiKit.Button("Tab" + i, body, names[i], new Vector2(204, 60), () => ShowTab(index), UiKit.Tone.Rep, 25);
-                UiKit.Place((RectTransform)tabs[i].transform, new Vector2(0, 1), new Vector2(i * 216, 0), new Vector2(204, 60),
+                tabs[i] = UiKit.Button("Tab" + i, body, names[i], new Vector2(208, 72), () => ShowTab(index), UiKit.Tone.Rep, 30);
+                UiKit.Place((RectTransform)tabs[i].transform, new Vector2(0, 1), new Vector2(i * 218, 0), new Vector2(208, 72),
                     new Vector2(0, 1));
+                // one line per tab: a long name (Umiejętności) shrinks a little
+                var tabText = tabs[i].GetComponentInChildren<Text>();
+                tabText.resizeTextForBestFit = true;
+                tabText.resizeTextMinSize = 20;
+                tabText.resizeTextMaxSize = 30;
+                tabText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                tabText.verticalOverflow = VerticalWrapMode.Truncate;
                 pages[i] = UiKit.Rect(names[i], body);
-                UiKit.Stretch(pages[i], 0, 0, 0, 78);
+                UiKit.Stretch(pages[i], 0, 0, 0, 88);
             }
             BuildProfile(pages[0]);
             BuildGear(pages[1]);
@@ -351,15 +358,15 @@ namespace Buds.UI
             pickerTitle = UiKit.Label("PickerTitle", page, "", 26, UiKit.Ink, true, TextAnchor.UpperLeft);
             UiKit.Place(pickerTitle.rectTransform, new Vector2(0, 1), new Vector2(500, -246), new Vector2(576, 34), new Vector2(0, 1));
             pickerGrid = UiKit.Rect("Picker", page);
-            UiKit.Place(pickerGrid, new Vector2(0, 1), new Vector2(500, -284), new Vector2(576, 184), new Vector2(0, 1));
+            UiKit.Place(pickerGrid, new Vector2(0, 1), new Vector2(500, -280), new Vector2(576, 172), new Vector2(0, 1));
 
             var details = UiKit.OutlinedBox("Details", page, UiKit.Paper300, UiKit.RadiusM);
-            UiKit.Place((RectTransform)details.transform.parent, new Vector2(0, 1), new Vector2(500, -474), new Vector2(576, 88),
+            UiKit.Place((RectTransform)details.transform.parent, new Vector2(0, 1), new Vector2(500, -458), new Vector2(576, 92),
                 new Vector2(0, 1));
             gearDetails = UiKit.Label("Text", details.transform, "", 20, UiKit.Ink, false, TextAnchor.MiddleLeft);
-            UiKit.Stretch(gearDetails.rectTransform, 16, 4, 190, 4);
-            gearAction = UiKit.Button("Action", details.transform, "Załóż", new Vector2(164, 62), GearAction, UiKit.Tone.Gold, 28);
-            UiKit.Place((RectTransform)gearAction.transform, new Vector2(1, 0.5f), new Vector2(-14, 2), new Vector2(164, 62),
+            UiKit.Stretch(gearDetails.rectTransform, 16, 4, 206, 4);
+            gearAction = UiKit.Button("Action", details.transform, "Załóż", new Vector2(184, 70), GearAction, UiKit.Tone.Gold, 30);
+            UiKit.Place((RectTransform)gearAction.transform, new Vector2(1, 0.5f), new Vector2(-12, 2), new Vector2(184, 70),
                 new Vector2(1, 0.5f));
             gearActionLabel = gearAction.GetComponentInChildren<Text>();
         }
@@ -566,9 +573,9 @@ namespace Buds.UI
                 UiKit.Place(bonus.rectTransform, new Vector2(0, 1), new Vector2(86 + pips.Length * 28 + 4, -42), new Vector2(120, 26),
                     new Vector2(0, 1));
                 var id = skill.id;
-                var upgrade = UiKit.Button("Upgrade", row.transform, "Ulepsz", new Vector2(132, 50), () => onUpgrade(id), UiKit.Tone.Buds,
-                    24);
-                UiKit.Place((RectTransform)upgrade.transform, new Vector2(1, 1), new Vector2(-12, -12), new Vector2(132, 50), new Vector2(1, 1));
+                var upgrade = UiKit.Button("Upgrade", row.transform, "Ulepsz", new Vector2(150, 58), () => onUpgrade(id), UiKit.Tone.Buds,
+                    27);
+                UiKit.Place((RectTransform)upgrade.transform, new Vector2(1, 1), new Vector2(-10, -10), new Vector2(150, 58), new Vector2(1, 1));
                 skillRows.Add((id, pips, upgrade, bonus, train, perks));
             }
         }
@@ -612,41 +619,68 @@ namespace Buds.UI
 
         // ---------- shop (coins earned in the game; premium = looks only, later) ----------
 
+        // shop layout (page is 1076 × 552): categories | items (4 per row) | the selected item
+        const float PageH = 552;
+        const float CategoryW = 200, CategoryStep = 62;
+        const int ShopCols = 4;
+        const float ShopTile = 96, ShopStepX = 112, ShopStepY = 124;
+        const float GridX = CategoryW + 18;
+        const float CardX = GridX + ShopCols * ShopStepX + 10;
+        const float CardW = 1076 - CardX;
+
         void BuildShop(RectTransform page)
         {
-            // filter: every slot (rides too) and the drinks, two rows of five
+            // categories: every slot (rides too), the drinks and premium, top to bottom; the list scrolls
             var filters = new List<(string id, string name)>();
             foreach (var s in content.slots) filters.Add((s.id, s.name));
             filters.Add((DrinkFilter, "Napoje"));
             filters.Add((PremiumFilter, "Premium"));
-            for (var i = 0; i < filters.Count && i < 12; i++)
+            var listBox = UiKit.OutlinedBox("Categories", page, UiKit.Paper300, UiKit.RadiusM);
+            listBox.raycastTarget = true; // the list is dragged to scroll
+            var listRt = (RectTransform)listBox.transform.parent;
+            UiKit.Place(listRt, new Vector2(0, 1), Vector2.zero, new Vector2(CategoryW, PageH), new Vector2(0, 1));
+            var viewport = UiKit.Rect("Viewport", listBox.transform);
+            UiKit.Stretch(viewport, 10);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var list = UiKit.Rect("List", viewport);
+            list.anchorMin = new Vector2(0, 1);
+            list.anchorMax = Vector2.one;
+            list.pivot = new Vector2(0.5f, 1);
+            list.sizeDelta = new Vector2(0, filters.Count * CategoryStep);
+            list.anchoredPosition = Vector2.zero;
+            var scroll = listBox.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = list;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 30;
+            for (var i = 0; i < filters.Count; i++)
             {
                 var slot = filters[i].id;
-                var chip = UiKit.Button("Filter " + slot, page, filters[i].name, new Vector2(92, 46), () =>
+                var chip = UiKit.Button("Filter " + slot, list, filters[i].name, new Vector2(CategoryW - 24, CategoryStep - 8), () =>
                 {
                     shopSlot = slot;
                     selectedShop = null;
                     RefreshShop();
-                }, slot == PremiumFilter ? UiKit.Tone.Gold : UiKit.Tone.Rep, 16);
+                }, slot == PremiumFilter ? UiKit.Tone.Gold : UiKit.Tone.Rep, 24);
                 var chipText = chip.GetComponentInChildren<Text>();
                 chipText.resizeTextForBestFit = true;
-                chipText.resizeTextMinSize = 11;
-                chipText.resizeTextMaxSize = 16;
-                chipText.horizontalOverflow = HorizontalWrapMode.Wrap;
-                chipText.verticalOverflow = VerticalWrapMode.Truncate;
-                UiKit.Place((RectTransform)chip.transform, new Vector2(0, 1), new Vector2((i % 6) * 98, -(i / 6) * 56), new Vector2(92, 46),
-                    new Vector2(0, 1));
+                chipText.resizeTextMinSize = 16;
+                chipText.resizeTextMaxSize = 24;
+                UiKit.Place((RectTransform)chip.transform, new Vector2(0.5f, 1), new Vector2(0, -i * CategoryStep), new Vector2(CategoryW - 24, CategoryStep - 8),
+                    new Vector2(0.5f, 1));
                 shopFilters.Add((slot, chip));
             }
+
             shopGrid = UiKit.Rect("Grid", page);
-            UiKit.Place(shopGrid, new Vector2(0, 1), new Vector2(0, -122), new Vector2(580, 400), new Vector2(0, 1));
+            UiKit.Place(shopGrid, new Vector2(0, 1), new Vector2(GridX, 0), new Vector2(ShopCols * ShopStepX, PageH - 56), new Vector2(0, 1));
             var premium = UiKit.Label("Premium", page,
-                "<b>Premium:</b> unikatowe wierzchowce i bronie za gemy. Wyjątkowy wygląd, ta sama moc co przedmioty z gry.", 18,
+                "<b>Premium:</b> unikatowe wierzchowce i bronie za gemy. Wyjątkowy wygląd, ta sama moc co przedmioty z gry.", 17,
                 UiKit.InkSoft, false, TextAnchor.LowerLeft);
-            UiKit.Place(premium.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(570, 44), Vector2.zero);
+            UiKit.Place(premium.rectTransform, new Vector2(0, 0), new Vector2(GridX, 0), new Vector2(ShopCols * ShopStepX, 48), Vector2.zero);
 
             var card = UiKit.OutlinedBox("Card", page, UiKit.Paper300, UiKit.RadiusL);
-            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(600, 0), new Vector2(476, 562),
+            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(CardX, 0), new Vector2(CardW, PageH),
                 new Vector2(0, 1));
             var iconBox = UiKit.Shape("IconBox", card.transform, UiKit.Surface800, UiKit.RadiusM);
             UiKit.Place(iconBox.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(150, 150), new Vector2(0.5f, 1));
@@ -655,23 +689,29 @@ namespace Buds.UI
             shopIcon.raycastTarget = false;
             UiKit.Stretch(shopIcon.rectTransform, 14);
             shopTitle = UiKit.Label("Title", card.transform, "", 30, UiKit.Ink, true, TextAnchor.UpperCenter);
-            UiKit.Place(shopTitle.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -180), new Vector2(440, 44), new Vector2(0.5f, 1));
+            UiKit.Place(shopTitle.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -180), new Vector2(CardW - 30, 44), new Vector2(0.5f, 1));
             shopTitle.resizeTextForBestFit = true;
             shopTitle.resizeTextMinSize = 18;
             shopTitle.resizeTextMaxSize = 30;
             shopDetails = UiKit.Label("Details", card.transform, "", 21, UiKit.Ink, false, TextAnchor.UpperCenter);
-            UiKit.Place(shopDetails.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -232), new Vector2(430, 200), new Vector2(0.5f, 1));
+            UiKit.Place(shopDetails.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -230), new Vector2(CardW - 30, 200), new Vector2(0.5f, 1));
             shopDetails.lineSpacing = 1.1f;
             shopWallet = UiKit.Label("Wallet", card.transform, "", 21, UiKit.InkSoft, true, TextAnchor.LowerCenter);
-            UiKit.Place(shopWallet.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 96), new Vector2(430, 30), new Vector2(0.5f, 0));
+            UiKit.Place(shopWallet.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 96), new Vector2(CardW - 20, 30), new Vector2(0.5f, 0));
+            shopWallet.resizeTextForBestFit = true;
+            shopWallet.resizeTextMinSize = 14;
+            shopWallet.resizeTextMaxSize = 21;
             // the one gold action on this screen
-            shopBuy = UiKit.Button("Buy", card.transform, "Kup", new Vector2(300, 72), () =>
+            shopBuy = UiKit.Button("Buy", card.transform, "Kup", new Vector2(CardW - 60, 72), () =>
             {
                 if (selectedShop != null) onBuy(selectedShop);
             }, UiKit.Tone.Gold, 30);
-            UiKit.Place((RectTransform)shopBuy.transform, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(300, 72),
+            UiKit.Place((RectTransform)shopBuy.transform, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(CardW - 60, 72),
                 new Vector2(0.5f, 0));
-            shopBuyLabel = shopBuy.GetComponentInChildren<Text>();
+            var buyText = shopBuyLabel = shopBuy.GetComponentInChildren<Text>();
+            buyText.resizeTextForBestFit = true;
+            buyText.resizeTextMinSize = 18;
+            buyText.resizeTextMaxSize = 30;
         }
 
         void RefreshShop()
@@ -689,17 +729,17 @@ namespace Buds.UI
                     items.Add(item);
             items.Sort((a, b) => a.minLevel != b.minLevel ? a.minLevel.CompareTo(b.minLevel) : (a.coins + a.gems).CompareTo(b.coins + b.gems));
             selectedShop ??= items.Count > 0 ? items[0].id : null;
-            for (var i = 0; i < items.Count && i < 15; i++)
+            for (var i = 0; i < items.Count && i < ShopCols * 4; i++)
             {
                 var item = items[i];
-                var at = new Vector2((i % 5) * 116, -(i / 5) * 132);
+                var at = new Vector2((i % ShopCols) * ShopStepX, -(i / ShopCols) * ShopStepY);
                 var owned = !item.IsDrink && data.Owned.Contains(item.id);
                 var locked = item.minLevel > data.Level;
-                ItemBox(shopGrid, item, at, 100, item.id == selectedShop, owned, () => SelectShopItem(item.id), locked && !owned);
+                ItemBox(shopGrid, item, at, ShopTile, item.id == selectedShop, owned, () => SelectShopItem(item.id), locked && !owned);
                 // premium prices are gems (gold), the rest coins
                 var price = UiKit.Label("Price", shopGrid, owned ? "Masz" : item.IsPremiumShop ? item.gems.ToString() : item.coins.ToString(), 19,
                     owned ? UiKit.Buds600 : item.IsPremiumShop ? UiKit.Gold600 : UiKit.Ink, true, TextAnchor.UpperCenter);
-                UiKit.Place(price.rectTransform, new Vector2(0, 1), at + new Vector2(0, -102), new Vector2(100, 26), new Vector2(0, 1));
+                UiKit.Place(price.rectTransform, new Vector2(0, 1), at + new Vector2(0, -ShopTile - 2), new Vector2(ShopTile, 26), new Vector2(0, 1));
             }
 
             var selected = selectedShop != null ? content.Item(selectedShop) : null;
@@ -746,7 +786,7 @@ namespace Buds.UI
             UiKit.Place(drinkGrid, new Vector2(0, 1), new Vector2(0, -48), new Vector2(580, 260), new Vector2(0, 1));
 
             var boxes = UiKit.OutlinedBox("Buffs", page, UiKit.Paper300, UiKit.RadiusM);
-            UiKit.Place((RectTransform)boxes.transform.parent, new Vector2(0, 1), new Vector2(0, -322), new Vector2(580, 240),
+            UiKit.Place((RectTransform)boxes.transform.parent, new Vector2(0, 1), new Vector2(0, -316), new Vector2(580, 236),
                 new Vector2(0, 1));
             var head = UiKit.Label("Head", boxes.transform, "Działa teraz", 24, UiKit.Ink, true, TextAnchor.UpperLeft);
             UiKit.Place(head.rectTransform, new Vector2(0, 1), new Vector2(18, -10), new Vector2(540, 32), new Vector2(0, 1));
@@ -755,7 +795,7 @@ namespace Buds.UI
             buffsText.lineSpacing = 1.1f;
 
             var card = UiKit.OutlinedBox("Card", page, UiKit.Paper300, UiKit.RadiusL);
-            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(600, 0), new Vector2(476, 562),
+            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(600, 0), new Vector2(476, 552),
                 new Vector2(0, 1));
             var iconBox = UiKit.Shape("IconBox", card.transform, UiKit.Surface800, UiKit.RadiusM);
             UiKit.Place(iconBox.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(150, 150), new Vector2(0.5f, 1));

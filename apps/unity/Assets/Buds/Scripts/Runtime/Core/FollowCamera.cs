@@ -12,6 +12,9 @@ namespace Buds.Core
         /// <summary>At least this many tiles are visible along each axis.</summary>
         public const float TargetTilesX = 15f;
         public const float TargetTilesY = 12f;
+        /// <summary>Phones: fewer tiles, so the bud and the world are big enough on a small screen.</summary>
+        public const float CompactTilesX = 12f;
+        public const float CompactTilesY = 8.5f;
 
         public Transform target;
         public Rect bounds; // world units
@@ -28,8 +31,9 @@ namespace Buds.Core
         }
 
         /// <summary>Half the visible height in tiles so that both target extents fit.</summary>
-        public static float OrthoSizeFor(int screenW, int screenH) =>
-            Mathf.Max(TargetTilesY / 2f, TargetTilesX / 2f * screenH / Mathf.Max(1, screenW));
+        public static float OrthoSizeFor(int screenW, int screenH, bool compact = false) =>
+            Mathf.Max((compact ? CompactTilesY : TargetTilesY) / 2f,
+                (compact ? CompactTilesX : TargetTilesX) / 2f * screenH / Mathf.Max(1, screenW));
 
         public void SnapToTarget()
         {
@@ -42,7 +46,7 @@ namespace Buds.Core
             if (Screen.width == lastW && Screen.height == lastH) return;
             lastW = Screen.width;
             lastH = Screen.height;
-            cam.orthographicSize = OrthoSizeFor(lastW, lastH);
+            cam.orthographicSize = OrthoSizeFor(lastW, lastH, UI.UiKit.Mobile);
         }
 
         void LateUpdate()

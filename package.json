@@ -13,6 +13,7 @@
     "test": "pnpm -r test",
     "test:security": "pnpm --filter @buds/api test",
     "check:migrations": "node tools/check-migrations.mjs",
+    "phone": "node tools/phone.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

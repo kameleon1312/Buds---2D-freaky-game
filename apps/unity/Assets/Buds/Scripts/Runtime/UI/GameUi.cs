@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using Buds.Characters;
 using Buds.Core;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Buds.UI
 {
-    /// <summary>All on-screen UI: pairing, loading, HUD, dialog box and the touch joystick.</summary>
+    /// <summary>
+    /// All on-screen UI: pairing, loading, HUD, dialog box and the touch joystick. Landscape layout: the player plate
+    /// and the quests top left, the buttons (Twój Bud, Mapa, the ride) top right, the action button bottom left and,
+    /// on phones, the joystick bottom right. Everything sits inside the screen's safe area (notches, rounded corners).
+    /// </summary>
     public sealed class GameUi
     {
         readonly Canvas canvas;
@@ -44,7 +49,11 @@ namespace Buds.UI
         float toastUntil;
 
         public bool DialogOpen => dialog && dialog.activeSelf;
-        public Transform Root => canvas.transform;
+        /// <summary>The safe area of the screen: every screen and panel is built in here.</summary>
+        public Transform Root => safe;
+        readonly RectTransform safe;
+        /// <summary>The action button or the dialog was tapped (acts like E).</summary>
+        public event Action Tapped;
         GameObject budButton;
         GameObject mapButton;
         Image fade;
@@ -53,6 +62,9 @@ namespace Buds.UI
         public GameUi()
         {
             canvas = UiKit.CreateCanvas("UI", 10);
+            safe = UiKit.Rect("Safe", canvas.transform);
+            UiKit.Stretch(safe);
+            safe.gameObject.AddComponent<SafeArea>();
             BuildLoading();
             BuildHud();
             BuildDialog();
@@ -69,34 +81,35 @@ namespace Buds.UI
             if (pairScreen) UnityEngine.Object.Destroy(pairScreen);
             HideLoading();
 
-            var bg = UiKit.Panel("Pair", canvas.transform, UiKit.Surface900);
+            var bg = UiKit.Panel("Pair", Root, UiKit.Surface900);
             bg.raycastTarget = true;
             UiKit.Stretch(bg.rectTransform);
             pairScreen = bg.gameObject;
 
-            // fixed-size group, scaled down to fit short landscape screens
+            // landscape: the logo and a word about the game on the left, the card on the right; scaled to fit
             var group = UiKit.Rect("Group", bg.transform);
-            Place(group, 0, 0, 640, 1000);
+            Place(group, 0, 0, 1180, 620);
             group.gameObject.AddComponent<FitInParent>();
 
-            var logo = UiKit.Outlined("Logo", group, "Buds", 150, UiKit.Buds400);
-            Place(logo.rectTransform, 0, 400, 600, 180);
+            var logo = UiKit.Outlined("Logo", group, "Buds", 170, UiKit.Buds400);
+            Place(logo.rectTransform, -300, 110, 520, 200);
 
-            var body = UiKit.Window("Card", group, new Vector2(600, 700), "Witaj w Buds", null, out var card, out _);
-            Place(card, 0, -30, 600, 700);
+            var sub = UiKit.Label("Sub", group,
+                "Nowy? Stwórz swojego Buda tutaj.\nMasz już Buda ze strony? Wpisz kod z jego profilu.", 26, UiKit.TextOnDarkMuted);
+            Place(sub.rectTransform, -300, -30, 520, 90);
 
-            var sub = UiKit.Label("Sub", body, "Nowy? Stwórz swojego Buda tutaj. Masz już Buda ze strony? Wpisz kod z jego profilu.", 25, UiKit.InkSoft);
-            Place(sub.rectTransform, 0, 246, 520, 80);
+            var body = UiKit.Window("Card", group, new Vector2(600, 600), "Witaj w Buds", null, out var card, out _);
+            Place(card, 280, 0, 600, 600);
 
             // the one gold action: a new bud, right here on the phone
             var create = UiKit.Button("Create", body, "Stwórz nowego Buda", new Vector2(460, 96), onCreate, UiKit.Tone.Gold, 36);
-            Place(create.transform as RectTransform, 0, 150, 460, 96);
+            Place(create.transform as RectTransform, 0, 186, 460, 96);
 
             var or = UiKit.Label("Or", body, "albo połącz kodem", 22, UiKit.InkSoft, true);
-            Place(or.rectTransform, 0, 76, 460, 30);
+            Place(or.rectTransform, 0, 112, 460, 30);
 
             var field = UiKit.Input("Code", body, new Vector2(440, 100), "KOD", 66);
-            Place((RectTransform)field.transform.parent, 0, 6, 440, 100);
+            Place((RectTransform)field.transform.parent, 0, 40, 440, 100);
             field.characterLimit = 6;
             field.contentType = InputField.ContentType.Alphanumeric;
             field.onValidateInput = (_, _, c) => char.IsLetterOrDigit(c) ? char.ToUpperInvariant(c) : '\0';
@@ -104,19 +117,21 @@ namespace Buds.UI
             ((Text)field.placeholder).alignment = TextAnchor.MiddleCenter;
 
             pairError = UiKit.Label("Error", body, "", 24, UiKit.Alert700);
-            Place(pairError.rectTransform, 0, -68, 520, 40);
+            Place(pairError.rectTransform, 0, -32, 520, 40);
 
             pairButton = UiKit.Button("Connect", body, "Połącz", new Vector2(440, 80), () => onConnect(field.text), UiKit.Tone.Buds, 32);
-            Place(pairButton.transform as RectTransform, 0, -134, 440, 80);
+            Place(pairButton.transform as RectTransform, 0, -94, 440, 80);
 
             var guest = UiKit.Button("Guest", body, "Graj gościem", new Vector2(440, 70), onGuest, UiKit.Tone.Rep, 30);
-            Place(guest.transform as RectTransform, 0, -236, 440, 70);
+            Place(guest.transform as RectTransform, 0, -186, 440, 70);
 
             if (Debug.isDebugBuild)
             {
                 // dev builds: point the game at a local API (e.g. http://192.168.1.10:4000)
-                var server = UiKit.Input("Server", group, new Vector2(600, 64), PlayerSession.ApiBaseUrl, 24);
-                Place((RectTransform)server.transform.parent, 0, -460, 600, 64);
+                var server = UiKit.Input("Server", group, new Vector2(500, 64), PlayerSession.ApiBaseUrl, 24);
+                Place((RectTransform)server.transform.parent, -300, -200, 500, 64);
+                var serverLabel = UiKit.Label("ServerLabel", group, "Serwer (wersja testowa)", 20, UiKit.TextOnDarkMuted, true);
+                Place(serverLabel.rectTransform, -300, -150, 500, 30);
                 server.text = PlayerSession.ApiBaseUrl;
                 server.onEndEdit.AddListener(v =>
                 {
@@ -165,7 +180,7 @@ namespace Buds.UI
         void BuildHud()
         {
             // dark plate: level badge, name and the xp bar
-            var plate = UiKit.OutlinedBox("Hud", canvas.transform, UiKit.Surface800, UiKit.RadiusL);
+            var plate = UiKit.OutlinedBox("Hud", Root, UiKit.Surface800, UiKit.RadiusL);
             var rt = (RectTransform)plate.transform.parent;
             UiKit.Place(rt, new Vector2(0, 1), new Vector2(24, -24), new Vector2(380, 124), new Vector2(0, 1));
 
@@ -185,8 +200,14 @@ namespace Buds.UI
             hud = rt.gameObject;
             hud.SetActive(false);
 
-            hintText = UiKit.Pill("Hint", canvas.transform, "", UiKit.Buds400, 34, new Vector2(300, 72), out var hrt);
-            UiKit.Place(hrt, new Vector2(0.5f, 0), new Vector2(0, 140), hrt.sizeDelta);
+            // the action button: what E does right now (talk, fight, search…); tapping it does the same
+            hintText = UiKit.Pill("Hint", Root, "", UiKit.Buds400, UiKit.Mobile ? 36 : 34, new Vector2(300, UiKit.Mobile ? 92 : 72), out var hrt);
+            if (UiKit.Mobile) UiKit.Place(hrt, Vector2.zero, new Vector2(28, 28), hrt.sizeDelta, Vector2.zero);
+            else UiKit.Place(hrt, new Vector2(0.5f, 0), new Vector2(0, 40), hrt.sizeDelta);
+            var tap = hrt.gameObject.AddComponent<Button>();
+            tap.targetGraphic = hrt.GetComponentInChildren<Image>();
+            tap.targetGraphic.raycastTarget = true; // UI shapes ignore touches by default
+            tap.onClick.AddListener(() => Tapped?.Invoke());
             hint = hrt.gameObject;
             hintRect = hrt;
             hint.SetActive(false);
@@ -205,6 +226,7 @@ namespace Buds.UI
         public void SetHint(string text)
         {
             hint.SetActive(!string.IsNullOrEmpty(text) && !DialogOpen);
+            text = UiKit.Keys(text);
             if (hintText.text == (text ?? "")) return;
             hintText.text = text ?? "";
             // one line, as wide as the text
@@ -215,13 +237,25 @@ namespace Buds.UI
 
         void BuildDialog()
         {
-            var body = UiKit.Window("Dialog", canvas.transform, new Vector2(760, 390), "", CloseDialog, out var rt,
+            var body = UiKit.Window("Dialog", Root, new Vector2(860, 320), "", CloseDialog, out var rt,
                 out dialogTitle);
-            UiKit.Place(rt, new Vector2(0.5f, 0), new Vector2(0, 40), rt.sizeDelta, new Vector2(0.5f, 0));
-            dialogBody = UiKit.Label("Body", body, "", 29, UiKit.Ink, false, TextAnchor.UpperLeft);
+            UiKit.Place(rt, new Vector2(0.5f, 0), new Vector2(0, 24), rt.sizeDelta, new Vector2(0.5f, 0));
+            // tapping the dialog moves on, like E (the buttons on it come first)
+            var tapArea = UiKit.Panel("Tap", rt, new Color(0, 0, 0, 0));
+            tapArea.raycastTarget = true;
+            UiKit.Stretch(tapArea.rectTransform);
+            tapArea.transform.SetAsFirstSibling();
+            var tapButton = tapArea.gameObject.AddComponent<Button>();
+            tapButton.transition = Selectable.Transition.None;
+            tapButton.onClick.AddListener(() =>
+            {
+                if (!ChoiceOpen) Tapped?.Invoke();
+            });
+            dialogBody = UiKit.Label("Body", body, "", 28, UiKit.Ink, false, TextAnchor.UpperLeft);
             UiKit.Stretch(dialogBody.rectTransform, 0, 30, 0, 0);
             dialogBody.lineSpacing = 1.1f;
-            dialogMore = UiKit.Label("More", body, "dotknij lub E", 22, UiKit.InkSoft, false, TextAnchor.LowerRight);
+            dialogMore = UiKit.Label("More", body, UiKit.Mobile ? "dotknij, aby dalej" : "dotknij lub E", 22, UiKit.InkSoft, false,
+                TextAnchor.LowerRight);
             UiKit.Stretch(dialogMore.rectTransform);
 
             // accept (gold, the one call to action) / decline (secondary) for quest offers
@@ -294,21 +328,34 @@ namespace Buds.UI
             onAccept = onDecline = null;
         }
 
-        /// <summary>"Twój Bud" button under the HUD plate (opens the Bud panel).</summary>
+        // the top-right button row, right to left: Twój Bud, Mapa, the ride
+        const float ButtonH = 66;
+        const float BudW = 230, MapW = 180, RideW = 210, Gap = 14;
+        /// <summary>Right edge of the left column (player plate, quests) in UI units.</summary>
+        const float LeftColumn = 24 + 380;
+
+        static void TopRight(Button button, float right, float width)
+        {
+            UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-right, -24), new Vector2(width, ButtonH),
+                new Vector2(1, 1));
+            button.transform.SetAsFirstSibling(); // under panels opened later
+        }
+
+        /// <summary>"Twój Bud" button, top right (opens the Bud panel).</summary>
         public void ShowBudButton(Action onClick)
         {
             if (budButton) return;
-            var button = UiKit.Button("BudButton", canvas.transform, "Twój Bud  [I]", new Vector2(250, 62), onClick, UiKit.Tone.Rep, 28);
-            UiKit.Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(24, -164), new Vector2(250, 62), new Vector2(0, 1));
+            var button = UiKit.Button("BudButton", Root, UiKit.Keys("Twój Bud  [I]"), new Vector2(BudW, ButtonH), onClick, UiKit.Tone.Rep, 28);
+            TopRight(button, 24, BudW);
             budButton = button.gameObject;
         }
 
-        /// <summary>"Mapa" button next to "Twój Bud" (opens the map screen).</summary>
+        /// <summary>"Mapa" button left of "Twój Bud" (opens the map screen).</summary>
         public void ShowMapButton(Action onClick)
         {
             if (mapButton) return;
-            var button = UiKit.Button("MapButton", canvas.transform, "Mapa  [M]", new Vector2(190, 62), onClick, UiKit.Tone.Rep, 28);
-            UiKit.Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(290, -164), new Vector2(190, 62), new Vector2(0, 1));
+            var button = UiKit.Button("MapButton", Root, UiKit.Keys("Mapa  [M]"), new Vector2(MapW, ButtonH), onClick, UiKit.Tone.Rep, 28);
+            TopRight(button, 24 + BudW + Gap, MapW);
             mapButton = button.gameObject;
         }
 
@@ -321,15 +368,14 @@ namespace Buds.UI
         {
             if (!rideButton && visible)
             {
-                var button = UiKit.Button("RideButton", canvas.transform, label, new Vector2(220, 62), onClick, UiKit.Tone.Rep, 26);
-                UiKit.Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(496, -164), new Vector2(220, 62), new Vector2(0, 1));
+                var button = UiKit.Button("RideButton", Root, label, new Vector2(RideW, ButtonH), onClick, UiKit.Tone.Rep, 26);
+                TopRight(button, 24 + BudW + Gap + MapW + Gap, RideW);
                 rideButton = button.gameObject;
-                rideButton.transform.SetAsFirstSibling(); // under panels opened later
                 rideLabel = button.GetComponentInChildren<Text>();
             }
             if (!rideButton) return;
             rideButton.SetActive(visible);
-            rideLabel.text = label;
+            rideLabel.text = UiKit.Keys(label);
         }
 
         /// <summary>Running boosts of energy drinks under the HUD buttons ("" hides it).</summary>
@@ -337,9 +383,11 @@ namespace Buds.UI
         {
             if (!buffLine)
             {
-                buffLine = UiKit.Outlined("Buffs", canvas.transform, "", 24, UiKit.Gold400);
-                buffLine.alignment = TextAnchor.UpperLeft;
-                UiKit.Place(buffLine.rectTransform, new Vector2(0, 1), new Vector2(28, -238), new Vector2(760, 34), new Vector2(0, 1));
+                // under the button row, right aligned
+                buffLine = UiKit.Outlined("Buffs", Root, "", 24, UiKit.Gold400);
+                buffLine.alignment = TextAnchor.UpperRight;
+                UiKit.Place(buffLine.rectTransform, new Vector2(1, 1), new Vector2(-28, -24 - ButtonH - 10), new Vector2(760, 34),
+                    new Vector2(1, 1));
                 buffLine.transform.SetAsFirstSibling();
             }
             buffLine.text = text ?? "";
@@ -382,10 +430,11 @@ namespace Buds.UI
 
         void BuildTracker()
         {
-            var plate = UiKit.OutlinedBox("Tracker", canvas.transform, UiKit.Surface800, UiKit.RadiusM);
+            // the quests: top left, under the player plate
+            var plate = UiKit.OutlinedBox("Tracker", Root, UiKit.Surface800, UiKit.RadiusM);
             trackerRect = (RectTransform)plate.transform.parent;
-            UiKit.Place(trackerRect, new Vector2(1, 1), new Vector2(-24, -116), new Vector2(400, 120), new Vector2(1, 1)); // below the zone toast
-            trackerText = UiKit.Label("Text", plate.transform, "", 25, UiKit.TextOnDark, false, TextAnchor.UpperLeft);
+            UiKit.Place(trackerRect, new Vector2(0, 1), new Vector2(24, -160), new Vector2(380, 120), new Vector2(0, 1));
+            trackerText = UiKit.Label("Text", plate.transform, "", 23, UiKit.TextOnDark, false, TextAnchor.UpperLeft);
             UiKit.Stretch(trackerText.rectTransform, 18, 12, 18, 12);
             trackerText.lineSpacing = 1.05f;
             tracker = trackerRect.gameObject;
@@ -410,16 +459,16 @@ namespace Buds.UI
             trackerText.text = sb.ToString();
             tracker.SetActive(true);
             Canvas.ForceUpdateCanvases();
-            trackerRect.sizeDelta = new Vector2(400, trackerText.preferredHeight + 28);
+            trackerRect.sizeDelta = new Vector2(380, trackerText.preferredHeight + 28);
         }
 
         // ---------- toast (district / zone name) ----------
 
         void BuildToast()
         {
-            toastText = UiKit.Pill("Toast", canvas.transform, "", UiKit.Surface800, 34, new Vector2(400, 70), out toastRect);
-            // a bit right of centre, so a long toast never covers the HUD plate on the left
-            UiKit.Place(toastRect, new Vector2(0.5f, 1), new Vector2(70, -30), toastRect.sizeDelta, new Vector2(0.5f, 1));
+            toastText = UiKit.Pill("Toast", Root, "", UiKit.Surface800, 32, new Vector2(400, 66), out toastRect);
+            // centred, under the button row (the plate is top left, the buttons top right)
+            UiKit.Place(toastRect, new Vector2(0.5f, 1), new Vector2(0, -24 - ButtonH - 16), toastRect.sizeDelta, new Vector2(0.5f, 1));
             toast = toastRect.gameObject;
             toast.SetActive(false);
         }
@@ -427,8 +476,12 @@ namespace Buds.UI
         /// <summary>Shows a short banner at the top for a few seconds (entering a district or a zone).</summary>
         public void ShowToast(string text, float seconds = 2.8f)
         {
-            toastText.text = text;
-            toastRect.sizeDelta = new Vector2(Mathf.Max(240, toastText.preferredWidth + 72), toastRect.sizeDelta.y);
+            toastText.text = UiKit.Keys(text);
+            var width = Mathf.Max(240, toastText.preferredWidth + 72);
+            toastRect.sizeDelta = new Vector2(width, toastRect.sizeDelta.y);
+            // centred, but never over the player plate and the quests on the left
+            var screen = ((RectTransform)Root).rect.width;
+            toastRect.anchoredPosition = new Vector2(Mathf.Max(0, LeftColumn + 16 + width / 2 - screen / 2), toastRect.anchoredPosition.y);
             toast.SetActive(true);
             toastUntil = Time.time + seconds;
         }
@@ -440,23 +493,35 @@ namespace Buds.UI
 
         // ---------- joystick ----------
 
+        /// <summary>The fixed joystick on phones: centre from the bottom-right corner and radius, in UI units.</summary>
+        const float StickInset = 112;
+        const float StickR = 78;
+        const float KnobTravel = 54;
+
         void BuildStick()
         {
-            stickBase = UiKit.Panel("StickBase", canvas.transform, new Color(0.086f, 0.094f, 0.122f, 0.45f));
+            stickBase = UiKit.Panel("StickBase", Root, new Color(0.086f, 0.094f, 0.122f, 0.45f));
             stickBase.sprite = UiKit.Circle(64);
-            stickBase.rectTransform.sizeDelta = new Vector2(180, 180);
-            stickKnob = UiKit.Panel("StickKnob", canvas.transform, new Color(0.965f, 0.949f, 0.914f, 0.85f));
+            stickBase.rectTransform.sizeDelta = UiKit.Mobile ? new Vector2(StickR * 2, StickR * 2) : new Vector2(180, 180);
+            stickKnob = UiKit.Panel("StickKnob", Root, new Color(0.965f, 0.949f, 0.914f, 0.85f));
             stickKnob.sprite = UiKit.Circle(32);
-            stickKnob.rectTransform.sizeDelta = new Vector2(80, 80);
+            stickKnob.rectTransform.sizeDelta = UiKit.Mobile ? new Vector2(70, 70) : new Vector2(80, 80);
             foreach (var img in new[] { stickBase, stickKnob })
             {
-                img.rectTransform.anchorMin = img.rectTransform.anchorMax = Vector2.zero;
+                var anchor = UiKit.Mobile ? new Vector2(1, 0) : Vector2.zero;
+                img.rectTransform.anchorMin = img.rectTransform.anchorMax = anchor;
+                img.raycastTarget = false;
                 img.gameObject.SetActive(false);
             }
         }
 
         public void UpdateStick(PlayerInput input)
         {
+            if (UiKit.Mobile)
+            {
+                UpdateFixedStick(input);
+                return;
+            }
             var show = input.StickActive && !DialogOpen;
             stickBase.gameObject.SetActive(show);
             stickKnob.gameObject.SetActive(show);
@@ -468,6 +533,50 @@ namespace Buds.UI
             stickKnob.rectTransform.anchoredPosition = origin + offset;
             // the knob turns gold while running
             stickKnob.color = input.Run ? new Color(1f, 0.79f, 0.24f, 0.9f) : new Color(0.965f, 0.949f, 0.914f, 0.85f);
+        }
+
+        /// <summary>Phones: the stick always sits bottom right; the input reads its centre and radius from here.</summary>
+        void UpdateFixedStick(PlayerInput input)
+        {
+            var show = hud.activeSelf && !DialogOpen;
+            stickBase.gameObject.SetActive(show);
+            stickKnob.gameObject.SetActive(show);
+            // always the fixed stick on phones: the floating one would turn every tap (even on X) into an action
+            input.FixedStick = true;
+            if (!show) return;
+            var home = new Vector2(-StickInset, StickInset);
+            stickBase.rectTransform.anchoredPosition = home;
+            var scale = canvas.scaleFactor;
+            input.StickCenter = stickBase.rectTransform.position; // overlay canvas: world position = screen pixels
+            input.StickRadius = StickR * scale;
+            var offset = input.StickActive
+                ? Vector2.ClampMagnitude((input.StickPosition - input.StickCenter) / scale, KnobTravel)
+                : Vector2.zero;
+            stickKnob.rectTransform.anchoredPosition = home + offset;
+            stickBase.color = new Color(0.086f, 0.094f, 0.122f, input.StickActive ? 0.6f : 0.4f);
+            stickKnob.color = input.Run ? new Color(1f, 0.79f, 0.24f, 0.95f) : new Color(0.965f, 0.949f, 0.914f, input.StickActive ? 0.95f : 0.7f);
+        }
+
+        /// <summary>
+        /// Autopilot: taps the screen where the action button (or the dialog) is, through the UI hit test a finger
+        /// goes through. Returns what was hit, or null when nothing takes the tap.
+        /// </summary>
+        public string TapForTest(bool dialogArea, bool closeButton = false)
+        {
+            var target = closeButton ? (RectTransform)dialog.transform.Find("Close")
+                : dialogArea ? (RectTransform)dialog.transform : hintRect;
+            var at = RectTransformUtility.WorldToScreenPoint(null, target.TransformPoint(target.rect.center));
+            var data = new PointerEventData(EventSystem.current) { position = at };
+            var hits = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(data, hits);
+            foreach (var hit in hits)
+            {
+                var handler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(hit.gameObject);
+                if (!handler) continue;
+                ExecuteEvents.Execute(handler, data, ExecuteEvents.pointerClickHandler);
+                return handler.name;
+            }
+            return null;
         }
 
         static void Place(RectTransform rt, float x, float y, float w, float h)
