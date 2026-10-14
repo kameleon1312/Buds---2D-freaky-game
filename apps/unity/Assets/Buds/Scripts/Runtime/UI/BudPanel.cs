@@ -21,7 +21,16 @@ namespace Buds.UI
         public readonly List<string> Owned = new();
         /// <summary>Gear by slot (head … held).</summary>
         public readonly Dictionary<string, string> Equipped = new();
+        /// <summary>Effective skill ranks: points spent plus training.</summary>
         public readonly Dictionary<string, int> Ranks = new();
+        /// <summary>Ranks bought with points, and training XP per skill.</summary>
+        public readonly Dictionary<string, int> Spent = new();
+        public readonly Dictionary<string, int> TrainingXp = new();
+        /// <summary>Special abilities unlocked.</summary>
+        public readonly List<string> Perks = new();
+        /// <summary>Energy drinks carried (item -> count) and running boosts (buff -> end, in realtimeSinceStartup).</summary>
+        public readonly Dictionary<string, int> Drinks = new();
+        public readonly Dictionary<string, float> Buffs = new();
         public int Points;
         public int Available;
         public int Coins;
@@ -33,7 +42,8 @@ namespace Buds.UI
 
     /// <summary>
     /// "Twój Bud": profile; gear on a head-to-toe paper doll with the stats it adds (the server validates every
-    /// change); skills (points from levels); the coin shop. Opened from the HUD button or with I / Tab / C.
+    /// change); skills (points from levels and training, special abilities); energy drinks and their running boosts;
+    /// the coin shop. Opened from the HUD button or with I / Tab / C.
     /// </summary>
     public sealed class BudPanel
     {
@@ -47,12 +57,18 @@ namespace Buds.UI
             ["mythic"] = ("Mityczny", UiKit.Hex("#ff3d7a")),
         };
 
-        const int Tabs = 4;
+        public const int TabProfile = 0, TabGear = 1, TabSkills = 2, TabDrinks = 3, TabShop = 4;
+        const int Tabs = 5;
+        /// <summary>The shop filter for energy drinks (they have no slot).</summary>
+        const string DrinkFilter = "drink";
+        /// <summary>The shop filter for premium items (for gems).</summary>
+        const string PremiumFilter = "premium";
 
         readonly QuestContent content;
         readonly Action<string> onUpgrade;
         readonly Action<string, string> onEquip;
         readonly Action<string> onBuy;
+        readonly Action<string> onDrink;
         readonly GameObject root;
         readonly RectTransform[] pages = new RectTransform[Tabs];
         readonly Button[] tabs = new Button[Tabs];
@@ -83,7 +99,18 @@ namespace Buds.UI
 
         // skills
         Text pointsText;
-        readonly List<(string id, Image[] pips, Button upgrade, Text bonus)> skillRows = new();
+        readonly List<(string id, Image[] pips, Button upgrade, Text bonus, RectTransform train, Text perks)> skillRows = new();
+
+        // drinks
+        RectTransform drinkGrid;
+        Text buffsText;
+        Image drinkIcon;
+        Text drinkTitle;
+        Text drinkDetails;
+        Button drinkUse;
+        Text drinkUseLabel;
+        string selectedDrink;
+        float nextTick;
 
         // shop
         RectTransform shopGrid;
@@ -100,12 +127,13 @@ namespace Buds.UI
         public bool IsOpen => root.activeSelf;
 
         public BudPanel(Transform canvas, QuestContent content, Action<string> onUpgrade, Action<string, string> onEquip,
-            Action<string> onBuy)
+            Action<string> onBuy, Action<string> onDrink)
         {
             this.content = content;
             this.onUpgrade = onUpgrade;
             this.onEquip = onEquip;
             this.onBuy = onBuy;
+            this.onDrink = onDrink;
 
             var dim = UiKit.Panel("BudPanel", canvas, new Color(0.086f, 0.094f, 0.122f, 0.72f));
             dim.raycastTarget = true; // blocks taps on the world behind
@@ -118,20 +146,21 @@ namespace Buds.UI
             var body = UiKit.Window("Window", group, new Vector2(1140, 800), "Twój Bud", Hide, out var window, out _);
             UiKit.Place(window, new Vector2(0.5f, 0.5f), Vector2.zero, window.sizeDelta);
 
-            string[] names = { "Profil", "Ekwipunek", "Umiejętności", "Sklep" };
+            string[] names = { "Profil", "Ekwipunek", "Umiejętności", "Napoje", "Sklep" };
             for (var i = 0; i < Tabs; i++)
             {
                 var index = i;
-                tabs[i] = UiKit.Button("Tab" + i, body, names[i], new Vector2(256, 60), () => ShowTab(index), UiKit.Tone.Rep, 28);
-                UiKit.Place((RectTransform)tabs[i].transform, new Vector2(0, 1), new Vector2(i * 270, 0), new Vector2(256, 60),
+                tabs[i] = UiKit.Button("Tab" + i, body, names[i], new Vector2(204, 60), () => ShowTab(index), UiKit.Tone.Rep, 25);
+                UiKit.Place((RectTransform)tabs[i].transform, new Vector2(0, 1), new Vector2(i * 216, 0), new Vector2(204, 60),
                     new Vector2(0, 1));
                 pages[i] = UiKit.Rect(names[i], body);
                 UiKit.Stretch(pages[i], 0, 0, 0, 78);
             }
             BuildProfile(pages[0]);
             BuildGear(pages[1]);
-            BuildSkills(pages[2]);
-            BuildShop(pages[3]);
+            BuildSkills(pages[TabSkills]);
+            BuildDrinks(pages[TabDrinks]);
+            BuildShop(pages[TabShop]);
             root.SetActive(false);
         }
 
@@ -158,7 +187,23 @@ namespace Buds.UI
         public void SelectShopItem(string id)
         {
             selectedShop = id;
+            var item = content.Item(id);
+            if (item != null) shopSlot = item.IsPremiumShop ? PremiumFilter : item.IsDrink ? DrinkFilter : item.slot;
             RefreshShop();
+        }
+
+        public void SelectDrink(string id)
+        {
+            selectedDrink = id;
+            RefreshDrinks();
+        }
+
+        /// <summary>Counts the boost timers down while the panel is open.</summary>
+        public void Tick()
+        {
+            if (!IsOpen || Time.realtimeSinceStartup < nextTick) return;
+            nextTick = Time.realtimeSinceStartup + 1;
+            if (tab == TabDrinks) RefreshBuffs();
         }
 
         public GearStats Stats => Gear.Stats(content, data.Equipped.Values, data.Ranks);
@@ -169,6 +214,7 @@ namespace Buds.UI
             RefreshProfile();
             RefreshGear();
             RefreshSkills();
+            RefreshDrinks();
             RefreshShop();
         }
 
@@ -260,6 +306,7 @@ namespace Buds.UI
             ["held"] = new Vector2Int(2, 2),
             ["legs"] = new Vector2Int(1, 3),
             ["feet"] = new Vector2Int(1, 4),
+            ["mount"] = new Vector2Int(2, 4),
         };
 
         const float Tile = 84;
@@ -330,7 +377,8 @@ namespace Buds.UI
             icon.raycastTarget = false;
             UiKit.Stretch(icon.rectTransform, 7);
             var label = UiKit.Label("Label", root, SlotName(slot), 17, UiKit.InkSoft, true, TextAnchor.LowerCenter);
-            UiKit.Stretch(label.rectTransform, -10, 0, -10, 0);
+            UiKit.Stretch(label.rectTransform, -16, 0, -16, 0);
+            label.horizontalOverflow = HorizontalWrapMode.Overflow; // "Wierzchowiec" stays on one line
             frame.raycastTarget = true;
             var button = root.gameObject.AddComponent<Button>();
             button.targetGraphic = frame;
@@ -390,7 +438,9 @@ namespace Buds.UI
                 var empty = UiKit.Label("Empty", pickerGrid,
                     data.Guest
                         ? "Połącz Buda ze strony, żeby zbierać i zakładać przedmioty."
-                        : "Nic tu jeszcze nie masz. Przedmioty dają pojedynki, zadania, skrytki i sklep.", 21, UiKit.InkSoft, false,
+                        : selectedSlot == "mount"
+                            ? "Nie masz jeszcze wierzchowca. Deskorolkę, hulajnowę i rower kupisz w sklepie, a motocykl i quada zdobędziesz w pojedynkach."
+                            : "Nic tu jeszcze nie masz. Przedmioty dają pojedynki, zadania, skrytki i sklep.", 21, UiKit.InkSoft, false,
                     TextAnchor.UpperLeft);
                 UiKit.Stretch(empty.rectTransform);
             }
@@ -427,7 +477,7 @@ namespace Buds.UI
 
         /// <summary>An item tile with its rarity frame; <paramref name="worn"/> adds a lime bar, <paramref name="locked"/> dims it.</summary>
         void ItemBox(RectTransform parent, ItemData item, Vector2 at, float size, bool selected, bool worn, Action onClick,
-            bool locked = false)
+            bool locked = false, bool showLevel = true)
         {
             var rarity = RarityOf(item);
             var slot = UiKit.Rect("Item " + item.id, parent);
@@ -448,7 +498,7 @@ namespace Buds.UI
                 var tag = UiKit.Shape("Worn", inner.transform, UiKit.Buds400, 4);
                 UiKit.Place(tag.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 2), new Vector2(size * 0.5f, 8), new Vector2(0.5f, 0));
             }
-            if (locked)
+            if (locked && showLevel)
             {
                 var lvl = UiKit.Outlined("Level", inner.transform, $"poz. {item.minLevel}", 18, UiKit.Gold400);
                 UiKit.Stretch(lvl.rectTransform);
@@ -466,8 +516,8 @@ namespace Buds.UI
             pointsText = UiKit.Label("Points", page, "", 28, UiKit.Ink, true, TextAnchor.UpperLeft);
             UiKit.Place(pointsText.rectTransform, new Vector2(0, 1), Vector2.zero, new Vector2(1000, 40), new Vector2(0, 1));
             var note = UiKit.Label("Note", page,
-                "Za każdy nowy poziom dostajesz punkt. Ekwipunek może dodać do 2 poziomów (zielone kropki).", 20,
-                UiKit.InkSoft, false, TextAnchor.UpperLeft);
+                "Rangi: z punktów (jasne), z treningu na mapie (niebieskie), z ekwipunku (ciemne). Rangi 3 i 5 dają wyjątkowe umiejętności.",
+                17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
             UiKit.Place(note.rectTransform, new Vector2(0, 1), new Vector2(0, -40), new Vector2(1000, 30), new Vector2(0, 1));
 
             var gearMax = content.skillGearMax > 0 ? content.skillGearMax : 2;
@@ -491,8 +541,17 @@ namespace Buds.UI
                 title.resizeTextMaxSize = 25;
                 title.horizontalOverflow = HorizontalWrapMode.Wrap;
                 title.verticalOverflow = VerticalWrapMode.Truncate;
-                var desc = UiKit.Label("Desc", row.transform, skill.description, 17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-                UiKit.Place(desc.rectTransform, new Vector2(0, 1), new Vector2(86, -74), new Vector2(430, 50), new Vector2(0, 1));
+                var desc = UiKit.Label("Desc", row.transform, skill.description, 16, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+                UiKit.Place(desc.rectTransform, new Vector2(0, 1), new Vector2(86, -70), new Vector2(430, 22), new Vector2(0, 1));
+                desc.resizeTextForBestFit = true; // long descriptions shrink to one line
+                desc.resizeTextMinSize = 11;
+                desc.resizeTextMaxSize = 16;
+                desc.verticalOverflow = VerticalWrapMode.Truncate;
+                var train = UiKit.Bar("Training", row.transform, UiKit.Rep400, out var trainBar);
+                UiKit.Place(trainBar, new Vector2(0, 1), new Vector2(12, -96), new Vector2(64, 14), new Vector2(0, 1));
+                var perks = UiKit.Label("Perks", row.transform, "", 15, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+                UiKit.Place(perks.rectTransform, new Vector2(0, 1), new Vector2(86, -92), new Vector2(436, 44), new Vector2(0, 1));
+                perks.lineSpacing = 0.95f;
 
                 var pips = new Image[content.skillMaxRank + gearMax];
                 for (var p = 0; p < pips.Length; p++)
@@ -510,7 +569,7 @@ namespace Buds.UI
                 var upgrade = UiKit.Button("Upgrade", row.transform, "Ulepsz", new Vector2(132, 50), () => onUpgrade(id), UiKit.Tone.Buds,
                     24);
                 UiKit.Place((RectTransform)upgrade.transform, new Vector2(1, 1), new Vector2(-12, -12), new Vector2(132, 50), new Vector2(1, 1));
-                skillRows.Add((id, pips, upgrade, bonus));
+                skillRows.Add((id, pips, upgrade, bonus, train, perks));
             }
         }
 
@@ -520,17 +579,34 @@ namespace Buds.UI
                 ? "Umiejętności rozwijasz z połączonym Budem"
                 : $"Wolne punkty: {data.Available}";
             var stats = Stats;
-            foreach (var (id, pips, upgrade, bonusText) in skillRows)
+            Canvas.ForceUpdateCanvases();
+            foreach (var (id, pips, upgrade, bonusText, train, perksText) in skillRows)
             {
-                var rank = data.Ranks.TryGetValue(id, out var r) ? r : 0;
+                var rank = data.Ranks.TryGetValue(id, out var r) ? r : 0; // spent + trained
+                var spent = data.Spent.TryGetValue(id, out var sp) ? Math.Min(sp, rank) : rank;
                 var bonus = stats.SkillBonus.TryGetValue(id, out var b) ? b : 0;
                 for (var p = 0; p < pips.Length; p++)
-                    pips[p].color = p < rank ? UiKit.Buds400 : p < rank + bonus ? UiKit.Buds600 : UiKit.Surface700;
+                    pips[p].color = p < spent ? UiKit.Buds400 : p < rank ? UiKit.Rep400 : p < rank + bonus ? UiKit.Buds600 : UiKit.Surface700;
                 // the extra (gear-only) pips show only when gear fills them
                 for (var p = content.skillMaxRank; p < pips.Length; p++)
                     pips[p].transform.parent.gameObject.SetActive(p < rank + bonus);
                 bonusText.text = bonus > 0 ? $"+{bonus} z ekwipunku" : "";
                 upgrade.interactable = !data.Guest && !data.Loading && data.Available > 0 && rank < content.skillMaxRank;
+
+                // training towards the next rank, and the two special abilities of the skill
+                var txp = data.TrainingXp.TryGetValue(id, out var t) ? t : 0;
+                var per = content.trainingXpPerRank;
+                UiKit.SetBar(train, rank >= content.skillMaxRank ? 1 : (txp % per) / (float)per);
+                var parts = new List<string>();
+                foreach (var perk in content.perks)
+                {
+                    if (perk.skill != id) continue;
+                    parts.Add(data.Perks.Contains(perk.id) || rank >= perk.rank
+                        ? $"<color=#5d9a12><b>{perk.name}</b></color>: {perk.description}"
+                        : $"<color=#8a857c>{perk.name} (ranga {perk.rank})</color>");
+                }
+                var where = rank >= content.skillMaxRank ? "Mistrzostwo!" : $"Trening {txp % per}/{per} XP";
+                perksText.text = $"{where}  ·  {string.Join("  ·  ", parts)}";
             }
         }
 
@@ -538,24 +614,34 @@ namespace Buds.UI
 
         void BuildShop(RectTransform page)
         {
-            // slot filter: two rows of four
-            for (var i = 0; i < content.slots.Length && i < 8; i++)
+            // filter: every slot (rides too) and the drinks, two rows of five
+            var filters = new List<(string id, string name)>();
+            foreach (var s in content.slots) filters.Add((s.id, s.name));
+            filters.Add((DrinkFilter, "Napoje"));
+            filters.Add((PremiumFilter, "Premium"));
+            for (var i = 0; i < filters.Count && i < 12; i++)
             {
-                var slot = content.slots[i].id;
-                var chip = UiKit.Button("Filter " + slot, page, content.slots[i].name, new Vector2(136, 46), () =>
+                var slot = filters[i].id;
+                var chip = UiKit.Button("Filter " + slot, page, filters[i].name, new Vector2(92, 46), () =>
                 {
                     shopSlot = slot;
                     selectedShop = null;
                     RefreshShop();
-                }, UiKit.Tone.Rep, 20);
-                UiKit.Place((RectTransform)chip.transform, new Vector2(0, 1), new Vector2((i % 4) * 146, -(i / 4) * 56), new Vector2(136, 46),
+                }, slot == PremiumFilter ? UiKit.Tone.Gold : UiKit.Tone.Rep, 16);
+                var chipText = chip.GetComponentInChildren<Text>();
+                chipText.resizeTextForBestFit = true;
+                chipText.resizeTextMinSize = 11;
+                chipText.resizeTextMaxSize = 16;
+                chipText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                chipText.verticalOverflow = VerticalWrapMode.Truncate;
+                UiKit.Place((RectTransform)chip.transform, new Vector2(0, 1), new Vector2((i % 6) * 98, -(i / 6) * 56), new Vector2(92, 46),
                     new Vector2(0, 1));
                 shopFilters.Add((slot, chip));
             }
             shopGrid = UiKit.Rect("Grid", page);
             UiKit.Place(shopGrid, new Vector2(0, 1), new Vector2(0, -122), new Vector2(580, 400), new Vector2(0, 1));
             var premium = UiKit.Label("Premium", page,
-                "<b>Wkrótce:</b> stroje premium za prawdziwe pieniądze. Tylko wygląd: nigdy nie dają przewagi.", 18,
+                "<b>Premium:</b> unikatowe wierzchowce i bronie za gemy. Wyjątkowy wygląd, ta sama moc co przedmioty z gry.", 18,
                 UiKit.InkSoft, false, TextAnchor.LowerLeft);
             UiKit.Place(premium.rectTransform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(570, 44), Vector2.zero);
 
@@ -593,28 +679,33 @@ namespace Buds.UI
             foreach (var (slot, chip) in shopFilters)
             {
                 var face = chip.transform.Find("Face/Fill")?.GetComponent<Image>();
-                if (face) face.color = slot == shopSlot ? UiKit.Buds400 : UiKit.Rep400;
+                if (face) face.color = slot == shopSlot ? UiKit.Buds400 : slot == PremiumFilter ? UiKit.Gold400 : UiKit.Rep400;
             }
             for (var i = shopGrid.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(shopGrid.GetChild(i).gameObject);
             var items = new List<ItemData>();
             foreach (var item in content.items)
-                if (item.shop && item.available && item.slot == shopSlot) items.Add(item);
-            items.Sort((a, b) => a.minLevel != b.minLevel ? a.minLevel.CompareTo(b.minLevel) : a.coins.CompareTo(b.coins));
+                if (shopSlot == PremiumFilter ? item.IsPremiumShop
+                    : item.shop && item.available && (shopSlot == DrinkFilter ? item.IsDrink : item.slot == shopSlot && !item.IsDrink))
+                    items.Add(item);
+            items.Sort((a, b) => a.minLevel != b.minLevel ? a.minLevel.CompareTo(b.minLevel) : (a.coins + a.gems).CompareTo(b.coins + b.gems));
             selectedShop ??= items.Count > 0 ? items[0].id : null;
             for (var i = 0; i < items.Count && i < 15; i++)
             {
                 var item = items[i];
                 var at = new Vector2((i % 5) * 116, -(i / 5) * 132);
-                var owned = data.Owned.Contains(item.id);
+                var owned = !item.IsDrink && data.Owned.Contains(item.id);
                 var locked = item.minLevel > data.Level;
                 ItemBox(shopGrid, item, at, 100, item.id == selectedShop, owned, () => SelectShopItem(item.id), locked && !owned);
-                var price = UiKit.Label("Price", shopGrid, owned ? "Masz" : item.coins.ToString(), 19,
-                    owned ? UiKit.Buds600 : UiKit.Ink, true, TextAnchor.UpperCenter);
+                // premium prices are gems (gold), the rest coins
+                var price = UiKit.Label("Price", shopGrid, owned ? "Masz" : item.IsPremiumShop ? item.gems.ToString() : item.coins.ToString(), 19,
+                    owned ? UiKit.Buds600 : item.IsPremiumShop ? UiKit.Gold600 : UiKit.Ink, true, TextAnchor.UpperCenter);
                 UiKit.Place(price.rectTransform, new Vector2(0, 1), at + new Vector2(0, -102), new Vector2(100, 26), new Vector2(0, 1));
             }
 
             var selected = selectedShop != null ? content.Item(selectedShop) : null;
-            shopWallet.text = data.Guest ? "Grasz jako gość" : $"Masz {Core.GameBootstrap.Coins(data.Coins)}";
+            shopWallet.text = data.Guest ? "Grasz jako gość"
+                : shopSlot == PremiumFilter ? $"Masz {data.Gems} gemów · gemy kupisz wkrótce"
+                : $"Masz {Core.GameBootstrap.Coins(data.Coins)}";
             if (selected == null)
             {
                 shopTitle.text = "Sklep";
@@ -628,13 +719,129 @@ namespace Buds.UI
             shopIcon.enabled = shopIcon.sprite;
             shopTitle.text = selected.name;
             var weapon = string.IsNullOrEmpty(selected.weapon) ? "" : $"\nRuchy: {MovesText(selected.weapon)}";
+            var twin = string.IsNullOrEmpty(selected.twin) ? null : content.Item(selected.twin);
+            var power = twin != null ? $"\n<size=18>Moc jak: {twin.name} (do zdobycia w grze)</size>" : "";
+            var where = selected.IsDrink
+                ? $"Napój  ·  masz {(data.Drinks.TryGetValue(selected.id, out var q) ? q : 0)}"
+                : $"{SlotName(selected.slot)}  ·  od poz. {selected.minLevel}";
             shopDetails.text =
-                $"<color=#{Hex(r.color)}><b>{r.label}</b></color>  ·  {SlotName(selected.slot)}  ·  od poz. {selected.minLevel}\n<b>{Gear.Describe(content, selected)}</b>{weapon}\n<color=#55514a>{selected.description}</color>";
-            var have = data.Owned.Contains(selected.id);
+                $"<color=#{Hex(r.color)}><b>{r.label}</b></color>  ·  {where}\n<b>{Gear.Describe(content, selected)}</b>{weapon}{power}\n<color=#55514a>{selected.description}</color>";
+            var have = !selected.IsDrink && data.Owned.Contains(selected.id);
             var tooYoung = selected.minLevel > data.Level;
             shopBuy.gameObject.SetActive(true);
-            shopBuyLabel.text = have ? "Już masz" : tooYoung ? $"Od poziomu {selected.minLevel}" : $"Kup za {selected.coins}";
-            shopBuy.interactable = !data.Guest && !data.Loading && !have && !tooYoung && data.Coins >= selected.coins;
+            var gems = selected.IsPremiumShop;
+            shopBuyLabel.text = have ? "Już masz" : tooYoung ? $"Od poziomu {selected.minLevel}"
+                : gems ? $"Kup za {selected.gems} gemów" : $"Kup za {selected.coins}";
+            shopBuy.interactable = !data.Guest && !data.Loading && !have && !tooYoung &&
+                                   (gems ? data.Gems >= selected.gems : data.Coins >= selected.coins);
+        }
+
+        // ---------- energy drinks ----------
+
+        void BuildDrinks(RectTransform page)
+        {
+            var title = UiKit.Label("Title", page, "Twoje napoje", 28, UiKit.Ink, true, TextAnchor.UpperLeft);
+            UiKit.Place(title.rectTransform, new Vector2(0, 1), Vector2.zero, new Vector2(580, 40), new Vector2(0, 1));
+            drinkGrid = UiKit.Rect("Grid", page);
+            UiKit.Place(drinkGrid, new Vector2(0, 1), new Vector2(0, -48), new Vector2(580, 260), new Vector2(0, 1));
+
+            var boxes = UiKit.OutlinedBox("Buffs", page, UiKit.Paper300, UiKit.RadiusM);
+            UiKit.Place((RectTransform)boxes.transform.parent, new Vector2(0, 1), new Vector2(0, -322), new Vector2(580, 240),
+                new Vector2(0, 1));
+            var head = UiKit.Label("Head", boxes.transform, "Działa teraz", 24, UiKit.Ink, true, TextAnchor.UpperLeft);
+            UiKit.Place(head.rectTransform, new Vector2(0, 1), new Vector2(18, -10), new Vector2(540, 32), new Vector2(0, 1));
+            buffsText = UiKit.Label("List", boxes.transform, "", 20, UiKit.Ink, false, TextAnchor.UpperLeft);
+            UiKit.Place(buffsText.rectTransform, new Vector2(0, 1), new Vector2(18, -48), new Vector2(540, 184), new Vector2(0, 1));
+            buffsText.lineSpacing = 1.1f;
+
+            var card = UiKit.OutlinedBox("Card", page, UiKit.Paper300, UiKit.RadiusL);
+            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(600, 0), new Vector2(476, 562),
+                new Vector2(0, 1));
+            var iconBox = UiKit.Shape("IconBox", card.transform, UiKit.Surface800, UiKit.RadiusM);
+            UiKit.Place(iconBox.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(150, 150), new Vector2(0.5f, 1));
+            drinkIcon = UiKit.Rect("Icon", iconBox.transform).gameObject.AddComponent<Image>();
+            drinkIcon.preserveAspect = true;
+            drinkIcon.raycastTarget = false;
+            UiKit.Stretch(drinkIcon.rectTransform, 14);
+            drinkTitle = UiKit.Label("Title", card.transform, "", 30, UiKit.Ink, true, TextAnchor.UpperCenter);
+            UiKit.Place(drinkTitle.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -180), new Vector2(440, 44), new Vector2(0.5f, 1));
+            drinkDetails = UiKit.Label("Details", card.transform, "", 21, UiKit.Ink, false, TextAnchor.UpperCenter);
+            UiKit.Place(drinkDetails.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -232), new Vector2(430, 220), new Vector2(0.5f, 1));
+            drinkDetails.lineSpacing = 1.1f;
+            drinkUse = UiKit.Button("Drink", card.transform, "Wypij", new Vector2(300, 72), () =>
+            {
+                if (selectedDrink != null) onDrink(selectedDrink);
+            }, UiKit.Tone.Gold, 30);
+            UiKit.Place((RectTransform)drinkUse.transform, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(300, 72),
+                new Vector2(0.5f, 0));
+            drinkUseLabel = drinkUse.GetComponentInChildren<Text>();
+        }
+
+        void RefreshDrinks()
+        {
+            for (var i = drinkGrid.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(drinkGrid.GetChild(i).gameObject);
+            var all = new List<ItemData>();
+            foreach (var item in content.items)
+                if (item.IsDrink) all.Add(item);
+            if (selectedDrink == null || !data.Drinks.ContainsKey(selectedDrink))
+                foreach (var item in all)
+                    if (data.Drinks.TryGetValue(item.id, out var n) && n > 0)
+                    {
+                        selectedDrink = item.id;
+                        break;
+                    }
+            selectedDrink ??= all.Count > 0 ? all[0].id : null;
+            for (var i = 0; i < all.Count; i++)
+            {
+                var item = all[i];
+                var count = data.Drinks.TryGetValue(item.id, out var n) ? n : 0;
+                var at = new Vector2((i % 5) * 116, -(i / 5) * 132);
+                ItemBox(drinkGrid, item, at, 100, item.id == selectedDrink, false, () => SelectDrink(item.id), count == 0, false);
+                var label = UiKit.Label("Count", drinkGrid, count > 0 ? $"× {count}" : "brak", 19, count > 0 ? UiKit.Ink : UiKit.InkSoft,
+                    true, TextAnchor.UpperCenter);
+                UiKit.Place(label.rectTransform, new Vector2(0, 1), at + new Vector2(0, -102), new Vector2(100, 26), new Vector2(0, 1));
+            }
+            RefreshBuffs();
+
+            var selected = selectedDrink != null ? content.Item(selectedDrink) : null;
+            if (selected == null)
+            {
+                drinkTitle.text = "Napoje";
+                drinkDetails.text = "";
+                drinkIcon.enabled = false;
+                drinkUse.gameObject.SetActive(false);
+                return;
+            }
+            var have = data.Drinks.TryGetValue(selected.id, out var qty) ? qty : 0;
+            drinkIcon.sprite = Icon("Items/" + selected.id);
+            drinkIcon.enabled = drinkIcon.sprite;
+            drinkTitle.text = selected.name;
+            drinkDetails.text = $"<b>{Gear.Describe(content, selected)}</b>\n<color=#55514a>{selected.description}</color>\n\nMasz: <b>{have}</b>" +
+                                (have == 0 ? "\n<color=#55514a>Kupisz w sklepie albo zdobędziesz w pojedynkach.</color>" : "");
+            drinkUse.gameObject.SetActive(true);
+            drinkUseLabel.text = have > 0 ? "Wypij" : "Brak";
+            drinkUse.interactable = !data.Guest && !data.Loading && have > 0;
+        }
+
+        void RefreshBuffs()
+        {
+            var lines = new List<string>();
+            var now = Time.realtimeSinceStartup;
+            foreach (var (id, ends) in data.Buffs)
+            {
+                var left = Mathf.CeilToInt(ends - now);
+                if (left <= 0) continue;
+                var buff = content.Buff(id);
+                lines.Add($"<b>{buff?.name ?? id}</b>  {left / 60}:{left % 60:00}  <color=#55514a>{buff?.description}</color>");
+            }
+            foreach (var id in data.Perks)
+            {
+                var perk = content.Perk(id);
+                if (perk != null) lines.Add($"<color=#5d9a12><b>{perk.name}</b></color>  <color=#55514a>{perk.description}</color>");
+            }
+            buffsText.text = lines.Count > 0
+                ? string.Join("\n", lines)
+                : data.Guest ? "Połącz Buda ze strony, żeby pić napoje." : "Nic nie działa. Wypij napój albo wytrenuj umiejętność do rangi 3.";
         }
 
         string MovesText(string weapon)

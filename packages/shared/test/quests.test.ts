@@ -35,11 +35,13 @@ describe('quest content', () => {
       quests: [{ ...CONTENT.quests[0]!, giver: 'ghost', requires: [CONTENT.quests[0]!.id] }],
       caches: [],
       enemies: [],
+      training: [CONTENT.training[0]!, CONTENT.training[0]!],
     };
     const problems = contentProblems(broken);
     expect(problems.some((p) => p.includes('duplicate npc'))).toBe(true);
     expect(problems.some((p) => p.includes('unknown giver'))).toBe(true);
     expect(problems.some((p) => p.includes('circular'))).toBe(true);
+    expect(problems.some((p) => p.includes('duplicate training spot'))).toBe(true);
   });
 });
 

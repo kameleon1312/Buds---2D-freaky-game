@@ -155,6 +155,21 @@ namespace Buds.Api
         public Awaitable<FightResponse> Flee(string token, string fightId) =>
             Post<FightResponse>($"/v1/fights/{Uri.EscapeDataString(fightId)}/flee", token, "{}");
 
+        /// <summary>Buys a premium item for gems; the server checks the price and the gem balance.</summary>
+        public Awaitable<BuyResponse> BuyPremium(string token, string itemId) =>
+            Post<BuyResponse>($"/v1/premium/{Uri.EscapeDataString(itemId)}/buy", token, "{}");
+
+        /// <summary>A training round: the server grants training XP for the mini-game score (0..5) once per cooldown.</summary>
+        public Awaitable<TrainResponse> Train(string token, string spotId, int score) =>
+            Post<TrainResponse>($"/v1/buds/me/training/{Uri.EscapeDataString(spotId)}", token, $"{{\"score\":{score}}}");
+
+        public Awaitable<ConsumablesResponse> GetConsumables(string token) =>
+            Get<ConsumablesResponse>("/v1/buds/me/consumables", token);
+
+        /// <summary>Drinks one energy drink; the server starts its boost.</summary>
+        public Awaitable<ConsumablesResponse> UseConsumable(string token, string itemId) =>
+            Post<ConsumablesResponse>($"/v1/buds/me/consumables/{Uri.EscapeDataString(itemId)}/use", token, "{}");
+
         /// <summary>POST with a small JSON body (ids are [a-z0-9-], safe to inline).</summary>
         async Awaitable<T> Post<T>(string path, string token, string json)
         {

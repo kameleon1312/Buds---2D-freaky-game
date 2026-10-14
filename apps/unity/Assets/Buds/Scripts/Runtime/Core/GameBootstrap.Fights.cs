@@ -94,6 +94,7 @@ namespace Buds.Core
                 {
                     lastReward = res.reward;
                     SetXp(res.reward.xp);
+                    if (!string.IsNullOrEmpty(res.reward.drink)) _ = LoadConsumables();
                     if (fightingWith)
                     {
                         enemyWorld.Rest(fightingWith.Data.id, RematchSeconds);

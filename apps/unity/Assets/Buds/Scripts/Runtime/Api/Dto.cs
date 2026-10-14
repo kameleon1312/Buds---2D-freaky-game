@@ -137,7 +137,11 @@ namespace Buds.Api
     public class SkillRankDto
     {
         public string id;
-        public int rank;
+        public int rank; // points spent
+        public int trainingXp;
+        public int trained; // ranks from training on top of the points
+
+        public int Effective => rank + trained;
     }
 
     [Serializable]
@@ -146,6 +150,42 @@ namespace Buds.Api
         public int points;
         public int available;
         public SkillRankDto[] skills;
+        public string[] perks;
+    }
+
+    [Serializable]
+    public class TrainResponse
+    {
+        public string spotId;
+        public string skill;
+        public int xpGained;
+        public int trainingXp;
+        public int rank;
+        public bool rankUp;
+        public string[] perksUnlocked;
+        public int cooldown;
+    }
+
+    [Serializable]
+    public class OwnedConsumableDto
+    {
+        public string itemId;
+        public int qty;
+    }
+
+    [Serializable]
+    public class ActiveBuffDto
+    {
+        public string buff;
+        public string until;
+        public int secondsLeft;
+    }
+
+    [Serializable]
+    public class ConsumablesResponse
+    {
+        public OwnedConsumableDto[] items;
+        public ActiveBuffDto[] buffs;
     }
 
     [Serializable]
@@ -185,6 +225,7 @@ namespace Buds.Api
         public string feet;
         public string accessory;
         public string held;
+        public string mount;
 
         public System.Collections.Generic.Dictionary<string, string> ToDictionary()
         {
@@ -201,6 +242,7 @@ namespace Buds.Api
             Add("feet", feet);
             Add("accessory", accessory);
             Add("held", held);
+            Add("mount", mount);
             return d;
         }
     }
@@ -216,6 +258,7 @@ namespace Buds.Api
     {
         public string itemId;
         public int coins;
+        public int gems; // premium purchases
     }
 
     [Serializable]
@@ -224,6 +267,7 @@ namespace Buds.Api
         public int blind;
         public int weaken;
         public bool aim;
+        public bool secondWind;
     }
 
     [Serializable]
@@ -240,6 +284,7 @@ namespace Buds.Api
         public string weapon;
         public string weaponItem;
         public string[] moves;
+        public string[] perks;
         public FighterStatusDto status;
     }
 
@@ -271,6 +316,14 @@ namespace Buds.Api
         public string effect; // guard | dodge | aim | blind | weaken | ""
         public int budHp;
         public int enemyHp;
+        public SecondWindDto secondWind; // who == "" when it did not happen
+    }
+
+    [Serializable]
+    public class SecondWindDto
+    {
+        public string who; // bud | enemy
+        public int hp;
     }
 
     /// <summary>Only meaningful when the fight was won (JsonUtility can't tell a null object from an empty one).</summary>
@@ -284,6 +337,7 @@ namespace Buds.Api
         public int coinsGained;
         public int coins;
         public string item;
+        public string drink; // an energy drink dropped with the loot
     }
 
     [Serializable]

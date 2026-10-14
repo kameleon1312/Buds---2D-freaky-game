@@ -7,7 +7,7 @@ import {
   type SlotId,
 } from '@buds/shared';
 import { makeSlug } from './slug.js';
-import type { BudStore, BuyResult } from './types.js';
+import type { BudStore, BuyResult, GemBuyResult } from './types.js';
 
 type BudRow = {
   id: string;
@@ -208,6 +208,25 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       return data as BuyResult;
     },
 
+    async buyItemWithGems(slug, itemId, price) {
+      const { data, error } = await db.rpc('buy_item_gems', {
+        p_bud: await idBySlug(slug),
+        p_item: itemId,
+        p_price: price,
+      });
+      if (error) throw error;
+      return data as GemBuyResult;
+    },
+
+    async grantGems(slug, n) {
+      const { data, error } = await db.rpc('grant_gems', {
+        p_bud: await idBySlug(slug),
+        p_gems: n,
+      });
+      if (error) throw error;
+      return data as number;
+    },
+
     async budsOfUser(userId) {
       const { data, error } = await db
         .from('buds')
@@ -299,6 +318,96 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       });
       if (error) throw error;
       return (data as { xp: number; coins: number } | null) ?? null;
+    },
+
+    async training(slug) {
+      const { data, error } = await db
+        .from('bud_training')
+        .select('skill_id, xp')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return (data as { skill_id: string; xp: number }[]).map((r) => ({
+        skill: r.skill_id,
+        xp: r.xp,
+      }));
+    },
+
+    async lastTrained(slug, spotId) {
+      const { data, error } = await db
+        .from('bud_training_spots')
+        .select('last_at')
+        .eq('bud_id', await idBySlug(slug))
+        .eq('spot_id', spotId)
+        .maybeSingle();
+      if (error) throw error;
+      const at = (data as { last_at: string } | null)?.last_at;
+      return at ? new Date(at) : null;
+    },
+
+    async train(slug, spotId, skill, xp, cooldownSeconds) {
+      const { data, error } = await db.rpc('train', {
+        p_bud: await idBySlug(slug),
+        p_spot: spotId,
+        p_skill: skill,
+        p_xp: xp,
+        p_cooldown: cooldownSeconds,
+      });
+      if (error) throw error;
+      return (data as number | null) ?? null;
+    },
+
+    async consumables(slug) {
+      const { data, error } = await db
+        .from('bud_consumables')
+        .select('item_id, qty')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return (data as { item_id: string; qty: number }[]).map((r) => ({
+        itemId: r.item_id,
+        qty: r.qty,
+      }));
+    },
+
+    async grantConsumable(slug, itemId, qty) {
+      const { error } = await db.rpc('grant_consumable', {
+        p_bud: await idBySlug(slug),
+        p_item: itemId,
+        p_qty: qty,
+      });
+      if (error) throw error;
+    },
+
+    async buyConsumable(slug, itemId, price) {
+      const { data, error } = await db.rpc('buy_consumable', {
+        p_bud: await idBySlug(slug),
+        p_item: itemId,
+        p_price: price,
+      });
+      if (error) throw error;
+      return data as BuyResult;
+    },
+
+    async useConsumable(slug, itemId, buff, seconds) {
+      const { data, error } = await db.rpc('use_consumable', {
+        p_bud: await idBySlug(slug),
+        p_item: itemId,
+        p_buff: buff,
+        p_seconds: seconds,
+      });
+      if (error) throw error;
+      return data ? new Date(data as string) : null;
+    },
+
+    async buffs(slug) {
+      const { data, error } = await db
+        .from('bud_buffs')
+        .select('buff_id, until')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return (data as { buff_id: string; until: string }[]).map((r) => ({
+        buff: r.buff_id,
+        until: new Date(r.until),
+      }));
     },
 
     async lastWin(slug, enemyId) {

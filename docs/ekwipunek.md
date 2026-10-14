@@ -32,8 +32,32 @@ W ręku z prawej, Dodatek przy ramieniu.
 - **Pojedynki:** łup o rzadkości zależnej od rywala (bossowie: epickie i legendarne).
 - **Sklep za monety:** monety ze skrytek, kupujesz w grze (panel → Sklep). Serwer sprawdza cenę i portfel
   (`POST /v1/shop/:itemId/buy`, funkcja SQL `buy_item`).
-- **Prawdziwe pieniądze (później):** tylko wygląd. Przedmiot premium nie może mieć bonusów, pilnuje tego test
-  `gearProblems` w `packages/shared/src/catalog.ts`. Pierwsza zapowiedź: „Sprintery Błysk — złota edycja”.
+- **Sklep premium (za gemy):** unikatowe wierzchowce i bronie dostępne tylko za gemy (`packages/shared/src/premium.ts`,
+  zakładka „Premium” w sklepie, `POST /v1/premium/:itemId/buy`, funkcja SQL `buy_item_gems`). Każdy taki przedmiot
+  ma „bliźniaka” (`twin`) do zdobycia w grze i jest **dokładnie tak samo mocny**: ten sam bonus, ta sama broń, ta
+  sama prędkość jazdy. Różni się wyglądem (własna grafika, rzadkość „mityczna”, poświata i błysk) i może być założony
+  najwyżej 2 poziomy wcześniej (`PREMIUM_LEVEL_HEAD_START`). Nigdy nie wypada z pojedynków. Pilnuje tego test
+  `gearProblems` w `packages/shared/src/catalog.ts`. Przedmioty bez mocy (stroje, buty) mogą być czystym wyglądem.
+- **Gemy:** kupowane za prawdziwe pieniądze. Przyznaje je tylko serwer po zweryfikowanej płatności
+  (`grant_gems`, tabela `purchases`). Płatności (Stripe na stronie, Google Play / App Store w aplikacji) podłączymy
+  osobno; do tego czasu sklep premium pokazuje ceny, a przycisk zakupu czeka na gemy.
+
+| Premium         | Bliźniak z gry            | Gemy |
+| --------------- | ------------------------- | ---- |
+| Deskorolka Holo | Deskorolka Cruiser (+20%) | 120  |
+| Hulajnowa Neon  | Hulajnowa Śmigacz (+30%)  | 200  |
+| Rower Chrom     | Rower Góral (+45%)        | 320  |
+| Motocykl Smok   | Motocykl Grzmot (+70%)    | 650  |
+| Quad Wulkan     | Quad Bestia (+85%)        | 950  |
+| Deska Płomień   | Deska Surfingowa Fala     | 180  |
+| Kij Neon        | Pałka Teleskopowa         | 180  |
+| Proca Laser     | Łuk na Przyssawki         | 220  |
+| Spray Tęcza     | Gaśnica                   | 240  |
+| Złoty Mikrofon  | Boombox Grzmot            | 380  |
+| Kij Smoka       | Złoty Kij Szefa           | 700  |
+
+Nowe przedmioty premium dodaje się wierszem w `premium.ts` (id, nazwa, bliźniak, cena) i ikoną/grafiką w
+`tools/world/art/gear-icons.ts` albo `tools/world/art/rides.ts` (kolory wariantu w `RIDES`).
 
 Nazwy marek są wymyślone (Sprintery Błysk, Pancerniak, Lisie Oko…). Nie używamy prawdziwych marek bez licencji.
 

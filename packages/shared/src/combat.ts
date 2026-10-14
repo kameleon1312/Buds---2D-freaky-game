@@ -3,6 +3,8 @@ import { budLookSchema } from './bud/look';
 import { levelOf, type CatalogItem, type Rarity } from './catalog';
 import { coinsWithLuck, weaponKindSchema, type CharacterStats, type WeaponKind } from './gear';
 import { levelFromXp } from './level';
+import { buffBonus, type BuffId } from './consumables';
+import type { PerkId } from './skills';
 
 /**
  * Duels (pojedynki): turn-based fights against the people of the districts, resolved on the server one turn at a
@@ -205,9 +207,44 @@ export const MOVES = {
     anim: 'dodge',
     description: 'Łatwiej uniknąć ciosu w tej turze.',
   }),
+  // special moves unlocked by skill perks (rank 5 Flow, rank 5 Graffiti, rank 3 Walka)
+  freestyle: m({
+    id: 'freestyle',
+    name: 'Freestyle',
+    power: [5, 8],
+    accuracy: 88,
+    hits: 2,
+    effect: 'weaken',
+    anim: 'shout',
+    description: 'Dwie zwrotki prosto w ego rywala. Osłabia.',
+  }),
+  tag: m({
+    id: 'tag',
+    name: 'Tag',
+    power: [6, 9],
+    accuracy: 92,
+    effect: 'blind',
+    anim: 'spray',
+    description: 'Podpis na twarzy rywala. Oślepia.',
+  }),
+  specjalny: m({
+    id: 'specjalny',
+    name: 'Cios specjalny',
+    power: [12, 18],
+    accuracy: 76,
+    anim: 'spin',
+    description: 'Obrót i cios z całej siły.',
+  }),
 } satisfies Record<string, Move>;
 export type MoveId = keyof typeof MOVES;
 export const moveIdSchema = z.enum(Object.keys(MOVES) as [MoveId, ...MoveId[]]);
+
+/** Moves a perk adds on top of the weapon's four. */
+export const PERK_MOVES: Partial<Record<PerkId, MoveId>> = {
+  'freestyle-mistrza': 'freestyle',
+  'tag-legendy': 'tag',
+  'cios-specjalny': 'specjalny',
+};
 
 /** Four moves per weapon kind; Garda for everyone. */
 export const MOVES_BY_WEAPON: Record<WeaponKind, MoveId[]> = {
@@ -268,6 +305,8 @@ const statusSchema = z.object({
   blind: z.number().int().nonnegative(),
   weaken: z.number().int().nonnegative(),
   aim: z.boolean(),
+  /** Drugi oddech already used in this fight. */
+  secondWind: z.boolean().default(false),
 });
 
 export const fighterSchema = z.object({
@@ -286,6 +325,8 @@ export const fighterSchema = z.object({
   weapon: weaponKindSchema,
   weaponItem: z.string().nullable(),
   moves: z.array(moveIdSchema),
+  /** Special abilities (skill perks) that count in a duel. */
+  perks: z.array(z.string()).default([]),
   status: statusSchema,
 });
 export type Fighter = z.infer<typeof fighterSchema>;
@@ -315,6 +356,8 @@ export type TurnEvent = {
   effect?: MoveEffect;
   budHp: number;
   enemyHp: number;
+  /** Drugi oddech took hold for this fighter (it got this much health back). */
+  secondWind?: { who: 'bud' | 'enemy'; hp: number };
 };
 
 // ---------- RNG ----------
@@ -347,32 +390,42 @@ class Rng {
 
 export const budMaxHp = (level: number) => 60 + 10 * (Math.max(1, level) - 1);
 
-/** The bud as a fighter: level, gear stats and skills, moves from the weapon. */
+/**
+ * The bud as a fighter: level, gear stats and skills, moves from the weapon, plus its perks (special moves,
+ * Twardziel) and the boosts of energy drinks it drank.
+ */
 export function budFighter(
   name: string,
   xp: number,
   stats: CharacterStats,
   weaponItem: CatalogItem | undefined,
+  { perks = [], buffs = [] }: { perks?: readonly string[]; buffs?: readonly BuffId[] } = {},
 ): Fighter {
   const level = levelFromXp(xp).level;
   const weapon = weaponItem?.weapon ?? 'piesci';
+  const boost = buffBonus(buffs);
+  const hp = budMaxHp(level) + (perks.includes('twardziel') ? 20 : 0) + boost.hp;
+  const extra = Object.entries(PERK_MOVES)
+    .filter(([perk]) => perks.includes(perk))
+    .map(([, move]) => move);
   return {
     name,
     level,
-    maxHp: budMaxHp(level),
-    hp: budMaxHp(level),
+    maxHp: hp,
+    hp,
     // experience counts too: a bit of attack and toughness with every level
-    attack: stats.attack + Math.floor(((level - 1) * 4) / 5),
-    armor: stats.armor + Math.floor((level - 1) / 2),
-    speed: stats.speed,
-    luck: stats.luck,
+    attack: stats.attack + Math.floor(((level - 1) * 4) / 5) + boost.attack,
+    armor: stats.armor + Math.floor((level - 1) / 2) + boost.armor,
+    speed: stats.speed + boost.duelSpeed,
+    luck: stats.luck + boost.luck,
     walka: stats.skills.walka ?? 0,
     przetrwanie: stats.skills.przetrwanie ?? 0,
     spryt: stats.skills.spryt ?? 0,
     weapon,
     weaponItem: weaponItem?.id ?? null,
-    moves: MOVES_BY_WEAPON[weapon],
-    status: { blind: 0, weaken: 0, aim: false },
+    moves: [...MOVES_BY_WEAPON[weapon], ...extra],
+    perks: [...perks],
+    status: { blind: 0, weaken: 0, aim: false, secondWind: false },
   };
 }
 
@@ -392,7 +445,8 @@ export function enemyFighter(e: Enemy): Fighter {
     weapon: e.weapon,
     weaponItem: null,
     moves: MOVES_BY_WEAPON[e.weapon],
-    status: { blind: 0, weaken: 0, aim: false },
+    perks: [],
+    status: { blind: 0, weaken: 0, aim: false, secondWind: false },
   };
 }
 
@@ -410,7 +464,10 @@ export function hitChance(
   defenderDodging: boolean,
 ) {
   const dodge =
-    Math.floor(defender.speed / 2) + 3 * defender.przetrwanie + (defenderDodging ? 35 : 0);
+    Math.floor(defender.speed / 2) +
+    3 * defender.przetrwanie +
+    (defenderDodging ? 35 : 0) +
+    (defender.perks.includes('unik-surfera') ? 10 : 0);
   const blind = attacker.status.blind > 0 ? 30 : 0;
   return Math.max(10, Math.min(99, move.accuracy - dodge - blind));
 }
@@ -428,6 +485,7 @@ export function damage(
 ) {
   let d = (roll + Math.floor(attacker.attack / 2)) * (100 + 6 * attacker.walka);
   d = Math.floor(d / 100);
+  if (attacker.perks.includes('mistrz-ringu')) d = Math.floor((d * 110) / 100);
   if (crit) d = Math.floor((d * 3) / 2);
   if (attacker.status.weaken > 0) d = Math.floor((d * 3) / 4);
   if (defenderGuarding) d = Math.floor(d / 2);
@@ -512,6 +570,17 @@ export function playTurn(
         );
         other.hp = Math.max(0, other.hp - dmg);
         event.hits.push({ hit: true, crit, damage: dmg });
+        // Drugi oddech: once a fight, dropping below a quarter of health gives a third of it back
+        if (
+          other.perks.includes('drugi-oddech') &&
+          !other.status.secondWind &&
+          other.hp * 4 < other.maxHp
+        ) {
+          const back = Math.floor(other.maxHp / 3);
+          other.hp = Math.min(other.maxHp, other.hp + back);
+          other.status.secondWind = true;
+          event.secondWind = { who: target, hp: back };
+        }
       }
       // blind and weaken stick only when the move landed
       if (event.hits.some((h) => h.hit) && (move.effect === 'blind' || move.effect === 'weaken')) {
@@ -546,11 +615,15 @@ export function fightXp(enemy: Enemy, budLevel: number) {
 
 const RARITY_ORDER: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
 
-export type Loot = { itemId: string | null; coins: number };
+export type Loot = { itemId: string | null; coins: number; drink: string | null };
+
+/** Chance (%) that a won duel also drops an energy drink. */
+export const DRINK_DROP_CHANCE = 25;
 
 /**
- * What a won duel drops: coins (with the bud's luck) and, by chance, an item whose rarity follows the opponent's
- * loot tier, from items not above the opponent's level + 2. An item the bud already owns turns into coins.
+ * What a won duel drops: coins (with the bud's luck), maybe an energy drink and, by chance (more with Łowca łupów),
+ * an item whose rarity follows the opponent's loot tier, from items not above the opponent's level + 2. An item the
+ * bud already owns turns into coins.
  */
 export function rollLoot(
   enemy: Enemy,
@@ -558,13 +631,33 @@ export function rollLoot(
   catalog: readonly CatalogItem[],
   owned: ReadonlySet<string>,
   seed: number,
+  { perks = [] }: { perks?: readonly string[] } = {},
 ): Loot {
+  // the drink has its own RNG stream so it never changes which item drops
+  const drinks = catalog.filter((i) => i.drink && i.available);
+  const drinkRng = new Rng(seed ^ 0x5bd1e995);
+  const drink =
+    drinks.length > 0 && drinkRng.chance(DRINK_DROP_CHANCE)
+      ? drinks[drinkRng.int(0, drinks.length - 1)]!.id
+      : null;
+  return { ...rollItem(enemy, luck, catalog, owned, seed, perks), drink };
+}
+
+function rollItem(
+  enemy: Enemy,
+  luck: number,
+  catalog: readonly CatalogItem[],
+  owned: ReadonlySet<string>,
+  seed: number,
+  perks: readonly string[],
+): Omit<Loot, 'drink'> {
   const rng = new Rng(seed);
   let coins = coinsWithLuck(
     rng.int(enemy.coins[0], Math.max(enemy.coins[0], enemy.coins[1])),
     luck,
   );
-  if (!rng.chance(enemy.lootChance * 100)) return { itemId: null, coins };
+  const bonus = perks.includes('lowca-lupow') ? 10 : 0;
+  if (!rng.chance(enemy.lootChance * 100 + bonus)) return { itemId: null, coins };
 
   const table = LOOT_TIERS[enemy.lootTier] ?? LOOT_TIERS[1]!;
   const total = Object.values(table).reduce((a, b) => a + (b ?? 0), 0);
@@ -609,6 +702,8 @@ export const fightRewardSchema = z.object({
   coinsGained: z.number().int().nonnegative(),
   coins: z.number().int().nonnegative(),
   item: z.string().nullable(),
+  /** Energy drink dropped with the loot. */
+  drink: z.string().nullable().default(null),
 });
 export type FightReward = z.infer<typeof fightRewardSchema>;
 
@@ -620,6 +715,7 @@ export const turnEventSchema = z.object({
   effect: z.enum(['guard', 'dodge', 'aim', 'blind', 'weaken']).optional(),
   budHp: z.number().int(),
   enemyHp: z.number().int(),
+  secondWind: z.object({ who: z.enum(['bud', 'enemy']), hp: z.number().int() }).optional(),
 });
 
 export const fightResponseSchema = z.object({

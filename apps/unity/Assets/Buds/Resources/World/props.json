@@ -2250,6 +2250,396 @@
         1,
         1
       ]
+    },
+    {
+      "name": "jazda-deskorolka-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-deskorolka-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-deskorolka-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-hulajnowa-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-hulajnowa-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-hulajnowa-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-rower-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-rower-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-rower-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-e-hulajnowa-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-e-hulajnowa-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-e-hulajnowa-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-motocykl-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-motocykl-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-motocykl-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-quad-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-quad-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-quad-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-deskorolka-holo-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-deskorolka-holo-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-deskorolka-holo-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-hulajnowa-neon-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-hulajnowa-neon-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-hulajnowa-neon-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-rower-chrom-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-rower-chrom-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-rower-chrom-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-motocykl-smok-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-motocykl-smok-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-motocykl-smok-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-quad-wulkan-bok",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-quad-wulkan-przod",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "jazda-quad-wulkan-tyl",
+      "pivotX": 0.5,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "trening-worek",
+      "pivotX": 0.5013,
+      "pivotY": 0.0374,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "trening-scena",
+      "pivotX": 0.4989,
+      "pivotY": 0.0469,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "trening-sciana",
+      "pivotX": 0.4989,
+      "pivotY": 0.0469,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "trening-deska",
+      "pivotX": 0.5007,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "trening-szachy",
+      "pivotX": 0.4989,
+      "pivotY": 0.061,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "trening-tor",
+      "pivotX": 0.4989,
+      "pivotY": 0.0532,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     }
   ]
 }

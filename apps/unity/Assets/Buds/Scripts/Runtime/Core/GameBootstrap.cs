@@ -163,6 +163,7 @@ namespace Buds.Core
             ui.ShowHud(name, level, xp, Progression.NextLevelXp(xp));
             SetUpQuests(completed);
             SetUpPanel();
+            SetUpRides();
             SetUpCaches();
             SetUpMap();
             SetUpFights();
@@ -194,10 +195,10 @@ namespace Buds.Core
             var at = fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
             player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
             player.Blocked = (x, y) => !map.IsWalkable(x, map.Height - 1 - y);
-            player.Motor.SpeedMultiplier = 1 + gear.Speed / 100f;
             // walking into a room you face into it; stepping out of one you face the street
             if (map.IsInterior) player.Look(Vector2.up);
             else if (map.Doors.Exists(d => d.Target == fromDistrict)) player.Look(Vector2.down);
+            SetUpMapExtras(); // training stations, the ride and the walking speed
 
             var cam = Camera.main!.GetComponent<FollowCamera>();
             cam.target = player.transform;
@@ -219,8 +220,9 @@ namespace Buds.Core
             if (travelling) return;
             var input = player.Input;
             input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
-                            (fightScreen?.IsOpen ?? false);
+                            (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false);
             if (UpdateFight()) return;
+            if (UpdateRidesAndTraining(input)) return;
             ui.UpdateStick(input);
 
             if (UpdateMapScreen(input)) return;
@@ -246,11 +248,13 @@ namespace Buds.Core
             nearbyNpc = questWorld.NearestNpc(feet, InteractRange);
             nearbyEnemy = nearbyNpc ? null : enemyWorld.Nearest(feet, InteractRange);
             nearbyCache = nearbyNpc || nearbyEnemy ? null : caches.Nearest(world.Map.Id, mx, my, CacheWorld.SearchRange);
-            nearbyDoor = nearbyNpc || nearbyEnemy || nearbyCache != null ? null : FindNearbyDoor(feet);
-            nearby = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyDoor != null ? null : FindNearbySign();
+            nearbyTraining = nearbyNpc || nearbyEnemy || nearbyCache != null ? null : trainingWorld.Nearest(feet, TrainingRange);
+            nearbyDoor = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyTraining != null ? null : FindNearbyDoor(feet);
+            nearby = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyTraining != null || nearbyDoor != null ? null : FindNearbySign();
             ui.SetHint(nearbyNpc ? $"Rozmawiaj: {nearbyNpc.Data.name}  [E]"
                 : nearbyEnemy ? $"Walcz: {nearbyEnemy.Data.name} (poz. {nearbyEnemy.Data.level})  [E]"
                 : nearbyCache != null ? "Przeszukaj  [E]"
+                : nearbyTraining != null ? TrainingHint(nearbyTraining)
                 : nearbyDoor != null ? $"Wejdź: {nearbyDoor.Name}  [E]"
                 : nearby != null ? "Czytaj  [E]"
                 : null);
@@ -261,6 +265,7 @@ namespace Buds.Core
             else if (nearbyNpc) TalkTo(nearbyNpc);
             else if (nearbyEnemy) Challenge(nearbyEnemy);
             else if (nearbyCache != null) _ = OpenCache(nearbyCache);
+            else if (nearbyTraining != null) StartTraining(nearbyTraining);
             else if (nearbyDoor != null) EnterDoor(nearbyDoor);
             else if (nearby != null) ui.ShowDialog(nearby.Title, nearby.Text);
         }
@@ -411,6 +416,7 @@ namespace Buds.Core
                 }
 
                 if (CommandLine.Has("-buds-gear-demo") && session != null) await GearDemo(Shot);
+                if (CommandLine.Has("-buds-ride-demo") && session != null) await RideDemo(Shot);
                 if (CommandLine.Has("-buds-fight-demo") && session != null)
                 {
                     if (world.Map.Id != Districts.Start) LoadDistrict(Districts.Start, null);

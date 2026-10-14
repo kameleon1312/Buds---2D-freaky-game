@@ -13,9 +13,19 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const skills = new Map<string, Map<string, number>>(); // slug -> skill -> rank
   const caches = new Map<string, Set<string>>(); // slug -> opened cache ids
   const coins = new Map<string, number>(); // slug -> coin balance
+  const gems = new Map<string, number>(); // slug -> gem balance
   const gear = new Map<string, Map<SlotId, string>>(); // slug -> slot -> item
   const owners = new Map<string, string>(); // slug -> user id
   const fights = new Map<string, { slug: string; state: FightState; finishedAt?: Date }>();
+  const training = new Map<string, Map<string, number>>(); // slug -> skill -> training XP
+  const trainedAt = new Map<string, Date>(); // "slug spot" -> last round
+  const drinks = new Map<string, Map<string, number>>(); // slug -> item -> qty
+  const buffs = new Map<string, Map<string, Date>>(); // slug -> buff -> until
+  const addDrinks = (slug: string, itemId: string, qty: number) => {
+    const bag = drinks.get(slug) ?? new Map<string, number>();
+    bag.set(itemId, (bag.get(itemId) ?? 0) + qty);
+    drinks.set(slug, bag);
+  };
   const copy = (bud: BudRecord | undefined) => (bud ? { ...bud, look: { ...bud.look } } : null);
 
   return {
@@ -87,7 +97,7 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
     },
 
     async wallet(slug) {
-      return { coins: coins.get(slug) ?? 0, gems: 0 };
+      return { coins: coins.get(slug) ?? 0, gems: gems.get(slug) ?? 0 };
     },
 
     async equipment(slug) {
@@ -112,6 +122,25 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
         { itemId, source: 'shop', acquiredAt: now().toISOString() },
       ]);
       return { status: 'ok', coins: balance - price };
+    },
+
+    async buyItemWithGems(slug, itemId, price) {
+      const balance = gems.get(slug) ?? 0;
+      if ((owned.get(slug) ?? []).some((i) => i.itemId === itemId))
+        return { status: 'owned', gems: balance };
+      if (balance < price) return { status: 'poor', gems: balance };
+      gems.set(slug, balance - price);
+      owned.set(slug, [
+        ...(owned.get(slug) ?? []),
+        { itemId, source: 'purchase', acquiredAt: now().toISOString() },
+      ]);
+      return { status: 'ok', gems: balance - price };
+    },
+
+    async grantGems(slug, n) {
+      const balance = (gems.get(slug) ?? 0) + Math.max(0, n);
+      gems.set(slug, balance);
+      return balance;
     },
 
     async budsOfUser(userId) {
@@ -182,6 +211,57 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
         )
           if (!last || f.finishedAt > last) last = f.finishedAt;
       return last;
+    },
+
+    async training(slug) {
+      return [...(training.get(slug) ?? [])].map(([skill, xp]) => ({ skill, xp }));
+    },
+
+    async lastTrained(slug, spotId) {
+      return trainedAt.get(`${slug} ${spotId}`) ?? null;
+    },
+
+    async train(slug, spotId, skill, xp, cooldownSeconds) {
+      const key = `${slug} ${spotId}`;
+      const last = trainedAt.get(key);
+      if (last && now().getTime() - last.getTime() < cooldownSeconds * 1000) return null;
+      trainedAt.set(key, now());
+      const skills = training.get(slug) ?? new Map<string, number>();
+      const total = (skills.get(skill) ?? 0) + Math.max(0, xp);
+      skills.set(skill, total);
+      training.set(slug, skills);
+      return total;
+    },
+
+    async consumables(slug) {
+      return [...(drinks.get(slug) ?? [])].map(([itemId, qty]) => ({ itemId, qty }));
+    },
+
+    async grantConsumable(slug, itemId, qty) {
+      addDrinks(slug, itemId, Math.max(0, qty));
+    },
+
+    async buyConsumable(slug, itemId, price) {
+      const balance = coins.get(slug) ?? 0;
+      if (balance < price) return { status: 'poor', coins: balance };
+      coins.set(slug, balance - price);
+      addDrinks(slug, itemId, 1);
+      return { status: 'ok', coins: balance - price };
+    },
+
+    async useConsumable(slug, itemId, buff, seconds) {
+      const bag = drinks.get(slug);
+      if (!bag || (bag.get(itemId) ?? 0) <= 0) return null;
+      bag.set(itemId, bag.get(itemId)! - 1);
+      const until = new Date(now().getTime() + seconds * 1000);
+      const active = buffs.get(slug) ?? new Map<string, Date>();
+      active.set(buff, until);
+      buffs.set(slug, active);
+      return until;
+    },
+
+    async buffs(slug) {
+      return [...(buffs.get(slug) ?? [])].map(([buff, until]) => ({ buff, until }));
     },
 
     async openedCaches(slug) {

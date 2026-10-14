@@ -228,12 +228,16 @@ describe('GET /v1/buds/:slug/sheet.png', () => {
 });
 
 describe('items and catalog', () => {
-  it('serves the catalog publicly, with reserved premium slots marked unavailable', async () => {
+  it('serves the catalog publicly, with unpriced premium slots marked unavailable', async () => {
     const res = await makeApp().request('/v1/catalog');
     expect(res.status).toBe(200);
     const { items } = (await res.json()) as CatalogResponse;
     expect(items.some((i) => i.id === 'outfit-bluza' && i.price.currency === 'free')).toBe(true);
-    for (const item of items.filter((i) => i.premium)) expect(item.available).toBe(false);
+    // reserved premium slots have no price yet; the premium shop sells priced ones for gems only
+    for (const item of items.filter((i) => i.premium)) {
+      expect(item.price.currency).toBe('gems');
+      expect(item.available).toBe(item.price.amount > 0);
+    }
   });
 
   it('lists owned items only for the authenticated bud', async () => {

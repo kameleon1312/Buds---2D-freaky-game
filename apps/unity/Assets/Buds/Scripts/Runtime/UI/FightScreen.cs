@@ -63,8 +63,10 @@ namespace Buds.UI
         readonly RectTransform fx;
         readonly Text log;
         readonly Text info;
-        readonly Button[] moveButtons = new Button[4];
-        readonly Text[] moveLabels = new Text[4];
+        /// <summary>Four moves from the weapon plus up to two special moves from skill perks.</summary>
+        const int MaxMoves = 6;
+        readonly Button[] moveButtons = new Button[MaxMoves];
+        readonly Text[] moveLabels = new Text[MaxMoves];
         readonly Button fleeButton;
         readonly GameObject result;
         readonly Text resultTitle;
@@ -113,10 +115,11 @@ namespace Buds.UI
             log = UiKit.Label("Log", body, "", 28, UiKit.Ink, true, TextAnchor.MiddleCenter);
             UiKit.Place(log.rectTransform, new Vector2(0, 1), new Vector2(0, -StageH - 8), new Vector2(StageW, 44), new Vector2(0, 1));
 
-            for (var i = 0; i < 4; i++)
+            for (var i = 0; i < MaxMoves; i++)
             {
                 var index = i;
-                moveButtons[i] = UiKit.Button("Move" + i, body, "", new Vector2(256, 84), () => Choose(index), UiKit.Tone.Buds, 28);
+                moveButtons[i] = UiKit.Button("Move" + i, body, "", new Vector2(256, 84), () => Choose(index),
+                    i >= 4 ? UiKit.Tone.Gold : UiKit.Tone.Buds, 28);
                 UiKit.Place((RectTransform)moveButtons[i].transform, new Vector2(0, 1), new Vector2(i * 273, -StageH - 64),
                     new Vector2(256, 84), new Vector2(0, 1));
                 moveLabels[i] = moveButtons[i].GetComponentInChildren<Text>();
@@ -152,13 +155,20 @@ namespace Buds.UI
             enemy = Fighter(fight.enemy, enemySheet, new Vector2(StageW * 0.73f, 54), -1,
                 KindIcon.TryGetValue(fight.enemy.weapon ?? "", out var icon) ? icon : null);
             moves = fight.bud.moves ?? Array.Empty<string>();
-            for (var i = 0; i < 4; i++)
+            // four wide buttons, or six narrower ones when perks add special moves
+            var count = Mathf.Min(moves.Length, MaxMoves);
+            var w = count <= 4 ? 256f : 170f;
+            var step = count <= 4 ? 273f : 181f;
+            for (var i = 0; i < MaxMoves; i++)
             {
-                var has = i < moves.Length;
+                var has = i < count;
                 moveButtons[i].gameObject.SetActive(has);
                 if (!has) continue;
+                var rt = (RectTransform)moveButtons[i].transform;
+                UiKit.Place(rt, new Vector2(0, 1), new Vector2(i * step, -StageH - 64), new Vector2(w, 84), new Vector2(0, 1));
                 var m = content.Move(moves[i]);
                 moveLabels[i].text = $"{m?.name ?? moves[i]}  [{i + 1}]";
+                moveLabels[i].fontSize = count <= 4 ? 28 : 21;
             }
             var weapon = string.IsNullOrEmpty(fight.bud.weaponItem) ? null : content.Item(fight.bud.weaponItem);
             info.text = $"Broń: <b>{weapon?.name ?? "pięści"}</b>  ·  Atak {fight.bud.attack}  ·  Pancerz {fight.bud.armor}  ·  Szybkość {fight.bud.speed}\n" +
@@ -194,7 +204,7 @@ namespace Buds.UI
                 return;
             }
             if (busy) return;
-            Key[] keys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4 };
+            Key[] keys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6 };
             for (var i = 0; i < keys.Length; i++)
                 if (kb[keys[i]].wasPressedThisFrame) Choose(i);
             if (kb.escapeKey.wasPressedThisFrame) onFlee();
@@ -240,6 +250,12 @@ namespace Buds.UI
                         icon = Icon("Items/" + item.id);
                     }
                     else sb.Append("\nTym razem bez łupu.");
+                    var drink = string.IsNullOrEmpty(reward.drink) ? null : content.Item(reward.drink);
+                    if (drink != null)
+                    {
+                        sb.Append($"\n+ <b>{drink.name}</b>");
+                        icon ??= Icon("Items/" + drink.id);
+                    }
                     resultBody.text = sb.ToString();
                     break;
                 case "lost":
@@ -323,6 +339,16 @@ namespace Buds.UI
                 case "weaken":
                     Popup(other, "Osłabiony!", UiKit.Alert500, 30, 60);
                     break;
+            }
+            // Drugi oddech: a fighter about to fall gets a third of its health back
+            if (e.secondWind != null && !string.IsNullOrEmpty(e.secondWind.who))
+            {
+                var saved = e.secondWind.who == "bud" ? bud : enemy;
+                SetHp(saved, e.secondWind.who == "bud" ? e.budHp : e.enemyHp);
+                saved.Body.color = Color.white;
+                Popup(saved, $"Drugi oddech! +{e.secondWind.hp}", UiKit.Buds400, 30, 60);
+                log.text = $"{(e.secondWind.who == "bud" ? "Ty" : saved.Name)}: <b>Drugi oddech!</b>";
+                await Wait(0.35f);
             }
             await Wait(0.18f);
         }

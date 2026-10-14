@@ -39,7 +39,7 @@ namespace Buds.Quests
             foreach (var id in worn)
             {
                 var item = id == null ? null : content.Item(id);
-                if (item == null) continue;
+                if (item == null || item.IsMount) continue; // rides add their own speed (Rides)
                 stats.Attack += item.attack;
                 stats.Speed += item.speed;
                 stats.Armor += item.armor;
@@ -78,6 +78,12 @@ namespace Buds.Quests
             if (item.speed > 0) parts.Add($"+{item.speed}% Szybkość");
             if (item.armor > 0) parts.Add($"+{item.armor} Pancerz");
             if (item.luck > 0) parts.Add($"+{item.luck}% Szczęście");
+            if (item.mountSpeed > 0) parts.Add($"+{item.mountSpeed}% szybkości w jeździe");
+            if (item.IsDrink)
+            {
+                var buff = content.Buff(item.drink);
+                if (buff != null) return $"{buff.description} ({buff.seconds / 60} min)";
+            }
             foreach (var b in item.skillBonus)
             {
                 var skill = Array.Find(content.skills, s => s.id == b.id);

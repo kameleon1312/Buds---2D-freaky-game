@@ -8,7 +8,10 @@ import {
   type GearBonus,
   type SlotId,
 } from './gear';
+import { buffIdSchema } from './consumables';
 import { GEAR_ITEMS, priceOf } from './gear-items';
+import { DRINKS, MOUNTS } from './rides-and-drinks';
+import { PREMIUM_LEVEL_HEAD_START, premiumItems } from './premium';
 
 /**
  * Item catalog — the groundwork for cosmetics and gear that can later be earned or sold.
@@ -34,6 +37,8 @@ export const ITEM_KINDS = [
   'emote',
   'district', // access to a premium district / event zone
   'gear', // clothes and things worn for their bonuses (shoes, vests, glasses…)
+  'mount', // rides: skateboard, scooter, bike, motorbike, quad
+  'consumable', // energy drinks: carried in numbers, drunk for a timed boost
 ] as const;
 export type ItemKind = (typeof ITEM_KINDS)[number];
 
@@ -74,8 +79,14 @@ export const catalogItemSchema = z.object({
   weapon: weaponKindSchema.optional(),
   /** Can drop as loot from duels. */
   loot: z.boolean().optional(),
+  /** Mounts: how much faster (%) the bud moves while riding. Not part of the gear speed cap. */
+  mountSpeed: z.number().int().min(5).max(150).optional(),
+  /** Energy drinks: the boost drinking one gives. */
+  drink: buffIdSchema.optional(),
   /** Not obtainable yet, but shown in the shop as "wkrótce". */
   preview: z.boolean().optional(),
+  /** Premium items with power: the earned item they match exactly (same bonus, weapon, ride speed). */
+  twin: itemIdSchema.optional(),
 });
 export type CatalogItem = z.infer<typeof catalogItemSchema>;
 
@@ -104,7 +115,7 @@ const HEADWEAR = [
 export const outfitItemId = (outfit: BudLook['outfit']) => `outfit-${outfit}`;
 export const headwearItemId = (hair: BudLook['hair']) => `headwear-${hair}`;
 
-export const CATALOG: readonly CatalogItem[] = [
+const EARNED: readonly CatalogItem[] = [
   // starter set: everything the website creator offers today
   ...OUTFITS.map((o): CatalogItem => ({
     id: outfitItemId(o),
@@ -219,7 +230,9 @@ export const CATALOG: readonly CatalogItem[] = [
   })),
   // the gear of the world: loot from duels, the cheaper half also in the coin shop (own brands, never real ones)
   ...GEAR_ITEMS,
-  // real money, later: looks only, never bonuses (shown in the shop as "wkrótce")
+  ...MOUNTS,
+  ...DRINKS,
+  // real money, later: looks only (shown in the shop as "wkrótce")
   {
     id: 'buty-sprintery-zlote',
     kind: 'outfit',
@@ -233,6 +246,9 @@ export const CATALOG: readonly CatalogItem[] = [
   },
 ];
 
+/** Everything: items earned in the game, then the premium rides and weapons built from their twins. */
+export const CATALOG: readonly CatalogItem[] = [...EARNED, ...premiumItems(EARNED)];
+
 /**
  * Rule check for the catalog: gear has a slot, a bonus needs a slot, and nothing bought with real money gives a
  * bonus (no pay-to-win). Empty when the catalog is fine.
@@ -245,10 +261,34 @@ export function gearProblems(catalog: readonly CatalogItem[] = CATALOG): string[
     ids.add(item.id);
     if (item.bonus && !item.slot) problems.push(`${item.id}: a bonus needs a slot`);
     if (item.kind === 'gear' && !item.slot) problems.push(`${item.id}: gear needs a slot`);
-    if (item.bonus && (item.premium || item.price.currency === 'gems'))
-      problems.push(`${item.id}: real-money items are looks only (no bonus)`);
+    const paid = item.premium || item.price.currency === 'gems';
+    // real money buys looks and an earlier start, never more power: a paid item with power copies an earned twin
+    if (paid && (item.bonus || item.weapon || item.mountSpeed)) {
+      const twin = item.twin ? catalog.find((i) => i.id === item.twin) : undefined;
+      if (!twin) problems.push(`${item.id}: a paid item with power needs an earned twin`);
+      else if (twin.premium || twin.price.currency === 'gems' || !twin.available)
+        problems.push(`${item.id}: its twin ${twin.id} must be earnable in the game`);
+      else {
+        if (
+          JSON.stringify(item.bonus ?? {}) !== JSON.stringify(twin.bonus ?? {}) ||
+          item.weapon !== twin.weapon ||
+          item.mountSpeed !== twin.mountSpeed ||
+          item.slot !== twin.slot
+        )
+          problems.push(`${item.id}: must be exactly as strong as its twin ${twin.id}`);
+        if (levelOf(item) < levelOf(twin) - PREMIUM_LEVEL_HEAD_START)
+          problems.push(
+            `${item.id}: at most ${PREMIUM_LEVEL_HEAD_START} levels earlier than ${twin.id}`,
+          );
+      }
+    }
     if (item.weapon && item.slot !== 'held') problems.push(`${item.id}: weapons are held`);
     if (item.slot === 'held' && !item.weapon) problems.push(`${item.id}: held items are weapons`);
+    if ((item.slot === 'mount') !== (item.mountSpeed !== undefined))
+      problems.push(`${item.id}: mounts go in the mount slot and have a mountSpeed`);
+    if (item.drink && (item.slot || item.kind !== 'consumable'))
+      problems.push(`${item.id}: drinks are consumables without a slot`);
+    if (item.drink && paid) problems.push(`${item.id}: real money never buys boosts`);
     if (item.loot && (item.premium || item.price.currency === 'gems'))
       problems.push(`${item.id}: real-money items never drop`);
     if (item.shop && (item.price.currency !== 'coins' || item.price.amount <= 0 || !item.available))

@@ -544,6 +544,13 @@ const SPECS: Record<string, Spec> = {
   boombox: s(boombox(T('#b45cff', '#8a3fd1'), '#a3e635'), true),
   'kusza-mysliwego': s(crossbow(T('#6b4229', '#4f2f1c'), '#b7bec9'), true),
   'zloty-kij-szefa': s(bat(T('#ffc93c', '#d98a0b'), '#3a3d4a'), true),
+  // premium weapons (packages/shared premium.ts): unique colours, same shapes as their twins
+  'premium-deska-plomien': s(surfboard(T('#ff9a1f', '#d97a0b'), '#ff3d50'), true),
+  'premium-kij-neon': s(stick(T('#a3e635', '#5d9a12'), '#ff3d7a', 4), true),
+  'premium-proca-laser': s(bow(T('#3a3d4a', '#262833'), '#ff3d50'), true),
+  'premium-spray-tecza': s(can(T('#b45cff', '#8a3fd1'), '#4cc7ff'), true),
+  'premium-mikrofon-zloty': s(megaphone(T('#ffc93c', '#d98a0b'), '#ff3d7a'), true),
+  'premium-kij-smoka': s(bat(T('#2c8574', '#1d5c50'), '#ffc93c'), true),
 };
 
 export const GEAR_ICONS: Record<string, Icon> = Object.fromEntries(

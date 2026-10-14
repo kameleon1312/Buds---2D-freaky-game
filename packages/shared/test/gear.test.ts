@@ -28,7 +28,7 @@ describe('gear catalog', () => {
       { ...base, id: 'za-darmo', price: { currency: 'free', amount: 0 } },
     ];
     const problems = gearProblems(broken);
-    expect(problems.some((p) => p.includes('p2w') && p.includes('looks only'))).toBe(true);
+    expect(problems.some((p) => p.includes('p2w') && p.includes('twin'))).toBe(true);
     expect(problems.some((p) => p.includes('bez-miejsca'))).toBe(true);
     expect(problems.some((p) => p.includes('za-darmo') && p.includes('coin shop'))).toBe(true);
   });

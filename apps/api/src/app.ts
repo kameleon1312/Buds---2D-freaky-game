@@ -9,6 +9,18 @@ import {
   CONTENT,
   SKILLS,
   SKILL_MAX_RANK,
+  BUFFS,
+  TRAINING_COOLDOWN_SECONDS,
+  buffBonus,
+  effectiveRank,
+  perksFor,
+  trainRequestSchema,
+  trainedRanks,
+  trainingSpotIdSchema,
+  trainingXp,
+  type BuffId,
+  type ConsumablesResponse,
+  type TrainResponse,
   skillIdSchema,
   skillPointsForLevel,
   type SkillsResponse,
@@ -97,11 +109,13 @@ export type AppDeps = {
   content?: DistrictContent;
   /** Public keys for account tokens; production fetches the project's JWKS. */
   jwks?: JWTVerifyGetKey;
+  /** The clock for drink boosts and training cooldowns (tests move it). */
+  now?: () => Date;
 };
 
 export function createApp(
   env: Env,
-  { store, catalog = CATALOG, content = CONTENT, jwks }: AppDeps,
+  { store, catalog = CATALOG, content = CONTENT, jwks, now = () => new Date() }: AppDeps,
 ) {
   const keys: AuthKeys = {
     secret: env.SUPABASE_JWT_SECRET,
@@ -243,13 +257,30 @@ export function createApp(
     return slots;
   };
 
-  /** Stats the server trusts: worn items (still in the catalog) plus trained skills. */
+  /** Skill ranks as they count: points spent plus ranks earned by training (capped). */
+  const ranksOf = async (slug: string) => {
+    const [spent, trained] = await Promise.all([store.skills(slug), store.training(slug)]);
+    const xp = new Map(trained.map((t) => [t.skill, t.xp]));
+    const rank = new Map(spent.map((s) => [s.id, s.rank]));
+    return Object.fromEntries(
+      SKILLS.map((s) => [s.id, effectiveRank(rank.get(s.id) ?? 0, xp.get(s.id) ?? 0)]),
+    ) as Record<SkillId, number>;
+  };
+
+  /** Boosts of energy drinks still running. */
+  const buffsOf = async (slug: string): Promise<BuffId[]> => {
+    const at = now().getTime();
+    return (await store.buffs(slug))
+      .filter((b) => b.until.getTime() > at && BUFFS.some((x) => x.id === b.buff))
+      .map((b) => b.buff as BuffId);
+  };
+
+  /** Stats the server trusts: worn items (still in the catalog) plus skills (spent and trained). */
   const statsOf = async (slug: string, slots?: Awaited<ReturnType<typeof equipmentOf>>) => {
     const worn = Object.values(slots ?? (await equipmentOf(slug)))
       .map((id) => (id ? catalogItem(id, catalog) : undefined))
       .filter((i) => i !== undefined);
-    const ranks = Object.fromEntries((await store.skills(slug)).map((s) => [s.id, s.rank]));
-    return characterStats(worn, ranks as Partial<Record<SkillId, number>>);
+    return characterStats(worn, await ranksOf(slug));
   };
 
   const equipmentResponse = async (slug: string): Promise<EquipmentResponse> => {
@@ -303,7 +334,7 @@ export function createApp(
     return c.json<EquipmentResponse>(await equipmentResponse(bud.slug));
   });
 
-  /** Buys gear for coins earned in the game. Real money will only ever buy looks (catalog rule). */
+  /** Buys gear, rides and drinks for coins earned in the game. */
   app.post('/v1/shop/:itemId/buy', requirePlayer(store), async (c) => {
     const item = catalogItem(c.req.param('itemId'), catalog);
     if (!item?.shop || !item.available || item.price.currency !== 'coins') {
@@ -315,7 +346,10 @@ export function createApp(
         403,
       );
     }
-    const result = await store.buyItem(c.get('bud').slug, item.id, item.price.amount);
+    const result =
+      item.kind === 'consumable'
+        ? await store.buyConsumable(c.get('bud').slug, item.id, item.price.amount)
+        : await store.buyItem(c.get('bud').slug, item.id, item.price.amount);
     if (result.status === 'owned') {
       return c.json<ApiError>({ error: { code: 'owned', message: 'Już to masz' } }, 409);
     }
@@ -327,6 +361,42 @@ export function createApp(
       );
     }
     return c.json<BuyResponse>({ itemId: item.id, coins: result.coins });
+  });
+
+  /**
+   * The premium shop: unique rides and weapons for gems. Gems come only from verified real-money purchases, and
+   * every premium item is exactly as strong as an earned twin (catalog rule), so money buys style, not power.
+   */
+  app.post('/v1/premium/:itemId/buy', requirePlayer(store), async (c) => {
+    const item = catalogItem(c.req.param('itemId'), catalog);
+    if (
+      !item?.premium ||
+      !item.available ||
+      item.price.currency !== 'gems' ||
+      item.price.amount <= 0
+    ) {
+      throw new HTTPException(404, { message: 'Tego nie ma w sklepie premium' });
+    }
+    const bud = c.get('bud');
+    if (levelFromXp(bud.xp).level < levelOf(item)) {
+      return c.json<ApiError>(
+        { error: { code: 'level_too_low', message: `Dostępne od poziomu ${levelOf(item)}` } },
+        403,
+      );
+    }
+    const result = await store.buyItemWithGems(bud.slug, item.id, item.price.amount);
+    if (result.status === 'owned') {
+      return c.json<ApiError>({ error: { code: 'owned', message: 'Już to masz' } }, 409);
+    }
+    if (result.status === 'poor') {
+      const missing = item.price.amount - result.gems;
+      return c.json<ApiError>(
+        { error: { code: 'not_enough_gems', message: `Brakuje ci ${missing} gemów` } },
+        409,
+      );
+    }
+    const wallet = await store.wallet(bud.slug);
+    return c.json<BuyResponse>({ itemId: item.id, coins: wallet.coins, gems: result.gems });
   });
 
   // ---------- duels (pojedynki), resolved here one turn at a time ----------
@@ -363,9 +433,10 @@ export function createApp(
     const slots = await equipmentOf(bud.slug);
     const stats = await statsOf(bud.slug, slots);
     const weapon = slots.held ? catalogItem(slots.held, catalog) : undefined;
+    const [ranks, buffs] = await Promise.all([ranksOf(bud.slug), buffsOf(bud.slug)]);
     const state = newFight(
       enemy.id,
-      budFighter(bud.name, bud.xp, stats, weapon),
+      budFighter(bud.name, bud.xp, stats, weapon, { perks: perksFor(ranks), buffs }),
       enemyFighter(enemy),
       randomInt(1, 2 ** 31 - 1),
     );
@@ -412,7 +483,9 @@ export function createApp(
     const levelBefore = levelFromXp(bud.xp).level;
     const xpGained = fightXp(enemy, levelBefore);
     const owned = new Set((await store.items(bud.slug)).map((i) => i.itemId));
-    const loot = rollLoot(enemy, state.bud.luck, catalog, owned, state.rng);
+    const loot = rollLoot(enemy, state.bud.luck, catalog, owned, state.rng, {
+      perks: state.bud.perks,
+    });
     const result = await store.finishFight(
       bud.slug,
       id.data,
@@ -424,6 +497,7 @@ export function createApp(
     );
     if (!result) return conflict();
     if (loot.itemId) await store.grantItem(bud.slug, loot.itemId, 'reward');
+    if (loot.drink) await store.grantConsumable(bud.slug, loot.drink, 1);
     const level = levelFromXp(result.xp).level;
     return c.json<FightResponse>({
       fight: view(id.data, state),
@@ -436,6 +510,7 @@ export function createApp(
         coinsGained: loot.coins,
         coins: result.coins,
         item: loot.itemId,
+        drink: loot.drink,
       },
     });
   });
@@ -568,8 +643,14 @@ export function createApp(
         409,
       );
     }
-    // Szczęście from worn gear adds coins (computed here, never by the game)
-    const coins = coinsWithLuck(cache.coins, (await statsOf(bud.slug)).luck);
+    // Szczęście from worn gear and the Fart drink adds coins, Szybka puszka 10% more (computed here, never by the game)
+    const [stats, ranks, buffs] = await Promise.all([
+      statsOf(bud.slug),
+      ranksOf(bud.slug),
+      buffsOf(bud.slug),
+    ]);
+    let coins = coinsWithLuck(cache.coins, stats.luck + buffBonus(buffs).luck);
+    if (perksFor(ranks).includes('szybka-puszka')) coins = Math.floor((coins * 110) / 100);
     const result = await store.openCache(bud.slug, cache.id, coins, cache.xp);
     if (!result) return c.json<ApiError>(already, 409);
     const before = levelFromXp(bud.xp).level;
@@ -588,13 +669,26 @@ export function createApp(
   // ---------- skills and wallet ----------
 
   const skillsOf = async (slug: string, xp: number): Promise<SkillsResponse> => {
-    const ranks = new Map((await store.skills(slug)).map((s) => [s.id, s.rank]));
+    const [spentRows, trainedRows] = await Promise.all([store.skills(slug), store.training(slug)]);
+    const ranks = new Map(spentRows.map((s) => [s.id, s.rank]));
+    const training = new Map(trainedRows.map((t) => [t.skill, t.xp]));
     const points = skillPointsForLevel(levelFromXp(xp).level);
     const spent = [...ranks.values()].reduce((a, b) => a + b, 0);
+    const skills = SKILLS.map((s) => {
+      const rank = ranks.get(s.id) ?? 0;
+      const trainingXp = training.get(s.id) ?? 0;
+      return {
+        id: s.id,
+        rank,
+        trainingXp,
+        trained: effectiveRank(rank, trainingXp) - Math.min(SKILL_MAX_RANK, rank),
+      };
+    });
     return {
       points,
       available: Math.max(0, points - spent),
-      skills: SKILLS.map((s) => ({ id: s.id, rank: ranks.get(s.id) ?? 0 })),
+      skills,
+      perks: perksFor(Object.fromEntries(skills.map((s) => [s.id, s.rank + s.trained]))),
     };
   };
 
@@ -609,7 +703,10 @@ export function createApp(
     if (!skill.success) throw new HTTPException(404, { message: 'Nie ma takiej umiejętności' });
     const bud = c.get('bud');
     const points = skillPointsForLevel(levelFromXp(bud.xp).level);
-    const rank = await store.upgradeSkill(bud.slug, skill.data, points, SKILL_MAX_RANK);
+    // ranks earned by training leave less room for points
+    const trained = (await store.training(bud.slug)).find((t) => t.skill === skill.data)?.xp ?? 0;
+    const maxSpent = Math.max(0, SKILL_MAX_RANK - trainedRanks(trained));
+    const rank = await store.upgradeSkill(bud.slug, skill.data, points, maxSpent);
     if (rank === null) {
       return c.json<ApiError>(
         {
@@ -622,6 +719,95 @@ export function createApp(
       );
     }
     return c.json<SkillsResponse>(await skillsOf(bud.slug, bud.xp));
+  });
+
+  // ---------- training on the map ----------
+
+  /**
+   * A training round at a spot on the map: the game reports the mini-game score (0..5), the server grants training
+   * XP (doubled by the Skupienie drink) once per cooldown and works out new ranks and perks.
+   */
+  app.post('/v1/buds/me/training/:spotId', requirePlayer(store), async (c) => {
+    const spotId = trainingSpotIdSchema.safeParse(c.req.param('spotId'));
+    const spot = spotId.success ? content.training.find((t) => t.id === spotId.data) : undefined;
+    if (!spot) throw new HTTPException(404, { message: 'Nie ma tu miejsca treningu' });
+    const input = trainRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success) {
+      return c.json<ApiError>({ error: { code: 'invalid_input', message: 'Podaj wynik' } }, 400);
+    }
+    const bud = c.get('bud');
+    const before = await ranksOf(bud.slug);
+    const focused = buffBonus(await buffsOf(bud.slug)).trainingFocus;
+    const xpGained = trainingXp(input.data.score, focused);
+    const total = await store.train(
+      bud.slug,
+      spot.id,
+      spot.skill,
+      xpGained,
+      TRAINING_COOLDOWN_SECONDS,
+    );
+    if (total === null) {
+      const last = await store.lastTrained(bud.slug, spot.id);
+      const wait = last
+        ? Math.max(
+            1,
+            TRAINING_COOLDOWN_SECONDS - Math.floor((now().getTime() - last.getTime()) / 1000),
+          )
+        : TRAINING_COOLDOWN_SECONDS;
+      return c.json<ApiError>(
+        { error: { code: 'resting', message: `Odpocznij chwilę. Wróć za ${wait} s.` } },
+        409,
+      );
+    }
+    const after = await ranksOf(bud.slug);
+    const had = new Set(perksFor(before));
+    return c.json<TrainResponse>({
+      spotId: spot.id,
+      skill: spot.skill,
+      xpGained,
+      trainingXp: total,
+      rank: after[spot.skill],
+      rankUp: after[spot.skill] > before[spot.skill],
+      perksUnlocked: perksFor(after).filter((p) => !had.has(p)),
+      cooldown: TRAINING_COOLDOWN_SECONDS,
+    });
+  });
+
+  // ---------- energy drinks (napoje) ----------
+
+  const consumablesOf = async (slug: string): Promise<ConsumablesResponse> => {
+    const at = now().getTime();
+    const [items, buffs] = await Promise.all([store.consumables(slug), store.buffs(slug)]);
+    return {
+      items: items.filter((i) => i.qty > 0 && catalogItem(i.itemId, catalog)?.drink),
+      buffs: buffs
+        .filter((b) => b.until.getTime() > at && BUFFS.some((x) => x.id === b.buff))
+        .map((b) => ({
+          buff: b.buff as BuffId,
+          until: b.until.toISOString(),
+          secondsLeft: Math.ceil((b.until.getTime() - at) / 1000),
+        })),
+    };
+  };
+
+  app.get('/v1/buds/me/consumables', requirePlayer(store), async (c) =>
+    c.json<ConsumablesResponse>(await consumablesOf(c.get('bud').slug)),
+  );
+
+  /** Drinks one energy drink: its boost runs for a while (drinking again restarts the timer). */
+  app.post('/v1/buds/me/consumables/:itemId/use', requirePlayer(store), async (c) => {
+    const item = catalogItem(c.req.param('itemId'), catalog);
+    const buff = item?.drink ? BUFFS.find((b) => b.id === item.drink) : undefined;
+    if (!item || !buff) throw new HTTPException(404, { message: 'Tego się nie pije' });
+    const bud = c.get('bud');
+    const until = await store.useConsumable(bud.slug, item.id, buff.id, buff.seconds);
+    if (!until) {
+      return c.json<ApiError>(
+        { error: { code: 'none_left', message: `Nie masz już: ${item.name}` } },
+        409,
+      );
+    }
+    return c.json<ConsumablesResponse>(await consumablesOf(bud.slug));
   });
 
   app.get('/v1/buds/me/wallet', requirePlayer(store), async (c) =>

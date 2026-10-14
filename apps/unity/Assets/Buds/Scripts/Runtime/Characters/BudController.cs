@@ -30,6 +30,53 @@ namespace Buds.Characters
         bool wasMoving;
         float dustTimer;
         Dust dust;
+        SpriteRenderer rideBehind;
+        SpriteRenderer rideOver;
+        float rideTime;
+
+        /// <summary>What a bud rides: the sprites of each facing and how high it sits.</summary>
+        public sealed class RideLook
+        {
+            public string Kind;
+            public Sprite Side;
+            public Sprite Front;
+            public Sprite Back;
+        }
+
+        /// <summary>The ride under the bud, or null on foot.</summary>
+        public RideLook Ride { get; private set; }
+
+        public void SetRide(RideLook ride)
+        {
+            Ride = ride;
+            if (!rideBehind)
+            {
+                rideBehind = new GameObject("Ride (behind)").AddComponent<SpriteRenderer>();
+                rideBehind.transform.SetParent(transform, false);
+                rideOver = new GameObject("Ride (over)").AddComponent<SpriteRenderer>();
+                rideOver.transform.SetParent(transform, false);
+            }
+            ShowRide();
+        }
+
+        /// <summary>Puts the ride's sprite for the current facing behind or over the bud.</summary>
+        void ShowRide()
+        {
+            if (!rideBehind) return;
+            if (Ride == null)
+            {
+                rideBehind.enabled = rideOver.enabled = false;
+                return;
+            }
+            var f = Motor.Facing;
+            var s = f == Facing.Side ? Ride.Side : f == Facing.Down ? Ride.Front : Ride.Back;
+            var over = Rides.DrawnOverBud(Ride.Kind, f);
+            rideBehind.enabled = !over && s;
+            rideOver.enabled = over && s;
+            var r = over ? rideOver : rideBehind;
+            r.sprite = s;
+            r.flipX = f == Facing.Side && Motor.FacingRight;
+        }
 
         public static BudController Spawn(BudSheet sheet, Vector3 position)
         {
@@ -75,7 +122,24 @@ namespace Buds.Characters
             wasMoving = moving;
             sprite.flipX = Motor.Facing == Facing.Side && Motor.FacingRight;
 
-            if (speed > 0.25f)
+            if (Ride != null)
+            {
+                // riding: the bud stands still on the ride, both bob a little over bumps
+                animTime = 0;
+                sprite.sprite = sheet.Get(Motor.Facing, 0);
+                rideTime += Time.deltaTime * speed;
+                var bob = speed > 0.25f ? Mathf.Abs(Mathf.Sin(rideTime * 2.4f)) * 0.025f : 0;
+                sprite.transform.localPosition = new Vector3(0, Rides.Rise(Ride.Kind) + bob, 0);
+                rideBehind.transform.localPosition = rideOver.transform.localPosition = new Vector3(0, bob * 0.5f, 0);
+                ShowRide();
+                dustTimer -= Time.deltaTime;
+                if (speed > BudMotor.RunSpeed && dustTimer <= 0)
+                {
+                    dustTimer = 0.09f;
+                    dust.Puff(transform.position + new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 0.04f, 0));
+                }
+            }
+            else if (speed > 0.25f)
             {
                 animTime += Time.deltaTime * speed * FramesPerTile;
                 var step = (int)animTime % WalkCycle.Length;
@@ -105,6 +169,11 @@ namespace Buds.Characters
         {
             // y-sorted with the props: walking north of a tree puts the bud behind its crown
             sprite.sortingOrder = WorldView.SortOrderFor(transform.position.y);
+            if (rideBehind)
+            {
+                rideBehind.sortingOrder = sprite.sortingOrder - 1;
+                rideOver.sortingOrder = sprite.sortingOrder + 1;
+            }
         }
 
         void FixedUpdate()
@@ -131,6 +200,7 @@ namespace Buds.Characters
             Motor.Face(dir, true);
             sprite.flipX = Motor.Facing == Facing.Side && Motor.FacingRight;
             sprite.sprite = sheet.Get(Motor.Facing, 0);
+            ShowRide();
         }
 
         /// <summary>The tile the bud is standing on, in map coordinates (y down).</summary>

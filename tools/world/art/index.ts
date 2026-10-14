@@ -4,6 +4,7 @@ import { INTERIOR } from './interior';
 import type { Prop } from './kit';
 import { MANOR } from './manor';
 import { QUEST_PROPS } from './quest';
+import { RIDE_PROPS, TRAINING_PROPS } from './rides';
 import { RUINS } from './ruins';
 import { TROPIC } from './tropic';
 
@@ -16,4 +17,6 @@ export const ALL_PROPS: Record<string, Prop> = {
   ...RUINS,
   ...QUEST_PROPS,
   ...INTERIOR,
+  ...RIDE_PROPS,
+  ...TRAINING_PROPS,
 };

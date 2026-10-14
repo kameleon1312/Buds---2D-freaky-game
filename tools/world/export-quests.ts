@@ -16,6 +16,12 @@ import {
   SKILLS,
   SKILL_GEAR_MAX,
   SKILL_MAX_RANK,
+  BUFFS,
+  PERKS,
+  PERK_MOVES,
+  TRAINING_COOLDOWN_SECONDS,
+  TRAINING_MAX_SCORE,
+  TRAINING_XP_PER_RANK,
   MOVES,
   MOVES_BY_WEAPON,
   SLOTS,
@@ -48,6 +54,7 @@ for (const id of new Set([
   ...DISTRICTS.map((d) => d.id),
   TUTORIAL_ISLAND.id,
   ...CONTENT.caches.map(cacheMap),
+  ...CONTENT.training.map((t) => t.map ?? t.district),
 ])) {
   let text: string;
   try {
@@ -71,6 +78,20 @@ for (const c of CONTENT.caches) {
   if (prop && !prop.startsWith('podloga-')) problems.push(`cache ${c.id} lies on prop ${prop}`);
   const set = npcCells.get(id) ?? new Set<string>();
   set.add(`${c.x},${c.y}`);
+  npcCells.set(id, set);
+}
+// training stations block their cell like a cache
+for (const t of CONTENT.training) {
+  const id = t.map ?? t.district;
+  if (!spawnOf.has(id)) continue;
+  const m = mapOf(id);
+  if (!walkable(m, t.x, t.y))
+    problems.push(`training spot ${t.id} stands on a blocked cell (${t.x},${t.y})`);
+  if (m.props[t.y]?.[t.x])
+    problems.push(`training spot ${t.id} stands on prop ${m.props[t.y]![t.x]}`);
+  const set = npcCells.get(id) ?? new Set<string>();
+  if (set.has(`${t.x},${t.y}`)) problems.push(`training spot ${t.id} shares its cell`);
+  set.add(`${t.x},${t.y}`);
   npcCells.set(id, set);
 }
 // opponents stand like NPCs (one per spot)
@@ -121,6 +142,18 @@ for (const [id, blocked] of npcCells) {
   const [sx, sy] = spawnOf.get(id)!;
   if (reach.get(id)!.size !== reachable(mapOf(id), sx, sy).size - blocked.size)
     problems.push(`${id}: NPCs or caches cut off part of the map`);
+}
+for (const t of CONTENT.training) {
+  if (!nextTo(t.map ?? t.district, t.x, t.y))
+    problems.push(`training spot ${t.id} can't be reached`);
+  if (!ALL_PROPS[`trening-${t.look}`])
+    problems.push(`training spot ${t.id}: no art trening-${t.look} (tools/world/art/rides.ts)`);
+}
+for (const i of CATALOG.filter((i) => i.slot === 'mount')) {
+  const kind = i.id.replace(/^mount-/, '');
+  for (const v of ['bok', 'przod', 'tyl'])
+    if (!ALL_PROPS[`jazda-${kind}-${v}`])
+      problems.push(`mount ${i.id}: no art jazda-${kind}-${v} (tools/world/art/rides.ts)`);
 }
 for (const c of CONTENT.caches)
   if (!ALL_PROPS[`skrytka-${c.look}`] || !ALL_PROPS[`skrytka-${c.look}-pusta`])
@@ -204,10 +237,14 @@ const json = {
     luck: i.bonus?.luck ?? 0,
     skillBonus: Object.entries(i.bonus?.skills ?? {}).map(([id, rank]) => ({ id, rank })),
     coins: i.price.currency === 'coins' ? i.price.amount : 0,
+    gems: i.price.currency === 'gems' ? i.price.amount : 0,
+    twin: i.twin ?? '',
     minLevel: i.minLevel ?? 1,
     weapon: i.weapon ?? '',
     attack: i.bonus?.attack ?? 0,
     shop: !!i.shop,
+    mountSpeed: i.mountSpeed ?? 0,
+    drink: i.drink ?? '',
     premium: i.premium,
     available: i.available,
     description: i.description ?? '',
@@ -228,6 +265,29 @@ const json = {
     district,
   })),
   skillMaxRank: SKILL_MAX_RANK,
+  perks: PERKS.map(({ id, skill, rank, name, description }) => ({
+    id,
+    skill,
+    rank,
+    name,
+    description,
+    move: PERK_MOVES[id] ?? '',
+  })),
+  buffs: BUFFS.map(({ id, name, seconds, description }) => ({ id, name, seconds, description })),
+  training: CONTENT.training.map((t) => ({
+    id: t.id,
+    district: t.district,
+    map: t.map ?? t.district,
+    x: t.x,
+    y: t.y,
+    skill: t.skill,
+    name: t.name,
+    look: t.look,
+    hint: t.hint,
+  })),
+  trainingXpPerRank: TRAINING_XP_PER_RANK,
+  trainingCooldown: TRAINING_COOLDOWN_SECONDS,
+  trainingMaxScore: TRAINING_MAX_SCORE,
   enemies: CONTENT.enemies.map((en) => ({
     id: en.id,
     name: en.name,
@@ -284,5 +344,5 @@ for (const en of CONTENT.enemies)
 
 const xp = CONTENT.quests.reduce((sum, q) => sum + q.xp, 0);
 console.info(
-  `exported ${CONTENT.npcs.length} NPCs, ${CONTENT.quests.length} quests (${xp} XP), ${CONTENT.caches.length} caches, ${CONTENT.enemies.length} opponents, ${CATALOG.length} items`,
+  `exported ${CONTENT.npcs.length} NPCs, ${CONTENT.quests.length} quests (${xp} XP), ${CONTENT.caches.length} caches, ${CONTENT.enemies.length} opponents, ${CONTENT.training.length} training spots, ${CATALOG.length} items`,
 );

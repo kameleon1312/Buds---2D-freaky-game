@@ -312,6 +312,40 @@ namespace Buds.UI
             mapButton = button.gameObject;
         }
 
+        GameObject rideButton;
+        Text rideLabel;
+        Text buffLine;
+
+        /// <summary>"Wsiądź / Zsiądź [R]" next to the map button, while a ride is worn and the bud is outdoors.</summary>
+        public void SetRideButton(bool visible, string label, Action onClick)
+        {
+            if (!rideButton && visible)
+            {
+                var button = UiKit.Button("RideButton", canvas.transform, label, new Vector2(220, 62), onClick, UiKit.Tone.Rep, 26);
+                UiKit.Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(496, -164), new Vector2(220, 62), new Vector2(0, 1));
+                rideButton = button.gameObject;
+                rideButton.transform.SetAsFirstSibling(); // under panels opened later
+                rideLabel = button.GetComponentInChildren<Text>();
+            }
+            if (!rideButton) return;
+            rideButton.SetActive(visible);
+            rideLabel.text = label;
+        }
+
+        /// <summary>Running boosts of energy drinks under the HUD buttons ("" hides it).</summary>
+        public void SetBuffLine(string text)
+        {
+            if (!buffLine)
+            {
+                buffLine = UiKit.Outlined("Buffs", canvas.transform, "", 24, UiKit.Gold400);
+                buffLine.alignment = TextAnchor.UpperLeft;
+                UiKit.Place(buffLine.rectTransform, new Vector2(0, 1), new Vector2(28, -238), new Vector2(760, 34), new Vector2(0, 1));
+                buffLine.transform.SetAsFirstSibling();
+            }
+            buffLine.text = text ?? "";
+            buffLine.gameObject.SetActive(!string.IsNullOrEmpty(text));
+        }
+
         // ---------- fade (walking through doors and between districts) ----------
 
         void BuildFade()

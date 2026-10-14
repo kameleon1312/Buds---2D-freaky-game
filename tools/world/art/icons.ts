@@ -1,6 +1,7 @@
 // Icons for the Bud panel: one per catalog item a player can own or wear, and one per skill.
 // 64×64 units, centred, rendered at 2× (128 px). No outline around the icon frame — the UI slot draws it.
 import { GEAR_ICONS } from './gear-icons';
+import { RIDE_ICONS } from './rides';
 import { circ, flat, poly, rr, shaded, stroke, type Tone } from './kit';
 
 const LINE = '#121218';
@@ -409,4 +410,7 @@ const ICONS_SKILLS: Record<string, Icon> = {
   },
 };
 
-export const ICONS = { items: { ...GEAR_ICONS, ...ICONS_ITEMS }, skills: ICONS_SKILLS };
+export const ICONS = {
+  items: { ...GEAR_ICONS, ...RIDE_ICONS, ...ICONS_ITEMS },
+  skills: ICONS_SKILLS,
+};

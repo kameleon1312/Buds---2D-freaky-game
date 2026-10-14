@@ -76,15 +76,23 @@ namespace Buds.Quests
         public int luck;
         public SkillBonusData[] skillBonus;
         public int coins; // price in the coin shop (the server charges)
+        public int gems; // price in the premium shop (gems come only from real-money purchases)
+        public string twin; // premium items with power: the earned item they match exactly
         public int minLevel; // the bud's level needed to wear or buy it
         public string weapon; // held items: piesci | kij | procarka | spray | mikrofon | deska
         public int attack;
         public bool shop;
+        public int mountSpeed; // mounts: % faster while riding (not part of the gear speed cap)
+        public string drink; // energy drinks: the boost (turbo | sila | pancerz | fart | skupienie | regeneracja)
         public bool premium; // real money: looks only
         public bool available;
         public string description;
 
         public bool IsGear => !string.IsNullOrEmpty(slot);
+        public bool IsMount => slot == "mount";
+        public bool IsDrink => !string.IsNullOrEmpty(drink);
+        /// <summary>Sold in the premium shop for gems (unique look, the power of its earned twin).</summary>
+        public bool IsPremiumShop => premium && available && gems > 0;
     }
 
     /// <summary>An opponent for duels; the server holds its stats and resolves the fight.</summary>
@@ -164,6 +172,43 @@ namespace Buds.Quests
         public string text;
     }
 
+    /// <summary>A special ability unlocked by a skill's rank (3 and 5); some add a duel move.</summary>
+    [Serializable]
+    public sealed class PerkData
+    {
+        public string id;
+        public string skill;
+        public int rank;
+        public string name;
+        public string description;
+        public string move; // "" = no move
+    }
+
+    /// <summary>A boost of an energy drink.</summary>
+    [Serializable]
+    public sealed class BuffData
+    {
+        public string id;
+        public string name;
+        public int seconds;
+        public string description;
+    }
+
+    /// <summary>A training station on the map: a timing mini-game that trains one skill.</summary>
+    [Serializable]
+    public sealed class TrainingSpotData
+    {
+        public string id;
+        public string district;
+        public string map;
+        public int x;
+        public int y;
+        public string skill;
+        public string name;
+        public string look; // art: trening-<look>
+        public string hint;
+    }
+
     /// <summary>All NPCs and quests the game knows (the API validates completions against the same data).</summary>
     [Serializable]
     public sealed class QuestContent
@@ -180,6 +225,12 @@ namespace Buds.Quests
         public EnemyData[] enemies;
         public MoveData[] moves;
         public WeaponData[] weapons;
+        public PerkData[] perks;
+        public BuffData[] buffs;
+        public TrainingSpotData[] training;
+        public int trainingXpPerRank;
+        public int trainingCooldown;
+        public int trainingMaxScore;
 
         public static QuestContent Parse(string json)
         {
@@ -194,6 +245,14 @@ namespace Buds.Quests
             content.enemies ??= Array.Empty<EnemyData>();
             content.moves ??= Array.Empty<MoveData>();
             content.weapons ??= Array.Empty<WeaponData>();
+            content.perks ??= Array.Empty<PerkData>();
+            content.buffs ??= Array.Empty<BuffData>();
+            content.training ??= Array.Empty<TrainingSpotData>();
+            foreach (var t in content.training)
+                if (string.IsNullOrEmpty(t.map)) t.map = t.district;
+            if (content.trainingXpPerRank < 1) content.trainingXpPerRank = 100;
+            if (content.trainingCooldown < 1) content.trainingCooldown = 90;
+            if (content.trainingMaxScore < 1) content.trainingMaxScore = 5;
             foreach (var e in content.enemies)
             {
                 e.lines ??= Array.Empty<string>();
@@ -205,6 +264,8 @@ namespace Buds.Quests
                 i.skillBonus ??= Array.Empty<SkillBonusData>();
                 i.description ??= "";
                 i.weapon ??= "";
+                i.drink ??= "";
+                i.twin ??= "";
                 if (i.minLevel < 1) i.minLevel = 1;
             }
             foreach (var c in content.caches)
@@ -242,6 +303,19 @@ namespace Buds.Quests
         }
 
         public QuestData Quest(string id) => Array.Find(quests, q => q.id == id);
+
+        public BuffData Buff(string id) => Array.Find(buffs, b => b.id == id);
+
+        public PerkData Perk(string id) => Array.Find(perks, p => p.id == id);
+
+        /// <summary>The perks a bud has with these effective ranks (mirror of packages/shared perksFor).</summary>
+        public List<string> PerksFor(IReadOnlyDictionary<string, int> ranks)
+        {
+            var list = new List<string>();
+            foreach (var p in perks)
+                if (ranks != null && ranks.TryGetValue(p.skill, out var r) && r >= p.rank) list.Add(p.id);
+            return list;
+        }
 
         public ItemData Item(string id) => Array.Find(items, i => i.id == id);
 

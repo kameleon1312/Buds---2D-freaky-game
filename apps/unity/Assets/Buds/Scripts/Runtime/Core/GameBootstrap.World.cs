@@ -270,7 +270,7 @@ namespace Buds.Core
         {
             await OpenPanel();
             await Awaitable.WaitForSecondsAsync(0.4f);
-            panel.SelectTab(3);
+            panel.SelectTab(BudPanel.TabShop);
             panel.SelectShopItem("buty-trampki");
             await shot("g1-sklep.png");
             await Buy("buty-trampki");

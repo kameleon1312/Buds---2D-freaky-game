@@ -8,7 +8,9 @@ import { LAS_PALMAS } from './content/las-palmas';
 import { LOS_KARKOS } from './content/los-karkos';
 import { MIASTO_ZIOMKOW } from './content/miasto-ziomkow';
 import { WYSPA_STARTOWA } from './content/wyspa-startowa';
+import { TRAINING_SPOTS } from './content/training';
 import { levelFromXp } from './level';
+import { trainingProblems, trainingSpotSchema } from './training';
 
 /**
  * NPCs and quests — data the game shows and the API uses to grant XP. Content lives in `content/<district>.ts`
@@ -82,6 +84,7 @@ export const districtContentSchema = z.object({
   quests: z.array(questSchema),
   caches: z.array(cacheSchema).default([]),
   enemies: z.array(enemySchema).default([]),
+  training: z.array(trainingSpotSchema).default([]),
 });
 export type DistrictContent = z.infer<typeof districtContentSchema>;
 
@@ -93,6 +96,7 @@ export const CONTENT: DistrictContent = (() => {
     quests: all.flatMap((c) => c.quests),
     caches: all.flatMap((c) => c.caches),
     enemies: all.flatMap((c) => c.enemies),
+    training: TRAINING_SPOTS,
   });
 })();
 
@@ -164,6 +168,7 @@ export function contentProblems(content: DistrictContent): string[] {
   };
   for (const q of content.quests) if (!visit(q.id)) problems.push(`${q.id}: circular requirements`);
   problems.push(...cacheProblems(content.caches));
+  problems.push(...trainingProblems(content.training));
   const enemyIds = new Set<string>();
   for (const e of content.enemies) {
     if (enemyIds.has(e.id)) problems.push(`duplicate enemy ${e.id}`);

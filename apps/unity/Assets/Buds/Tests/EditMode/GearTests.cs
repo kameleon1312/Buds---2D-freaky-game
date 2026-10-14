@@ -23,12 +23,22 @@ namespace Buds.Tests
             Assert.IsTrue(shoes.shop);
             Assert.IsTrue(shoes.IsGear);
             Assert.IsFalse(Content.Item("outfit-bluza").IsGear, "looks are not gear");
-            Assert.AreEqual(8, Content.slots.Length);
+            Assert.AreEqual(9, Content.slots.Length); // eight body slots + the ride
             Assert.AreEqual(4, Content.stats.Length);
+            // real money buys looks and an earlier start: a premium item with power matches its earned twin exactly
             foreach (var item in Content.items)
-                if (item.premium)
-                    Assert.IsTrue(item.speed == 0 && item.armor == 0 && item.luck == 0 && item.skillBonus.Length == 0,
-                        $"{item.id}: real money buys looks only");
+            {
+                if (!item.premium) continue;
+                var power = item.attack + item.speed + item.armor + item.luck + item.mountSpeed + item.skillBonus.Length;
+                if (power == 0 && string.IsNullOrEmpty(item.weapon)) continue;
+                var twin = Content.Item(item.twin);
+                Assert.IsNotNull(twin, $"{item.id} needs an earned twin");
+                Assert.IsFalse(twin.premium, item.id);
+                Assert.AreEqual((twin.attack, twin.speed, twin.armor, twin.luck, twin.mountSpeed, twin.weapon, twin.slot),
+                    (item.attack, item.speed, item.armor, item.luck, item.mountSpeed, item.weapon, item.slot), item.id);
+                Assert.AreEqual(0, item.coins, $"{item.id}: gems only");
+                Assert.Greater(item.gems, 0, item.id);
+            }
         }
 
         [Test]
@@ -94,7 +104,8 @@ namespace Buds.Tests
                 var n = 0;
                 foreach (var item in Content.items)
                     if (item.slot == Content.slots[slot].id) n++;
-                Assert.GreaterOrEqual(n, 10, Content.slots[slot].id);
+                // ten or more items per body slot; rides are their own small set (RideTests)
+                Assert.GreaterOrEqual(n, Content.slots[slot].id == "mount" ? 6 : 10, Content.slots[slot].id);
             }
         }
 

@@ -25,6 +25,8 @@ namespace Buds.Characters
         public bool CancelPressed { get; private set; }
         /// <summary>I / Tab / C: open or close the Bud panel.</summary>
         public bool PanelPressed { get; private set; }
+        /// <summary>R: get on or off the ride.</summary>
+        public bool RidePressed { get; private set; }
         /// <summary>True when this frame's interaction came from a key (not a screen tap, which may hit a UI button).</summary>
         public bool InteractFromKey { get; private set; }
 
@@ -49,6 +51,7 @@ namespace Buds.Characters
             CancelPressed = false;
             PanelPressed = false;
             MapPressed = false;
+            RidePressed = false;
             Run = false;
             pendingInteract = false;
             var move = Vector2.zero;
@@ -67,6 +70,7 @@ namespace Buds.Characters
                 if (kb.iKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame || kb.cKey.wasPressedThisFrame)
                     PanelPressed = true;
                 if (kb.mKey.wasPressedThisFrame) MapPressed = true;
+                if (kb.rKey.wasPressedThisFrame) RidePressed = true;
                 Run = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
             }
 

@@ -96,7 +96,7 @@ function bonusText(item: CatalogItem): string {
 
 /** One example item per slot, the strongest the coin shop or quests offer. */
 const GEAR = SLOTS.map((slot) => {
-  const items = CATALOG.filter((i) => i.available && i.slot === slot.id);
+  const items = CATALOG.filter((i) => i.available && !i.premium && i.slot === slot.id);
   const best = items.sort((a, b) => b.price.amount - a.price.amount)[0];
   return { slot, item: best };
 });
@@ -176,9 +176,10 @@ export default function HomePage() {
       <section className="container section">
         <h2 className="section-title">Ekwipunek od stóp do głów</h2>
         <p className="lead section-lead">
-          Osiem miejsc na postaci. Każdy przedmiot dodaje coś do statystyk albo umiejętności, a
-          zdobywasz je w zadaniach, skrytkach i w sklepie za monety z gry. Za prawdziwe pieniądze
-          będzie tylko wygląd, nigdy przewaga.
+          Osiem miejsc na postaci i wierzchowiec: od deskorolki po quada. Każdy przedmiot dodaje coś
+          do statystyk albo umiejętności, a zdobywasz je w zadaniach, skrytkach, pojedynkach i w
+          sklepie za monety z gry. Za prawdziwe pieniądze kupisz unikatowe wierzchowce i bronie:
+          wyjątkowy wygląd, ale dokładnie ta sama moc co przedmioty z gry.
         </p>
         <div className="gear-showcase card">
           <div className="gear-doll" aria-hidden>

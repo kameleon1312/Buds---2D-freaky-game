@@ -9,6 +9,7 @@ import type {
 } from '@buds/shared';
 
 export type BuyResult = { status: 'ok' | 'owned' | 'poor'; coins: number };
+export type GemBuyResult = { status: 'ok' | 'owned' | 'poor'; gems: number };
 /** ok = linked now, mine = already this user's, taken = another user's. */
 export type ClaimResult = 'ok' | 'mine' | 'taken';
 
@@ -68,6 +69,10 @@ export interface BudStore {
   equip(slug: string, slot: SlotId, itemId: string | null): Promise<void>;
   /** Buys an item for coins atomically: never twice, never below zero coins. */
   buyItem(slug: string, itemId: string, price: number): Promise<BuyResult>;
+  /** Buys a premium item for gems atomically: never twice, never below zero gems. Source "purchase". */
+  buyItemWithGems(slug: string, itemId: string, price: number): Promise<GemBuyResult>;
+  /** Server-only: gems from a verified real-money purchase. Returns the new balance. */
+  grantGems(slug: string, gems: number): Promise<number>;
   /** Buds of an account, oldest first. */
   budsOfUser(userId: string): Promise<BudRecord[]>;
   /** The account a bud belongs to, or null for a guest bud. */
@@ -96,4 +101,29 @@ export interface BudStore {
   ): Promise<{ xp: number; coins: number } | null>;
   /** When the bud last beat this opponent. */
   lastWin(slug: string, enemyId: string): Promise<Date | null>;
+  /** Training XP per skill (skills never trained are absent). */
+  training(slug: string): Promise<{ skill: string; xp: number }[]>;
+  /** When the bud last trained at this spot. */
+  lastTrained(slug: string, spotId: string): Promise<Date | null>;
+  /**
+   * A training round: if the spot is not cooling down (`cooldownSeconds` since the last round), records it and adds
+   * `xp` to the skill atomically. Returns the skill's new training XP, or null while cooling down.
+   */
+  train(
+    slug: string,
+    spotId: string,
+    skill: string,
+    xp: number,
+    cooldownSeconds: number,
+  ): Promise<number | null>;
+  /** Energy drinks the bud carries (none = absent or qty 0). */
+  consumables(slug: string): Promise<{ itemId: string; qty: number }[]>;
+  /** Server-only (loot). Adds drinks to the count. */
+  grantConsumable(slug: string, itemId: string, qty: number): Promise<void>;
+  /** Buys one drink for coins atomically (never below zero coins); drinks can be bought again and again. */
+  buyConsumable(slug: string, itemId: string, price: number): Promise<BuyResult>;
+  /** Drinks one: takes it from the count and starts its boost. Returns the boost's end, or null if none left. */
+  useConsumable(slug: string, itemId: string, buff: string, seconds: number): Promise<Date | null>;
+  /** Boosts with their end (also ended ones; the API filters by time). */
+  buffs(slug: string): Promise<{ buff: string; until: Date }[]>;
 }
