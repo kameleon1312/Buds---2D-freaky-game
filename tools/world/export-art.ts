@@ -16,10 +16,25 @@ export const PPU = 96; // output pixels per tile (Unity sprite pixelsPerUnit)
 const svgOf = (p: { w: number; h: number; body: string }) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}">${p.body}</svg>`;
 
+// lettering on props (banners, booth signs) uses the game's Rubik Black, never a system font
+const SIGN_FONT = {
+  fontFiles: [
+    fileURLToPath(
+      new URL('../../apps/unity/Assets/Buds/Resources/Fonts/Rubik-Black.ttf', import.meta.url),
+    ),
+  ],
+  loadSystemFonts: false,
+  defaultFontFamily: 'Rubik Black',
+};
+
 const args = process.argv.slice(2);
 if (args[0] === '--preview') {
   const filter = args[2];
-  const entries = Object.entries(ALL_PROPS).filter(([name]) => !filter || name.includes(filter));
+  // a filter like "karuzela|mlyn" matches any of its parts
+  const parts = filter?.split('|') ?? [];
+  const entries = Object.entries(ALL_PROPS).filter(
+    ([name]) => !filter || parts.some((f) => name.includes(f)),
+  );
   const cols = 6;
   const cell = 7 * T;
   let x = 0;
@@ -43,7 +58,10 @@ if (args[0] === '--preview') {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#9fd07a"/>${body}</svg>`;
   writeFileSync(
     args[1]!,
-    new Resvg(svg, { fitTo: { mode: 'zoom', value: 0.5 }, font: { loadSystemFonts: true } })
+    new Resvg(svg, {
+      fitTo: { mode: 'zoom', value: 0.5 },
+      font: { ...SIGN_FONT, loadSystemFonts: true },
+    })
       .render()
       .asPng(),
   );
@@ -62,7 +80,10 @@ if (args[0] === '--preview') {
     foot: [number, number];
   }[] = [];
   for (const [name, p] of Object.entries(ALL_PROPS)) {
-    const png = new Resvg(svgOf(p), { fitTo: { mode: 'zoom', value: scale } }).render();
+    const png = new Resvg(svgOf(p), {
+      fitTo: { mode: 'zoom', value: scale },
+      font: SIGN_FONT,
+    }).render();
     writeFileSync(`${dir}${name}.png`, png.asPng());
     // pivot from the bottom-left in 0..1, measured on the rendered (rounded) pixel size
     manifest.push({

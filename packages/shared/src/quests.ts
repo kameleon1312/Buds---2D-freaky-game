@@ -4,9 +4,12 @@ import { cacheProblems, cacheSchema } from './caches';
 import { enemySchema } from './combat';
 import { catalogItem } from './catalog';
 import { DWOR_CARSKI } from './content/dwor-carski';
+import { DZIKA_PUSZCZA } from './content/dzika-puszcza';
 import { LAS_PALMAS } from './content/las-palmas';
+import { LOCALS } from './content/locals';
 import { LOS_KARKOS } from './content/los-karkos';
 import { MIASTO_ZIOMKOW } from './content/miasto-ziomkow';
+import { NEW_PLACES } from './content/new-places';
 import { WYSPA_STARTOWA } from './content/wyspa-startowa';
 import { TRAINING_SPOTS } from './content/training';
 import { levelFromXp } from './level';
@@ -33,6 +36,11 @@ export const npcSchema = z.object({
   look: budLookSchema,
   /** Small talk when the NPC has nothing for you; one line is picked each time. */
   lines: z.array(z.string().min(1)).min(1),
+  /**
+   * Side characters stroll up to this many tiles around their cell (0 = stands still). Quest givers and quest
+   * talk targets always stand still, so the player finds them where the map says.
+   */
+  wander: z.number().int().min(0).max(4).default(0),
 });
 export type Npc = z.infer<typeof npcSchema>;
 export type NpcInput = z.input<typeof npcSchema>;
@@ -90,13 +98,22 @@ export type DistrictContent = z.infer<typeof districtContentSchema>;
 
 /** All content, validated once at load. */
 export const CONTENT: DistrictContent = (() => {
-  const all = [WYSPA_STARTOWA, MIASTO_ZIOMKOW, LAS_PALMAS, DWOR_CARSKI, LOS_KARKOS];
+  // newer content goes last, so the original order (first quest, first boss…) stays as it was
+  const all = [
+    WYSPA_STARTOWA,
+    MIASTO_ZIOMKOW,
+    LAS_PALMAS,
+    DWOR_CARSKI,
+    LOS_KARKOS,
+    DZIKA_PUSZCZA,
+    NEW_PLACES,
+  ];
   return districtContentSchema.parse({
-    npcs: all.flatMap((c) => c.npcs),
+    npcs: [...all.flatMap((c) => c.npcs), ...LOCALS],
     quests: all.flatMap((c) => c.quests),
     caches: all.flatMap((c) => c.caches),
     enemies: all.flatMap((c) => c.enemies),
-    training: TRAINING_SPOTS,
+    training: [...TRAINING_SPOTS, ...DZIKA_PUSZCZA.training],
   });
 })();
 
@@ -134,6 +151,15 @@ export function contentProblems(content: DistrictContent): string[] {
     if (questIds.has(q.id)) problems.push(`duplicate quest ${q.id}`);
     questIds.add(q.id);
   }
+  // the people quests point to stay put
+  const stay = new Set(
+    content.quests.flatMap((q) => [
+      q.giver,
+      ...q.steps.flatMap((s) => (s.kind === 'talk' ? [s.npc] : [])),
+    ]),
+  );
+  for (const n of content.npcs)
+    if (n.wander > 0 && stay.has(n.id)) problems.push(`${n.id}: a quest NPC must not wander`);
   for (const q of content.quests) {
     const giver = content.npcs.find((n) => n.id === q.giver);
     if (!giver) problems.push(`${q.id}: unknown giver ${q.giver}`);

@@ -322,6 +322,15 @@ export function miastoZiomkow(): MapCanvas {
   m.exit([62, 0, 65, 0], 'las-palmas');
   m.exit([62, H - 1, 65, H - 1], 'dwor-carski');
   m.exit([W - 1, 46, W - 1, 49], 'los-karkos');
+  // west: a forest trail from the park into Dzika Puszcza
+  m.rect([0, 58, 14, 61], { g: 'path' });
+  m.exit([0, 58, 0, 61], 'dzika-puszcza');
+  m.sign(
+    12,
+    57,
+    'Do Dzikiej Puszczy',
+    'Las bez końca: rzeka, jezioro i obozowisko. Wejście od poziomu 2.',
+  );
 
   // ---------- zones ----------
   m.zone([36, 22, 97, 74], 'Śródmieście');

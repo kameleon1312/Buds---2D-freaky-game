@@ -10,12 +10,12 @@ namespace Buds.Characters
     /// </summary>
     public sealed class BudMotor
     {
-        public const float WalkSpeed = 4.5f; // tiles per second
-        public const float RunSpeed = 7.2f;
-        /// <summary>Tiles/s²: full walking speed in about a tenth of a second.</summary>
-        public const float Acceleration = 40f;
+        public const float WalkSpeed = 3.8f; // tiles per second: a brisk walk for a bud two tiles tall
+        public const float RunSpeed = 6.2f;
+        /// <summary>Tiles/s²: full walking speed in about an eighth of a second (a step to get going, not a snap).</summary>
+        public const float Acceleration = 30f;
         /// <summary>Stopping and turning around are a bit snappier than starting.</summary>
-        public const float Braking = 60f;
+        public const float Braking = 45f;
         /// <summary>The other axis has to win by this factor before the facing flips, so diagonals don't flicker.</summary>
         public const float FacingBias = 1.3f;
         /// <summary>How far (tiles) the bud is nudged sideways around a corner it pushes against.</summary>

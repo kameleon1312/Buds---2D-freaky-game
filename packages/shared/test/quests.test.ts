@@ -29,6 +29,31 @@ describe('quest content', () => {
     for (const n of CONTENT.npcs) expect(n.lines.length).toBeGreaterThan(0);
   });
 
+  it('quest NPCs stand still, locals stroll and give no quests', () => {
+    const questNpcs = new Set(
+      CONTENT.quests.flatMap((q) => [
+        q.giver,
+        ...q.steps.flatMap((s) => (s.kind === 'talk' ? [s.npc] : [])),
+      ]),
+    );
+    const locals = CONTENT.npcs.filter((n) => n.wander > 0);
+    expect(locals.length).toBeGreaterThanOrEqual(20);
+    for (const n of CONTENT.npcs) if (questNpcs.has(n.id)) expect(n.wander, n.id).toBe(0);
+    for (const n of locals) expect(questNpcs.has(n.id), n.id).toBe(false);
+    // every district has some life in it
+    for (const d of new Set(CONTENT.npcs.map((n) => n.district)))
+      expect(locals.filter((n) => n.district === d).length, d).toBeGreaterThanOrEqual(3);
+  });
+
+  it('flags a quest NPC that wanders', () => {
+    const giver = CONTENT.npcs.find((n) => n.id === CONTENT.quests[0]!.giver)!;
+    const problems = contentProblems({
+      ...CONTENT,
+      npcs: CONTENT.npcs.map((n) => (n === giver ? { ...n, wander: 2 } : n)),
+    });
+    expect(problems.some((p) => p.includes('must not wander'))).toBe(true);
+  });
+
   it('detects broken content', () => {
     const broken: DistrictContent = {
       npcs: [CONTENT.npcs[0]!, CONTENT.npcs[0]!],

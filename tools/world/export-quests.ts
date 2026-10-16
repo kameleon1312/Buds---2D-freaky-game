@@ -203,13 +203,14 @@ const flatStep = (s: Quest['steps'][number]) => ({
   spots: s.kind === 'collect' ? s.spots : [],
 });
 const json = {
-  npcs: CONTENT.npcs.map(({ id, name, district, x, y, lines }) => ({
+  npcs: CONTENT.npcs.map(({ id, name, district, x, y, lines, wander }) => ({
     id,
     name,
     district,
     x,
     y,
     lines,
+    wander,
   })),
   quests: CONTENT.quests.map((q) => ({
     id: q.id,

@@ -2,6 +2,7 @@
 // joined to the old town by roads, with plots (m.plot) kept clear for the quests, NPCs and attractions to come.
 // The old part keeps its coordinates, so everything placed there before stays where it was.
 import { MapCanvas, noise2, rng, type Rect } from './lib';
+import * as places from './places';
 
 /** A street of `width` cells (no dashes) — a thin wrapper so each district reads the same. */
 const street = (m: MapCanvas, axis: 'h' | 'v', from: number, to: number, at: number, width = 2) =>
@@ -39,12 +40,12 @@ export function miastoZiomkowOutskirts(m: MapCanvas) {
   );
 
   // ---------- Stadion and Lunapark: plots for attractions ----------
-  m.plot([132, 54, 168, 78], 'mz-stadion', 'attraction', 'Stadion Ziomków', 'plaza');
+  places.stadion(m);
   m.zone([130, 52, 170, 80], 'Stadion');
-  m.sign(149, 52, 'Stadion Ziomków', 'Tu powstaje stadion. Wkrótce: mecze, turnieje i doping.');
-  m.plot([134, 112, 170, 126], 'mz-lunapark', 'attraction', 'Lunapark', 'concrete');
+  m.sign(149, 52, 'Stadion Ziomków', 'Boisko, trybuny i doping. Trenerka Kasia szuka zawodników.');
+  places.lunapark(m);
   m.zone([132, 110, 172, 128], 'Lunapark');
-  m.sign(151, 111, 'Lunapark', 'Karuzela jeszcze w pudłach. Wkrótce: mini-gry i nagrody.');
+  m.sign(151, 111, 'Lunapark', 'Karuzela, diabelski młyn i wata cukrowa. Bilety u Pana Leszka.');
 
   // ---------- Port Rzeczny (south-west): a river with a quay ----------
   m.rect([4, 120, 124, 126], { g: 'water', s: true });
@@ -56,12 +57,17 @@ export function miastoZiomkowOutskirts(m: MapCanvas) {
   m.road('v', 109, H - 1, 62, 4, { sidewalk: false });
 
   // ---------- Bazar Miejski and a square for new quests ----------
-  m.plot([70, 98, 118, 104], 'mz-bazar', 'shop', 'Bazar Miejski', 'plaza');
+  places.bazarMiejski(m);
   m.zone([68, 96, 120, 106], 'Bazar Miejski');
-  m.sign(94, 97, 'Bazar Miejski', 'Stoiska czekają na kupców. Wkrótce: handel i wymiana.');
-  m.plot([10, 96, 52, 104], 'mz-plac-zadan', 'quest', 'Plac Ziomków', 'plaza');
+  m.sign(94, 97, 'Bazar Miejski', 'Owoce, ciuchy i graty. Pani Grażyna zna ceny wszystkiego.');
+  places.placZiomkow(m);
   m.zone([8, 94, 54, 106], 'Plac Ziomków');
-  m.sign(30, 95, 'Plac Ziomków', 'Miejsce spotkań. Wkrótce: nowi mieszkańcy z nowymi zadaniami.');
+  m.sign(
+    30,
+    95,
+    'Plac Ziomków',
+    'Scena dla całego miasta. W piątek koncert, jeśli sprzęt dojedzie.',
+  );
 }
 
 export function lasPalmasOutskirts(m: MapCanvas) {
@@ -84,20 +90,26 @@ export function lasPalmasOutskirts(m: MapCanvas) {
   lane(m, [150, 20, 151, H - 10], 'path');
   lane(m, [20, 104, W - 8, 105], 'path');
 
-  m.plot([134, 18, 166, 34], 'lp-wodospad', 'attraction', 'Wodospad', 'grass2');
+  places.wodospad(m);
   m.zone([132, 16, 168, 36], 'Wodospad');
-  m.sign(150, 37, 'Wodospad', 'Huk wody słychać z daleka. Wkrótce: skoki do laguny.');
-  m.plot([132, 56, 168, 78], 'lp-wioska-tiki', 'quest', 'Wioska Tiki', 'sand');
+  m.sign(150, 37, 'Wodospad', 'Huk wody słychać z daleka. Kąpiel na własną odpowiedzialność.');
+  places.wioskaTiki(m);
   m.zone([130, 54, 170, 80], 'Wioska Tiki');
-  m.sign(149, 55, 'Wioska Tiki', 'Mieszkańcy dopiero się wprowadzają. Wkrótce: nowe zadania.');
+  m.sign(149, 55, 'Wioska Tiki', 'Chaty wokół ogniska. Wódz Makoa wita każdego gościa.');
 
   // ---------- Zatoka Żółwi (south): a long beach and a small bay ----------
   m.rect([14, 98, 124, H - 6], (x, y) => (m.get(x, y)?.s ? null : { g: 'sand' }));
   m.blob(36, 118, 12, 6, 2103, (x, y) => m.set(x, y, { g: 'water', s: true }));
   m.zone([12, 96, 126, H - 4], 'Zatoka Żółwi');
   m.sign(60, 103, 'Zatoka Żółwi', 'Tu żółwie składają jaja. Wkrótce: wyprawy z przewodnikiem.');
-  m.plot([84, 110, 120, 124], 'lp-przystan', 'minigame', 'Przystań Jachtowa', 'sand');
-  m.sign(102, 109, 'Przystań Jachtowa', 'Wkrótce: regaty i łowienie ryb.');
+  places.przystan(m);
+  m.zone([82, 108, 122, 126], 'Przystań Jachtowa');
+  m.sign(
+    102,
+    109,
+    'Przystań Jachtowa',
+    'Łodzie, sieci i zapach ryb. Żeglarka Marina zna każdą falę.',
+  );
   // the road back to Miasto Ziomków crosses the beach
   lane(m, [62, 96, 65, H - 1], 'path');
 }
@@ -117,24 +129,29 @@ export function dworCarskiOutskirts(m: MapCanvas) {
   m.zone([130, 8, 172, 50], 'Winnice');
   m.sign(129, 30, 'Winnice', 'Winogrona dworu. Wkrótce: zbiory i degustacje.');
 
-  m.plot([132, 58, 168, 90], 'dc-tor-konny', 'arena', 'Tor Wyścigów Konnych', 'dirt');
+  places.torWyscigow(m);
   m.zone([130, 56, 170, 92], 'Tor Wyścigów');
-  m.sign(129, 74, 'Tor Wyścigów Konnych', 'Stajenni szykują konie. Wkrótce: wyścigi.');
+  m.sign(
+    129,
+    74,
+    'Tor Wyścigów Konnych',
+    'Owalny tor wokół stajni. Dżokejka Róża mierzy czas okrążeń.',
+  );
 
   // ---------- Jezioro Dworskie (south) and the old mill ----------
   m.blob(44, 114, 16, 8, 3101, (x, y) => m.set(x, y, { g: 'water', s: true }));
   m.zone([18, 100, 72, 126], 'Jezioro Dworskie');
   m.sign(44, 101, 'Jezioro Dworskie', 'Łabędzie i łódki hrabiego. Wkrótce: rejsy po jeziorze.');
-  m.plot([88, 102, 122, 124], 'dc-stary-mlyn', 'quest', 'Stary Młyn', 'gravel');
+  places.staryMlyn(m);
   m.zone([86, 100, 124, 126], 'Stary Młyn');
-  m.sign(105, 101, 'Stary Młyn', 'Młynarz zniknął bez śladu. Wkrótce: śledztwo.');
-  m.plot([140, 102, 164, 122], 'dc-oranzeria', 'attraction', 'Oranżeria', 'gravel');
+  m.sign(105, 101, 'Stary Młyn', 'Młynarz zniknął bez śladu. Jego córka Hania szuka pomocy.');
+  places.oranzeria(m);
   m.zone([138, 100, 166, 124], 'Oranżeria');
   m.sign(
     152,
     101,
     'Oranżeria',
-    'Szklany pawilon czeka na rośliny z całego świata. Wkrótce: zielarstwo.',
+    'Szklany pawilon z roślinami z całego świata. Zielarka Bogna zna każdą z nich.',
   );
 }
 
@@ -144,12 +161,17 @@ export function losKarkosOutskirts(m: MapCanvas) {
   m.road('h', 20, W - 8, 98, 3, { sidewalk: false, dashes: false });
   m.road('v', 8, H - 8, 126, 3, { sidewalk: false, dashes: false });
 
-  m.plot([132, 10, 168, 40], 'lk-kopalnia', 'minigame', 'Stara Kopalnia', 'dirt');
+  places.staraKopalnia(m);
   m.zone([130, 8, 170, 42], 'Stara Kopalnia');
-  m.sign(130, 25, 'Stara Kopalnia', 'Szyby zamknięte od lat. Wkrótce: wyprawy po skarby.');
-  m.plot([132, 54, 168, 84], 'lk-motocross', 'arena', 'Tor Motocrossowy', 'dirt');
+  m.sign(
+    130,
+    25,
+    'Stara Kopalnia',
+    'Szyby zamknięte od lat, ale ktoś tu ciągle kopie. Górnik Stefan pilnuje wejścia.',
+  );
+  places.torMotocross(m);
   m.zone([130, 52, 170, 86], 'Tor Motocrossowy');
-  m.sign(130, 69, 'Tor Motocrossowy', 'Błoto i skocznie. Wkrótce: wyścigi.');
+  m.sign(130, 69, 'Tor Motocrossowy', 'Błoto i skocznie. Iga mierzy czas, Brudas łamie zasady.');
 
   // ---------- Port Przemytników (south): a sludge dock ----------
   m.rect([4, 116, 96, 126], { g: 'sludge', s: true });
@@ -161,7 +183,7 @@ export function losKarkosOutskirts(m: MapCanvas) {
     'Port Przemytników',
     'Nocą przypływają łodzie bez świateł. Wkrótce: misje przemytnicze.',
   );
-  m.plot([102, 102, 150, 124], 'lk-elektrownia', 'quest', 'Ruiny Elektrowni', 'concrete');
+  places.ruinyElektrowni(m);
   m.zone([100, 100, 152, 126], 'Ruiny Elektrowni');
-  m.sign(126, 101, 'Ruiny Elektrowni', 'Coś tu wciąż buczy. Wkrótce: nowe zadania.');
+  m.sign(126, 101, 'Ruiny Elektrowni', 'Coś tu wciąż buczy. Inżynierka Wera chce wiedzieć co.');
 }

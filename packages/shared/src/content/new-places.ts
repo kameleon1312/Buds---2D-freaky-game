@@ -1,0 +1,757 @@
+import type { BudLookInput } from '../bud/look';
+import type { CacheInput } from '../caches';
+import { scaledEnemy, type EnemyInput } from '../combat';
+import type { NpcInput, QuestInput } from '../quests';
+
+/**
+ * The people, quests, caches and opponents of the places built on the old plots (tools/world/maps/places.ts):
+ * Stadion, Lunapark, Bazar Miejski and Plac Ziomków in Miasto Ziomków; Wodospad, Wioska Tiki and Przystań Jachtowa
+ * in Las Palmas; Tor Wyścigów, Stary Młyn and Oranżeria in Dwór Carski; Stara Kopalnia, Tor Motocrossowy and Ruiny
+ * Elektrowni in Los Karkos. Kept apart from the original district files so the old content stays as it was; the
+ * quests send players back to people they already know.
+ */
+const look = (l: BudLookInput) => l;
+
+export const NEW_PLACES: {
+  npcs: NpcInput[];
+  quests: QuestInput[];
+  caches: CacheInput[];
+  enemies: EnemyInput[];
+} = {
+  npcs: [
+    // ---------- Miasto Ziomków ----------
+    {
+      id: 'trenerka-kasia',
+      name: 'Trenerka Kasia',
+      district: 'miasto-ziomkow',
+      x: 150,
+      y: 78,
+      look: look({
+        gender: 'ona',
+        mood: 'zadziorny',
+        skin: 2,
+        hair: 'kucyk',
+        hairColor: 1,
+        outfit: 'tshirt',
+        outfitColor: 0,
+        pants: 'dresy',
+        pantsColor: 1,
+        shoes: 'trampki',
+        shoesColor: 4,
+      }),
+      lines: [
+        'Na Stadionie Ziomków gra się do ostatniego gwizdka.',
+        'Biegaj, podawaj, strzelaj. W tej kolejności.',
+      ],
+    },
+    {
+      id: 'operator-leszek',
+      name: 'Pan Leszek',
+      district: 'miasto-ziomkow',
+      x: 152,
+      y: 120,
+      look: look({
+        gender: 'on',
+        mood: 'wyluzowany',
+        skin: 1,
+        hair: 'krotkie',
+        hairColor: 5,
+        outfit: 'kamizelka',
+        outfitColor: 3,
+        pants: 'chinosy',
+        pantsColor: 1,
+        shoes: 'mokasyny',
+        shoesColor: 1,
+      }),
+      lines: [
+        'Karuzela kręci się od czterdziestu lat. Ja trochę krócej.',
+        'Diabelski młyn najładniej wygląda o zachodzie słońca.',
+      ],
+    },
+    {
+      id: 'handlarka-grazyna',
+      name: 'Pani Grażyna',
+      district: 'miasto-ziomkow',
+      x: 92,
+      y: 102,
+      look: look({
+        gender: 'ona',
+        mood: 'radosny',
+        skin: 0,
+        hair: 'kok',
+        hairColor: 2,
+        outfit: 'sweter',
+        outfitColor: 4,
+        pants: 'spodnica',
+        pantsColor: 0,
+        shoes: 'mokasyny',
+        shoesColor: 1,
+      }),
+      lines: [
+        'Najlepsze jabłka w mieście! Najlepsze w tej cenie, znaczy się.',
+        'Na bazarze targowanie to obowiązek.',
+      ],
+    },
+    {
+      id: 'konferansjer-wojtek',
+      name: 'Konferansjer Wojtek',
+      district: 'miasto-ziomkow',
+      x: 31,
+      y: 101,
+      look: look({
+        gender: 'on',
+        mood: 'radosny',
+        skin: 3,
+        hair: 'jezyk',
+        hairColor: 0,
+        outfit: 'koszula',
+        outfitColor: 2,
+        pants: 'jeansy',
+        pantsColor: 1,
+        shoes: 'trampki',
+        shoesColor: 0,
+      }),
+      lines: [
+        'Raz, dwa, raz, dwa… słychać mnie? Plac Ziomków, czy mnie słyszycie?!',
+        'Bez sprzętu nie ma koncertu. Bez publiczności też nie.',
+      ],
+    },
+    // ---------- Las Palmas ----------
+    {
+      id: 'przewodnik-keoni',
+      name: 'Przewodnik Keoni',
+      district: 'las-palmas',
+      x: 150,
+      y: 27,
+      look: look({
+        gender: 'on',
+        mood: 'wyluzowany',
+        skin: 4,
+        hair: 'dlugie',
+        hairColor: 0,
+        outfit: 'koszula',
+        outfitColor: 1,
+        pants: 'szorty',
+        pantsColor: 2,
+        shoes: 'sandaly',
+        shoesColor: 0,
+      }),
+      lines: [
+        'Wodospad szumi tak samo od tysiąca lat. Ja od dwudziestu.',
+        'Do laguny wchodzi się powoli. Wychodzi szybko.',
+      ],
+    },
+    {
+      id: 'wodz-makoa',
+      name: 'Wódz Makoa',
+      district: 'las-palmas',
+      x: 150,
+      y: 71,
+      look: look({
+        gender: 'on',
+        mood: 'tajemniczy',
+        skin: 5,
+        hair: 'loki',
+        hairColor: 0,
+        outfit: 'kamizelka',
+        outfitColor: 4,
+        pants: 'szorty',
+        pantsColor: 5,
+        shoes: 'sandaly',
+        shoesColor: 1,
+      }),
+      lines: [
+        'Ogień Wioski Tiki nie gaśnie od pokoleń. Prawie.',
+        'Gość w wiosce to dar. Gość z drewnem to podwójny dar.',
+      ],
+    },
+    {
+      id: 'zeglarka-marina',
+      name: 'Żeglarka Marina',
+      district: 'las-palmas',
+      x: 106,
+      y: 113,
+      look: look({
+        gender: 'ona',
+        mood: 'radosny',
+        skin: 2,
+        hair: 'bob',
+        hairColor: 3,
+        outfit: 'polo',
+        outfitColor: 1,
+        pants: 'szorty',
+        pantsColor: 2,
+        shoes: 'sandaly',
+        shoesColor: 3,
+      }),
+      lines: [
+        'Wiatr z zachodu, fale z południa. Idealny dzień na rejs.',
+        'Każda łódź na przystani ma imię. Ta tutaj to Burza.',
+      ],
+    },
+    // ---------- Dwór Carski ----------
+    {
+      id: 'dzokejka-roza',
+      name: 'Dżokejka Róża',
+      district: 'dwor-carski',
+      x: 150,
+      y: 85,
+      look: look({
+        gender: 'ona',
+        mood: 'zadziorny',
+        skin: 1,
+        hair: 'kok',
+        hairColor: 4,
+        outfit: 'kurtka',
+        outfitColor: 3,
+        pants: 'legginsy',
+        pantsColor: 2,
+        shoes: 'kozaki',
+        shoesColor: 1,
+      }),
+      lines: [
+        'Na torze liczy się każda sekunda.',
+        'Józef ze stajni dba o konie jak o własne dzieci.',
+      ],
+    },
+    {
+      id: 'hania-mlynarzowna',
+      name: 'Hania',
+      district: 'dwor-carski',
+      x: 104,
+      y: 114,
+      look: look({
+        gender: 'ona',
+        mood: 'niesmialy',
+        skin: 0,
+        hair: 'warkocze',
+        hairColor: 3,
+        outfit: 'sukienka',
+        outfitColor: 7,
+        pants: 'spodnica',
+        pantsColor: 2,
+        shoes: 'mokasyny',
+        shoesColor: 1,
+      }),
+      lines: [
+        'Tata nigdy nie zostawiłby młyna bez słowa.',
+        'Koło dalej się kręci. Tylko tata zniknął.',
+      ],
+    },
+    {
+      id: 'zielarka-bogna',
+      name: 'Zielarka Bogna',
+      district: 'dwor-carski',
+      x: 152,
+      y: 113,
+      look: look({
+        gender: 'ona',
+        mood: 'tajemniczy',
+        skin: 2,
+        hair: 'loki',
+        hairColor: 1,
+        outfit: 'kamizelka',
+        outfitColor: 5,
+        pants: 'spodnica',
+        pantsColor: 5,
+        shoes: 'kozaki',
+        shoesColor: 1,
+      }),
+      lines: [
+        'W oranżerii rosną rośliny z pięciu kontynentów. Z szóstego tylko chwasty.',
+        'Herbata z dworskich ziół leczy wszystko. Oprócz nudy.',
+      ],
+    },
+    // ---------- Los Karkos ----------
+    {
+      id: 'gornik-stefan',
+      name: 'Górnik Stefan',
+      district: 'los-karkos',
+      x: 146,
+      y: 20,
+      look: look({
+        gender: 'on',
+        mood: 'zaspany',
+        skin: 1,
+        hair: 'czapka',
+        hairColor: 5,
+        outfit: 'ogrodniczki',
+        outfitColor: 7,
+        pants: 'bojowki',
+        pantsColor: 4,
+        shoes: 'glany',
+        shoesColor: 1,
+      }),
+      lines: [
+        'Trzydzieści lat pod ziemią. Słońce dalej mnie oślepia.',
+        'Kopalnię zamknęli, ale ruda została.',
+      ],
+    },
+    {
+      id: 'motocyklistka-iga',
+      name: 'Motocyklistka Iga',
+      district: 'los-karkos',
+      x: 150,
+      y: 62,
+      look: look({
+        gender: 'ona',
+        mood: 'zadziorny',
+        skin: 3,
+        hair: 'irokez',
+        hairColor: 4,
+        outfit: 'kurtka',
+        outfitColor: 1,
+        pants: 'bojowki',
+        pantsColor: 1,
+        shoes: 'glany',
+        shoesColor: 2,
+      }),
+      lines: [
+        'Błoto to moje drugie imię. Pierwsze to Iga.',
+        'Brudas jeździ nieczysto. Ktoś musi go ograć.',
+      ],
+    },
+    {
+      id: 'inzynierka-wera',
+      name: 'Inżynierka Wera',
+      district: 'los-karkos',
+      x: 126,
+      y: 111,
+      look: look({
+        gender: 'ona',
+        mood: 'tajemniczy',
+        skin: 4,
+        hair: 'bob',
+        hairColor: 0,
+        outfit: 'ogrodniczki',
+        outfitColor: 4,
+        pants: 'jeansy',
+        pantsColor: 1,
+        shoes: 'glany',
+        shoesColor: 1,
+      }),
+      lines: [
+        'Elektrownia nie działa od lat, a licznik dalej kręci. Ciekawe, prawda?',
+        'Prąd się nie kończy. Tylko kable.',
+      ],
+    },
+  ],
+
+  quests: [
+    // ---------- Miasto Ziomków ----------
+    {
+      id: 'pilki-na-boisko',
+      title: 'Piłki na boisko',
+      district: 'miasto-ziomkow',
+      giver: 'trenerka-kasia',
+      xp: 90,
+      minLevel: 2,
+      intro:
+        'Moi zawodnicy kopnęli piłki tak mocno, że rozleciały się po całym mieście. Przyniesiesz cztery? Bez piłek nie ma treningu.',
+      done: 'Cztery piłki, komplet! Trening zaczynamy za pięć minut. Ty też możesz biegać z nami.',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'pilka',
+          label: 'Piłki',
+          spots: [
+            { x: 33, y: 48 },
+            { x: 63, y: 30 },
+            { x: 110, y: 42 },
+            { x: 147, y: 63 },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'zgubione-bilety',
+      title: 'Zgubione bilety',
+      district: 'miasto-ziomkow',
+      giver: 'operator-leszek',
+      xp: 80,
+      minLevel: 2,
+      intro:
+        'Wiatr porwał mi plik biletów. Jeden poleciał na bazar, jeden do portu, jeden został tu w lunaparku. Pozbierasz?',
+      done: 'Wszystkie trzy! Za fatygę możesz się przejechać na karuzeli. Raz. Dwa, jeśli nikt nie patrzy.',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'bilet',
+          label: 'Bilety',
+          spots: [
+            { x: 146, y: 116 },
+            { x: 88, y: 101 },
+            { x: 40, y: 116 },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'zamowienia-grazyny',
+      title: 'Zamówienia z bazaru',
+      district: 'miasto-ziomkow',
+      giver: 'handlarka-grazyna',
+      xp: 70,
+      minLevel: 1,
+      intro:
+        'Pani Halina zamówiła u mnie jabłka, a Pan Zdzisiek obiecał pomidory na stoisko. Zajdziesz do obojga? Ja nie mogę zostawić straganu.',
+      done: 'Jabłka zamówione, pomidory przyjadą. Handel kwitnie! Dzięki tobie.',
+      steps: [
+        {
+          kind: 'talk',
+          npc: 'halina',
+          text: 'Od Grażyny? Niech odłoży mi kilo jabłek. Tylko tych czerwonych!',
+        },
+        {
+          kind: 'talk',
+          npc: 'zdzisiek',
+          text: 'Pomidory dla Grażyny? Zawiozę jutro rano, jak tylko zerwę.',
+        },
+      ],
+    },
+    {
+      id: 'sprzet-na-scene',
+      title: 'Sprzęt na scenę',
+      district: 'miasto-ziomkow',
+      giver: 'konferansjer-wojtek',
+      xp: 110,
+      minLevel: 2,
+      requires: ['ulotki-basi'],
+      intro:
+        'Ulotki rozdane, ludzie przyjdą, a połowa nagłośnienia została w garażach! Przyniesiesz trzy skrzynki z częściami? Potem pogadaj z Kubą Deską, on otwiera koncert.',
+      done: 'Sprzęt jest, Kuba gotowy. Plac Ziomków, czy mnie słyszycie?! Koncert się odbędzie!',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'czesc',
+          label: 'Części nagłośnienia',
+          spots: [
+            { x: 44, y: 89 },
+            { x: 52, y: 88 },
+            { x: 24, y: 89 },
+          ],
+        },
+        {
+          kind: 'talk',
+          npc: 'kuba',
+          text: 'Koncert na Placu Ziomków? Jasne, że otworzę. Zrobię freestyle o tobie.',
+        },
+      ],
+    },
+    // ---------- Las Palmas ----------
+    {
+      id: 'spokoj-nad-laguna',
+      title: 'Spokój nad laguną',
+      district: 'las-palmas',
+      giver: 'przewodnik-keoni',
+      xp: 230,
+      minLevel: 3,
+      intro:
+        'Turyści boją się kąpać pod wodospadem, bo pirat z laguny straszy ich od rana. Rozejrzyj się nad wodą i pokaż mu, gdzie jego miejsce.',
+      done: 'Turyści wracają do laguny. Wodospad znowu szumi spokojnie. Mahalo!',
+      steps: [
+        { kind: 'reach', x: 150, y: 26, radius: 2, label: 'Laguna pod wodospadem' },
+        { kind: 'duel', enemy: 'pirat-z-laguny', label: 'Przegoń pirata z laguny' },
+      ],
+    },
+    {
+      id: 'ogien-wioski',
+      title: 'Ogień wioski',
+      district: 'las-palmas',
+      giver: 'wodz-makoa',
+      xp: 240,
+      minLevel: 4,
+      intro:
+        'Ognisko wioski przygasa. Przynieś cztery naręcza chrustu z dżungli, a potem powiedz Kahu z miasteczka, że dziś wieczorem świętujemy.',
+      done: 'Ogień płonie, cała wioska tańczy. Jesteś teraz przyjacielem Wioski Tiki.',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'chrust',
+          label: 'Chrust',
+          spots: [
+            { x: 150, y: 45 },
+            { x: 130, y: 40 },
+            { x: 160, y: 40 },
+            { x: 151, y: 52 },
+          ],
+        },
+        { kind: 'talk', npc: 'kahu', text: 'Święto w Wiosce Tiki? Będę! Przyniosę ukulele.' },
+      ],
+    },
+    {
+      id: 'sieci-mariny',
+      title: 'Sieci dla przystani',
+      district: 'las-palmas',
+      giver: 'zeglarka-marina',
+      xp: 200,
+      minLevel: 3,
+      intro:
+        'Sztorm porwał sieci z przystani i wyrzucił je na plażę w Zatoce Żółwi. Przyniesiesz trzy? Rybak Tomasz pomoże je naprawić.',
+      done: 'Sieci całe, łodzie gotowe. Jutro wypływamy o świcie!',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'siec',
+          label: 'Sieci',
+          spots: [
+            { x: 40, y: 104 },
+            { x: 70, y: 108 },
+            { x: 90, y: 112 },
+          ],
+        },
+        {
+          kind: 'talk',
+          npc: 'tomasz',
+          text: 'Sieci Mariny? Załatam w godzinę. Dobre sieci to połowa połowu.',
+        },
+      ],
+    },
+    // ---------- Dwór Carski ----------
+    {
+      id: 'okrazenie-probne',
+      title: 'Okrążenie próbne',
+      district: 'dwor-carski',
+      giver: 'dzokejka-roza',
+      xp: 300,
+      minLevel: 5,
+      intro:
+        'Przed wyścigiem trzeba sprawdzić tor. Obiegnij go dookoła: zakręt północny, wschodni i południowy. Potem zgłoś się do Józefa w stajni.',
+      done: 'Tor równy, przeszkód brak. Wyścig może się odbyć. Szybkie nogi, gratuluję!',
+      steps: [
+        { kind: 'reach', x: 136, y: 62, radius: 2, label: 'Zakręt północny' },
+        { kind: 'reach', x: 164, y: 74, radius: 2, label: 'Zakręt wschodni' },
+        { kind: 'reach', x: 136, y: 86, radius: 2, label: 'Zakręt południowy' },
+        { kind: 'talk', npc: 'jozef', text: 'Róża przysłała? Konie gotowe. Tor też, jak widzę.' },
+      ],
+    },
+    {
+      id: 'zaginiony-mlynarz',
+      title: 'Zaginiony młynarz',
+      district: 'dwor-carski',
+      giver: 'hania-mlynarzowna',
+      xp: 420,
+      minLevel: 6,
+      intro:
+        'Tata zniknął, a za młynem leżą rozsypane worki mąki. Pozbieraj je, może coś powiedzą. I pokaż je detektyw Irenie.',
+      done: 'Tata jest w domu! Urzędnik zamknął go w piwnicy urzędu, żeby przejąć młyn. Nigdy ci tego nie zapomnę.',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'maka',
+          label: 'Worki mąki',
+          spots: [
+            { x: 96, y: 108 },
+            { x: 119, y: 120 },
+            { x: 102, y: 122 },
+          ],
+        },
+        {
+          kind: 'talk',
+          npc: 'irena',
+          text: 'Mąka z pieczątką urzędu? To ślad. Urzędnik z parasolem kręcił się przy młynie.',
+        },
+        { kind: 'duel', enemy: 'urzednik-z-parasolem', label: 'Zmuś urzędnika do prawdy' },
+      ],
+    },
+    {
+      id: 'ziola-dla-hrabiny',
+      title: 'Zioła dla hrabiny',
+      district: 'dwor-carski',
+      giver: 'zielarka-bogna',
+      xp: 280,
+      minLevel: 5,
+      intro:
+        'Hrabina Eleonora zamówiła napar z leśnych grzybów. Rosną w Parku Dworskim i nad jeziorem. Zbierz trzy i zanieś je hrabinie.',
+      done: 'Hrabina zachwycona naparem. Mówi, że od dawna nie piła nic tak… leśnego.',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'grzyb',
+          label: 'Grzyby',
+          spots: [
+            { x: 71, y: 82 },
+            { x: 78, y: 88 },
+            { x: 60, y: 104 },
+          ],
+        },
+        {
+          kind: 'talk',
+          npc: 'eleonora',
+          text: 'Od Bogny? Cudownie. Herbatka o piątej będzie dziś wyjątkowa.',
+        },
+      ],
+    },
+    // ---------- Los Karkos ----------
+    {
+      id: 'ruda-gornika',
+      title: 'Ruda górnika',
+      district: 'los-karkos',
+      giver: 'gornik-stefan',
+      xp: 480,
+      minLevel: 7,
+      intro:
+        'Ktoś szabruje moją kopalnię. Zbierz rudę, którą rozsypali przy wejściu, zanim zabiorą resztę. A jak spotkasz szabrownika, wiesz co robić.',
+      done: 'Ruda ocalona, szabrownik przegoniony. Kopalnia zamknięta, ale honor górnika został.',
+      steps: [
+        {
+          kind: 'collect',
+          item: 'ruda',
+          label: 'Ruda',
+          spots: [
+            { x: 140, y: 20 },
+            { x: 160, y: 24 },
+            { x: 146, y: 36 },
+            { x: 156, y: 32 },
+          ],
+        },
+        { kind: 'duel', enemy: 'szabrownik-z-kopalni', label: 'Pokonaj szabrownika' },
+      ],
+    },
+    {
+      id: 'wyscig-z-brudasem',
+      title: 'Wyścig z Brudasem',
+      district: 'los-karkos',
+      giver: 'motocyklistka-iga',
+      xp: 520,
+      minLevel: 8,
+      intro:
+        'Brudas wygrywa każdy wyścig, bo ścina zakręty. Przejdź tor: skocznię zachodnią i wschodnią, a potem pokaż mu, że oszustwo się nie opłaca.',
+      done: 'Brudas pokonany na własnym torze! Od dziś ścinanie zakrętów jest zakazane.',
+      steps: [
+        { kind: 'reach', x: 136, y: 73, radius: 2, label: 'Skocznia zachodnia' },
+        { kind: 'reach', x: 164, y: 73, radius: 2, label: 'Skocznia wschodnia' },
+        { kind: 'duel', enemy: 'rajdowiec-brudas', label: 'Pokonaj Brudasa' },
+      ],
+    },
+    {
+      id: 'buczenie-w-ruinach',
+      title: 'Buczenie w ruinach',
+      district: 'los-karkos',
+      giver: 'inzynierka-wera',
+      xp: 450,
+      minLevel: 7,
+      intro:
+        'Coś buczy w starym transformatorze. Sprawdź go, pozbieraj części, które leżą wokół, i zanieś je Waldkowi na złomowisko. On wie, co z nimi zrobić.',
+      done: 'Waldek mówi, że ktoś podpiął kabel do sieci. Zagadka rozwiązana, buczenie ucichło.',
+      steps: [
+        { kind: 'reach', x: 126, y: 110, radius: 2, label: 'Stary transformator' },
+        {
+          kind: 'collect',
+          item: 'czesc',
+          label: 'Części',
+          spots: [
+            { x: 106, y: 106 },
+            { x: 120, y: 118 },
+            { x: 146, y: 104 },
+          ],
+        },
+        {
+          kind: 'talk',
+          npc: 'waldek',
+          text: 'Części z elektrowni? Ktoś podpiął kabel na lewo. Załatwię to.',
+        },
+      ],
+    },
+  ],
+
+  caches: [
+    {
+      id: 'mz-stadion',
+      district: 'miasto-ziomkow',
+      x: 166,
+      y: 66,
+      look: 'skrzynka',
+      coins: 35,
+      xp: 15,
+      text: 'Skrzynka pod trybuną. Ktoś zbierał drobne na nowe siatki do bramek.',
+    },
+    {
+      id: 'mz-lunapark',
+      district: 'miasto-ziomkow',
+      x: 136,
+      y: 120,
+      look: 'worek',
+      coins: 25,
+      xp: 10,
+      text: 'Worek z monetami za karuzelą. Utarg z całego weekendu?',
+    },
+    {
+      id: 'lp-wodospad',
+      district: 'las-palmas',
+      x: 140,
+      y: 30,
+      look: 'dzban',
+      coins: 70,
+      xp: 25,
+      text: 'Dzban ukryty między skałami. Pewnie dar dla ducha wodospadu.',
+    },
+    {
+      id: 'dc-mlyn',
+      district: 'dwor-carski',
+      x: 94,
+      y: 120,
+      look: 'worek',
+      coins: 90,
+      xp: 30,
+      text: 'Worek młynarza schowany pod sianem. Oszczędności na czarną godzinę.',
+    },
+    {
+      id: 'lk-kopalnia',
+      district: 'los-karkos',
+      x: 162,
+      y: 38,
+      look: 'skrzynka',
+      coins: 120,
+      xp: 40,
+      text: 'Skrzynka górnicza. W środku narzędzia i garść starych monet.',
+    },
+  ],
+
+  enemies: [
+    scaledEnemy({
+      id: 'szabrownik-z-kopalni',
+      name: 'Szabrownik z kopalni',
+      district: 'los-karkos',
+      level: 8,
+      weapon: 'kij',
+      look: {
+        gender: 'on',
+        mood: 'tajemniczy',
+        skin: 2,
+        hair: 'czapka',
+        hairColor: 0,
+        outfit: 'kurtka',
+        outfitColor: 1,
+        pantsColor: 1,
+      },
+      lines: ['Kopalnia jest niczyja. Więc moja.', 'Ruda sama się nie wyniesie.'],
+      spots: [
+        { x: 156, y: 20 },
+        { x: 144, y: 30 },
+      ],
+    }),
+    scaledEnemy({
+      id: 'rajdowiec-brudas',
+      name: 'Rajdowiec Brudas',
+      district: 'los-karkos',
+      level: 9,
+      weapon: 'piesci',
+      look: {
+        gender: 'on',
+        mood: 'zadziorny',
+        skin: 1,
+        hair: 'buzz',
+        hairColor: 1,
+        outfit: 'kurtka',
+        outfitColor: 3,
+        pantsColor: 1,
+      },
+      lines: ['Zakręty są dla mięczaków.', 'Na moim torze wygrywam ja. Zawsze.'],
+      spots: [
+        { x: 150, y: 78 },
+        { x: 160, y: 82 },
+      ],
+    }),
+  ],
+};

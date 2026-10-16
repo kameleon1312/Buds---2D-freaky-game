@@ -26,12 +26,12 @@ namespace Buds.Tests
         }
 
         [TestCaseSource(nameof(Ids))]
-        public void DistrictsGrewAndKeepClearPlots(string id)
+        public void DistrictsGrewAndReservedPlotsStayClear(string id)
         {
             var map = MapFormat.Load(id);
             Assert.GreaterOrEqual(map.Width, 176, "districts grew east");
             Assert.GreaterOrEqual(map.Height, 132, "and south");
-            Assert.GreaterOrEqual(map.Plots.Count, 3, $"{id} has plots for future content");
+            // the first plots were built on (stadium, funfair, mill…); any plot still reserved must stay clear
             var ids = new HashSet<string>();
             foreach (var p in map.Plots)
             {

@@ -141,6 +141,64 @@ const coin = pickup(
     stroke('M26 31l3 -2v13', '#b38a3e', 2.5),
 );
 
+const football = pickup(
+  shaded(circ(29, 36, 13), ['#f6f2e9', '#d8cfbf'], LINE, -3, -3) +
+    flat(`M29 30l5 4l-2 6h-6l-2 -6Z`, '#262833', LINE, 1) +
+    stroke('M29 30v-7M34 34l7 -2M32 40l4 6M26 40l-4 6M24 34l-7 -2', '#262833', 2),
+);
+
+const ticket = pickup(
+  shaded(
+    `M15 26h28v6a4 4 0 0 0 0 8v6h-28v-6a4 4 0 0 0 0 -8Z`,
+    ['#ffc93c', '#d98a0b'],
+    LINE,
+    -2,
+    -2,
+  ) +
+    stroke('M23 28v16', '#b38a3e', 2) +
+    stroke('M28 32h11M28 37h8', '#b38a3e', 2.5),
+);
+
+const mushroom = pickup(
+  shaded(rr(25, 34, 9, 14, 4), ['#f6f2e9', '#d8cfbf'], LINE, -1, -1, 2) +
+    shaded(`M15 36q14 -24 28 0Z`, ['#ff5a4a', '#c8322a'], LINE, -2, -2) +
+    flat(circ(23, 30, 2.5), '#ffffff', 'none', 0) +
+    flat(circ(32, 27, 2), '#ffffff', 'none', 0) +
+    flat(circ(37, 32, 2), '#ffffff', 'none', 0),
+);
+
+const ore = pickup(
+  shaded(`M16 42l5 -14l12 -6l10 8l-2 12l-12 4Z`, ['#6f6a63', '#4c4843'], LINE, -2, -2) +
+    flat(`M24 32l4 -3l3 4l-4 3Z`, '#ffc93c', '#b38a3e', 1.5) +
+    flat(`M33 38l3 -2l2 3l-3 2Z`, '#ffc93c', '#b38a3e', 1.5),
+);
+
+const berries = pickup(
+  flat(`M20 30q9 -8 18 0`, 'none', '#3f8f3e', 2.5) +
+    [
+      [22, 36],
+      [30, 34],
+      [37, 37],
+      [26, 42],
+      [34, 43],
+    ]
+      .map(([x, y]) => shaded(circ(x!, y!, 5.5), ['#6a5be0', '#4b3cb8'], LINE, -1, -1, 1.8))
+      .join('') +
+    flat(`M28 24q4 -4 8 0q-4 4 -8 0Z`, '#62b84e', '#2b5a2c', 1.5),
+);
+
+const kindling = pickup(
+  stroke('M14 44L44 30M16 36L42 42M20 30L38 46', '#45291a', 8) +
+    stroke('M14 44L44 30M16 36L42 42M20 30L38 46', '#8f5e3b', 5) +
+    stroke('M24 30l-3 -5M36 33l3 -5', '#8f5e3b', 3),
+);
+
+const flourSack = pickup(
+  shaded(`M18 46q-4 -16 4 -22q7 -4 14 0q8 6 4 22Z`, ['#f6f2e9', '#d8cfbf'], LINE, -2, -2) +
+    stroke('M22 26q7 4 14 0', '#a9733f', 3) +
+    flat(`M24 38h10v4h-10Z`, '#e8c46a', '#b38a3e', 1),
+);
+
 const documentProp = pickup(
   shaded(rr(17, 18, 24, 30, 3), ['#f6f2e9', '#d8cfbf'], LINE, -2, -2) +
     stroke('M21 26h16M21 31h16M21 36h10', '#a9afbd', 2.5) +
@@ -198,4 +256,11 @@ export const QUEST_PROPS: Record<string, Prop> = {
   'item-apteczka': medkit,
   'item-skrzynka': crate,
   'item-naszywka': patch,
+  'item-pilka': football,
+  'item-bilet': ticket,
+  'item-grzyb': mushroom,
+  'item-ruda': ore,
+  'item-jagody': berries,
+  'item-chrust': kindling,
+  'item-maka': flourSack,
 };

@@ -1,6 +1,6 @@
 # Buds — dzielnice
 
-Świat Buds składa się z 4 dzielnic. Każda to **duża mapa**: miasto w centrum plus otwarte okolice do zwiedzania,
+Świat Buds składa się z 5 dzielnic. Każda to **duża mapa**: miasto w centrum plus otwarte okolice do zwiedzania,
 gdzie zdobywa się XP w questach i potyczkach. Każda dzielnica ma własny klimat, własną mechanikę i własne
 kosmetyki w sklepie. W multiplayerze dzielnica = osobny pokój na serwerze.
 
@@ -9,22 +9,50 @@ Rejestr (nazwy, progi poziomu, status): `packages/shared/src/districts.ts`, lust
 | #   | Dzielnica          | Wejście od poziomu | Klimat                      | Główna mechanika                                              |
 | --- | ------------------ | ------------------ | --------------------------- | ------------------------------------------------------------- |
 | 1   | **Miasto Ziomków** | start              | codzienne życie, ulica      | freestyle, graffiti i ukrywanie się przed policją             |
-| 2   | **Las Palmas**     | 3                  | tropiki, plaże, ocean       | eksploracja, zwierzęta, zadania na wodzie                     |
-| 3   | **Dwór Carski**    | 5                  | arystokracja, cegła, dworek | zagadki logiczne, okradanie nieuczciwych urzędników           |
-| 4   | **Los Karkos**     | 7                  | bieda, ruiny, graffiti      | ciągłe zaczepki, trening walki i przetrwania, sklepy z bronią |
+| 2   | **Dzika Puszcza**  | 2                  | las, rzeka, jezioro, obóz   | zbieractwo, tropienie, rozbójnicy i ich herszt                |
+| 3   | **Las Palmas**     | 3                  | tropiki, plaże, ocean       | eksploracja, zwierzęta, zadania na wodzie                     |
+| 4   | **Dwór Carski**    | 5                  | arystokracja, cegła, dworek | zagadki logiczne, okradanie nieuczciwych urzędników           |
+| 5   | **Los Karkos**     | 7                  | bieda, ruiny, graffiti      | ciągłe zaczepki, trening walki i przetrwania, sklepy z bronią |
 
 Kolejność progów rośnie z trudnością: Miasto Ziomków uczy podstaw, Las Palmas to spokojna eksploracja,
 Dwór Carski wymaga myślenia i pierwszych walk, Los Karkos to sprawdzian dla doświadczonych.
 
 ## Stan
 
-Wszystkie 4 dzielnice są zbudowane jako mapy 128 × 96 pól (`apps/unity/Assets/Buds/Resources/Maps/*.txt`) z grafiką
+Wszystkie dzielnice są zbudowane jako mapy 176 × 132 pól (`apps/unity/Assets/Buds/Resources/Maps/*.txt`) z grafiką
 w stylu gry: centrum, okolice, strefy z nazwami, tablice z opisami i drogi między dzielnicami. Następne kroki to NPC,
 questy i potyczki w tych strefach (patrz `docs/roadmap.md`).
 
 Mapy edytuje się na dwa sposoby: w skryptach `tools/world/maps/<dzielnica>.ts` (układ, budynki, rozsiane obiekty)
 albo bezpośrednio w pliku `.txt` (każdy znak to pole, legenda na górze pliku). Po zmianie skryptu:
 `pnpm exec tsx ../../tools/world/export-maps.ts` z katalogu `apps/api` — skrypt sprawdza, czy wszystko jest osiągalne.
+
+## Nowe miejsca na dawnych działkach
+
+Działki trzymane wolne „na później” zostały zabudowane (`tools/world/maps/places.ts`), a ich ludzie, zadania,
+skrytki i przeciwnicy są w `packages/shared/src/content/new-places.ts`:
+
+- **Miasto Ziomków:** Stadion Ziomków (Trenerka Kasia), Lunapark (Pan Leszek), Bazar Miejski (Pani Grażyna),
+  Plac Ziomków ze sceną (Konferansjer Wojtek).
+- **Las Palmas:** Wodospad (Przewodnik Keoni), Wioska Tiki (Wódz Makoa), Przystań Jachtowa (Żeglarka Marina).
+- **Dwór Carski:** Tor Wyścigów (Dżokejka Róża), Stary Młyn (Hania, śledztwo z Detektyw Ireną), Oranżeria
+  (Zielarka Bogna).
+- **Los Karkos:** Stara Kopalnia (Górnik Stefan), Tor Motocrossowy (Motocyklistka Iga), Ruiny Elektrowni
+  (Inżynierka Wera).
+
+## Dzika Puszcza
+
+Las na zachód od Miasta Ziomków (wejście ścieżką z Parku Miejskiego, od poziomu 2), mapa
+`tools/world/maps/dzika-puszcza.ts`, treść `packages/shared/src/content/dzika-puszcza.ts`. Bez ulic, same szlaki:
+Leśna Brama, Obozowisko harcerzy, Chata Leśniczego (wnętrze), Jezioro Głębokie, Rzeka z dwoma mostami, Polana
+Grzybiarzy, Bagna, Wzgórze Wilków i Ruiny Strażnicy. Dwa łańcuchy zadań: obóz (chrust, zaginiony harcerz, jagody)
+i leśniczy (kłusownik, rozbójnicy, herszt Borys, boss na poziomie 7).
+
+## Mieszkańcy
+
+Poza NPC z zadaniami każda dzielnica ma mieszkańców bez zadań (`packages/shared/src/content/locals.ts` i
+w plikach dzielnic), z polem `wander`: przechadzają się kilka pól wokół swojego miejsca (`NpcWander` w grze),
+zatrzymują się i odwracają, gdy podejdziesz. NPC z zadaniami zawsze stoją w miejscu (`contentProblems` pilnuje).
 
 ## Wspólny układ mapy
 

@@ -9,7 +9,8 @@
       "lines": [
         "Morze dziś spokojne. Dobry dzień na naukę.",
         "Każdy ziomek zaczynał kiedyś na tej plaży."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "rybak-staszek",
@@ -20,7 +21,8 @@
       "lines": [
         "Ryby biorą, ale ja wolę kokosy.",
         "Na wyspie nic się nie marnuje."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "trenerka-ewa",
@@ -31,7 +33,8 @@
       "lines": [
         "Garda wyżej!",
         "Najpierw technika, potem siła."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "sternik-jozek",
@@ -42,7 +45,8 @@
       "lines": [
         "Łódź gotowa, czekamy na zgodę kapitana.",
         "Miasto Ziomków jest tuż za horyzontem."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "wiktor",
@@ -53,7 +57,8 @@
       "lines": [
         "Rynek to serce miasta. Stąd wszędzie blisko.",
         "Jak się zgubisz, wracaj do fontanny."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "halina",
@@ -64,7 +69,8 @@
       "lines": [
         "Za moich czasów to się chodziło piechotą!",
         "Ładny dziś dzień, prawda?"
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "nowak",
@@ -75,7 +81,8 @@
       "lines": [
         "Graffiti to wandalizm. Tak przynajmniej mówi regulamin.",
         "Mam cię na oku, młody."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "basia",
@@ -86,7 +93,8 @@
       "lines": [
         "W parku zawsze coś się dzieje!",
         "Widziałeś kaczki na stawie?"
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "kuba",
@@ -97,7 +105,8 @@
       "lines": [
         "Deska, rampa, luz. Tyle mi trzeba.",
         "Wkrótce bitwy freestylowe. Będziesz?"
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "zdzisiek",
@@ -108,7 +117,8 @@
       "lines": [
         "Pomidory w tym roku jak malowane.",
         "Działka to najlepsza siłownia."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "ola",
@@ -119,7 +129,8 @@
       "lines": [
         "Ściany w tym mieście są za szare.",
         "Psst. Policja patroluje tory po zmroku."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "marek",
@@ -130,7 +141,8 @@
       "lines": [
         "Przesyłki same się nie doręczą.",
         "Autobus znowu się spóźnia."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "kahu",
@@ -141,7 +153,8 @@
       "lines": [
         "Aloha! Tu nikt się nie spieszy.",
         "Najlepsze kokosy są przy chatkach."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "leilani",
@@ -152,7 +165,8 @@
       "lines": [
         "Coś zimnego? Mamy sok z kokosa!",
         "Bar otwarty do zachodu słońca."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "tomasz",
@@ -163,7 +177,8 @@
       "lines": [
         "Ryba bierze rano. Teraz to tylko czekanie.",
         "Morze daje i morze zabiera."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "mia",
@@ -174,7 +189,8 @@
       "lines": [
         "Fala dziś idealna!",
         "Deska, słońce, ocean — czego chcieć więcej?"
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "profesor",
@@ -185,7 +201,8 @@
       "lines": [
         "Te ruiny mają tysiąc lat. Albo dwa.",
         "Archeologia to cierpliwość. I dużo komarów."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "nalu",
@@ -196,7 +213,8 @@
       "lines": [
         "Ciii… flamingi śpią.",
         "Każdy flaming ma swoje imię. Ten to Rysio."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "alfred",
@@ -207,7 +225,8 @@
       "lines": [
         "Hrabina przyjmuje gości tylko po umówieniu.",
         "Herbata o piątej. Zawsze o piątej."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "eleonora",
@@ -218,7 +237,8 @@
       "lines": [
         "Róże w tym roku kwitną wyjątkowo.",
         "W tym dworze ściany mają uszy."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "feliks",
@@ -229,7 +249,8 @@
       "lines": [
         "Żywopłot trzeba przycinać co tydzień.",
         "Labirynt sadził jeszcze mój dziadek."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "irena",
@@ -240,7 +261,8 @@
       "lines": [
         "Każdy coś ukrywa. Pytanie tylko co.",
         "Kamienice mówią więcej niż ludzie."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "pompejusz",
@@ -251,7 +273,8 @@
       "lines": [
         "Proszę wypełnić wniosek w trzech egzemplarzach.",
         "Urząd nieczynny. Wróć jutro. Albo za rok."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "zofia",
@@ -262,7 +285,8 @@
       "lines": [
         "Bank otwarty od dziewiątej.",
         "Liczby się nie zgadzają… znowu."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "jozef",
@@ -273,7 +297,8 @@
       "lines": [
         "Konie wiedzą więcej, niż myślisz.",
         "Siano, woda, szczotka. I tak codziennie."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "rysiek",
@@ -284,7 +309,8 @@
       "lines": [
         "Tu wszystko ma swoją cenę.",
         "Nie pytaj, skąd towar."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "jola",
@@ -295,7 +321,8 @@
       "lines": [
         "Sprzęt dobry, ceny uczciwe. Prawie.",
         "Bez ochraniaczy do fabryki nie idź."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "bogdan",
@@ -306,7 +333,8 @@
       "lines": [
         "Gardę wyżej!",
         "Siła to nie wszystko. Liczy się głowa."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "szymek",
@@ -317,7 +345,8 @@
       "lines": [
         "Mieszkam tu od zawsze. Nie jest tak źle…",
         "Uważaj na typów spod bloku numer cztery."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "waldek",
@@ -328,7 +357,8 @@
       "lines": [
         "Złom to złoto, tylko trzeba umieć patrzeć.",
         "Pies? Jaki pies? Śpi."
-      ]
+      ],
+      "wander": 0
     },
     {
       "id": "kos",
@@ -339,7 +369,596 @@
       "lines": [
         "Nie widziałeś mnie.",
         "Słucham, co mówią na dzielnicy."
-      ]
+      ],
+      "wander": 0
+    },
+    {
+      "id": "harcerka-zosia",
+      "name": "Harcerka Zosia",
+      "district": "dzika-puszcza",
+      "x": 130,
+      "y": 60,
+      "lines": [
+        "Czuwaj! W puszczy trzymamy się razem.",
+        "Ognisko to serce obozu. Bez drewna serce stoi."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "harcerz-tomek",
+      "name": "Harcerz Tomek",
+      "district": "dzika-puszcza",
+      "x": 54,
+      "y": 96,
+      "lines": [
+        "Zgubiłem szlak, ale znalazłem grzyby. Chyba to się liczy?",
+        "Pani Jagna mówi, że las sam pokazuje drogę."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "lesniczy-bartek",
+      "name": "Leśniczy Bartek",
+      "district": "dzika-puszcza",
+      "x": 114,
+      "y": 30,
+      "lines": [
+        "Każde drzewo w tej puszczy ma numer. Ja znam wszystkie.",
+        "Ktoś zastawia sidła przy bagnach. Dowiem się kto."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "wedkarz-edek",
+      "name": "Wędkarz Edek",
+      "district": "dzika-puszcza",
+      "x": 62,
+      "y": 46,
+      "lines": [
+        "W Jeziorze Głębokim mieszka sum. Widziałem go raz. Albo on mnie.",
+        "Cisza nad wodą to połowa sukcesu."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "zielarka-jagna",
+      "name": "Zielarka Jagna",
+      "district": "dzika-puszcza",
+      "x": 60,
+      "y": 95,
+      "lines": [
+        "Każdy grzyb jest jadalny. Niektóre tylko raz.",
+        "Zioła z polany leczą lepiej niż niejedna apteczka."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "harcerz-olek",
+      "name": "Harcerz Olek",
+      "district": "dzika-puszcza",
+      "x": 122,
+      "y": 60,
+      "lines": [
+        "Na torze przeszkód za namiotami trenuje się przetrwanie. Polecam!",
+        "Zosia rządzi obozem twardą ręką. I dobrze."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "grzybiarz-zenek",
+      "name": "Grzybiarz Zenek",
+      "district": "dzika-puszcza",
+      "x": 70,
+      "y": 96,
+      "lines": [
+        "Najlepsze miejsca na grzyby? Nie powiem. Nikt nie mówi.",
+        "Rano w lesie jest najpiękniej. I najmokrzej."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "wedrowniczka-ala",
+      "name": "Wędrowniczka Ala",
+      "district": "dzika-puszcza",
+      "x": 156,
+      "y": 59,
+      "lines": [
+        "Z miasta do jeziora jest godzina marszu. Z mapą pół godziny.",
+        "Rzekę przejdziesz tylko po moście. Wierz mi, sprawdzałam."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "ornitolog-maks",
+      "name": "Ornitolog Maks",
+      "district": "dzika-puszcza",
+      "x": 34,
+      "y": 46,
+      "lines": [
+        "Ciii… dzięcioł. Albo rozbójnik puka w drzewo. Na wzgórzu trudno powiedzieć.",
+        "Na bagnach żyją czaple. I komary. Głównie komary."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "trenerka-kasia",
+      "name": "Trenerka Kasia",
+      "district": "miasto-ziomkow",
+      "x": 150,
+      "y": 78,
+      "lines": [
+        "Na Stadionie Ziomków gra się do ostatniego gwizdka.",
+        "Biegaj, podawaj, strzelaj. W tej kolejności."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "operator-leszek",
+      "name": "Pan Leszek",
+      "district": "miasto-ziomkow",
+      "x": 152,
+      "y": 120,
+      "lines": [
+        "Karuzela kręci się od czterdziestu lat. Ja trochę krócej.",
+        "Diabelski młyn najładniej wygląda o zachodzie słońca."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "handlarka-grazyna",
+      "name": "Pani Grażyna",
+      "district": "miasto-ziomkow",
+      "x": 92,
+      "y": 102,
+      "lines": [
+        "Najlepsze jabłka w mieście! Najlepsze w tej cenie, znaczy się.",
+        "Na bazarze targowanie to obowiązek."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "konferansjer-wojtek",
+      "name": "Konferansjer Wojtek",
+      "district": "miasto-ziomkow",
+      "x": 31,
+      "y": 101,
+      "lines": [
+        "Raz, dwa, raz, dwa… słychać mnie? Plac Ziomków, czy mnie słyszycie?!",
+        "Bez sprzętu nie ma koncertu. Bez publiczności też nie."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "przewodnik-keoni",
+      "name": "Przewodnik Keoni",
+      "district": "las-palmas",
+      "x": 150,
+      "y": 27,
+      "lines": [
+        "Wodospad szumi tak samo od tysiąca lat. Ja od dwudziestu.",
+        "Do laguny wchodzi się powoli. Wychodzi szybko."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "wodz-makoa",
+      "name": "Wódz Makoa",
+      "district": "las-palmas",
+      "x": 150,
+      "y": 71,
+      "lines": [
+        "Ogień Wioski Tiki nie gaśnie od pokoleń. Prawie.",
+        "Gość w wiosce to dar. Gość z drewnem to podwójny dar."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "zeglarka-marina",
+      "name": "Żeglarka Marina",
+      "district": "las-palmas",
+      "x": 106,
+      "y": 113,
+      "lines": [
+        "Wiatr z zachodu, fale z południa. Idealny dzień na rejs.",
+        "Każda łódź na przystani ma imię. Ta tutaj to Burza."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "dzokejka-roza",
+      "name": "Dżokejka Róża",
+      "district": "dwor-carski",
+      "x": 150,
+      "y": 85,
+      "lines": [
+        "Na torze liczy się każda sekunda.",
+        "Józef ze stajni dba o konie jak o własne dzieci."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "hania-mlynarzowna",
+      "name": "Hania",
+      "district": "dwor-carski",
+      "x": 104,
+      "y": 114,
+      "lines": [
+        "Tata nigdy nie zostawiłby młyna bez słowa.",
+        "Koło dalej się kręci. Tylko tata zniknął."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "zielarka-bogna",
+      "name": "Zielarka Bogna",
+      "district": "dwor-carski",
+      "x": 152,
+      "y": 113,
+      "lines": [
+        "W oranżerii rosną rośliny z pięciu kontynentów. Z szóstego tylko chwasty.",
+        "Herbata z dworskich ziół leczy wszystko. Oprócz nudy."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "gornik-stefan",
+      "name": "Górnik Stefan",
+      "district": "los-karkos",
+      "x": 146,
+      "y": 20,
+      "lines": [
+        "Trzydzieści lat pod ziemią. Słońce dalej mnie oślepia.",
+        "Kopalnię zamknęli, ale ruda została."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "motocyklistka-iga",
+      "name": "Motocyklistka Iga",
+      "district": "los-karkos",
+      "x": 150,
+      "y": 62,
+      "lines": [
+        "Błoto to moje drugie imię. Pierwsze to Iga.",
+        "Brudas jeździ nieczysto. Ktoś musi go ograć."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "inzynierka-wera",
+      "name": "Inżynierka Wera",
+      "district": "los-karkos",
+      "x": 126,
+      "y": 111,
+      "lines": [
+        "Elektrownia nie działa od lat, a licznik dalej kręci. Ciekawe, prawda?",
+        "Prąd się nie kończy. Tylko kable."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "turystka-gosia",
+      "name": "Turystka Gosia",
+      "district": "wyspa-startowa",
+      "x": 20,
+      "y": 46,
+      "lines": [
+        "Przypłynęłam na tydzień, zostaję na zawsze. Tu jest za ładnie.",
+        "Kapitan Bosman mówi, że łódź do miasta płynie dopiero, gdy ktoś jest gotów. Ja chyba nie jestem."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "maly-antek",
+      "name": "Mały Antek",
+      "district": "wyspa-startowa",
+      "x": 41,
+      "y": 29,
+      "lines": [
+        "Jak dorosnę, będę walczyć z manekinem bez ani jednego siniaka!",
+        "Tata mówi, że skrytki widać dopiero z bliska. Szukam od rana."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "wedkarz-zbyszek",
+      "name": "Wędkarz Zbyszek",
+      "district": "wyspa-startowa",
+      "x": 66,
+      "y": 32,
+      "lines": [
+        "Ryby biorą o świcie. Albo o zmierzchu. Albo wcale.",
+        "Cicho, bo mi spłoszysz szczupaka."
+      ],
+      "wander": 2
+    },
+    {
+      "id": "spacerowiczka-wanda",
+      "name": "Pani Wanda",
+      "district": "miasto-ziomkow",
+      "x": 92,
+      "y": 53,
+      "lines": [
+        "Codziennie robię rundkę po śródmieściu. Lekarz kazał.",
+        "Pani Halina zna wszystkie plotki w mieście. Ja tylko połowę."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "biegacz-darek",
+      "name": "Biegacz Darek",
+      "district": "miasto-ziomkow",
+      "x": 30,
+      "y": 42,
+      "lines": [
+        "Trzy kółka wokół stawu i jestem nowym człowiekiem.",
+        "Szybkie buty dodają szybkości. Sprawdzone na sobie."
+      ],
+      "wander": 4
+    },
+    {
+      "id": "zbieracz-kamyk",
+      "name": "Kamyk",
+      "district": "miasto-ziomkow",
+      "x": 97,
+      "y": 16,
+      "lines": [
+        "Ze Wzgórza widać całe miasto. I parę miejsc, gdzie ktoś coś zakopał.",
+        "Znaki mówią więcej, niż się wydaje. Czytasz tablice?"
+      ],
+      "wander": 3
+    },
+    {
+      "id": "mechanik-heniek",
+      "name": "Mechanik Heniek",
+      "district": "miasto-ziomkow",
+      "x": 28,
+      "y": 83,
+      "lines": [
+        "Hulajnoga piszczy? Daj ją tu. Albo nie, mam przerwę.",
+        "Za garażami ktoś ciągle maluje ściany. Sierżant Nowak już się zgrzał."
+      ],
+      "wander": 2
+    },
+    {
+      "id": "kolejarz-stach",
+      "name": "Kolejarz Stach",
+      "district": "miasto-ziomkow",
+      "x": 94,
+      "y": 83,
+      "lines": [
+        "Pociągi tu już nie jeżdżą, ale ja dalej pilnuję torów. Z przyzwyczajenia.",
+        "Po zmroku przy torach kręcą się różne typy. Uważaj na siebie."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "kurierka-ula",
+      "name": "Kurierka Ula",
+      "district": "miasto-ziomkow",
+      "x": 117,
+      "y": 53,
+      "lines": [
+        "Listonosz Marek to mój mistrz. Zna każdą skrzynkę w mieście.",
+        "Na rowerze jestem na Wylotówce w minutę. Na piechotę w pięć."
+      ],
+      "wander": 4
+    },
+    {
+      "id": "sasiadka-ela",
+      "name": "Sąsiadka Ela",
+      "district": "miasto-ziomkow",
+      "x": 146,
+      "y": 27,
+      "lines": [
+        "Na Nowym Osiedlu wszyscy się znają. Ja dopiero się uczę.",
+        "Mówią, że na Stadionie Ziomków kiedyś będą wielkie mecze."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "flisak-romek",
+      "name": "Flisak Romek",
+      "district": "miasto-ziomkow",
+      "x": 69,
+      "y": 116,
+      "lines": [
+        "Do Dworu Carskiego idzie się na południe, za portem. Tam ludzie noszą kapelusze.",
+        "Woda dziś spokojna. Idealna na spacer brzegiem."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "sprzedawca-lodow",
+      "name": "Lodziarz Pepe",
+      "district": "las-palmas",
+      "x": 67,
+      "y": 67,
+      "lines": [
+        "Kokosowe, mango, ananas. Kokosy się skończyły, wiadomo czemu.",
+        "W upał najlepiej w cieniu palm."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "plazowiczka-luna",
+      "name": "Luna",
+      "district": "las-palmas",
+      "x": 26,
+      "y": 54,
+      "lines": [
+        "Na Plaży Aloha fale są najlepsze po południu. Zapytaj Mię, ona wie wszystko o falach.",
+        "Surfing ćwiczy się na desce na piasku. Brzmi dziwnie, ale działa."
+      ],
+      "wander": 4
+    },
+    {
+      "id": "nurek-bruno",
+      "name": "Nurek Bruno",
+      "district": "las-palmas",
+      "x": 58,
+      "y": 20,
+      "lines": [
+        "Przy odpływie na rafie błyszczą perły. Ja widziałem dwie.",
+        "Pod wodą jest cicho. Na lądzie wszyscy gadają."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "odkrywca-igor",
+      "name": "Odkrywca Igor",
+      "district": "las-palmas",
+      "x": 99,
+      "y": 48,
+      "lines": [
+        "Profesor Kowalski twierdzi, że złota maska istnieje. Ja twierdzę, że komary istnieją.",
+        "Ścieżka do ruin prowadzi przez dżunglę. Trzymaj się szlaku."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "turystka-zoe",
+      "name": "Turystka Zoe",
+      "district": "las-palmas",
+      "x": 69,
+      "y": 112,
+      "lines": [
+        "W Zatoce Żółwi naprawdę są żółwie! Jeden na mnie mrugnął.",
+        "Robię zdjęcia wszystkiemu. Tobie też mogę."
+      ],
+      "wander": 4
+    },
+    {
+      "id": "dama-klotylda",
+      "name": "Dama Klotylda",
+      "district": "dwor-carski",
+      "x": 64,
+      "y": 23,
+      "lines": [
+        "Aleją Carską spaceruje się powoli. Pośpiech jest dla urzędników.",
+        "Hrabina Eleonora wydaje herbatki. Bez zaproszenia ani rusz."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "pomocnik-ogrodnika",
+      "name": "Pomocnik Tymek",
+      "district": "dwor-carski",
+      "x": 61,
+      "y": 66,
+      "lines": [
+        "Ogrodnik Feliks zgubił kiedyś klucz w labiryncie. Nie mów mu, że wiem.",
+        "Róże podlewa się rano, nie w południe. To pierwsza lekcja."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "poeta-cyprian",
+      "name": "Poeta Cyprian",
+      "district": "dwor-carski",
+      "x": 35,
+      "y": 27,
+      "lines": [
+        "Między kamienicami echo powtarza moje wiersze. Szkoda, że tylko echo.",
+        "Natchnienie przychodzi, gdy zgubię długopis."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "goniec-witek",
+      "name": "Goniec Witek",
+      "district": "dwor-carski",
+      "x": 98,
+      "y": 26,
+      "lines": [
+        "Urzędnicy wysyłają mnie z pismami tam i z powrotem. Nikt ich nie czyta.",
+        "Detektyw Irena zawsze wie, kto co podpisał. Straszne."
+      ],
+      "wander": 4
+    },
+    {
+      "id": "niania-jadwiga",
+      "name": "Niania Jadwiga",
+      "district": "dwor-carski",
+      "x": 73,
+      "y": 85,
+      "lines": [
+        "W Parku Dworskim jest najwięcej cienia. I najwięcej gołębi.",
+        "Kucyk znowu uciekł ze stajni? Józef ma pełne ręce roboty."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "malarka-iza",
+      "name": "Malarka Iza",
+      "district": "dwor-carski",
+      "x": 49,
+      "y": 103,
+      "lines": [
+        "Maluję jezioro od trzech lat. Ciągle się zmienia.",
+        "Graffiti to też sztuka. Tylko nie mów tego Sierżantowi Nowakowi."
+      ],
+      "wander": 2
+    },
+    {
+      "id": "blokers-maciek",
+      "name": "Blokers Maciek",
+      "district": "los-karkos",
+      "x": 56,
+      "y": 41,
+      "lines": [
+        "Na blokach każdy zna każdego. A ciebie jeszcze nie.",
+        "Trener Bogdan na ringu nie bierze jeńców. Ale uczy uczciwie."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "handlarka-bozena",
+      "name": "Handlarka Bożena",
+      "district": "los-karkos",
+      "x": 56,
+      "y": 79,
+      "lines": [
+        "Na bazarze kupisz wszystko. Pytanie, czy chcesz wiedzieć skąd.",
+        "Rysiek z Bazaru jest uczciwy. Prawie zawsze."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "zlomiarz-kazik",
+      "name": "Kazik",
+      "district": "los-karkos",
+      "x": 107,
+      "y": 24,
+      "lines": [
+        "Waldek płaci za części. Ja tylko znajduję.",
+        "Na złomowisku są skarby. Głównie zardzewiałe."
+      ],
+      "wander": 3
+    },
+    {
+      "id": "celnik-gutek",
+      "name": "Celnik Gutek",
+      "district": "los-karkos",
+      "x": 10,
+      "y": 53,
+      "lines": [
+        "Rogatki są po to, żeby było wiadomo, gdzie się zaczyna Los Karkos.",
+        "Kto wchodzi, ten wie, na co się pisze."
+      ],
+      "wander": 2
+    },
+    {
+      "id": "rybaczka-krysia",
+      "name": "Rybaczka Krysia",
+      "district": "los-karkos",
+      "x": 50,
+      "y": 112,
+      "lines": [
+        "W Porcie Przemytników nikt nie zadaje pytań. Ja też nie.",
+        "Nocą przy kanale coś pływa. Nie chcesz wiedzieć co."
+      ],
+      "wander": 3
     }
   ],
   "quests": [
@@ -1752,6 +2371,1015 @@
               "y": 88
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "drewno-na-ognisko",
+      "title": "Drewno na ognisko",
+      "district": "dzika-puszcza",
+      "giver": "harcerka-zosia",
+      "xp": 80,
+      "minLevel": 2,
+      "requires": [],
+      "intro": "Witaj w obozie! Ognisko przygasa, a chrustu nie ma. Pozbierasz pięć naręczy wokół obozu?",
+      "done": "Ale buzuje! Siadaj przy ogniu, należy ci się. Mamy jednak inny kłopot…",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Chrust",
+          "item": "chrust",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 122,
+              "y": 64
+            },
+            {
+              "x": 138,
+              "y": 62
+            },
+            {
+              "x": 126,
+              "y": 70
+            },
+            {
+              "x": 134,
+              "y": 71
+            },
+            {
+              "x": 120,
+              "y": 56
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zaginiony-harcerz",
+      "title": "Zaginiony harcerz",
+      "district": "dzika-puszcza",
+      "giver": "harcerka-zosia",
+      "xp": 150,
+      "minLevel": 2,
+      "requires": [
+        "drewno-na-ognisko"
+      ],
+      "intro": "Tomek poszedł nad jezioro po wodę i nie wrócił. Zapytaj Edka, wędkarza. On widzi wszystko, co dzieje się nad wodą.",
+      "done": "Tomek jest cały! Dziękuję. Od dziś masz w obozie swoje miejsce przy ognisku.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 62,
+          "y": 44,
+          "radius": 2,
+          "label": "Brzeg Jeziora Głębokiego",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "wedkarz-edek",
+          "text": "Chłopak z obozu? Poszedł na południe, za grzybami. Pewnie na polanę.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "harcerz-tomek",
+          "text": "Jesteś! Wrócę szlakiem, obiecuję. Powiedz Zosi, że jestem cały.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "grzybobranie",
+      "title": "Grzybobranie",
+      "district": "dzika-puszcza",
+      "giver": "zielarka-jagna",
+      "xp": 120,
+      "minLevel": 2,
+      "requires": [],
+      "intro": "Polana pełna grzybów, a moje kolana pełne bólu. Zbierzesz pięć? Tylko te z czerwonym kapeluszem omijaj. Żartuję. Zbieraj wszystkie.",
+      "done": "Piękne okazy. Ususzę je na zimę, a ty weź trochę na drogę.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Grzyby",
+          "item": "grzyb",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 48,
+              "y": 92
+            },
+            {
+              "x": 52,
+              "y": 100
+            },
+            {
+              "x": 62,
+              "y": 100
+            },
+            {
+              "x": 66,
+              "y": 90
+            },
+            {
+              "x": 57,
+              "y": 89
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jagody-dla-obozu",
+      "title": "Jagody dla obozu",
+      "district": "dzika-puszcza",
+      "giver": "zielarka-jagna",
+      "xp": 130,
+      "minLevel": 2,
+      "requires": [
+        "grzybobranie"
+      ],
+      "intro": "Harcerze z obozu robią dziś kompot. Na skraju bagien rosną najlepsze jagody. Zanieś cztery garście Zosi.",
+      "done": "Kompot z bagiennych jagód, mmm. Zosia na pewno się ucieszyła.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Jagody",
+          "item": "jagody",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 40,
+              "y": 60
+            },
+            {
+              "x": 26,
+              "y": 52
+            },
+            {
+              "x": 38,
+              "y": 70
+            },
+            {
+              "x": 20,
+              "y": 74
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "harcerka-zosia",
+          "text": "Jagody od Jagny? Super! Kompot gotowy w pięć minut.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "sieci-edka",
+      "title": "Zaplątane sieci",
+      "district": "dzika-puszcza",
+      "giver": "wedkarz-edek",
+      "xp": 110,
+      "minLevel": 2,
+      "requires": [],
+      "intro": "Sum mi pozrywał sieci i rozniósł je po całym brzegu. Pozbierasz trzy? Ja tu muszę pilnować spławika.",
+      "done": "Jak nowe. Prawie. Następnym razem sum nie ma szans.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Sieci",
+          "item": "siec",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 46,
+              "y": 38
+            },
+            {
+              "x": 75,
+              "y": 32
+            },
+            {
+              "x": 56,
+              "y": 42
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "klusownik-z-bagien",
+      "title": "Kłusownik z bagien",
+      "district": "dzika-puszcza",
+      "giver": "lesniczy-bartek",
+      "xp": 180,
+      "minLevel": 3,
+      "requires": [],
+      "intro": "Na bagnach ktoś zastawia sidła. Kłusownik Heniek, znam go z widzenia. Przegoń go stamtąd.",
+      "done": "Sidła zdjęte, Heniek uciekł. Las ci dziękuje. Ja też.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Przegoń kłusownika",
+          "item": "",
+          "enemy": "klusownik-heniek",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "rozbojnicy-ze-wzgorza",
+      "title": "Rozbójnicy ze wzgórza",
+      "district": "dzika-puszcza",
+      "giver": "lesniczy-bartek",
+      "xp": 220,
+      "minLevel": 4,
+      "requires": [
+        "klusownik-z-bagien"
+      ],
+      "intro": "Heniek powiedział, kto go nasłał: rozbójnicy z Wzgórza Wilków. Pokonaj ich zwiadowcę, to się zastanowią.",
+      "done": "Zwiadowca uciekł do swoich. Teraz wiemy, gdzie się kryją: w Ruinach Strażnicy.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pokonaj zwiadowcę rozbójników",
+          "item": "",
+          "enemy": "lesny-rozbojnik",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "herszt-rozbojnikow",
+      "title": "Herszt rozbójników",
+      "district": "dzika-puszcza",
+      "giver": "lesniczy-bartek",
+      "xp": 400,
+      "minLevel": 6,
+      "requires": [
+        "rozbojnicy-ze-wzgorza"
+      ],
+      "intro": "Czas zakończyć tę sprawę. Ich herszt siedzi w Ruinach Strażnicy. Uważaj na jego strzelca przy szlaku.",
+      "done": "Herszt pokonany, puszcza znów jest bezpieczna. Gdyby nie ty, dalej liczyłbym ukradzione drzewa.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pokonaj strzelca przy szlaku",
+          "item": "",
+          "enemy": "rozbojnik-z-proca",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 140,
+          "y": 99,
+          "radius": 2,
+          "label": "Ruiny Strażnicy",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pokonaj herszta",
+          "item": "",
+          "enemy": "herszt-rozbojnikow",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "pilki-na-boisko",
+      "title": "Piłki na boisko",
+      "district": "miasto-ziomkow",
+      "giver": "trenerka-kasia",
+      "xp": 90,
+      "minLevel": 2,
+      "requires": [],
+      "intro": "Moi zawodnicy kopnęli piłki tak mocno, że rozleciały się po całym mieście. Przyniesiesz cztery? Bez piłek nie ma treningu.",
+      "done": "Cztery piłki, komplet! Trening zaczynamy za pięć minut. Ty też możesz biegać z nami.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Piłki",
+          "item": "pilka",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 33,
+              "y": 48
+            },
+            {
+              "x": 63,
+              "y": 30
+            },
+            {
+              "x": 110,
+              "y": 42
+            },
+            {
+              "x": 147,
+              "y": 63
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zgubione-bilety",
+      "title": "Zgubione bilety",
+      "district": "miasto-ziomkow",
+      "giver": "operator-leszek",
+      "xp": 80,
+      "minLevel": 2,
+      "requires": [],
+      "intro": "Wiatr porwał mi plik biletów. Jeden poleciał na bazar, jeden do portu, jeden został tu w lunaparku. Pozbierasz?",
+      "done": "Wszystkie trzy! Za fatygę możesz się przejechać na karuzeli. Raz. Dwa, jeśli nikt nie patrzy.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Bilety",
+          "item": "bilet",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 146,
+              "y": 116
+            },
+            {
+              "x": 88,
+              "y": 101
+            },
+            {
+              "x": 40,
+              "y": 116
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zamowienia-grazyny",
+      "title": "Zamówienia z bazaru",
+      "district": "miasto-ziomkow",
+      "giver": "handlarka-grazyna",
+      "xp": 70,
+      "minLevel": 1,
+      "requires": [],
+      "intro": "Pani Halina zamówiła u mnie jabłka, a Pan Zdzisiek obiecał pomidory na stoisko. Zajdziesz do obojga? Ja nie mogę zostawić straganu.",
+      "done": "Jabłka zamówione, pomidory przyjadą. Handel kwitnie! Dzięki tobie.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "halina",
+          "text": "Od Grażyny? Niech odłoży mi kilo jabłek. Tylko tych czerwonych!",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "zdzisiek",
+          "text": "Pomidory dla Grażyny? Zawiozę jutro rano, jak tylko zerwę.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "sprzet-na-scene",
+      "title": "Sprzęt na scenę",
+      "district": "miasto-ziomkow",
+      "giver": "konferansjer-wojtek",
+      "xp": 110,
+      "minLevel": 2,
+      "requires": [
+        "ulotki-basi"
+      ],
+      "intro": "Ulotki rozdane, ludzie przyjdą, a połowa nagłośnienia została w garażach! Przyniesiesz trzy skrzynki z częściami? Potem pogadaj z Kubą Deską, on otwiera koncert.",
+      "done": "Sprzęt jest, Kuba gotowy. Plac Ziomków, czy mnie słyszycie?! Koncert się odbędzie!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Części nagłośnienia",
+          "item": "czesc",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 44,
+              "y": 89
+            },
+            {
+              "x": 52,
+              "y": 88
+            },
+            {
+              "x": 24,
+              "y": 89
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "kuba",
+          "text": "Koncert na Placu Ziomków? Jasne, że otworzę. Zrobię freestyle o tobie.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "spokoj-nad-laguna",
+      "title": "Spokój nad laguną",
+      "district": "las-palmas",
+      "giver": "przewodnik-keoni",
+      "xp": 230,
+      "minLevel": 3,
+      "requires": [],
+      "intro": "Turyści boją się kąpać pod wodospadem, bo pirat z laguny straszy ich od rana. Rozejrzyj się nad wodą i pokaż mu, gdzie jego miejsce.",
+      "done": "Turyści wracają do laguny. Wodospad znowu szumi spokojnie. Mahalo!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 150,
+          "y": 26,
+          "radius": 2,
+          "label": "Laguna pod wodospadem",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Przegoń pirata z laguny",
+          "item": "",
+          "enemy": "pirat-z-laguny",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "ogien-wioski",
+      "title": "Ogień wioski",
+      "district": "las-palmas",
+      "giver": "wodz-makoa",
+      "xp": 240,
+      "minLevel": 4,
+      "requires": [],
+      "intro": "Ognisko wioski przygasa. Przynieś cztery naręcza chrustu z dżungli, a potem powiedz Kahu z miasteczka, że dziś wieczorem świętujemy.",
+      "done": "Ogień płonie, cała wioska tańczy. Jesteś teraz przyjacielem Wioski Tiki.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Chrust",
+          "item": "chrust",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 150,
+              "y": 45
+            },
+            {
+              "x": 130,
+              "y": 40
+            },
+            {
+              "x": 160,
+              "y": 40
+            },
+            {
+              "x": 151,
+              "y": 52
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "kahu",
+          "text": "Święto w Wiosce Tiki? Będę! Przyniosę ukulele.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "sieci-mariny",
+      "title": "Sieci dla przystani",
+      "district": "las-palmas",
+      "giver": "zeglarka-marina",
+      "xp": 200,
+      "minLevel": 3,
+      "requires": [],
+      "intro": "Sztorm porwał sieci z przystani i wyrzucił je na plażę w Zatoce Żółwi. Przyniesiesz trzy? Rybak Tomasz pomoże je naprawić.",
+      "done": "Sieci całe, łodzie gotowe. Jutro wypływamy o świcie!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Sieci",
+          "item": "siec",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 40,
+              "y": 104
+            },
+            {
+              "x": 70,
+              "y": 108
+            },
+            {
+              "x": 90,
+              "y": 112
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "tomasz",
+          "text": "Sieci Mariny? Załatam w godzinę. Dobre sieci to połowa połowu.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "okrazenie-probne",
+      "title": "Okrążenie próbne",
+      "district": "dwor-carski",
+      "giver": "dzokejka-roza",
+      "xp": 300,
+      "minLevel": 5,
+      "requires": [],
+      "intro": "Przed wyścigiem trzeba sprawdzić tor. Obiegnij go dookoła: zakręt północny, wschodni i południowy. Potem zgłoś się do Józefa w stajni.",
+      "done": "Tor równy, przeszkód brak. Wyścig może się odbyć. Szybkie nogi, gratuluję!",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 136,
+          "y": 62,
+          "radius": 2,
+          "label": "Zakręt północny",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 164,
+          "y": 74,
+          "radius": 2,
+          "label": "Zakręt wschodni",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 136,
+          "y": 86,
+          "radius": 2,
+          "label": "Zakręt południowy",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "talk",
+          "npc": "jozef",
+          "text": "Róża przysłała? Konie gotowe. Tor też, jak widzę.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "zaginiony-mlynarz",
+      "title": "Zaginiony młynarz",
+      "district": "dwor-carski",
+      "giver": "hania-mlynarzowna",
+      "xp": 420,
+      "minLevel": 6,
+      "requires": [],
+      "intro": "Tata zniknął, a za młynem leżą rozsypane worki mąki. Pozbieraj je, może coś powiedzą. I pokaż je detektyw Irenie.",
+      "done": "Tata jest w domu! Urzędnik zamknął go w piwnicy urzędu, żeby przejąć młyn. Nigdy ci tego nie zapomnę.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Worki mąki",
+          "item": "maka",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 96,
+              "y": 108
+            },
+            {
+              "x": 119,
+              "y": 120
+            },
+            {
+              "x": 102,
+              "y": 122
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "irena",
+          "text": "Mąka z pieczątką urzędu? To ślad. Urzędnik z parasolem kręcił się przy młynie.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Zmuś urzędnika do prawdy",
+          "item": "",
+          "enemy": "urzednik-z-parasolem",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "ziola-dla-hrabiny",
+      "title": "Zioła dla hrabiny",
+      "district": "dwor-carski",
+      "giver": "zielarka-bogna",
+      "xp": 280,
+      "minLevel": 5,
+      "requires": [],
+      "intro": "Hrabina Eleonora zamówiła napar z leśnych grzybów. Rosną w Parku Dworskim i nad jeziorem. Zbierz trzy i zanieś je hrabinie.",
+      "done": "Hrabina zachwycona naparem. Mówi, że od dawna nie piła nic tak… leśnego.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Grzyby",
+          "item": "grzyb",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 71,
+              "y": 82
+            },
+            {
+              "x": 78,
+              "y": 88
+            },
+            {
+              "x": 60,
+              "y": 104
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "eleonora",
+          "text": "Od Bogny? Cudownie. Herbatka o piątej będzie dziś wyjątkowa.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "ruda-gornika",
+      "title": "Ruda górnika",
+      "district": "los-karkos",
+      "giver": "gornik-stefan",
+      "xp": 480,
+      "minLevel": 7,
+      "requires": [],
+      "intro": "Ktoś szabruje moją kopalnię. Zbierz rudę, którą rozsypali przy wejściu, zanim zabiorą resztę. A jak spotkasz szabrownika, wiesz co robić.",
+      "done": "Ruda ocalona, szabrownik przegoniony. Kopalnia zamknięta, ale honor górnika został.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Ruda",
+          "item": "ruda",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 140,
+              "y": 20
+            },
+            {
+              "x": 160,
+              "y": 24
+            },
+            {
+              "x": 146,
+              "y": 36
+            },
+            {
+              "x": 156,
+              "y": 32
+            }
+          ]
+        },
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pokonaj szabrownika",
+          "item": "",
+          "enemy": "szabrownik-z-kopalni",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "wyscig-z-brudasem",
+      "title": "Wyścig z Brudasem",
+      "district": "los-karkos",
+      "giver": "motocyklistka-iga",
+      "xp": 520,
+      "minLevel": 8,
+      "requires": [],
+      "intro": "Brudas wygrywa każdy wyścig, bo ścina zakręty. Przejdź tor: skocznię zachodnią i wschodnią, a potem pokaż mu, że oszustwo się nie opłaca.",
+      "done": "Brudas pokonany na własnym torze! Od dziś ścinanie zakrętów jest zakazane.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 136,
+          "y": 73,
+          "radius": 2,
+          "label": "Skocznia zachodnia",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 164,
+          "y": 73,
+          "radius": 2,
+          "label": "Skocznia wschodnia",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "duel",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Pokonaj Brudasa",
+          "item": "",
+          "enemy": "rajdowiec-brudas",
+          "spots": []
+        }
+      ]
+    },
+    {
+      "id": "buczenie-w-ruinach",
+      "title": "Buczenie w ruinach",
+      "district": "los-karkos",
+      "giver": "inzynierka-wera",
+      "xp": 450,
+      "minLevel": 7,
+      "requires": [],
+      "intro": "Coś buczy w starym transformatorze. Sprawdź go, pozbieraj części, które leżą wokół, i zanieś je Waldkowi na złomowisko. On wie, co z nimi zrobić.",
+      "done": "Waldek mówi, że ktoś podpiął kabel do sieci. Zagadka rozwiązana, buczenie ucichło.",
+      "rewardItem": "",
+      "steps": [
+        {
+          "kind": "reach",
+          "npc": "",
+          "text": "",
+          "x": 126,
+          "y": 110,
+          "radius": 2,
+          "label": "Stary transformator",
+          "item": "",
+          "enemy": "",
+          "spots": []
+        },
+        {
+          "kind": "collect",
+          "npc": "",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "Części",
+          "item": "czesc",
+          "enemy": "",
+          "spots": [
+            {
+              "x": 106,
+              "y": 106
+            },
+            {
+              "x": 120,
+              "y": 118
+            },
+            {
+              "x": 146,
+              "y": 104
+            }
+          ]
+        },
+        {
+          "kind": "talk",
+          "npc": "waldek",
+          "text": "Części z elektrowni? Ktoś podpiął kabel na lewo. Załatwię to.",
+          "x": 0,
+          "y": 0,
+          "radius": 0,
+          "label": "",
+          "item": "",
+          "enemy": "",
+          "spots": []
         }
       ]
     }
@@ -5506,8 +7134,8 @@
       "id": "trening-mz-worek",
       "district": "miasto-ziomkow",
       "map": "miasto-ziomkow",
-      "x": 150,
-      "y": 66,
+      "x": 166,
+      "y": 74,
       "skill": "walka",
       "name": "Worek przy stadionie",
       "look": "worek",
@@ -5576,6 +7204,17 @@
       "y": 17,
       "skill": "przetrwanie",
       "name": "Tor na złomowisku",
+      "look": "tor",
+      "hint": "Skacz nad przeszkodami w samą porę."
+    },
+    {
+      "id": "trening-dp-tor",
+      "district": "dzika-puszcza",
+      "map": "dzika-puszcza",
+      "x": 126,
+      "y": 74,
+      "skill": "przetrwanie",
+      "name": "Tor przeszkód harcerzy",
       "look": "tor",
       "hint": "Skacz nad przeszkodami w samą porę."
     }
@@ -6075,6 +7714,163 @@
         {
           "x": 109,
           "y": 81
+        }
+      ]
+    },
+    {
+      "id": "wloczega-z-bagien",
+      "name": "Bagienny włóczęga",
+      "district": "dzika-puszcza",
+      "level": 2,
+      "hp": 44,
+      "weapon": "piesci",
+      "boss": false,
+      "lines": [
+        "Moje bagno, moje zasady.",
+        "Masz coś do jedzenia? Nie? To masz problem."
+      ],
+      "spots": [
+        {
+          "x": 14,
+          "y": 60
+        },
+        {
+          "x": 26,
+          "y": 59
+        }
+      ]
+    },
+    {
+      "id": "klusownik-heniek",
+      "name": "Kłusownik Heniek",
+      "district": "dzika-puszcza",
+      "level": 3,
+      "hp": 54,
+      "weapon": "procarka",
+      "boss": false,
+      "lines": [
+        "Nic nie widziałeś. Te sidła same się zastawiły.",
+        "Las jest wielki. Starczy dla wszystkich."
+      ],
+      "spots": [
+        {
+          "x": 20,
+          "y": 59
+        },
+        {
+          "x": 30,
+          "y": 60
+        }
+      ]
+    },
+    {
+      "id": "lesny-rozbojnik",
+      "name": "Leśny rozbójnik",
+      "district": "dzika-puszcza",
+      "level": 4,
+      "hp": 64,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "Myto za przejście szlakiem! Płacisz albo walczysz.",
+        "Herszt mówi, że to nasz las."
+      ],
+      "spots": [
+        {
+          "x": 34,
+          "y": 30
+        },
+        {
+          "x": 35,
+          "y": 24
+        }
+      ]
+    },
+    {
+      "id": "rozbojnik-z-proca",
+      "name": "Strzelec herszta",
+      "district": "dzika-puszcza",
+      "level": 5,
+      "hp": 74,
+      "weapon": "procarka",
+      "boss": false,
+      "lines": [
+        "Z tej odległości nie pudłuję.",
+        "Do ruin nie przejdziesz. Chyba że przeze mnie."
+      ],
+      "spots": [
+        {
+          "x": 140,
+          "y": 90
+        },
+        {
+          "x": 141,
+          "y": 80
+        }
+      ]
+    },
+    {
+      "id": "herszt-rozbojnikow",
+      "name": "Herszt Borys",
+      "district": "dzika-puszcza",
+      "level": 7,
+      "hp": 135,
+      "weapon": "kij",
+      "boss": true,
+      "lines": [
+        "Puszcza należy do mnie. Leśniczy może sobie liczyć drzewa.",
+        "Kto wchodzi do ruin, ten z nich nie wychodzi. Z moimi monetami."
+      ],
+      "spots": [
+        {
+          "x": 141,
+          "y": 107
+        }
+      ]
+    },
+    {
+      "id": "szabrownik-z-kopalni",
+      "name": "Szabrownik z kopalni",
+      "district": "los-karkos",
+      "level": 8,
+      "hp": 104,
+      "weapon": "kij",
+      "boss": false,
+      "lines": [
+        "Kopalnia jest niczyja. Więc moja.",
+        "Ruda sama się nie wyniesie."
+      ],
+      "spots": [
+        {
+          "x": 156,
+          "y": 20
+        },
+        {
+          "x": 144,
+          "y": 30
+        }
+      ]
+    },
+    {
+      "id": "rajdowiec-brudas",
+      "name": "Rajdowiec Brudas",
+      "district": "los-karkos",
+      "level": 9,
+      "hp": 114,
+      "weapon": "piesci",
+      "boss": false,
+      "lines": [
+        "Zakręty są dla mięczaków.",
+        "Na moim torze wygrywam ja. Zawsze."
+      ],
+      "spots": [
+        {
+          "x": 150,
+          "y": 78
+        },
+        {
+          "x": 160,
+          "y": 82
         }
       ]
     }
@@ -6755,6 +8551,126 @@
       "xp": 40,
       "minLevel": 1,
       "text": "Dzban pod podłogą opuszczonego mieszkania. Ktoś tu kiedyś żył dostatnio."
+    },
+    {
+      "id": "dp-wzgorze",
+      "district": "dzika-puszcza",
+      "map": "dzika-puszcza",
+      "x": 30,
+      "y": 18,
+      "look": "kufer",
+      "coins": 45,
+      "xp": 20,
+      "minLevel": 1,
+      "text": "Kufer rozbójników! W środku łup z całego tygodnia i mapa z krzyżykiem na ruinach."
+    },
+    {
+      "id": "dp-chata",
+      "district": "dzika-puszcza",
+      "map": "dzika-puszcza",
+      "x": 106,
+      "y": 22,
+      "look": "dzban",
+      "coins": 25,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Dzban leśniczego. Oszczędności na nową siekierę."
+    },
+    {
+      "id": "dp-bagna",
+      "district": "dzika-puszcza",
+      "map": "dzika-puszcza",
+      "x": 36,
+      "y": 64,
+      "look": "worek",
+      "coins": 30,
+      "xp": 15,
+      "minLevel": 1,
+      "text": "Worek kłusownika, zakopany w błocie. Śmierdzi, ale monety są czyste."
+    },
+    {
+      "id": "dp-ruiny",
+      "district": "dzika-puszcza",
+      "map": "dzika-puszcza",
+      "x": 148,
+      "y": 103,
+      "look": "skrzynka",
+      "coins": 60,
+      "xp": 25,
+      "minLevel": 1,
+      "text": "Skrzynia herszta. Wygląda, że rozbójnicy też oszczędzali."
+    },
+    {
+      "id": "dp-jezioro",
+      "district": "dzika-puszcza",
+      "map": "dzika-puszcza",
+      "x": 48,
+      "y": 40,
+      "look": "opona",
+      "coins": 20,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "W starej oponie ktoś schował drobne. Pewnie na przynętę."
+    },
+    {
+      "id": "mz-stadion",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow",
+      "x": 166,
+      "y": 66,
+      "look": "skrzynka",
+      "coins": 35,
+      "xp": 15,
+      "minLevel": 1,
+      "text": "Skrzynka pod trybuną. Ktoś zbierał drobne na nowe siatki do bramek."
+    },
+    {
+      "id": "mz-lunapark",
+      "district": "miasto-ziomkow",
+      "map": "miasto-ziomkow",
+      "x": 136,
+      "y": 120,
+      "look": "worek",
+      "coins": 25,
+      "xp": 10,
+      "minLevel": 1,
+      "text": "Worek z monetami za karuzelą. Utarg z całego weekendu?"
+    },
+    {
+      "id": "lp-wodospad",
+      "district": "las-palmas",
+      "map": "las-palmas",
+      "x": 140,
+      "y": 30,
+      "look": "dzban",
+      "coins": 70,
+      "xp": 25,
+      "minLevel": 1,
+      "text": "Dzban ukryty między skałami. Pewnie dar dla ducha wodospadu."
+    },
+    {
+      "id": "dc-mlyn",
+      "district": "dwor-carski",
+      "map": "dwor-carski",
+      "x": 94,
+      "y": 120,
+      "look": "worek",
+      "coins": 90,
+      "xp": 30,
+      "minLevel": 1,
+      "text": "Worek młynarza schowany pod sianem. Oszczędności na czarną godzinę."
+    },
+    {
+      "id": "lk-kopalnia",
+      "district": "los-karkos",
+      "map": "los-karkos",
+      "x": 162,
+      "y": 38,
+      "look": "skrzynka",
+      "coins": 120,
+      "xp": 40,
+      "minLevel": 1,
+      "text": "Skrzynka górnicza. W środku narzędzia i garść starych monet."
     }
   ]
 }

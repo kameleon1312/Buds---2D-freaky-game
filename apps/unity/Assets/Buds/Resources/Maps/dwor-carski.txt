@@ -21,42 +21,53 @@ X = cobble + topiary-kula !
 P = cobble + urzad !
 R = cobble + wycieraczka-wejscie
 ' = dirt
-i = dirt !
-o = dirt + fence-post !
-k = dirt + powoz !
-u = dirt + siano !
-m = dirt + sign !
-j = dirt + stajnia !
+j = dirt !
+r = dirt + fence-post !
+i = dirt + latarnia-gaz !
+m = dirt + powoz !
+x = dirt + siano !
+o = dirt + sign !
+k = dirt + stajnia !
 A = forest !
 F = forest + latarnia-gaz !
 C = forest + sign !
 B = forest + tree-a|tree-b|topiary-stozek !
 b = gravel
-s = gravel + latarnia-gaz !
+3 = gravel !
+2 = gravel + bush-a !
+v = gravel + latarnia-gaz !
 g = gravel + lawka-park !
-n = gravel + posag !
+4 = gravel + mlyn !
+p = gravel + posag !
+7 = gravel + powoz !
+6 = gravel + siano !
+5 = gravel + szklarnia !
 e = gravel + wycieraczka-wejscie
 c = hedge !
 D = lawn
 Z = lawn !
 d = lawn + dworek !
+l = lawn + fence-post !
 J = lawn + latarnia-gaz !
 h = lawn + posag !
+1 = lawn + powoz !
 f = lawn + roze
+0 = lawn + siano !
 S = lawn + sign !
-t = lawn + topiary-kula !
+q = lawn + stajnia !
+w = lawn + topiary-kula !
 H = lawn + topiary-stozek !
-p = lawn + tree-a !
-q = lawn + tree-b !
+s = lawn + tree-a !
+t = lawn + tree-b !
 E = lawn2
 a = lawn2 !
 L = lawn2 + bush-a|bush-b !
 G = lawn2 + latarnia-gaz !
-l = lawn2 + sign !
-w = lawn2 + topiary-kula !
+n = lawn2 + sign !
+z = lawn2 + topiary-kula !
 I = lawn2 + topiary-stozek !
-r = lawn2 + tree-b !
-v = water !
+u = lawn2 + tree-b !
+y = water !
 
 [ground]
 lawn2 : lawn2 : 2.2 : 0.3 #74b552
@@ -83,10 +94,10 @@ water : 0.12 : lily
 101,70 | Stajnie | Stajenny potrzebuje kogoś, kto złapie zbiegłego kucyka.
 70,3 | Do Miasta Ziomków | Droga powrotna do miasta.
 129,30 | Winnice | Winogrona dworu. Wkrótce: zbiory i degustacje.
-129,74 | Tor Wyścigów Konnych | Stajenni szykują konie. Wkrótce: wyścigi.
+129,74 | Tor Wyścigów Konnych | Owalny tor wokół stajni. Dżokejka Róża mierzy czas okrążeń.
 44,101 | Jezioro Dworskie | Łabędzie i łódki hrabiego. Wkrótce: rejsy po jeziorze.
-105,101 | Stary Młyn | Młynarz zniknął bez śladu. Wkrótce: śledztwo.
-152,101 | Oranżeria | Szklany pawilon czeka na rośliny z całego świata. Wkrótce: zielarstwo.
+105,101 | Stary Młyn | Młynarz zniknął bez śladu. Jego córka Hania szuka pomocy.
+152,101 | Oranżeria | Szklany pawilon z roślinami z całego świata. Zielarka Bogna zna każdą z nich.
 
 [exits]
 62,0,65,0 | miasto-ziomkow
@@ -111,9 +122,6 @@ water : 0.12 : lily
 82,20 | dwor-carski-urzad | Urząd Skarbowy
 
 [plots]
-132,58,168,90 | dc-tor-konny | arena | Tor Wyścigów Konnych
-88,102,122,124 | dc-stary-mlyn | quest | Stary Młyn
-140,102,164,122 | dc-oranzeria | attraction | Oranżeria
 
 [grid]
 AABBBBABAAAABBBBBABAAABBAABABABBBBABBABABABBBBAAAAAAABBABABA;;;;;;;;BABBBBBBAABBBBAABBAABAABABBBBAAABBBAABBABBAABAABABBBAABABBBAAAAAABABAAABBBBBAAAABBABBAAAABAABABBBAABAABAABAA
@@ -176,38 +184,38 @@ BBAABAcccccccbcccbcccccccbcccbcccccbcbcbcDDDDDfDfDfDfDfDfDfDfDbbbgfDfDfDfDfDfDfD
 BBBBABcbbbbbcbbbcbbbcbbbcbbbcbbbbbbbcbbbcDDDDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDDDDDDDDEDDDDDDDDDDEEEEEDDDDDDDDDDDDDDDDDAAABA
 AAABABcbcccbcccbcccbcbcbcccbcccccccccccbcDDDDDDDDDhDDDDDDDDDDDbbbbDDDDDDDDDDhDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DEEE'''''''''''''''''''''''''''''''''''''DDBAABB
 BAAABDcbcbbbbbcbbbbbcbcbbbcbbbbbbbcbbbbbcDDDDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''EEE;;EEEE'''''''''''''''''''''''''''''''''''''DDDBAAB
-BABAADcbcbcccccccccccbcccbcbcccccbcbcccccDDEDDfDfDfDfDfDfDfDfDbbbbfDfDfDfDfDfDfDfDfDDD'''''''''''''''''bb''''''''''''''''''EEE;;EEEE'''''''''''''''''''''''''''''''''''''DDDBBAA
+BABAADcbcbcccccccccccbcccbcbcccccbcbcccccDDEDDfDfDfDfDfDfDfDfDbbbbfDfDfDfDfDfDfDfDfDDD'''''''''''''''''bb''''''''''''''''''EEE;;EEEE''i'''''''''''''''''''''''''''''''i''DDDBBAA
 BBAABDcbcbbbcbbbcbbbbbcbbbcbcbbbbbcbbbbbcDDDDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''EEE;;EEEE'''''''''''''''''''''''''''''''''''''DDDABBB
-ABABADcbcccbcbcbcbcccbcbcccbcbcccccccccbcDDDbbbbbbbbbbbbgbbbbbbbbbbbbbbbbbbbbbbbbbbbbD''''''''iiiii''''bb'''''iiiii''''''''DDD;;EEEE'''''''''''''''''''''''''''''''''''''DDDAAAB
-BBBAAEcbbbcbbbcbbbcbbbcbcbbbcbbbbbcbbbbbcDDDbbbbbbbbbbbbbbbbbbgbbbbbbbbbbbbbbbbbbbbbbD''''''''iiiii''''bb'''''iiiii''''''''DDD;;DDEE'''''''''''''''''''''''''''''''''''''DDDAAAA
-BBBBBEcbcccccccccccbcccbcbcccccccbcbcccccDDDDDDDDDDDDDDDDDDDDDbbbbSDDDDDDDDDDDDDDDDDDD''''''''iijii''''bb'''''iijii''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDDABBA
+ABABADcbcccbcbcbcbcccbcbcccbcbcccccccccbcDDDbbbbbbbbbbbbgbbbbbbbbbbbbbbbbbbbbbbbbbbbbD''''''''jjjjj''''bb'''''jjjjj''''''''DDD;;EEEE'''''''''''''''''''''''''''''''''''''DDDAAAB
+BBBAAEcbbbcbbbcbbbcbbbcbcbbbcbbbbbcbbbbbcDDDbbbbbbbbbbbbbbbbbbgbbbbbbbbbbbbbbbbbbbbbbD''''''''jjjjj''''bb'''''jjjjj''''''''DDD;;DDEE'''''''''''''''''''''''''''''''''''''DDDAAAA
+BBBBBEcbcccccccccccbcccbcbcccccccbcbcccccDDDDDDDDDDDDDDDDDDDDDbbbbSDDDDDDDDDDDDDDDDDDD''''''''jjkjj''''bb'''''jjkjj''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDDABBA
 ABAABEcbcbbbbbbbbbcbcbbbcbbbcbbbbbcbcbbbcDDDDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDDBBBB
-ABBBAEcbcbcccccccbcbcbcccccccbcccbcbcccbcDDDDDfDfDfDfDfDfDfDfDbbbbfDfDfDfDfDfDfDfDfDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDDBBBA
-ABBABEcbcbbbbbbbcbbbcbbbbbcbbbcbbbcbbbbbcDDDDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDDBBBB
-AABABEcbcccccccbcccccccccbcbcccbcccccccbcDDDDDDDDDhDDDDDDDDDDDbbbbDDDDDDDDDDhDDDDDDDDD'''''''''''''''''iki'''''''''''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDBABBB
-BAAABBcbbbbbcbcbbbcbbbcbbbbbcbbbcbbbbbcbcEEEDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDAAABA
-ABAAABcccccbcbcccbcccbcbcccccccbcbcbcccbcEElDDfDfDfDfDfDfDfDfDbbbbfDfDfDfDfDfDfDfDfDDD'''''''''''''''m'bb''''''''''''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDBBABB
-ABAABBcbcbbbcbbbcbbbcbcnbbcbbbcbcbcbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDABABB
-BBABADcbcbcccccbcccbcbbbbccbcbcccbcccbcbcbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDDDDDDDDDDDDDD''ooooooooooooooobb'ooooooooooooooo''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDBBABB
-BAAAADcbcbcbbbbbcbcbcbbbcbbbcbbbbbcbbbcbcEEEEDDDDDDDDDDDDDDDEDbbbbDDDDDDDDDDEEEEEEEDDD''o'''''''''''''''''''''''''''''''o''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDABBBB
-BBABADcbcbcbcbcbcbcbcccccbcccccccccbcccbcEEEEDDDDDDDDDDDDDDDDDbbbbDDDDDDDpDDDEEEEEEDDD''o'''''''''''''''''''''''''''''''o''DDD;;DSDD'''''''''''''''''''''''''''''''''''''DDBABAA
-BBBBADcbcbcbcbcbcbcbbbbbcbcbbbbbbbcbbbbbcEEEDqDDDDDDDDDDDDDDDDbbbbDDpDDDDDDDDDDDDDDrEE''o'''''''''''''''''''''''''''''''o''DDD;;DDDD'''''''''''''''''''''''''''''''''''''DDDBAAA
-BBBABDcbcbcccbcbcbcccccbcbcbcccccbcccccccDEDDDDDDDDDDDDDDDDbbbbbsbbDDDDDDDDDDDDDDDDEEE''o'''''''''''''''''''''''''''''''o''DDD;;DDDE'''''''''''''''''''''''''''''''''''''DDBAABB
-BBBAADcbcbbbcbcbcbbbbbcbbbcbbbcbbbbbbbbbcDDDDDDDqDDDDtDDDDbbbbbbbbbbbbDDDDDDDDDDDDDEEE''o'''''''''''''u''''''''''''''u''o''DDD;;DDDE'''''''''''''''''''''''''''''''''''''DDBBBAB
-BABBDDcbcccbcbcbcccbcbcccccccbcbcccccccccDDDDDDDDDDDDDDDDbgbvvvvvvvvbbbDDDDDDDDDDDDwEE''o'''''''''''''''''''''''''''''''o''DDD;;DDDE'''''''''''''''''''''''''''''''''''''DDBAABA
-BBABDDcbbbcbbbcbbbcbcbbbbbcbbbcbbbbbbbbbcDDDDDDDDDDDDDDDbbvvvvvvvvvvvvbbDDDDDDDDDDDEEE''o'''''''''''''''''''''''''''''''o''DDD;;DDDE'''''''''''''''''''''''''''''''''''''DBBBABB
-AABBDDcbcccccccccbcbcccccbcccccbcccccccbcDDDDDDDDDDtDDDbbvvvvvvvvvvvvvvbDDDDDDDDDDDEEE''o'''''''''''''''''''''''''''''''o''DDD;;DDDE'''''''''''''''''''''''''''''''''''''DBABBBA
-ABBBDDcbbbbbbbbbcbcbcbbbcbbbbbcbcbbbcbbbcDDDDDDDDDDDDDDbbvvvvvvvvvvvvvvbqDDDDDDDDDDEEE''o'''''''''''''''''''''''''''''''o''EDD;;DDDD'''''''''''''''''''''''''''''''''''''DBBABBB
-BAAAADcbcbcccccccbcbcbcbcccccbcbcccbcbcbcDDDDDDDDDDDDDDbbvvvvvvvvvvvvvvbDDDqDDDDpDDEEE''o'''''''''''''''''''''''''''''''o''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DBABBBA
-BBAABDcbcbbbbbcbbbcbbbcbbbcbcbcbbbcbcbcbcDDDDDDpDDDDDDDbbvvvvvvvvvvvvvbbDDDDDDDDDDDEEE''o'''''''''''''''u'''''''''''''''o''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDBAAAA
-BAABAAcbcccccbcbcccccccccbcbcbcccbcbcbcccDDDDDDDDDDDpDDDbbvvvvvvvvvvvvbDDDDDDDDDDDDEEE''o''''''''''''''''''''''''u''''''o''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDABBBB
-BAAABAcbbbcbcbcbbbcbbbbbbbcbcbbbcbcbcbbbcDDDDDDDDDDDDDDDDbbbvvvvvvvvbbbDDDDDDDDDDDDEEE''o'''''''''''''''''''''''''''''''o''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDBBBAA
-BBBAABcccbcbcbcccbcbcccccccbcccbcbcbcccbcDDDDDDDDDDDDDDDDDbbbbbbbbbbbbDDDDDDDDDDDDDEEE''o'''''''''''''''''''''''''''''''o''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDBBBAA
-BBBBADcbbbcbcbbbcbcbbbcbcbbbbbbbcbbbbbcbcDDDDDDDDDDDDDtDDDDDDDbbbbbDDDDDDDDDDqDDDDDEEE''o'''''''''''''''''''''''''''''''o''EEE;;EDDD'''''''''''''''''''''''''''''''''''''DDBBBBB
-AABADDcbcccbcbcccbcccbcbcbcccccccccccccbcDDDDDDDqDDDDDDDDDDDDDDDDDDDDDDDtDDDDDDDDDDtDE''ooooooooooooooooooooooooooooooooo''EEE;;EDDD'''''''''''''''''''''''''''''''''''''DDBBBAA
-ABAADDcbbbbbcbbbbbbbbbcbbbbbbbbbbbbbbbbbcDDDtDDDDDDDDDDDDDDDDpDDDDDpDDDDDDDDDDDDDDDDDD'''''''''''''''''''''''''''''''''''''EEE;;EDDD'''''''''''''''''''''''''''''''''''''DDDAAAA
+ABBBAEcbcbcccccccbcbcbcccccccbcccbcbcccbcDDDDDfDfDfDfDfDfDfDfDbbbbfDfDfDfDfDfDfDfDfDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD''''''''llllllllllDllllllllll''''''''DDDBBBA
+ABBABEcbcbbbbbbbcbbbcbbbbbcbbbcbbbcbbbbbcDDDDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD''''''''lDDDDDDDDDDDDDDDDDDDl''''''''DDDBBBB
+AABABEcbcccccccbcccccccccbcbcccbcccccccbcDDDDDDDDDhDDDDDDDDDDDbbbbDDDDDDDDDDhDDDDDDDDD'''''''''''''''''jmj'''''''''''''''''DDD;;DDDD''''''''lDDDDDDDDDDDDDDDDDDDl''''''''DDBABBB
+BAAABBcbbbbbcbcbbbcbbbcbbbbbcbbbcbbbbbcbcEEEDDDDDDDDDDDDDDDDDDbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD''''''''lDDDDDDDZZZZZDDDDDDDl''''''''DDAAABA
+ABAAABcccccbcbcccbcccbcbcccccccbcbcbcccbcEEnDDfDfDfDfDfDfDfDfDbbbbfDfDfDfDfDfDfDfDfDDD'''''''''''''''o'bb''''''''''''''''''DDD;;DDDD''''''''lDDDDDDDZZZZZDDDDDDDl''''''''DDBBABB
+ABAABBcbcbbbcbbbcbbbcbcpbbcbbbcbcbcbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDDDDDDDDDDDDDD'''''''''''''''''bb''''''''''''''''''DDD;;DDDD''''''''lDDDDDDDZZqZZDDDDDDDl''''''''DDABABB
+BBABADcbcbcccccbcccbcbbbbccbcbcccbcccbcbcbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDDDDDDDDDDDDDD''rrrrrrrrrrrrrrrbb'rrrrrrrrrrrrrrr''DDD;;DDDD''''''''lDDDDDDDDDDDDDDDDDDDl''''''''DDBBABB
+BAAAADcbcbcbbbbbcbcbcbbbcbbbcbbbbbcbbbcbcEEEEDDDDDDDDDDDDDDDEDbbbbDDDDDDDDDDEEEEEEEDDD''r'''''''''''''''''''''''''''''''r''DDD;;DDDD''''''''DDDDDDDDDDDDDDDDDDDDD''''''''DDABBBB
+BBABADcbcbcbcbcbcbcbcccccbcccccccccbcccbcEEEEDDDDDDDDDDDDDDDDDbbbbDDDDDDDsDDDEEEEEEDDD''r'''''''''''''''''''''''''''''''r''DDD;;DSDD''''''''DDDDDDDDDDDDDDDDDDDDD''''''''DDBABAA
+BBBBADcbcbcbcbcbcbcbbbbbcbcbbbbbbbcbbbbbcEEEDtDDDDDDDDDDDDDDDDbbbbDDsDDDDDDDDDDDDDDuEE''r'''''''''''''''''''''''''''''''r''DDD;;DDDD''''''''DDDDDDDDDDDDDDDDDDDDD''''''''DDDBAAA
+BBBABDcbcbcccbcbcbcccccbcbcbcccccbcccccccDEDDDDDDDDDDDDDDDDbbbbbvbbDDDDDDDDDDDDDDDDEEE''r'''''''''''''''''''''''''''''''r''DDD;;DDDE''''''''lDDDDDDDDDDDDDDDDDDDl''''''''DDBAABB
+BBBAADcbcbbbcbcbcbbbbbcbbbcbbbcbbbbbbbbbcDDDDDDDtDDDDwDDDDbbbbbbbbbbbbDDDDDDDDDDDDDEEE''r'''''''''''''x''''''''''''''x''r''DDD;;DDDE''''''''lDDDDDDDDDDDDDDDDDDDl''''''''DDBBBAB
+BABBDDcbcccbcbcbcccbcbcccccccbcbcccccccccDDDDDDDDDDDDDDDDbgbyyyyyyyybbbDDDDDDDDDDDDzEE''r'''''''''''''''''''''''''''''''r''DDD;;DDDE''''''''lDDD0D0DDDDDDDD0DDDDl''''''''DDBAABA
+BBABDDcbbbcbbbcbbbcbcbbbbbcbbbcbbbbbbbbbcDDDDDDDDDDDDDDDbbyyyyyyyyyyyybbDDDDDDDDDDDEEE''r'''''''''''''''''''''''''''''''r''DDD;;DDDE''''''''lDDDDDDDDZ1ZDDDDDDDDl''''''''DBBBABB
+AABBDDcbcccccccccbcbcccccbcccccbcccccccbcDDDDDDDDDDwDDDbbyyyyyyyyyyyyyybDDDDDDDDDDDEEE''r'''''''''''''''''''''''''''''''r''DDD;;DDDE''''''''lDDDDDDDDDDDDDDDDDDDl''''''''DBABBBA
+ABBBDDcbbbbbbbbbcbcbcbbbcbbbbbcbcbbbcbbbcDDDDDDDDDDDDDDbbyyyyyyyyyyyyyybtDDDDDDDDDDEEE''r'''''''''''''''''''''''''''''''r''EDD;;DDDD''''''''lDDDDDDDDDDDDDDDDDDDl''''''''DBBABBB
+BAAAADcbcbcccccccbcbcbcbcccccbcbcccbcbcbcDDDDDDDDDDDDDDbbyyyyyyyyyyyyyybDDDtDDDDsDDEEE''r'''''''''''''''''''''''''''''''r''EEE;;EEDD''''''''llllllllllDllllllllll''''''''DBABBBA
+BBAABDcbcbbbbbcbbbcbbbcbbbcbcbcbbbcbcbcbcDDDDDDsDDDDDDDbbyyyyyyyyyyyyybbDDDDDDDDDDDEEE''r'''''''''''''''x'''''''''''''''r''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDBAAAA
+BAABAAcbcccccbcbcccccccccbcbcbcccbcbcbcccDDDDDDDDDDDsDDDbbyyyyyyyyyyyybDDDDDDDDDDDDEEE''r''''''''''''''''''''''''x''''''r''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDABBBB
+BAAABAcbbbcbcbcbbbcbbbbbbbcbcbbbcbcbcbbbcDDDDDDDDDDDDDDDDbbbyyyyyyyybbbDDDDDDDDDDDDEEE''r'''''''''''''''''''''''''''''''r''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDBBBAA
+BBBAABcccbcbcbcccbcbcccccccbcccbcbcbcccbcDDDDDDDDDDDDDDDDDbbbbbbbbbbbbDDDDDDDDDDDDDEEE''r'''''''''''''''''''''''''''''''r''EEE;;EEDD'''''''''''''''''''''''''''''''''''''DDBBBAA
+BBBBADcbbbcbcbbbcbcbbbcbcbbbbbbbcbbbbbcbcDDDDDDDDDDDDDwDDDDDDDbbbbbDDDDDDDDDDtDDDDDEEE''r'''''''''''''''''''''''''''''''r''EEE;;EDDD'''''''''''''''''''''''''''''''''''''DDBBBBB
+AABADDcbcccbcbcccbcccbcbcbcccccccccccccbcDDDDDDDtDDDDDDDDDDDDDDDDDDDDDDDwDDDDDDDDDDwDE''rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr''EEE;;EDDD''i'''''''''''''''''''''''''''''''i''DDBBBAA
+ABAADDcbbbbbcbbbbbbbbbcbbbbbbbbbbbbbbbbbcDDDwDDDDDDDDDDDDDDDDsDDDDDsDDDDDDDDDDDDDDDDDD'''''''''''''''''''''''''''''''''''''EEE;;EDDD'''''''''''''''''''''''''''''''''''''DDDAAAA
 AAAADDcccccccccccccccccccccccccccccccccccDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD'''''''''''''''''''''''''''''''''''''EEE;;EDDD'''''''''''''''''''''''''''''''''''''DDDBBAB
-BABBDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEDDDDDDDDDpDDDDDDDDDDDDDDDDDDpDDEEEEEEEEEEEEDDDDDDDDDDEDDDDDDDDDDDEEEEEE;;EDDDDDDDDEEEEEEDDDDDDDDDDEEEEEDDDDDDDDDDDDDDABAB
+BABBDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEDDDDDDDDDsDDDDDDDDDDDDDDDDDDsDDEEEEEEEEEEEEDDDDDDDDDDEDDDDDDDDDDDEEEEEE;;EDDDDDDDDEEEEEEDDDDDDDDDDEEEEEDDDDDDDDDDDDDDABAB
 AAABDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEDDDDDDDDDDDDDDDDDDDDDEEEEEEE;;EDDDDDDDDEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDBBAA
 BAAABDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEDDDDDDDDDDDDDDDDDDDDEEEEEEEE;;EDDDDDDDEEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDEEEDDABBA
 AAABBDDDDDDEEEDDDDDDDDDDDDDDEEEEEDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEDDDDDDDDDDDDDDDDDDDEEEEEEEE;;EDDDDDDDEEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDEEEEDBBAB
@@ -218,29 +226,29 @@ BAAABADDDDDEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEDDDDDDDDDEDDDDDDD
 BABBAADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDDEEEEEEEEEEEEE;;EEDDDDDDDEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDAABB
 BBABAADDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEEEDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDDEEEEEEEEEEEEE;;EEDDDDDDDDDDDDDDDDDDDDDDDDDEEDDDDDDDDDDDDDDDAABB
 AABAAADDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEDDDDDSDDDDDDDDDDDDDDDDDDDEEEEEEEEEEEEEEEEDDDDDDDDDDDDDDDEEEDDDDDDDSDDDDDDEEEEEEEEEEEEEE;;EEEEEDDDDDDDDDDDDDDDDDDDSDEEEEDDDDDDDDDDDDDDBBBA
-BAABBBDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEEEEEEEDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEEE;;EEEEEEDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBBAB
-BBAAAADDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDEDDDDDDDDDDDDDDDEEEEEEEEEEEEEEEEDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEEE;;EEEEEEDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBBAA
-ABAAAADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDDEEEEEEEEEEEEDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEEE;;EEEEEEDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBABA
-AAABABDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDvvvvEEEDDDDDDDDDDDDDDDDDDDEEEEEEDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEDD;;DDEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBABA
-BBAABBEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvEDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBBAB
-ABBABBEEDDDDDDDDDDDDDDDDDDDDDEEDDDDvvvvvvvvvvvvvvvvvvvvvDDDEEEDDDDDDDDDDEDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDAAAB
-ABBBABEEDDDDDDDDDDDDDDDDDDDDEEEEDDvvvvvvvvvvvvvvvvvvvvvvvDEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDEEEEEDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDABAAB
-BBABBBEEDDDDDDDDDDDDDDDDDDDDEEEEDvvvvvvvvvvvvvvvvvvvvvvvvvEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDEEEEEDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDBAAAA
-BBAABAEEDDDDDDDDDDDDDDDDDDDDDDEvvvvvvvvvvvvvvvvvvvvvvvvvvvEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDEDDABBBB
-BAAAAADDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvvvvvvvvvvvvvvvvvvvvvvEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEDD;;DEEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEBBBAB
-BBBAADDDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEEE;;EEEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEAABAA
-BABAADDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEEE;;EEEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEBAABA
-AABBADDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEEE;;EEEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEBAAAB
-BABBBDDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbEEE;;EEEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEDAAAB
-ABAABDDDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvvvvvvvvvvvvvvvvvvvvvvEEEDDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DEEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEDBABA
-AABBADDDDDDDDDDDDDDDDDDDDDDDDDvvvvvvvvvvvvvvvvvvvvvvvvvvvvDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEDBBBA
-AAABBDEDDDDDDDDDDDDDDDDDDDDDEEEvvvvvvvvvvvvvvvvvvvvvvvvvvvDDDDDDEEEEDDDDDDDDDEEEEEEEEEDDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEDBAAA
-ABBBDEEEDDDDDDDDDDDDDDDDDDDEEEEEvvvvvvvvvvvvvvvvvvvvvvvvvDDDDDDDEEEEEDDDDDDDEEEEEEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEDBBBB
-BBAADEEEEDDDDDDDDDDDDDDDDDDEEEEEDDvvvvvvvvvvvvvvvvDDDEEvvDDDDDDDEEEEEEDDDDDDEEEEEEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEDBBAA
-BABBAEEEEDDDDDDDDDDDDDDDDDEEEEEEDDDDDDDDDEvvvvvDDDDDDEEEDDDDDDDDEEEEEEDDDDDDEEEEEEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDDEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEDBBAB
-AABBAEEEEDDDDDDDDDDDDDDDEEEEEEEEDDDDDDDDDDDvvvDDDDDDDDDDDDDDDDDDDEEEEEDDDDDDEEEEEEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDEEEEDDBBBB
-BABAAEEEEEEEEDDDDDDDDDDEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEDDDDDDDEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDDDDDDDDDDDEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDBBBA
-BBBBABEEEEEEEEDDDDDDDDEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEDDDDDDEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbDDD;;DDDDDDDDDDEEEEEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDBBBA
+BAABBBDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEEEEEEEDDDDDDDDbbbbbbbbbbb2bbbbbbbbbbbbbbyybbbbbbbEEE;;EEEEEEDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBBAB
+BBAAAADDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDEDDDDDDDDDDDDDDDEEEEEEEEEEEEEEEEDDDDDDDDbbbbbbbbbbbbbbbbbbbbb2bbbbyybbbbbbbEEE;;EEEEEEDDDDDDbvbbbbbbbbbbbbbbbbbbbbbvbDDDDDDDBBAA
+ABAAAADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDDEEEEEEEEEEEEDDDDDDDDDDDbbbbvbbbbbbbbbbbbbbbbbbbbbyybbbbvbbEEE;;EEEEEEDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBABA
+AAABABDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDyyyyEEEDDDDDDDDDDDDDDDDDDDEEEEEEDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbyybbbbbbbEDD;;DDEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBABA
+BBAABBEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyEDDDDDDDDDDDDDDDDDDDDDEEEDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbyybbbbbbbDDD;;DDEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDDDDDDDBBAB
+ABBABBEEDDDDDDDDDDDDDDDDDDDDDEEDDDDyyyyyyyyyyyyyyyyyyyyyDDDEEEDDDDDDDDDDEDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbb33333bbbyybbbbbbbDDD;;DDDEEEEDDDDDbbbbbbbbb3333333bbbbbbbbbDDDDDDDAAAB
+ABBBABEEDDDDDDDDDDDDDDDDDDDDEEEEDDyyyyyyyyyyyyyyyyyyyyyyyDEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbb33333bbbyybbbbbbbDDD;;DDDEEEEEDDDDbbbbbbbbb3333333bbbbbbbbbDDDDDDABAAB
+BBABBBEEDDDDDDDDDDDDDDDDDDDDEEEEDyyyyyyyyyyyyyyyyyyyyyyyyyEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbb33333bbbyybbbbbbbDDD;;DDDEEEEEDDDDbbbbbbbbb3333333bbbbbbbbbDDDDDDBAAAA
+BBAABAEEDDDDDDDDDDDDDDDDDDDDDDEyyyyyyyyyyyyyyyyyyyyyyyyyyyEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbb33433bbbyybbbbbbbDDD;;DDEEEEEDDDDDbbbbbbbbb3335333bbbbbbbbbDDDEDDABBBB
+BAAAAADDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyyyyyyyyyyyyyyyyyyyyyyEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbyybbbbbbbEDD;;DEEEEEEDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbEEEEEEBBBAB
+BBBAADDDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbb6bbbbbbbbbbbbbyybbbbbbbEEE;;EEEEEEEDDDDDbbbDDDDDDDDDDDDDDDDDDDbbbEEEEEEAABAA
+BABAADDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbb6b6bbbbbbbbbbbbyybbbbbbbEEE;;EEEEEEEDDDDDbbbDDDDDDDDDDDDDDDDDDDbbbEEEEEEBAABA
+AABBADDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbbyybbbbbbbEEE;;EEEEEEEDDDDDbbbDwDDDwDDDDDDDwDDDwDbbbEEEEEEBAAAB
+BABBBDDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyEEEEDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbb2bbbbbbbbbyybbbbbbbEEE;;EEEEEEEDDDDDbbbDDDDDDDDDDDDDDDDDDDbbbEEEEEEDAAAB
+ABAABDDDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyyyyyyyyyyyyyyyyyyyyyyEEEDDDDDDDDDDDDDDDDDDDDDDDDDDbb2bbbbbbbbbbbbbbbbbbbbbbbyybbbbbbbDDD;;DEEEEEEDDDDDbbbDDDDDDDDDDDDDDDDDDDbbbEEEEEEDBABA
+AABBADDDDDDDDDDDDDDDDDDDDDDDDDyyyyyyyyyyyyyyyyyyyyyyyyyyyyDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbb;;bbbbbbbDDD;;DDEEEEEDDDDDbbbDDDDDDDDDhDDDDDDDDDbbbEEEEEEDBBBA
+AAABBDEDDDDDDDDDDDDDDDDDDDDDEEEyyyyyyyyyyyyyyyyyyyyyyyyyyyDDDDDDEEEEDDDDDDDDDEEEEEEEEEDDbbbbbbbbb373bbbbbbbbbbbbbb;;bbbbbbbDDD;;DDDEEEEDDDDDbbbDDfDDDDDfDfDDDDDfDDbbbEEEEEEDBAAA
+ABBBDEEEDDDDDDDDDDDDDDDDDDDEEEEEyyyyyyyyyyyyyyyyyyyyyyyyyDDDDDDDEEEEEDDDDDDDEEEEEEEEEEEDbbbbbbbbbbbbb2bbbbbbbbbbbbyybbbbbbbDDD;;DDDEEEEDDDDDbbbDDDDDDDDDDDDDDDDDDDbbbEEEEEEDBBBB
+BBAADEEEEDDDDDDDDDDDDDDDDDDEEEEEDDyyyyyyyyyyyyyyyyDDDEEyyDDDDDDDEEEEEEDDDDDDEEEEEEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbyybbbbbbbDDD;;DDDEEEEDDDDDbbbDDDDDDDDDDDDDDDDDDDbbbEEEEEEDBBAA
+BABBAEEEEDDDDDDDDDDDDDDDDDEEEEEEDDDDDDDDDEyyyyyDDDDDDEEEDDDDDDDDEEEEEEDDDDDDEEEEEEEEEEEDbbbbbbbbbbbbbbbb2bbbbbbbbbyybbbbbbbDDD;;DDDDEEEDDDDDbvbbbbbbbbbbbbbbbbbbbbbvbEEEEEEDBBAB
+AABBAEEEEDDDDDDDDDDDDDDDEEEEEEEEDDDDDDDDDDDyyyDDDDDDDDDDDDDDDDDDDEEEEEDDDDDDEEEEEEEEEEEDbbbbvbbbbbbbbbbbbbbbbbbbbbyybbbbvbbDDD;;DDDDDDDDDDDDbbbbbbbbbbbbbbbbbbbbbbbbbDEEEEDDBBBB
+BABAAEEEEEEEEDDDDDDDDDDEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEDDDDDDDEEEEEEDbbbbbbbbbbbbbbbbbbbbbbbbbbyybbbbbbbDDD;;DDDDDDDDDDDDDEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDBBBA
+BBBBABEEEEEEEEDDDDDDDDEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEDDDDDDEEEEEEDbbbbbbbbbbbb2bbbbbbbbbbbbbyybbbbbbbDDD;;DDDDDDDDDDEEEEEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDBBBA
 BBABABEEEEEEEEEDDDDDDDEEEEEEDDDDDDEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEDDDDDDDEEEEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEEDDDDDDDDDDDDDDDDDDDDDDDAABB
 BBAABABEEEEEEEABBAABABBEEEEEDDDDDDEEEEEDDDDDDDDDDDDDDDDDDDDDADDDDDDDDBABEEEDDDDDDDEEEEEDDDDDDDAABDDDDDDAAABEEEDDDDDDDDDDABAABBAABBAADDDDDDEEEEEEEEEEEBBBDDDDDDDDDDDDDDDDDDDDAAAB
 ABBBBBBABBEAABABBBBBBABBBBBBBABBBABBABBAAABBAABABBBBBBBDBABABAABBBAABBBBAEEDDDDDBBEEEEEABBBBABABBBBBBAABABAABBBDDDDDDDBBAAAAABBBBAAABBAABBBAABBAAAAAABABBABBBBBADBAABBBBBDDDBAAA

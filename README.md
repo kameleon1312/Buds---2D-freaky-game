@@ -6,7 +6,7 @@
 
 ### Twój ziomek. Twoje miasto. Twoja legenda.
 
-Mobilne RPG o ziomkach z miasta: stwórz swojego Buda, rozkręć się w czterech dzielnicach,<br/>
+Mobilne RPG o ziomkach z miasta: stwórz swojego Buda, rozkręć się w pięciu dzielnicach,<br/>
 wygrywaj pojedynki, zbieraj sprzęt i jeźdź po mieście, od deskorolki po quada.
 
 <br/>
@@ -48,10 +48,10 @@ każde w swoich kolorach. Wygląd rysuje się na bieżąco, więc twój Bud wygl
 </td>
 <td width="50%" valign="top">
 
-**Cztery dzielnice i wyspa**
-Miasto Ziomków ze skateparkiem i stadionem, tropikalne Las Palmas z dżunglą i wodospadem, wytworny Dwór Carski
-z labiryntem i winnicami oraz niebezpieczne Los Karkos z ringiem i złomowiskiem. Do tego wnętrza budynków, do
-których wchodzisz.
+**Pięć dzielnic i wyspa**
+Miasto Ziomków ze skateparkiem, stadionem i lunaparkiem, Dzika Puszcza z obozowiskiem, jeziorem i rozbójnikami,
+tropikalne Las Palmas z dżunglą i wodospadem, wytworny Dwór Carski z labiryntem i starym młynem oraz niebezpieczne
+Los Karkos z ringiem, kopalnią i torem motocrossowym. Do tego wnętrza budynków, do których wchodzisz.
 
 </td>
 </tr>
@@ -165,8 +165,8 @@ Na komputerze: klawiatura (WASD, E, I, M).
 
 <div align="center">
 
-| 4 dzielnice + wyspa | 31 mieszkańców | 33 zadania | 22 przeciwników | 100+ przedmiotów | 6 wierzchowców |
-| :-----------------: | :------------: | :--------: | :-------------: | :--------------: | :------------: |
+| 5 dzielnic + wyspa | 80 mieszkańców | 54 zadania | 29 przeciwników | 100+ przedmiotów | 6 wierzchowców |
+| :----------------: | :------------: | :--------: | :-------------: | :--------------: | :------------: |
 
 </div>
 

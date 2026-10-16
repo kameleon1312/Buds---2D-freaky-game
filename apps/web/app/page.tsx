@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CONTENT, type BudLook } from '@buds/shared';
+import { CONTENT, DISTRICTS, type BudLook } from '@buds/shared';
 import { BudSprite } from '@/components/BudSprite';
 import { Creator } from '@/components/Creator';
 import { GameplayTabs, ScrollProgress, type Shot } from '@/components/JourneyBits';
@@ -111,7 +111,7 @@ const STOPS: TrailStop[] = [
     id: 'odkrywanie',
     kicker: 'Przystanek 4 · Odkrywanie',
     title: 'Świat pełen sekretów',
-    text: `Cztery dzielnice z własnym klimatem, budynki, do których da się wejść, i ${CONTENT.caches.length} ukrytych skrytek z monetami. Skrytki widać dopiero z bliska, a mapa odsłania się tam, gdzie twój Bud już był.`,
+    text: `${DISTRICTS.length} dzielnice z własnym klimatem, od miasta po dziką puszczę, budynki, do których da się wejść, i ${CONTENT.caches.length} ukrytych skrytek z monetami. Skrytki widać dopiero z bliska, a mapa odsłania się tam, gdzie twój Bud już był.`,
     fact: 'Na Wzgórzu zakopano kuferek ze starym listem: „Dla tego, kto słucha, co mówią znaki”.',
     src: '/screens/skrytka.png',
     alt: 'Odkryta skrytka w grze Buds',
@@ -136,7 +136,7 @@ const STOPS: TrailStop[] = [
   },
 ];
 
-/** A look around the world: the four districts and the rooms inside. */
+/** A look around the world: the districts and the rooms inside. */
 const SHOTS: Shot[] = [
   {
     id: 'miasto',

@@ -22,6 +22,13 @@ export const DISTRICTS = [
     blurb: 'Tu zaczynasz. Codzienne życie, freestyle i graffiti pod nosem policji.',
   },
   {
+    id: 'dzika-puszcza',
+    name: 'Dzika Puszcza',
+    unlockLevel: 2,
+    status: 'open',
+    blurb: 'Las bez końca na zachód od miasta: rzeka, jezioro, obozowisko i rozbójnicy w ruinach.',
+  },
+  {
     id: 'las-palmas',
     name: 'Las Palmas',
     unlockLevel: 3,

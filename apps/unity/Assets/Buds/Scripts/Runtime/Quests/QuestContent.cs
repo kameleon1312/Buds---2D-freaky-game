@@ -15,6 +15,8 @@ namespace Buds.Quests
         public int x;
         public int y;
         public string[] lines;
+        /// <summary>Side characters stroll this many tiles around their cell; 0 = stands still (quest NPCs).</summary>
+        public int wander;
     }
 
     [Serializable]

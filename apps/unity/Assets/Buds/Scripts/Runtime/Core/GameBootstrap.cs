@@ -221,6 +221,9 @@ namespace Buds.Core
             var at = fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
             player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
             player.Blocked = (x, y) => !map.IsWalkable(x, map.Height - 1 - y);
+            // strolling NPCs stop for the player and stand still while anyone talks or a screen is open
+            questWorld.PlayerFeet = () => player ? (Vector2?)player.transform.position : null;
+            questWorld.Busy = () => ui.DialogOpen || (fightScreen?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false);
             // walking into a room you face into it; stepping out of one you face the street
             if (map.IsInterior) player.Look(Vector2.up);
             else if (map.Doors.Exists(d => d.Target == fromDistrict)) player.Look(Vector2.down);
@@ -369,6 +372,58 @@ namespace Buds.Core
         }
 
         /// <summary>
+        /// Autopilot (-buds-life-demo): a strip of frames of the bud walking and running (to judge the steps), then a
+        /// strolling local filmed a few seconds apart, and once more when the bud walks up to it.
+        /// </summary>
+        async Awaitable LifeDemo(string dir)
+        {
+            if (world.Map.Id != Districts.Start) LoadDistrict(Districts.Start, null);
+            async Awaitable Strip(string name, bool run)
+            {
+                var start = world.Map.Zones.Find(z => z.Name == "Rynek") ?? world.Map.Zones[0];
+                Teleport(start.X0 + 2, (start.Y0 + start.Y1) / 2);
+                await Awaitable.WaitForSecondsAsync(0.5f);
+                player.Input.OverrideRun = run;
+                player.Input.Override = Vector2.right;
+                await Awaitable.WaitForSecondsAsync(0.4f); // up to speed
+                for (var i = 0; i < 10; i++)
+                {
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"{name}-{i:00}.png"));
+                    await Awaitable.WaitForSecondsAsync(0.05f);
+                }
+                player.Input.Override = Vector2.zero;
+                player.Input.OverrideRun = false;
+                await Awaitable.WaitForSecondsAsync(0.25f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"{name}-stop.png"));
+                await Awaitable.WaitForSecondsAsync(0.3f);
+            }
+            await Strip("walk", false);
+            await Strip("run", true);
+
+            NpcView local = null;
+            foreach (var n in questWorld.Npcs)
+                if (n.Data.wander > 0) { local = n; break; }
+            if (local == null) return;
+            Teleport(local.Data.x, local.Data.y + 5);
+            for (var i = 0; i < 3; i++)
+            {
+                await Awaitable.WaitForSecondsAsync(i == 0 ? 0.5f : 3.5f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"life-{i}.png"));
+                Debug.Log($"[AutoPilot] life-{i}: {local.Data.id} at {local.transform.position}");
+            }
+            // walk up to it: it stops and turns to the bud
+            var to = (Vector2)(local.transform.position - player.transform.position);
+            player.Input.Override = to.normalized;
+            for (var t = 0f; t < 3 && Vector2.Distance(player.transform.position, local.transform.position) > 1.6f; t += Time.deltaTime)
+                await Awaitable.NextFrameAsync();
+            player.Input.Override = Vector2.zero;
+            await Awaitable.WaitForSecondsAsync(0.6f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(dir, "life-3-near.png"));
+            Debug.Log($"[AutoPilot] life-3: {local.Data.id} at {local.transform.position}");
+            await Awaitable.WaitForSecondsAsync(0.3f);
+        }
+
+        /// <summary>
         /// Automated smoke run for CI/dev: walks around, opens the sign, saves screenshots, quits.
         /// Usage: Buds.exe -buds-guest -buds-autoshot C:\path\to\dir
         /// </summary>
@@ -424,6 +479,7 @@ namespace Buds.Core
                 if (CommandLine.Has("-buds-panel-demo")) await PanelDemo(Shot);
                 if (CommandLine.Has("-buds-tutorial-demo")) await TutorialDemo(Shot);
                 if (CommandLine.Has("-buds-quest-demo")) await QuestDemo(Shot);
+                if (CommandLine.Has("-buds-life-demo")) await LifeDemo(dir);
 
                 // tour: every zone of every district (or just the current one without -buds-tour)
                 var districts = CommandLine.Has("-buds-tour") ? Districts.All : new[] { Districts.Get(world.Map.Id) };

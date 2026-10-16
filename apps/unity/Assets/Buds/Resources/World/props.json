@@ -1472,6 +1472,76 @@
       ]
     },
     {
+      "name": "item-pilka",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-bilet",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-grzyb",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-ruda",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-jagody",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-chrust",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-maka",
+      "pivotX": 0.5023,
+      "pivotY": 0.1349,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
       "name": "sciana-kawiarnia-a",
       "pivotX": 0.5,
       "pivotY": 0.04,
@@ -2635,6 +2705,296 @@
       "name": "trening-tor",
       "pivotX": 0.4989,
       "pivotY": 0.0532,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "trybuna",
+      "pivotX": 0.4999,
+      "pivotY": 0.0416,
+      "flat": false,
+      "foot": [
+        9,
+        3
+      ]
+    },
+    {
+      "name": "bramka",
+      "pivotX": 0.4998,
+      "pivotY": 0.0559,
+      "flat": false,
+      "foot": [
+        5,
+        1
+      ]
+    },
+    {
+      "name": "tablica-wynikow",
+      "pivotX": 0.5006,
+      "pivotY": 0.0332,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "linia-boiska-h",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "linia-boiska-v",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "kolo-srodkowe",
+      "pivotX": 0.5,
+      "pivotY": 0.4258,
+      "flat": true,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "karuzela",
+      "pivotX": 0.5004,
+      "pivotY": 0.0281,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "diabelski-mlyn",
+      "pivotX": 0.4996,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        5,
+        2
+      ]
+    },
+    {
+      "name": "budka-wata",
+      "pivotX": 0.5006,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "balony",
+      "pivotX": 0.5015,
+      "pivotY": 0.0496,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "scena",
+      "pivotX": 0.5003,
+      "pivotY": 0.031,
+      "flat": false,
+      "foot": [
+        7,
+        3
+      ]
+    },
+    {
+      "name": "wodospad",
+      "pivotX": 0.5,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        7,
+        3
+      ]
+    },
+    {
+      "name": "kloda",
+      "pivotX": 0.4997,
+      "pivotY": 0.0833,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "pien",
+      "pivotX": 0.5009,
+      "pivotY": 0.1026,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "grzyby",
+      "pivotX": 0.5,
+      "pivotY": 0.25,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sosna",
+      "pivotX": 0.4987,
+      "pivotY": 0.0356,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "swierk",
+      "pivotX": 0.4987,
+      "pivotY": 0.0334,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "krzak-jagody",
+      "pivotX": 0.5015,
+      "pivotY": 0.0976,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "namiot-a",
+      "pivotX": 0.5006,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "namiot-b",
+      "pivotX": 0.5006,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "ognisko",
+      "pivotX": 0.5009,
+      "pivotY": 0.1216,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "mlyn",
+      "pivotX": 0.5002,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "szklarnia",
+      "pivotX": 0.5003,
+      "pivotY": 0.031,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "wejscie-kopalni",
+      "pivotX": 0.4996,
+      "pivotY": 0.0332,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "wagonik",
+      "pivotX": 0.5015,
+      "pivotY": 0.0976,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "komin",
+      "pivotX": 0.4994,
+      "pivotY": 0.0184,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "transformator",
+      "pivotX": 0.5006,
+      "pivotY": 0.0456,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "skocznia-cross",
+      "pivotX": 0.5006,
+      "pivotY": 0.0637,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "totem",
+      "pivotX": 0.5009,
+      "pivotY": 0.0454,
       "flat": false,
       "foot": [
         1,

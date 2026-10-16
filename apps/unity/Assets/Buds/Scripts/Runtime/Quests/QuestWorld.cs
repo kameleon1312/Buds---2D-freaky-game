@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Buds.Characters;
 using Buds.World;
@@ -5,7 +6,11 @@ using UnityEngine;
 
 namespace Buds.Quests
 {
-    /// <summary>One NPC standing in the world: sprite from the bud generator, a collider, and a quest marker.</summary>
+    /// <summary>
+    /// One NPC in the world: sprite from the bud generator, a collider, and a quest marker. Quest NPCs stand where
+    /// the map says and breathe; side characters (data.wander > 0) stroll about their patch with a proper walk,
+    /// stop when the player comes close and turn to them.
+    /// </summary>
     public sealed class NpcView : MonoBehaviour
     {
         public NpcData Data { get; private set; }
@@ -13,6 +18,13 @@ namespace Buds.Quests
         SpriteRenderer body;
         SpriteRenderer marker;
         float phase;
+        NpcWander wander;
+        WalkCycle walk;
+        Rigidbody2D rb;
+        Vector2 velocity;
+        Func<Vector2?> playerFeet;
+        Func<bool> busy;
+        bool talking;
 
         public static NpcView Spawn(NpcData data, BudSheet sheet, Vector3 feet, Transform parent)
         {
@@ -42,6 +54,18 @@ namespace Buds.Quests
             return view;
         }
 
+        /// <summary>Lets a side character stroll (called once after Spawn, for data.wander > 0).</summary>
+        public void Wander(Func<Vector2, bool> walkable, Func<Vector2?> player, Func<bool> isBusy)
+        {
+            wander = new NpcWander(transform.position, Data.wander, walkable, StableSeed(Data.id));
+            walk = new WalkCycle(NpcWander.Speed, NpcWander.Speed * 1.6f, 0.7f, 0.9f, 0.03f);
+            playerFeet = player;
+            busy = isBusy;
+            rb = gameObject.AddComponent<Rigidbody2D>();
+            rb.bodyType = RigidbodyType2D.Kinematic; // moves itself, blocks the player like a person would
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
+
         public void SetMarker(Sprite sprite)
         {
             marker.sprite = sprite;
@@ -51,18 +75,58 @@ namespace Buds.Quests
         /// <summary>Turns towards a point (the player) while talking.</summary>
         public void Face(Vector3 target)
         {
-            var d = target - transform.position;
+            talking = true;
+            Show(target - transform.position, 0);
+        }
+
+        /// <summary>The same number for the same id on every run and device (string.GetHashCode may differ).</summary>
+        static int StableSeed(string id)
+        {
+            unchecked
+            {
+                var h = (int)2166136261;
+                foreach (var c in id) h = (h ^ c) * 16777619;
+                return h;
+            }
+        }
+
+        void Show(Vector2 d, int frame)
+        {
             var facing = Mathf.Abs(d.x) > Mathf.Abs(d.y) ? Facing.Side : d.y > 0 ? Facing.Up : Facing.Down;
-            body.sprite = sheet.Get(facing, 0);
+            body.sprite = sheet.Get(facing, frame);
             body.flipX = facing == Facing.Side && d.x > 0;
         }
 
         void Update()
         {
-            // the marker floats above the head; NPCs breathe a little so they don't look like statues
+            // the marker floats above the head; standing NPCs breathe a little so they don't look like statues
             var t = Time.time + phase * 3;
             marker.transform.localPosition = new Vector3(0, 1.95f + Mathf.Sin(t * 3f) * 0.08f, 0);
-            body.transform.localScale = new Vector3(1, 1 + Mathf.Sin(t * 2f) * 0.012f, 1);
+            if (wander == null)
+            {
+                body.transform.localScale = new Vector3(1, 1 + Mathf.Sin(t * 2f) * 0.012f, 1);
+                return;
+            }
+
+            var isBusy = busy?.Invoke() ?? false;
+            if (!isBusy) talking = false;
+            velocity = wander.Tick(Time.deltaTime, transform.position, playerFeet?.Invoke(), isBusy);
+            walk.Tick(velocity.magnitude, Time.deltaTime);
+            // while talking the NPC keeps facing the player (Face), otherwise where it walks or looks
+            if (!talking) Show(walk.Walking ? velocity : wander.Look, walk.Frame);
+            body.transform.localPosition = new Vector3(0, walk.Lift, 0);
+            var breathe = walk.Walking ? 0 : Mathf.Sin(t * 2f) * 0.012f;
+            body.transform.localScale = new Vector3(1 + (1 - walk.Squash) * 0.6f, walk.Squash + breathe, 1);
+        }
+
+        void FixedUpdate()
+        {
+            if (rb && velocity != Vector2.zero) rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
+        }
+
+        void LateUpdate()
+        {
+            if (wander != null) body.sortingOrder = WorldView.SortOrderFor(transform.position.y);
         }
     }
 
@@ -82,6 +146,10 @@ namespace Buds.Quests
         readonly List<GameObject> targets = new();
 
         public IReadOnlyList<NpcView> Npcs => npcs;
+        /// <summary>The player's feet (null when there is no player yet): strolling NPCs stop for them.</summary>
+        public Func<Vector2?> PlayerFeet { get; set; }
+        /// <summary>A dialog or a screen is open: everyone stands still.</summary>
+        public Func<bool> Busy { get; set; }
 
         public static QuestWorld Create(WorldView world, QuestLog log)
         {
@@ -104,7 +172,9 @@ namespace Buds.Quests
                     continue;
                 }
                 var feet = world.CellCenter(n.x, n.y) + new Vector3(0, -0.3f, 0);
-                qw.npcs.Add(NpcView.Spawn(n, new BudSheet(tex), feet, qw.transform));
+                var view = NpcView.Spawn(n, new BudSheet(tex), feet, qw.transform);
+                if (n.wander > 0) view.Wander(qw.Walkable, () => qw.PlayerFeet?.Invoke(), () => qw.Busy?.Invoke() ?? false);
+                qw.npcs.Add(view);
             }
             log.Changed += qw.Refresh;
             qw.Refresh();
@@ -114,6 +184,15 @@ namespace Buds.Quests
         void OnDestroy()
         {
             if (log != null) log.Changed -= Refresh;
+        }
+
+        /// <summary>Can feet stand here (world units)? The whole feet box must be on walkable cells.</summary>
+        bool Walkable(Vector2 feet)
+        {
+            var map = world.Map;
+            bool Free(float x, float y) => map.IsWalkable(Mathf.FloorToInt(x), map.Height - 1 - Mathf.FloorToInt(y));
+            return Free(feet.x - 0.32f, feet.y) && Free(feet.x + 0.32f, feet.y) && Free(feet.x - 0.32f, feet.y + 0.31f) &&
+                   Free(feet.x + 0.32f, feet.y + 0.31f);
         }
 
         public void Refresh()

@@ -72,6 +72,7 @@ describe('districts', () => {
     expect(DISTRICTS[0]).toMatchObject({ id: START_DISTRICT, unlockLevel: 1, status: 'open' });
     expect(DISTRICTS.map((d) => d.name)).toEqual([
       'Miasto Ziomków',
+      'Dzika Puszcza',
       'Las Palmas',
       'Dwór Carski',
       'Los Karkos',

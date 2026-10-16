@@ -39,8 +39,9 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
   {
     id: 'trening-mz-worek',
     district: 'miasto-ziomkow',
-    x: 150,
-    y: 66,
+    // beside the pitch, on the stadium plaza
+    x: 166,
+    y: 74,
     skill: 'walka',
     name: 'Worek przy stadionie',
     look: 'worek',

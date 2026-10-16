@@ -7,13 +7,16 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { MapCanvas } from './maps/lib';
 import { dworCarski } from './maps/dwor-carski';
+import { dzikaPuszcza } from './maps/dzika-puszcza';
 import { interiors } from './maps/interiors';
 import { lasPalmas } from './maps/las-palmas';
 import { losKarkos } from './maps/los-karkos';
 import { miastoZiomkow } from './maps/miasto-ziomkow';
 import { wyspaStartowa } from './maps/wyspa-startowa';
 
-const districts = [miastoZiomkow, lasPalmas, dworCarski, losKarkos].map((build) => build());
+const districts = [miastoZiomkow, dzikaPuszcza, lasPalmas, dworCarski, losKarkos].map((build) =>
+  build(),
+);
 const rooms = interiors();
 
 const problems: string[] = [];
