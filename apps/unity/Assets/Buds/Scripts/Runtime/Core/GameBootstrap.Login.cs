@@ -66,6 +66,7 @@ namespace Buds.Core
             }
             signingIn = true;
             loginScreen.SetBusy(true);
+            _ = WakeUpNote();
             try
             {
                 var config = await api.GetAuthConfig();
@@ -119,12 +120,20 @@ namespace Buds.Core
             }
         }
 
+        /// <summary>A sleeping server (free hosting) can take up to a minute to answer: say so instead of looking stuck.</summary>
+        async Awaitable WakeUpNote()
+        {
+            await Awaitable.WaitForSecondsAsync(5f);
+            if (signingIn && loginScreen.IsOpen) loginScreen.ShowWaiting("Budzę serwer, to może potrwać do minuty…");
+        }
+
         /// <summary>A bud tapped on the account's list.</summary>
         async Awaitable PickAccountBud(string slug)
         {
             if (signingIn) return;
             signingIn = true;
             loginScreen.SetBusy(true);
+            _ = WakeUpNote();
             try
             {
                 await EnterAccountBud(slug);

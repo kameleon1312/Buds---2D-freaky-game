@@ -18,7 +18,9 @@ namespace Buds.Api
     /// <summary>Thin client for the Buds API (apps/api). All messages are player-facing Polish.</summary>
     public sealed class BudsApi
     {
-        const int TimeoutSeconds = 10;
+        // the free Render plan sleeps after 15 min idle and takes up to a minute to wake: wait that long rather than
+        // telling the player there is no connection (no network at all still fails right away)
+        const int TimeoutSeconds = 70;
         readonly string baseUrl;
 
         public BudsApi(string baseUrl)

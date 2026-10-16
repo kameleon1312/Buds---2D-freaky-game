@@ -143,6 +143,8 @@ namespace Buds.UI
                 server.text = PlayerSession.ApiBaseUrl;
                 server.onEndEdit.AddListener(v =>
                 {
+                    // only an actual change is remembered: closing the keyboard on the shown address must not pin it
+                    if (v.Trim().TrimEnd('/') == PlayerSession.ApiBaseUrl) return;
                     if (v.Trim().StartsWith("http")) PlayerSession.ApiBaseUrl = v;
                     else if (v.Trim().Length == 0)
                     {

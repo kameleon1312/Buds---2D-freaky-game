@@ -104,6 +104,14 @@ namespace Buds.UI
             signInLabel.text = busy ? "Loguję…" : "Zaloguj się";
             error.text = message ?? "";
             budsError.text = message ?? "";
+            error.color = budsError.color = UiKit.Alert700;
+        }
+
+        /// <summary>A calm note while the button stays busy (not an error), e.g. while the server wakes up.</summary>
+        public void ShowWaiting(string note)
+        {
+            error.text = budsError.text = note;
+            error.color = budsError.color = UiKit.InkSoft;
         }
 
         /// <summary>The account's buds as big buttons (name · level); tapping one plays it.</summary>
