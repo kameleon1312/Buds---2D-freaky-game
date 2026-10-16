@@ -118,9 +118,9 @@ Railway dalej działa jako alternatywa: `apps/api/railway.json` (Config file pat
 
 1. Adres produkcyjnego API jest w `PlayerSession.DefaultApiBaseUrl`
    (`Assets/Buds/Scripts/Runtime/Core/PlayerSession.cs`, teraz `https://buds-api-9vhw.onrender.com`) — musi być HTTPS.
-   Buildy dev na telefon (`pnpm phone`) łączą się z API na komputerze; z produkcyjnym:
-   `BUDS_API_URL=https://buds-api-9vhw.onrender.com pnpm phone`. Adres wpisany w polu „Serwer” na ekranie startowym
-   gry ma pierwszeństwo przed oboma (pusty = domyślny).
+   Buildy na telefon (`pnpm phone`) też łączą się z nim; z API na komputerze: `pnpm phone --local`, z innym serwerem:
+   `BUDS_API_URL=… pnpm phone`. Adres wpisany w polu „Serwer” na ekranie startowym gry ma pierwszeństwo
+   (wyczyszczenie pola wraca do adresu z builda).
 2. Build: menu **Buds → Build → Android APK (dev)** albo w trybie wsadowym
    `-executeMethod Buds.EditorTools.BudsBuild.AndroidDev`.
 3. Do Google Play potrzebny będzie build release (AAB) podpisany własnym keystore — dodamy go

@@ -18,9 +18,10 @@ Wersja testowa (dev) łączy się z API na twoim komputerze przez domowe Wi-Fi.
 3. `pnpm phone` — buduje APK (pierwszy raz 10–15 min, potem kilka), instaluje go i uruchamia grę.
    `pnpm phone --no-build` instaluje ostatni APK jeszcze raz. Edytor Unity musi być zamknięty na czas budowania.
 
-Build wpisuje do gry adres komputera w sieci domowej (`http://<IP>:4000`, plik `Resources/Dev/api.txt`, poza gitem).
-Inny serwer: `BUDS_API_URL=http://host:port pnpm phone` albo pole adresu na dole ekranu parowania (zapamiętuje się).
-Gdy zmieni się IP komputera, zbuduj ponownie albo wpisz nowy adres w tym polu.
+Gra łączy się z produkcyjnym API (Render, `PlayerSession.DefaultApiBaseUrl`). `pnpm phone --local` wpisuje zamiast
+niego adres komputera w sieci domowej (`http://<IP>:4000`, plik `Resources/Dev/api.txt`, poza gitem; `pnpm dev` musi
+działać). Inny serwer: `BUDS_API_URL=http://host:port pnpm phone`. Adres wpisany w polu „Serwer” na ekranie parowania
+zapamiętuje się i wygrywa z buildem; wyczyszczenie pola wraca do adresu z builda.
 
 ## Układ na telefonie
 

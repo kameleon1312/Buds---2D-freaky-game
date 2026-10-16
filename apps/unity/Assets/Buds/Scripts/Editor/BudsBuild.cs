@@ -26,16 +26,22 @@ namespace Buds.EditorTools
         const string DevApiFile = "Assets/Buds/Resources/Dev/api.txt";
 
         /// <summary>
-        /// Android dev build. The phone can't reach "localhost" on the PC, so the build bakes in the PC's address on
-        /// the home network (http://&lt;LAN IP&gt;:4000, or BUDS_API_URL) as the default API; the pairing screen can still
-        /// change it. Release builds never read this file.
+        /// Android dev build. By default it talks to the production API (PlayerSession.DefaultApiBaseUrl). BUDS_API_URL
+        /// bakes in another server; BUDS_API_LOCAL=1 (pnpm phone --local) bakes in this PC's address on the home network
+        /// (http://&lt;LAN IP&gt;:4000), since the phone can't reach "localhost". The pairing screen can still change it.
         /// </summary>
         [MenuItem("Buds/Build/Android APK (dev)")]
         public static void AndroidDev()
         {
             var api = Environment.GetEnvironmentVariable("BUDS_API_URL");
-            if (string.IsNullOrWhiteSpace(api)) api = LanIp() is { } ip ? $"http://{ip}:4000" : null;
-            if (api != null)
+            if (string.IsNullOrWhiteSpace(api) && Environment.GetEnvironmentVariable("BUDS_API_LOCAL") == "1")
+                api = LanIp() is { } ip ? $"http://{ip}:4000" : null;
+            if (string.IsNullOrWhiteSpace(api))
+            {
+                // no baked-in address: the build uses the production default
+                if (AssetDatabase.DeleteAsset(DevApiFile)) Debug.Log("[BudsBuild] dev API for the phone: production default");
+            }
+            else
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(DevApiFile)!);
                 File.WriteAllText(DevApiFile, api.Trim().TrimEnd('/'));

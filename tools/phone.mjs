@@ -3,11 +3,13 @@
 //
 //   pnpm phone              build + install + start
 //   pnpm phone --no-build   install the last APK again
+//   pnpm phone --local      build against the API on this PC instead (keep `pnpm dev` running)
 //   pnpm phone pair <ip:port> <code>    once: pair with the phone (Wireless debugging → "Pair device with code")
 //   pnpm phone connect <ip:port>        connect to the phone (Wireless debugging screen, "IP address & port")
 //
-// The APK talks to the API on this PC (http://<LAN IP>:4000, baked in by BudsBuild.AndroidDev); keep `pnpm dev`
-// running and the phone on the same Wi-Fi. Override with BUDS_API_URL=http://host:port.
+// The APK talks to the production API (PlayerSession.DefaultApiBaseUrl). With --local it talks to the API on this PC
+// (http://<LAN IP>:4000, baked in by BudsBuild.AndroidDev; phone on the same Wi-Fi). BUDS_API_URL=http://host:port
+// picks any other server.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -25,7 +27,9 @@ const appId = 'com.buds.game';
 /** The phone's last wireless debugging address (Unity restarts adb while building, which drops the connection). */
 const lastPhone = path.join(root, 'apps/unity/Builds/phone-address.txt');
 
-const [cmd, ...rest] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const local = args.includes('--local');
+const [cmd, ...rest] = args.filter((a) => a !== '--local');
 const run = (args, opts = {}) => execFileSync(adb, args, { encoding: 'utf8', ...opts });
 
 if (!existsSync(adb)) {
@@ -75,7 +79,7 @@ if (cmd !== '--no-build') {
       '-logFile',
       log,
     ],
-    { stdio: 'inherit' },
+    { stdio: 'inherit', env: local ? { ...process.env, BUDS_API_LOCAL: '1' } : process.env },
   );
   if (build.status !== 0) {
     console.error(`Build failed (is the Unity editor open on this project? close it). Log: ${log}`);

@@ -35,7 +35,7 @@ pnpm exec tsx ../../tools/world/export-art.ts
 pnpm exec tsx ../../tools/world/export-maps.ts
 pnpm exec tsx ../../tools/world/export-quests.ts   # NPCs, quests, caches, opponents, items → Unity JSON, NPC/opponent sheets (validated against the maps)
 # quest flow end to end: Buds.exe -buds-pair CODE -buds-api http://localhost:4000 -buds-quest-demo -buds-autoshot <dir>
-# phone (Android, docs/telefon.md): pnpm phone [pair <ip:port> <code> | connect <ip:port> | --no-build]
+# phone (Android, docs/telefon.md): pnpm phone [pair <ip:port> <code> | connect <ip:port> | --no-build | --local]  (production API by default; --local = the PC on the LAN)
 # account sign-in: Buds.exe -buds-api URL -buds-login-demo -buds-login-email E -buds-login-password P -buds-autoshot <dir> (wrong password, then in)
 # more demos with a paired bud: -buds-tour (rooms, caches), -buds-gear-demo (shop, equip), -buds-fight-demo [-buds-fight-enemy <id>], -buds-ride-demo (ride, drinks, training; run after -buds-tour for coins)
 ```
