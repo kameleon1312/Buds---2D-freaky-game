@@ -2,15 +2,18 @@ import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Rubik } from 'next/font/google';
+import localFont from 'next/font/local';
 import { SITE_URL } from '@/lib/site';
 import './globals.css';
 import './journey.css';
 
-// Buds design system: Rubik everywhere (display 800-900 outlined, body 500-700).
-const rubik = Rubik({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['500', '700', '800', '900'],
+// Buds design system: Rubik everywhere (display 800-900 outlined, body 500-700). Self-hosted (the variable font,
+// Latin + Polish, OFL: fonts/Rubik-OFL.txt) so the build never depends on reaching Google Fonts.
+const rubik = localFont({
+  src: './fonts/Rubik-Variable.woff2',
+  weight: '300 900',
+  style: 'normal',
+  display: 'swap',
   variable: '--font-display',
 });
 
