@@ -12,7 +12,8 @@ namespace Buds.Core
         const string SlugKey = "buds.slug";
         const string ApiKey = "buds.api";
 
-        public const string DefaultApiBaseUrl = "http://localhost:4000";
+        /// <summary>The production API (Render). Local runs pass -buds-api, phone dev builds bake in the PC address.</summary>
+        public const string DefaultApiBaseUrl = "https://buds-api-9vhw.onrender.com";
 
         public string Token { get; }
         public string Slug { get; }

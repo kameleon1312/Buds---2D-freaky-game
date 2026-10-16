@@ -143,7 +143,13 @@ namespace Buds.UI
                 server.text = PlayerSession.ApiBaseUrl;
                 server.onEndEdit.AddListener(v =>
                 {
-                    if (v.StartsWith("http")) PlayerSession.ApiBaseUrl = v;
+                    if (v.Trim().StartsWith("http")) PlayerSession.ApiBaseUrl = v;
+                    else if (v.Trim().Length == 0)
+                    {
+                        // cleared: forget the typed address and use the default again
+                        PlayerSession.ApiBaseUrl = "";
+                        server.text = PlayerSession.ApiBaseUrl;
+                    }
                 });
             }
         }
