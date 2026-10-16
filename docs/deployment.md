@@ -15,10 +15,12 @@ Zalecane: Settings → Branches → ochrona `main` z wymaganymi checkami CI.
 1. Import repozytorium w Vercel.
 2. **Root Directory**: `apps/web` (Vercel wykryje monorepo pnpm i `vercel.json`).
 3. Zmienne środowiskowe:
-   - `NEXT_PUBLIC_API_URL` — domena API z Railway (`https://…up.railway.app`),
+   - `NEXT_PUBLIC_API_URL` — adres API z Render (`https://…onrender.com`),
    - `NEXT_PUBLIC_SITE_URL` — adres strony (najpierw `https://<projekt>.vercel.app`, potem twoja domena),
    - `NEXT_PUBLIC_SUPABASE_URL` i `NEXT_PUBLIC_SUPABASE_ANON_KEY` — te same publiczne wartości co w `.env`
      (bez nich konta na stronie są wyłączone). Klucza secret tu **nie** wpisuj.
+   - `ENABLE_EXPERIMENTAL_COREPACK` = `1` — Vercel użyje wersji pnpm z `packageManager` w `package.json`
+     (bez tego instalacja może się wywrócić na niezgodnej wersji pnpm).
 4. Po zmianie zmiennych w Vercel: Deployments → **Redeploy** (zmienne `NEXT_PUBLIC_*` są wklejane w kod przy budowaniu).
 
 Status deploymentu pojawi się jako check „Vercel” przy commitach.
@@ -27,9 +29,9 @@ Status deploymentu pojawi się jako check „Vercel” przy commitach.
 
 1. Vercel → projekt → Settings → **Domains** → dodaj domenę i ustaw u rejestratora rekordy DNS, które pokaże Vercel.
 2. Zmień adres strony wszędzie, gdzie występuje: `NEXT_PUBLIC_SITE_URL` (Vercel, potem Redeploy), `WEB_ORIGIN`
-   (Railway — inaczej przeglądarka zablokuje zapytania do API przez CORS) i w Supabase → Authentication → URL
+   (Render → Environment — inaczej przeglądarka zablokuje zapytania do API przez CORS) i w Supabase → Authentication → URL
    Configuration (Site URL i Redirect URLs `…/konto`, `…/konto/nowe-haslo`).
-3. Opcjonalnie domena dla API (np. `api.twojadomena.pl`) w Railway → Networking → Custom Domain; wtedy zmień
+3. Opcjonalnie domena dla API (np. `api.twojadomena.pl`) w Render → Settings → Custom Domains; wtedy zmień
    `NEXT_PUBLIC_API_URL` w Vercel i adres w grze (`PlayerSession.DefaultApiBaseUrl`).
 
 ### Lokalnie: zmienne strony
@@ -37,16 +39,45 @@ Status deploymentu pojawi się jako check „Vercel” przy commitach.
 Po dopisaniu albo zmianie `NEXT_PUBLIC_*` w `.env` zatrzymaj `pnpm dev` i uruchom go ponownie — strona wczytuje je przy
 starcie. Jeśli `/konto` dalej pisze „Konta są wyłączone”, usuń `apps/web/.next` i uruchom ponownie.
 
-## Railway (API)
+## Render (API)
 
-1. New Project → Deploy from GitHub repo.
-2. Settings → **Config file path**: `apps/api/railway.json` (root directory zostaw na `/`).
-3. Zmienne: `WEB_ORIGIN` (URL z Vercel), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-   `SUPABASE_JWT_SECRET`. Opcjonalnie `RATE_LIMIT_PER_MINUTE`, `CREATE_LIMIT_PER_MINUTE`.
-   `PORT` ustawia Railway. Do logowania na konto w grze dodaj też `SUPABASE_PUBLISHABLE_KEY`
-   (ten sam publiczny klucz co `NEXT_PUBLIC_SUPABASE_ANON_KEY`) — API podaje go grze przez `GET /v1/auth/config`.
-   **Bez `SUPABASE_SERVICE_ROLE_KEY` API trzyma dane w pamięci — na produkcji koniecznie ustaw.**
-4. Settings → Networking → Generate Domain; wpisz go jako `NEXT_PUBLIC_API_URL` w Vercel.
+Konfiguracja jest w repo: `render.yaml` (Blueprint). Plan **Free** ma swoje limity:
+
+- usługa usypia po 15 minutach bez ruchu, a pierwsze zapytanie po uśpieniu czeka ok. minuty;
+- 750 darmowych godzin pracy miesięcznie na konto, czyli wystarczy na jedną usługę działającą cały miesiąc;
+- transfer i minuty budowania są limitowane miesięcznie.
+
+1. render.com → **New → Blueprint** → wybierz repozytorium (Render czyta `render.yaml`).
+2. Render zapyta o zmienne oznaczone w pliku jako sekretne. Wpisz:
+   - `WEB_ORIGIN` — adres strony z Vercel, np. `https://buds.vercel.app` (bez `/` na końcu; inaczej przeglądarka
+     zablokuje zapytania przez CORS),
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET` — jak w sekcji Supabase niżej,
+   - `SUPABASE_PUBLISHABLE_KEY` — ten sam publiczny klucz co `NEXT_PUBLIC_SUPABASE_ANON_KEY` (logowanie na konto w grze).
+
+   Resztę (`NODE_VERSION`, `CLIENT_IP_HEADER` i ustawienia pnpm) ustawia `render.yaml`. `PORT` ustawia Render.
+   **Bez `SUPABASE_SERVICE_ROLE_KEY` API trzyma dane w pamięci i traci je przy każdym uśpieniu.**
+
+3. Po pierwszym deployu adres API to `https://buds-api.onrender.com` (albo z dopiskiem, jeśli nazwa była zajęta —
+   widać go na górze strony usługi). Sprawdzenie: `https://<adres>/health` zwraca `{"status":"ok",…}`.
+4. Wpisz ten adres jako `NEXT_PUBLIC_API_URL` w Vercel i zrób Redeploy strony.
+5. Żeby API nie usypiało: darmowy monitor (np. UptimeRobot, typ HTTP(s)) na `https://<adres>/health` co 10 minut.
+   Mieści się w 750 godzinach.
+6. Kolejne pushe na `main` wdrażają API same, ale tylko gdy zmieni się `apps/api`, `packages/shared`, lockfile albo
+   `render.yaml`.
+
+`CLIENT_IP_HEADER=cf-connecting-ip`: limity zapytań (m.in. na zgadywanie kodów parowania) liczą się po IP klienta.
+Na Render nagłówki `X-Real-IP` / `X-Forwarded-For` przechodzą od klienta i dałoby się je podrobić, a
+`CF-Connecting-IP` zawsze ustawia brzeg Render (Cloudflare). Sprawdzenie po deployu (szósta próba ma dać `429`):
+
+```bash
+for i in 1 2 3 4 5 6; do curl -s -o /dev/null -w "%{http_code}\n" -X POST https://<adres>/v1/pair \
+  -H "content-type: application/json" -H "X-Real-IP: 10.0.0.$i" -d '{"code":"AAAAAA"}'; done
+```
+
+Przy domyślnym `CREATE_LIMIT_PER_MINUTE=5` wynik to pięć odpowiedzi `404` (albo `400`) i potem `429`. Jeśli wszystkie są `404`, napisz.
+
+Railway dalej działa jako alternatywa: `apps/api/railway.json` (Config file path), te same zmienne bez
+`CLIENT_IP_HEADER`.
 
 ## Supabase
 
@@ -67,7 +98,7 @@ starcie. Jeśli `/konto` dalej pisze „Konta są wyłączone”, usuń `apps/we
    - **API Keys** → klucz **secret** (`sb_secret_…`; w starszych projektach `service_role`) → `SUPABASE_SERVICE_ROLE_KEY`,
    - **JWT Keys** → _Legacy JWT secret_ → `SUPABASE_JWT_SECRET`.
 
-   Lokalnie wpisz je do pliku `.env` w katalogu głównym (jest w `.gitignore`), na produkcji do zmiennych w Railway.
+   Lokalnie wpisz je do pliku `.env` w katalogu głównym (jest w `.gitignore`), na produkcji do zmiennych w Render.
    Klucz secret daje pełny dostęp do bazy: **nigdy** nie wpisuj go do zmiennych `NEXT_PUBLIC_*`, do gry ani do repo.
 
 4. Konta graczy (logowanie e-mailem i hasłem), w panelu Supabase:

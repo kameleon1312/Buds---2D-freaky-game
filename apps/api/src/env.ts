@@ -23,6 +23,16 @@ const envSchema = z.object({
    */
   SUPABASE_PUBLISHABLE_KEY: optional,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: optional,
+  /**
+   * The only request header trusted for the client IP in rate limits, lower-case (e.g. cf-connecting-ip on Render).
+   * Unset: X-Real-IP / X-Forwarded-For as Railway's edge sets them.
+   */
+  CLIENT_IP_HEADER: optional.pipe(
+    z
+      .string()
+      .regex(/^[a-z0-9-]+$/, 'CLIENT_IP_HEADER must be a lower-case header name')
+      .optional(),
+  ),
 });
 
 export type Env = z.infer<typeof envSchema>;

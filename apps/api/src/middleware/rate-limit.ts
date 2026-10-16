@@ -6,13 +6,18 @@ type Bucket = { count: number; resetAt: number };
 
 /**
  * Fixed-window in-memory limiter keyed by client IP.
- * Good enough for a single Railway instance; swap for Redis when scaling out.
+ * Good enough for a single API instance; swap for Redis when scaling out.
+ * `ipHeader` is the one header trusted for the client IP (CLIENT_IP_HEADER, see clientIp).
  */
-export function rateLimit(limitPerMinute: number, windowMs = 60_000): MiddlewareHandler {
+export function rateLimit(
+  limitPerMinute: number,
+  windowMs = 60_000,
+  ipHeader?: string,
+): MiddlewareHandler {
   const buckets = new Map<string, Bucket>();
 
   return async (c, next) => {
-    const ip = clientIp(c);
+    const ip = clientIp(c, ipHeader);
     const now = Date.now();
 
     let bucket = buckets.get(ip);

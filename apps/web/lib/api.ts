@@ -14,8 +14,11 @@ import {
   type PairCodeResponse,
 } from '@buds/shared';
 import type { z } from 'zod';
+import { normalizeUrl } from '@/lib/site';
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL?.trim()
+  ? normalizeUrl(process.env.NEXT_PUBLIC_API_URL)
+  : 'http://localhost:4000';
 
 export class ApiRequestError extends Error {
   constructor(

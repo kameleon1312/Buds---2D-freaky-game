@@ -95,6 +95,22 @@ describe('POST /v1/buds', () => {
     expect((await app.request('/v1/buds', post(body, headers))).status).toBe(201);
     expect((await app.request('/v1/buds', post(body, headers))).status).toBe(429);
   });
+
+  it('trusts only CLIENT_IP_HEADER when it is set, so faked X-Real-IP cannot dodge the limit', async () => {
+    const app = makeApp({ CREATE_LIMIT_PER_MINUTE: '2', CLIENT_IP_HEADER: 'cf-connecting-ip' });
+    const body = { name: 'Ola', look };
+    const from = (fake: string) => post(body, { 'CF-Connecting-IP': '5.5.5.5', 'X-Real-IP': fake });
+    expect((await app.request('/v1/buds', from('1.1.1.1'))).status).toBe(201);
+    expect((await app.request('/v1/buds', from('2.2.2.2'))).status).toBe(201);
+    expect((await app.request('/v1/buds', from('3.3.3.3'))).status).toBe(429);
+    // another real client still gets in
+    const other = post(body, { 'CF-Connecting-IP': '6.6.6.6' });
+    expect((await app.request('/v1/buds', other)).status).toBe(201);
+  });
+
+  it('rejects a CLIENT_IP_HEADER that is not a header name', () => {
+    expect(() => makeApp({ CLIENT_IP_HEADER: 'X-Real-IP; drop' })).toThrow(/CLIENT_IP_HEADER/);
+  });
 });
 
 describe('GET /v1/buds/me', () => {

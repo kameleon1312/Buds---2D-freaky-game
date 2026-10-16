@@ -183,7 +183,7 @@ Na komputerze: klawiatura (WASD, E, I, M).
 | ----------------- | --------------------------------------------------------------------- |
 | `apps/unity`      | Gra: Unity 6.6, URP 2D, kamera 2.5D, Android (iOS w planach)          |
 | `apps/web`        | Strona: Next.js 15 na Vercel (kreator, profil, ranking, konta)        |
-| `apps/api`        | API: Hono na Railway (Budy, zadania, pojedynki, sklep, arkusze PNG)   |
+| `apps/api`        | API: Hono na Render (Budy, zadania, pojedynki, sklep, arkusze PNG)    |
 | `packages/shared` | Generator wyglądu Budów, treści gry, zasady walki, schematy zod       |
 | `supabase`        | Baza i konta: migracje z RLS, atomowe funkcje SQL                     |
 | `tools`           | Eksport grafiki, map i treści do Unity, testy migracji, build na tel. |

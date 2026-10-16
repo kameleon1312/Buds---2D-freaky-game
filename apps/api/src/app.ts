@@ -147,7 +147,9 @@ export function createApp(
         c.json<ApiError>({ error: { code: 'payload_too_large', message: 'Body too large' } }, 413),
     }),
   );
-  app.use('/v1/*', rateLimit(env.RATE_LIMIT_PER_MINUTE));
+  // every limit keys on the same client IP (CLIENT_IP_HEADER picks the one trusted header)
+  const limit = (perMinute: number) => rateLimit(perMinute, 60_000, env.CLIENT_IP_HEADER);
+  app.use('/v1/*', limit(env.RATE_LIMIT_PER_MINUTE));
 
   app.get('/health', (c) =>
     c.json<HealthResponse>({
@@ -164,7 +166,7 @@ export function createApp(
 
   // ---------- buds ----------
 
-  app.post('/v1/buds', rateLimit(env.CREATE_LIMIT_PER_MINUTE), async (c) => {
+  app.post('/v1/buds', limit(env.CREATE_LIMIT_PER_MINUTE), async (c) => {
     const body = await c.req.json().catch(() => null);
     const input = createBudSchema.safeParse(body);
     if (!input.success) {
@@ -573,7 +575,7 @@ export function createApp(
    */
   app.post(
     '/v1/account/buds/link',
-    rateLimit(env.CREATE_LIMIT_PER_MINUTE),
+    limit(env.CREATE_LIMIT_PER_MINUTE),
     requireAuth(keys),
     async (c) => {
       const input = redeemPairSchema.safeParse(await c.req.json().catch(() => null));
@@ -906,7 +908,7 @@ export function createApp(
   });
 
   // tight limit: this is the one endpoint where guessing would pay off
-  app.post('/v1/pair', rateLimit(env.CREATE_LIMIT_PER_MINUTE), async (c) => {
+  app.post('/v1/pair', limit(env.CREATE_LIMIT_PER_MINUTE), async (c) => {
     const input = redeemPairSchema.safeParse(await c.req.json().catch(() => null));
     if (!input.success) {
       return c.json<ApiError>(
@@ -939,7 +941,7 @@ export function createApp(
    * A preview sheet for a look that isn't a bud yet (the in-game creator). `look` is the JSON look, base64url.
    * Rendering costs CPU, so it has its own limit.
    */
-  app.get('/v1/look/sheet.png', rateLimit(env.PREVIEW_LIMIT_PER_MINUTE), (c) => {
+  app.get('/v1/look/sheet.png', limit(env.PREVIEW_LIMIT_PER_MINUTE), (c) => {
     let look: unknown = null;
     try {
       look = JSON.parse(Buffer.from(c.req.query('look') ?? '', 'base64url').toString('utf8'));

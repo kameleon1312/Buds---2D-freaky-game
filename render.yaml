@@ -1,0 +1,44 @@
+# Render Blueprint for the API (apps/api). Render → New → Blueprint → this repo.
+# Secrets are marked sync: false: Render asks for them when the Blueprint is created and never reads them from here.
+services:
+  - type: web
+    name: buds-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    # pnpm comes from the repo's packageManager field through Corepack (Render's own install step is skipped)
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @buds/api build
+    startCommand: node apps/api/dist/index.js
+    healthCheckPath: /health
+    autoDeploy: true
+    # redeploy only when the API or the code it bundles changes
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/shared/**
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - render.yaml
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: SKIP_INSTALL_DEPS
+        value: 'true'
+      # Node 22's bundled Corepack may not know the signing keys of newer pnpm releases
+      - key: COREPACK_INTEGRITY_KEYS
+        value: '0'
+      # Render's Cloudflare edge always sets this header; client-sent X-Real-IP / X-Forwarded-For can be faked
+      - key: CLIENT_IP_HEADER
+        value: cf-connecting-ip
+      # the website's address, e.g. https://buds.vercel.app (CORS allows only this origin)
+      - key: WEB_ORIGIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false

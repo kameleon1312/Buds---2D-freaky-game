@@ -6,7 +6,7 @@ Gracz ────► │ kreator Buda → POST /v1/buds → token gościa│
             │ profil Buda → POST /v1/buds/me/pair-code   │
             └──────────────────────┬─────────────────────┘
                                    ▼
-                        apps/api (Railway, Hono) ──► Supabase Postgres
+                        apps/api (Render, Hono)  ──► Supabase Postgres
                                    ▲                  (buds, bud_tokens, bud_pair_codes)
             ┌──────────────────────┴─────────────────────┐
 Gracz ────► │ apps/unity: wpisuje kod → POST /v1/pair    │
