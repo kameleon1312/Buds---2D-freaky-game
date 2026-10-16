@@ -52,18 +52,19 @@ namespace Buds.UI
             UiKit.Stretch(formPage);
             var intro = UiKit.Label("Intro", formPage, "Zaloguj się kontem ze strony Buds: zagrasz swoim Budem na tym telefonie.", 23,
                 UiKit.InkSoft, false, TextAnchor.UpperCenter);
-            UiKit.Place(intro.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -4), new Vector2(600, 64), new Vector2(0.5f, 1));
-            email = UiKit.Input("Email", formPage, new Vector2(560, 84), "e-mail", 32);
-            UiKit.Place((RectTransform)email.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -84), new Vector2(560, 84),
+            UiKit.Place(intro.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -4), new Vector2(600, 60), new Vector2(0.5f, 1));
+            // fields, then the error line, all above the button so a message is never hidden behind it
+            email = UiKit.Input("Email", formPage, new Vector2(560, 76), "e-mail", 30);
+            UiKit.Place((RectTransform)email.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -72), new Vector2(560, 76),
                 new Vector2(0.5f, 1));
             email.contentType = InputField.ContentType.EmailAddress;
-            password = UiKit.Input("Password", formPage, new Vector2(560, 84), "hasło", 32);
-            UiKit.Place((RectTransform)password.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -188), new Vector2(560, 84),
+            password = UiKit.Input("Password", formPage, new Vector2(560, 76), "hasło", 30);
+            UiKit.Place((RectTransform)password.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -160), new Vector2(560, 76),
                 new Vector2(0.5f, 1));
             password.contentType = InputField.ContentType.Password;
             password.inputType = InputField.InputType.Password;
-            error = UiKit.Label("Error", formPage, "", 22, UiKit.Alert700, false, TextAnchor.MiddleCenter);
-            UiKit.Place(error.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -282), new Vector2(600, 56), new Vector2(0.5f, 1));
+            error = UiKit.Label("Error", formPage, "", 20, UiKit.Alert700, false, TextAnchor.MiddleCenter);
+            UiKit.Place(error.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -242), new Vector2(620, 52), new Vector2(0.5f, 1));
             // the one gold action
             signIn = UiKit.Button("SignIn", formPage, "Zaloguj się", new Vector2(440, 88), () => this.onSignIn(email.text.Trim(), password.text),
                 UiKit.Tone.Gold, 36);

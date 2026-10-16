@@ -81,6 +81,13 @@ namespace Buds.Core
                 return;
             }
 
+            // automated run of the account sign-in: wrong password, then the right one
+            if (CommandLine.Has("-buds-login-demo") && CommandLine.Get("-buds-autoshot") is { } loginShots)
+            {
+                _ = LoginDemo(loginShots);
+                return;
+            }
+
             // automated run of the in-game creator: makes a new bud, then the autopilot takes over
             if (CommandLine.Has("-buds-create-demo") && CommandLine.Get("-buds-autoshot") is { } createShots)
             {

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Buds.Api;
 using Buds.Characters;
 using Buds.UI;
@@ -14,17 +15,20 @@ namespace Buds.Core
     /// </summary>
     public sealed partial class GameBootstrap
     {
+        const string LoginFailed = "Coś poszło nie tak. Spróbuj jeszcze raz.";
+
         LoginScreen loginScreen;
         /// <summary>The signed-in account's access token while the login screen is in use (never saved).</summary>
         string accountToken;
         string accountEmail;
+        /// <summary>A sign-in or bud pick is in flight: further taps are ignored until it ends.</summary>
         bool signingIn;
 
         async Awaitable OpenLogin()
         {
             HidePairing();
             api = new BudsApi(PlayerSession.ApiBaseUrl);
-            loginScreen ??= new LoginScreen(ui.FullScreen, ui.Root, (email, password) => _ = SignIn(email, password), slug => _ = PlayAccountBud(slug),
+            loginScreen ??= new LoginScreen(ui.FullScreen, ui.Root, (email, password) => _ = SignIn(email, password), slug => _ = PickAccountBud(slug),
                 () =>
                 {
                     loginScreen.Hide();
@@ -37,7 +41,15 @@ namespace Buds.Core
                 });
             if (accountToken != null)
             {
-                await ShowAccountBuds();
+                signingIn = true;
+                try
+                {
+                    await ShowAccountBuds();
+                }
+                finally
+                {
+                    signingIn = false;
+                }
                 return;
             }
             loginScreen.ShowForm();
@@ -46,6 +58,7 @@ namespace Buds.Core
         async Awaitable SignIn(string email, string password)
         {
             if (signingIn) return;
+            email = email?.Trim();
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 loginScreen.SetBusy(false, "Wpisz e-mail i hasło.");
@@ -70,60 +83,104 @@ namespace Buds.Core
             {
                 loginScreen.SetBusy(false, e.Message);
             }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                loginScreen.SetBusy(false, LoginFailed);
+            }
             finally
             {
                 signingIn = false;
             }
         }
 
+        /// <summary>Lists the account's buds; with exactly one the game goes straight in. Runs inside a sign-in.</summary>
         async Awaitable ShowAccountBuds()
         {
             try
             {
                 var list = await api.GetAccountBuds(accountToken);
-                var buds = list.buds ?? Array.Empty<AccountBudDto>();
-                // one bud: play it right away
-                if (buds.Length == 1)
+                var buds = list?.buds ?? Array.Empty<AccountBudDto>();
+                if (buds.Length == 1 && buds[0]?.bud != null)
                 {
-                    await PlayAccountBud(buds[0].bud.slug);
+                    await EnterAccountBud(buds[0].bud.slug);
                     return;
                 }
                 loginScreen.ShowBuds(accountEmail, buds);
             }
             catch (ApiException e)
             {
-                if (e.Status == 401) accountToken = null;
-                loginScreen.ShowForm(e.Message);
+                if (e.Status == 401)
+                {
+                    accountToken = null;
+                    loginScreen.ShowForm("Sesja wygasła. Zaloguj się jeszcze raz.");
+                }
+                else loginScreen.SetBusy(false, e.Message);
             }
         }
 
-        /// <summary>This device gets its own token for the bud; the session is saved like after pairing.</summary>
-        async Awaitable PlayAccountBud(string slug)
+        /// <summary>A bud tapped on the account's list.</summary>
+        async Awaitable PickAccountBud(string slug)
         {
             if (signingIn) return;
             signingIn = true;
             loginScreen.SetBusy(true);
             try
             {
-                var res = await api.DeviceToken(accountToken, slug);
-                var device = new PlayerSession(res.token, res.bud.slug);
-                device.Save();
-                look = res.bud.look;
-                var tex = await api.GetSheet(res.bud.slug);
-                var completed = await LoadCompleted(device);
-                loginScreen.Hide();
-                EnterWorld(res.bud.name, res.bud.xp, new BudSheet(tex), device, completed);
-                ui.ShowToast($"Zalogowano: {res.bud.name}", 2.5f);
-                accountToken = null; // the device token is all the game keeps
+                await EnterAccountBud(slug);
             }
             catch (ApiException e)
             {
                 loginScreen.SetBusy(false, e.Message);
             }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                loginScreen.SetBusy(false, LoginFailed);
+            }
             finally
             {
                 signingIn = false;
             }
+        }
+
+        /// <summary>This device gets its own token for the bud; the session is saved like after pairing.</summary>
+        async Awaitable EnterAccountBud(string slug)
+        {
+            var res = await api.DeviceToken(accountToken, slug);
+            var device = new PlayerSession(res.token, res.bud.slug);
+            device.Save();
+            look = res.bud.look;
+            var tex = await api.GetSheet(res.bud.slug);
+            var completed = await LoadCompleted(device);
+            loginScreen.Hide();
+            EnterWorld(res.bud.name, res.bud.xp, new BudSheet(tex), device, completed);
+            ui.ShowToast($"Zalogowano: {res.bud.name}", 2.5f);
+            accountToken = null; // the device token is all the game keeps
+        }
+
+        /// <summary>
+        /// Usage: Buds.exe -buds-api URL -buds-login-demo -buds-login-email E -buds-login-password P -buds-autoshot dir.
+        /// Shoots the form, a wrong password, then signs in for real (one bud: straight into the world; more: the list).
+        /// </summary>
+        async Awaitable LoginDemo(string shots)
+        {
+            Directory.CreateDirectory(shots);
+            var email = CommandLine.Get("-buds-login-email") ?? "";
+            var password = CommandLine.Get("-buds-login-password") ?? "";
+            async Awaitable Shot(string name, float wait = 0.6f)
+            {
+                await Awaitable.WaitForSecondsAsync(wait);
+                ScreenCapture.CaptureScreenshot(Path.Combine(shots, name));
+                await Awaitable.WaitForSecondsAsync(0.3f);
+            }
+            await OpenLogin();
+            await Shot("l1-form.png");
+            await SignIn(email, password + "-zle");
+            await Shot("l2-wrong-password.png");
+            await SignIn(email, password);
+            await Shot(loginScreen.IsOpen ? "l3-bud-list.png" : "l3-world.png", 2.5f);
+            Debug.Log($"[Buds] login demo: {(loginScreen.IsOpen ? "list" : "world")}");
         }
     }
 }
