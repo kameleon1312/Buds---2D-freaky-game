@@ -307,6 +307,9 @@ const json = {
     hits: mv.hits ?? 1,
     effect: mv.effect ?? '',
     damage: mv.power[1] > 0,
+    // shown on the move buttons (the server still decides every hit)
+    power: mv.power,
+    accuracy: mv.accuracy,
   })),
   weapons: WEAPON_KINDS.map((kind) => ({ kind, moves: MOVES_BY_WEAPON[kind] })),
   caches: CONTENT.caches.map((c) => ({

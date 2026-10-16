@@ -160,7 +160,9 @@ namespace Buds.Core
             await Awaitable.WaitForSecondsAsync(0.5f);
             await shot("f0-opponent.png");
             await StartDuel(target);
-            await Awaitable.WaitForSecondsAsync(0.4f);
+            await Awaitable.WaitForSecondsAsync(0.3f);
+            await shot("f0b-intro.png");
+            await Awaitable.WaitForSecondsAsync(1.0f); // the walk-in and the VS
             await shot("f1-start.png");
             for (var turn = 0; turn < 30 && currentFight is { status: "active" }; turn++)
             {

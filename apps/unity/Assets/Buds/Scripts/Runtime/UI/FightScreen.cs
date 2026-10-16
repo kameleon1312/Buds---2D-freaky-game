@@ -14,7 +14,10 @@ namespace Buds.UI
     /// weapon and a way out. The server decides every turn; this plays what happened — each move with its own motion:
     /// a jab is a quick punch, a hook an arc, a kick a hop and a turn, a swing a wide arc of the weapon, a thrust a
     /// stab, a spin a full turn, a shot a flying stone, spray a cloud, a shout rings of sound, a kickflip the board in
-    /// the air — and every hit flashes, shakes and shows its damage.
+    /// the air — and every hit flashes, shakes and shows its damage. Around that: the fighters walk in under a "VS",
+    /// the move buttons show damage and accuracy, health bars leave a trail of what was lost and pulse when low, a
+    /// round counter and a hit streak run along, crits flash the arena, freeze a beat and shake it, and the duel ends
+    /// with a knockout (and confetti when the bud wins). Waiting for a move, both fighters breathe.
     /// </summary>
     public sealed class FightScreen
     {
@@ -51,6 +54,10 @@ namespace Buds.UI
             public int Hp;
             public int MaxHp;
             public float WeaponRest = 25;
+            public RectTransform HpGhost;
+            public Image HpImage;
+            public Color HpColor;
+            public int TrailToken;
         }
 
         readonly QuestContent content;
@@ -77,6 +84,13 @@ namespace Buds.UI
         FighterView enemy;
         string[] moves = Array.Empty<string>();
         bool busy;
+        RectTransform arenaRt;
+        Image flash;
+        Text round;
+        /// <summary>The bud's hits in a row (a miss or a hit taken ends it).</summary>
+        int streak;
+        bool introPlaying;
+        int idleToken;
 
         public bool IsOpen => root.activeSelf;
         public bool ShowingResult => result.activeSelf;
@@ -101,7 +115,7 @@ namespace Buds.UI
 
             // the arena: night sky over asphalt
             var arena = UiKit.OutlinedBox("Arena", body, UiKit.Surface800, UiKit.RadiusM);
-            var arenaRt = (RectTransform)arena.transform.parent;
+            arenaRt = (RectTransform)arena.transform.parent;
             UiKit.Place(arenaRt, new Vector2(0, 1), Vector2.zero, new Vector2(StageW, StageH), new Vector2(0, 1));
             var ground = UiKit.Shape("Ground", arena.transform, UiKit.Surface700, UiKit.RadiusM - 4);
             UiKit.Place(ground.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 6), new Vector2(StageW - 12, 84), new Vector2(0.5f, 0));
@@ -111,6 +125,12 @@ namespace Buds.UI
             UiKit.Stretch(stage);
             fx = UiKit.Rect("Fx", arena.transform);
             UiKit.Stretch(fx);
+            round = UiKit.Outlined("Round", arena.transform, "", 22, UiKit.Gold400, TextAnchor.UpperLeft);
+            UiKit.Stretch(round.rectTransform, 16, 0, 0, 10);
+            // a white flash over the whole arena on a critical hit
+            flash = UiKit.Panel("Flash", arena.transform, new Color(1, 1, 1, 0));
+            UiKit.Stretch(flash.rectTransform);
+            flash.raycastTarget = false;
 
             log = UiKit.Label("Log", body, "", 28, UiKit.Ink, true, TextAnchor.MiddleCenter);
             UiKit.Place(log.rectTransform, new Vector2(0, 1), new Vector2(0, -StageH - 8), new Vector2(StageW, 44), new Vector2(0, 1));
@@ -167,19 +187,42 @@ namespace Buds.UI
                 var rt = (RectTransform)moveButtons[i].transform;
                 UiKit.Place(rt, new Vector2(0, 1), new Vector2(i * step, -StageH - 64), new Vector2(w, 84), new Vector2(0, 1));
                 var m = content.Move(moves[i]);
-                moveLabels[i].text = UiKit.Keys($"{m?.name ?? moves[i]}  [{i + 1}]");
-                moveLabels[i].fontSize = count <= 4 ? 28 : 21;
+                var sub = count <= 4 ? 18 : 15;
+                moveLabels[i].text = UiKit.Keys($"{m?.name ?? moves[i]}  [{i + 1}]") + $"\n<size={sub}>{MoveLine(m)}</size>";
+                moveLabels[i].fontSize = count <= 4 ? 27 : 21;
+                moveLabels[i].lineSpacing = 0.9f;
             }
             var weapon = string.IsNullOrEmpty(fight.bud.weaponItem) ? null : content.Item(fight.bud.weaponItem);
             info.text = $"Broń: <b>{weapon?.name ?? "pięści"}</b>  ·  Atak {fight.bud.attack}  ·  Pancerz {fight.bud.armor}  ·  Szybkość {fight.bud.speed}\n" +
                         $"Rywal: poziom {fight.enemy.level}, {WeaponName(fight.enemy.weapon)}";
             log.text = $"„{line}”";
+            round.text = "Runda 1";
+            streak = 0;
             result.SetActive(false);
-            SetBusy(false);
             root.SetActive(true);
             root.transform.SetAsLastSibling();
             RefreshFighter(bud, fight.bud);
             RefreshFighter(enemy, fight.enemy);
+            busy = false;
+            _ = Intro();
+            _ = Idle(++idleToken);
+        }
+
+        /// <summary>The line under a move's name: damage and accuracy, or what it does.</summary>
+        static string MoveLine(MoveData m)
+        {
+            if (m == null) return "";
+            if (m.damage && m.power is { Length: 2 })
+                return $"{m.power[0]}–{m.power[1]}{(m.hits > 1 ? $" ×{m.hits}" : "")} obr. · {m.accuracy}%";
+            return m.effect switch
+            {
+                "guard" => "połowa obrażeń",
+                "dodge" => "unik",
+                "aim" => "następny cios mocniej",
+                "blind" => "oślepia",
+                "weaken" => "osłabia",
+                _ => "",
+            };
         }
 
         public void Hide() => root.SetActive(false);
@@ -187,8 +230,10 @@ namespace Buds.UI
         public void SetBusy(bool value)
         {
             busy = value;
-            foreach (var b in moveButtons) b.interactable = !value;
-            fleeButton.interactable = !value;
+            var open = !value && !introPlaying;
+            foreach (var b in moveButtons) b.interactable = open;
+            fleeButton.interactable = open;
+            if (value) StandStill();
         }
 
         public void ShowMessage(string text) => log.text = text;
@@ -223,6 +268,8 @@ namespace Buds.UI
         /// <summary>Plays the events of one turn, then shows the state the server sent.</summary>
         public async Awaitable PlayTurn(FightResponse res)
         {
+            while (introPlaying && IsOpen) await Awaitable.NextFrameAsync();
+            round.text = $"Runda {Mathf.Max(1, res.fight.turn)}";
             foreach (var e in res.events ?? Array.Empty<TurnEventDto>())
             {
                 if (!IsOpen) return;
@@ -232,6 +279,8 @@ namespace Buds.UI
             if (!IsOpen) return;
             RefreshFighter(bud, res.fight.bud);
             RefreshFighter(enemy, res.fight.enemy);
+            if (res.fight.status == "won") await KnockOut(enemy, bud, true);
+            else if (res.fight.status == "lost") await KnockOut(bud, enemy, false);
         }
 
         public void ShowResult(FightDto fight, FightRewardDto reward, string error = null)
@@ -322,6 +371,13 @@ namespace Buds.UI
             }
 
             if (hits.Length > 0) SetHp(other, finalHp);
+            foreach (var h in hits)
+            {
+                if (e.actor == "bud") streak = h.hit ? streak + 1 : 0;
+                else if (h.hit) streak = 0;
+            }
+            if (e.actor == "bud" && hits.Length > 0 && streak >= 2)
+                Popup(bud, $"Seria ×{streak}!", UiKit.Gold400, 30, 110);
             switch (e.effect)
             {
                 case "guard":
@@ -393,8 +449,18 @@ namespace Buds.UI
             v.NameText = UiKit.Outlined("Name", plate, "", 22);
             v.NameText.horizontalOverflow = HorizontalWrapMode.Overflow;
             UiKit.Place(v.NameText.rectTransform, new Vector2(0.5f, 1), Vector2.zero, new Vector2(320, 34), new Vector2(0.5f, 1));
-            v.HpFill = UiKit.Bar("Hp", plate, dir > 0 ? UiKit.Buds400 : UiKit.Alert500, out var bar);
+            v.HpColor = dir > 0 ? UiKit.Buds400 : UiKit.Alert500;
+            v.HpFill = UiKit.Bar("Hp", plate, v.HpColor, out var bar);
             UiKit.Place(bar, new Vector2(0.5f, 1), new Vector2(0, -36), new Vector2(280, 30), new Vector2(0.5f, 1));
+            v.HpImage = v.HpFill.GetComponent<Image>();
+            // what was just lost stays as a pale trail behind the bar for a moment
+            var ghost = UiKit.Panel("Trail", v.HpFill.parent, new Color(1, 1, 1, 0.7f)).rectTransform;
+            ghost.anchorMin = v.HpFill.anchorMin;
+            ghost.anchorMax = v.HpFill.anchorMax;
+            ghost.pivot = v.HpFill.pivot;
+            ghost.anchoredPosition = Vector2.zero;
+            ghost.SetSiblingIndex(v.HpFill.GetSiblingIndex());
+            v.HpGhost = ghost;
             v.HpText = UiKit.Outlined("Value", bar, "", 20);
             UiKit.Stretch(v.HpText.rectTransform, 0, 2, 0, 0);
             v.StatusText = UiKit.Outlined("Status", plate, "", 18, UiKit.Gold400);
@@ -422,8 +488,27 @@ namespace Buds.UI
             v.Hp = Mathf.Max(0, hp);
             v.HpText.text = $"{v.Hp} / {v.MaxHp}";
             Canvas.ForceUpdateCanvases();
+            var before = v.HpFill.gameObject.activeSelf ? v.HpFill.sizeDelta.x : 0;
             UiKit.SetBar(v.HpFill, v.MaxHp > 0 ? v.Hp / (float)v.MaxHp : 0);
+            var after = v.HpFill.gameObject.activeSelf ? v.HpFill.sizeDelta.x : 0;
+            if (v.HpGhost)
+            {
+                // the trail never shrinks below the bar; it catches up a moment after a loss
+                if (after >= v.HpGhost.sizeDelta.x || !IsOpen) v.HpGhost.sizeDelta = new Vector2(after, 0);
+                else _ = Trail(v, Mathf.Max(before, v.HpGhost.sizeDelta.x), after);
+            }
             if (v.Hp == 0) v.Body.color = new Color(1, 1, 1, 0.55f);
+        }
+
+        async Awaitable Trail(FighterView v, float from, float to)
+        {
+            var token = ++v.TrailToken;
+            v.HpGhost.sizeDelta = new Vector2(from, 0);
+            await Wait(0.35f);
+            await Tween(0.35f, t =>
+            {
+                if (token == v.TrailToken && v.HpGhost) v.HpGhost.sizeDelta = new Vector2(Mathf.Lerp(from, to, Ease(t)), 0);
+            });
         }
 
         // ---------- motions ----------
@@ -625,6 +710,13 @@ namespace Buds.UI
                 await Tween(0.16f, t => target.Root.anchoredPosition = target.Home + new Vector2(-target.Dir * 30 * Mathf.Sin(t * Mathf.PI), 0));
                 return;
             }
+            Sparks(target, hit.crit);
+            if (hit.crit)
+            {
+                _ = Flash();
+                await Wait(0.07f); // a beat of stillness: the hit lands
+                _ = Shake(0.28f, 14);
+            }
             Popup(target, hit.crit ? $"KRYTYK! {hit.damage}" : hit.damage.ToString(), hit.crit ? UiKit.Gold400 : UiKit.TextOnDark,
                 hit.crit ? 46 : 38);
             SetHp(target, target.Hp - hit.damage);
@@ -639,6 +731,183 @@ namespace Buds.UI
             if (target.Hp > 0) target.Body.color = Color.white;
         }
 
+        /// <summary>The fighters walk in from the edges under a big "VS", then "Walcz!".</summary>
+        async Awaitable Intro()
+        {
+            introPlaying = true;
+            SetBusy(busy);
+            var budFrom = bud.Home + new Vector2(-StageW * 0.4f, 0);
+            var enemyFrom = enemy.Home + new Vector2(StageW * 0.4f, 0);
+            bud.Root.anchoredPosition = budFrom;
+            enemy.Root.anchoredPosition = enemyFrom;
+            var vs = Banner("VS", 96, UiKit.Gold400);
+            await Tween(0.45f, t =>
+            {
+                var k = Ease(t);
+                bud.Root.anchoredPosition = Vector2.Lerp(budFrom, bud.Home, k) + new Vector2(0, Mathf.Abs(Mathf.Sin(t * Mathf.PI * 3)) * 10);
+                enemy.Root.anchoredPosition = Vector2.Lerp(enemyFrom, enemy.Home, k) + new Vector2(0, Mathf.Abs(Mathf.Sin(t * Mathf.PI * 3)) * 10);
+                bud.Body.sprite = bud.Sheet.Get(Facing.Side, (int)(t * 6) % 2 == 0 ? 1 : 2);
+                enemy.Body.sprite = enemy.Sheet.Get(Facing.Side, (int)(t * 6) % 2 == 0 ? 2 : 1);
+                if (vs) vs.rectTransform.localScale = Vector3.one * Mathf.Lerp(2.2f, 1, k);
+            });
+            bud.Body.sprite = bud.Sheet.Get(Facing.Side, 0);
+            enemy.Body.sprite = enemy.Sheet.Get(Facing.Side, 0);
+            await Wait(0.25f);
+            if (vs) UnityEngine.Object.Destroy(vs.gameObject);
+            var go = Banner("Walcz!", 64, UiKit.Buds400);
+            _ = FadeText(go, 0.55f);
+            introPlaying = false;
+            SetBusy(busy);
+        }
+
+        /// <summary>Both fighters breathe while the bud picks a move; a bar low on health pulses.</summary>
+        async Awaitable Idle(int token)
+        {
+            var t = 0f;
+            while (token == idleToken && root && root.activeSelf)
+            {
+                t += Time.unscaledDeltaTime;
+                if (!busy && !introPlaying && !ShowingResult)
+                    foreach (var v in new[] { bud, enemy })
+                    {
+                        if (v == null || v.Hp <= 0) continue;
+                        var b = Mathf.Sin(t * 3.4f + (v.Dir > 0 ? 0 : 1.3f));
+                        v.Root.localScale = new Vector3(-v.Dir * (1 - 0.012f * b), 1 + 0.022f * b, 1);
+                    }
+                foreach (var v in new[] { bud, enemy })
+                {
+                    if (v?.HpImage == null) continue;
+                    var low = v.MaxHp > 0 && v.Hp > 0 && v.Hp / (float)v.MaxHp < 0.3f;
+                    v.HpImage.color = low ? Color.Lerp(v.HpColor, Color.white, 0.5f + 0.5f * Mathf.Sin(t * 9)) : v.HpColor;
+                }
+                await Awaitable.NextFrameAsync();
+            }
+        }
+
+        void StandStill()
+        {
+            foreach (var v in new[] { bud, enemy })
+                if (v?.Root && v.Hp > 0)
+                    v.Root.localScale = new Vector3(-v.Dir, 1, 1);
+        }
+
+        /// <summary>The loser falls over and fades; the winner hops for joy; a bud's win rains confetti.</summary>
+        async Awaitable KnockOut(FighterView loser, FighterView winner, bool budWon)
+        {
+            var ko = Banner("K.O.!", 84, UiKit.Alert500);
+            _ = Shake(0.3f, 10);
+            var from = loser.Root.anchoredPosition;
+            await Tween(0.45f, t =>
+            {
+                var k = Ease(t);
+                // falls backwards, away from the winner
+                loser.Root.localEulerAngles = new Vector3(0, 0, loser.Dir * 82 * k);
+                loser.Root.anchoredPosition = from + new Vector2(-loser.Dir * 40 * k, -12 * k);
+            });
+            loser.Body.color = new Color(1, 1, 1, 0.55f);
+            if (budWon) _ = Confetti();
+            for (var hop = 0; hop < 2; hop++)
+                await Tween(0.28f, t => winner.Root.anchoredPosition = winner.Home + new Vector2(0, Mathf.Sin(t * Mathf.PI) * 46));
+            await Wait(0.25f);
+            if (ko) _ = FadeText(ko, 0.3f);
+        }
+
+        async Awaitable Confetti()
+        {
+            Color[] colors = { UiKit.Buds400, UiKit.Gold400, UiKit.Rep400, UiKit.XpFill, UiKit.Alert500 };
+            var bits = new List<(Image img, Vector2 from, float drift, float spin, float delay)>();
+            for (var i = 0; i < 40; i++)
+            {
+                var img = UiKit.Panel("Confetti", fx, colors[i % colors.Length]);
+                img.rectTransform.anchorMin = img.rectTransform.anchorMax = Vector2.zero;
+                img.rectTransform.sizeDelta = new Vector2(UnityEngine.Random.Range(10, 18), UnityEngine.Random.Range(14, 24));
+                var from = new Vector2(UnityEngine.Random.Range(40f, StageW - 40), StageH + UnityEngine.Random.Range(0f, 60f));
+                img.rectTransform.anchoredPosition = from;
+                bits.Add((img, from, UnityEngine.Random.Range(-90f, 90f), UnityEngine.Random.Range(-540f, 540f),
+                    UnityEngine.Random.Range(0, 0.35f)));
+            }
+            await Tween(1.6f, t =>
+            {
+                foreach (var (img, from, drift, spin, delay) in bits)
+                {
+                    if (!img) continue;
+                    var k = Mathf.Clamp01((t - delay) / (1 - delay));
+                    img.rectTransform.anchoredPosition = from + new Vector2(drift * k + Mathf.Sin(k * 9) * 12, -(StageH + 80) * k);
+                    img.rectTransform.localEulerAngles = new Vector3(0, 0, spin * k);
+                }
+            });
+            foreach (var (img, _, _, _, _) in bits)
+                if (img) UnityEngine.Object.Destroy(img.gameObject);
+        }
+
+        /// <summary>A burst of small stars where the blow lands.</summary>
+        void Sparks(FighterView target, bool crit)
+        {
+            var at = Center(target) + new Vector2(target.Dir * 36, 16);
+            var count = crit ? 10 : 6;
+            for (var i = 0; i < count; i++)
+            {
+                var angle = (i / (float)count) * Mathf.PI * 2 + UnityEngine.Random.Range(-0.3f, 0.3f);
+                var dist = UnityEngine.Random.Range(40f, crit ? 110f : 70f);
+                var spark = Fx("Spark", i % 2 == 0 ? UiKit.Gold400 : UiKit.TextOnDark, new Vector2(crit ? 16 : 12, crit ? 16 : 12), at);
+                _ = Fly(spark, at, at + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * dist, 0.28f);
+            }
+        }
+
+        static async Awaitable Fly(Image img, Vector2 from, Vector2 to, float seconds)
+        {
+            await Tween(seconds, t =>
+            {
+                if (!img) return;
+                img.rectTransform.anchoredPosition = Vector2.Lerp(from, to, Ease(t));
+                img.rectTransform.localScale = Vector3.one * (1 - t * 0.7f);
+                var c = img.color;
+                c.a = 1 - t;
+                img.color = c;
+            });
+            if (img) UnityEngine.Object.Destroy(img.gameObject);
+        }
+
+        async Awaitable Flash()
+        {
+            await Tween(0.2f, t => flash.color = new Color(1, 1, 1, 0.55f * (1 - t)));
+            flash.color = new Color(1, 1, 1, 0);
+        }
+
+        async Awaitable Shake(float seconds, float strength)
+        {
+            var home = arenaRt.anchoredPosition;
+            await Tween(seconds, t =>
+            {
+                var s = (1 - t) * strength;
+                arenaRt.anchoredPosition = home + new Vector2(UnityEngine.Random.Range(-s, s), UnityEngine.Random.Range(-s, s) * 0.6f);
+            });
+            arenaRt.anchoredPosition = home;
+        }
+
+        /// <summary>A big word in the middle of the arena (VS, Walcz!, K.O.!).</summary>
+        Text Banner(string text, int size, Color color)
+        {
+            var label = UiKit.Outlined("Banner", fx, text, size, color);
+            label.horizontalOverflow = HorizontalWrapMode.Overflow;
+            UiKit.Place(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(600, size + 30));
+            return label;
+        }
+
+        static async Awaitable FadeText(Text label, float seconds)
+        {
+            var start = label ? label.rectTransform.localScale : Vector3.one;
+            await Tween(seconds, t =>
+            {
+                if (!label) return;
+                label.rectTransform.localScale = start * (1 + 0.25f * t);
+                var c = label.color;
+                c.a = 1 - t;
+                label.color = c;
+            });
+            if (label) UnityEngine.Object.Destroy(label.gameObject);
+        }
+
         void Popup(FighterView over, string text, Color color, int size, float lift = 0)
         {
             var label = UiKit.Outlined("Popup", fx, text, size, color);
@@ -646,7 +915,8 @@ namespace Buds.UI
             var rt = label.rectTransform;
             rt.anchorMin = rt.anchorMax = Vector2.zero;
             rt.sizeDelta = new Vector2(300, 60);
-            var start = over.Home + new Vector2(0, FighterH * 0.8f + lift);
+            // from the chest up, so the numbers never sit on the health bar above the head
+            var start = over.Home + new Vector2(0, FighterH * 0.5f + lift * 0.6f);
             rt.anchoredPosition = start;
             _ = Float(label, start);
         }

@@ -121,6 +121,9 @@ namespace Buds.Quests
         public int hits;
         public string effect;
         public bool damage;
+        /// <summary>Damage per hit before stats [min, max], and the chance to hit in %: shown on the buttons.</summary>
+        public int[] power;
+        public int accuracy;
     }
 
     [Serializable]

@@ -30,6 +30,8 @@ namespace Buds.UI
         RectTransform hintRect;
         Text hintText;
         GameObject dialog;
+        RectTransform dialogRect;
+        RectTransform dialogContent;
         Text dialogTitle;
         Text dialogBody;
         Text dialogMore;
@@ -267,9 +269,13 @@ namespace Buds.UI
             {
                 if (!ChoiceOpen) Tapped?.Invoke();
             });
-            dialogBody = UiKit.Label("Body", body, "", 28, UiKit.Ink, false, TextAnchor.UpperLeft);
-            UiKit.Stretch(dialogBody.rectTransform, 0, 30, 0, 0);
+            dialogBody = UiKit.Label("Body", body, "", DialogFont, UiKit.Ink, false, TextAnchor.UpperLeft);
+            UiKit.Stretch(dialogBody.rectTransform, 0, MoreRow, 0, 0);
             dialogBody.lineSpacing = 1.1f;
+            // a very long text shrinks a little rather than running under the buttons
+            dialogBody.resizeTextForBestFit = true;
+            dialogBody.resizeTextMinSize = DialogFontMin;
+            dialogBody.resizeTextMaxSize = DialogFont;
             dialogMore = UiKit.Label("More", body, UiKit.Mobile ? "dotknij, aby dalej" : "dotknij lub E", 22, UiKit.InkSoft, false,
                 TextAnchor.LowerRight);
             UiKit.Stretch(dialogMore.rectTransform);
@@ -292,7 +298,38 @@ namespace Buds.UI
             choiceRow.SetActive(false);
 
             dialog = rt.gameObject;
+            dialogRect = rt;
+            dialogContent = body;
             dialog.SetActive(false);
+        }
+
+        const int DialogFont = 28;
+        const int DialogFontMin = 20;
+        const float DialogMinHeight = 320;
+        /// <summary>Room under the text for the "tap to go on" line, and for the row of choice buttons.</summary>
+        const float MoreRow = 30;
+        const float ChoiceRow = 76 + 14;
+
+        /// <summary>
+        /// Sizes the dialog to its text: the text gets the whole width and ends above the bottom row (the hint or the
+        /// buttons), and the window grows up to the screen height, so nothing is ever hidden behind the buttons.
+        /// </summary>
+        void LayoutDialog(bool choice)
+        {
+            var bottom = choice ? ChoiceRow : MoreRow;
+            var body = dialogBody.rectTransform;
+            body.offsetMin = new Vector2(body.offsetMin.x, bottom);
+            // the window's frame (head, padding) around the content
+            var chrome = dialogRect.sizeDelta.y - dialogContent.rect.height;
+            var width = dialogContent.rect.width;
+            var settings = dialogBody.GetGenerationSettings(new Vector2(width, 0));
+            settings.resizeTextForBestFit = false;
+            settings.fontSize = DialogFont;
+            var textHeight = dialogBody.cachedTextGeneratorForLayout.GetPreferredHeight(dialogBody.text, settings) /
+                             dialogBody.pixelsPerUnit;
+            var max = Mathf.Max(DialogMinHeight, ((RectTransform)Root).rect.height - 48);
+            var height = Mathf.Clamp(textHeight + bottom + chrome + 8, DialogMinHeight, max);
+            dialogRect.sizeDelta = new Vector2(dialogRect.sizeDelta.x, height);
         }
 
         public void ShowDialog(string title, string text)
@@ -304,6 +341,7 @@ namespace Buds.UI
             onAccept = onDecline = null;
             dialog.SetActive(true);
             hint.SetActive(false);
+            LayoutDialog(false);
         }
 
         /// <summary>Dialog with two buttons (E / Enter = accept, Esc / Q = decline, or tap).</summary>
@@ -316,6 +354,7 @@ namespace Buds.UI
             onDecline = declined;
             choiceRow.SetActive(true);
             dialogMore.gameObject.SetActive(false);
+            LayoutDialog(true);
         }
 
         public void ChooseAccept()

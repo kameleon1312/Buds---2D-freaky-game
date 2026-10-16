@@ -190,6 +190,13 @@ namespace Buds.Core
             await shot("q1-offer.png");
             await Press(); // accept
             await shot("q2-accepted.png");
+            // the map with the quest's target pin, then that pin opened (a chat line still open would keep it shut)
+            ui.HideDialog();
+            OpenMap();
+            await shot("q2b-map.png");
+            mapScreen.OpenFirstPinForTest();
+            await shot("q2c-map-pin.png");
+            mapScreen.Hide();
             await Visit("halina");
             await shot("q3-talk.png");
             await Press();

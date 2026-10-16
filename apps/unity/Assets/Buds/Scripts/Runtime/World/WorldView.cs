@@ -79,8 +79,20 @@ namespace Buds.World
 
         public WorldMap Map { get; private set; }
 
-        /// <summary>Sprites lower on screen draw in front; shared by props and actors.</summary>
-        public static int SortOrderFor(float worldY) => 10000 - Mathf.RoundToInt(worldY * 100);
+        /// <summary>Highest standing sort order; markers above the world use 20000.</summary>
+        const int SortStandTop = 18000;
+        /// <summary>The order at worldY 0: room to spare south of the map (down to y -10) and north of it (up to y 170).</summary>
+        const int SortStandZero = 17000;
+        /// <summary>Lowest standing sort order: always above the ground (-1000…) and flat decorations (-100…-90).</summary>
+        const int SortStandBottom = 0;
+
+        /// <summary>
+        /// Sprites lower on screen draw in front; shared by props and actors. Kept between SortStandBottom and
+        /// SortStandTop for every map row (districts are 132 rows: 17000…3800), so nothing standing ever slips under
+        /// the ground or a road marking at the north end of a map.
+        /// </summary>
+        public static int SortOrderFor(float worldY) =>
+            Mathf.Clamp(SortStandZero - Mathf.RoundToInt(worldY * 100), SortStandBottom, SortStandTop);
 
         public static WorldView Create(WorldMap map)
         {

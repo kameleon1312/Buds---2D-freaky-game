@@ -6087,7 +6087,12 @@
       "description": "Zasłaniasz się: połowa obrażeń w tej turze.",
       "hits": 1,
       "effect": "guard",
-      "damage": false
+      "damage": false,
+      "power": [
+        0,
+        0
+      ],
+      "accuracy": 100
     },
     {
       "id": "prosty",
@@ -6096,7 +6101,12 @@
       "description": "Szybki, pewny cios.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        5,
+        7
+      ],
+      "accuracy": 95
     },
     {
       "id": "sierpowy",
@@ -6105,7 +6115,12 @@
       "description": "Mocny cios z boku.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        8,
+        11
+      ],
+      "accuracy": 82
     },
     {
       "id": "kopniak",
@@ -6114,7 +6129,12 @@
       "description": "Z obrotu. Boli, jeśli trafi.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        10,
+        14
+      ],
+      "accuracy": 72
     },
     {
       "id": "pchniecie",
@@ -6123,7 +6143,12 @@
       "description": "Krótko, prosto, końcem kija.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        6,
+        9
+      ],
+      "accuracy": 92
     },
     {
       "id": "zamach",
@@ -6132,7 +6157,12 @@
       "description": "Szeroki zamach z całej siły.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        10,
+        14
+      ],
+      "accuracy": 80
     },
     {
       "id": "mlyniec",
@@ -6141,7 +6171,12 @@
       "description": "Obrót z kijem. Ryzykowny.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        13,
+        18
+      ],
+      "accuracy": 65
     },
     {
       "id": "strzal",
@@ -6150,7 +6185,12 @@
       "description": "Kamyk prosto w cel.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        7,
+        10
+      ],
+      "accuracy": 90
     },
     {
       "id": "seria",
@@ -6159,7 +6199,12 @@
       "description": "Dwa szybkie strzały.",
       "hits": 2,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        4,
+        6
+      ],
+      "accuracy": 80
     },
     {
       "id": "celowanie",
@@ -6168,7 +6213,12 @@
       "description": "Następny cios na pewno krytyczny.",
       "hits": 1,
       "effect": "aim",
-      "damage": false
+      "damage": false,
+      "power": [
+        0,
+        0
+      ],
+      "accuracy": 100
     },
     {
       "id": "psik",
@@ -6177,7 +6227,12 @@
       "description": "Rywal gorzej trafia przez 2 tury.",
       "hits": 1,
       "effect": "blind",
-      "damage": true
+      "damage": true,
+      "power": [
+        3,
+        5
+      ],
+      "accuracy": 95
     },
     {
       "id": "chmura",
@@ -6186,7 +6241,12 @@
       "description": "Gęsta chmura farby.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        7,
+        10
+      ],
+      "accuracy": 85
     },
     {
       "id": "diss",
@@ -6195,7 +6255,12 @@
       "description": "Rywal słabiej bije przez 2 tury.",
       "hits": 1,
       "effect": "weaken",
-      "damage": true
+      "damage": true,
+      "power": [
+        2,
+        4
+      ],
+      "accuracy": 95
     },
     {
       "id": "bit",
@@ -6204,7 +6269,12 @@
       "description": "Fala basu prosto w twarz.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        8,
+        11
+      ],
+      "accuracy": 85
     },
     {
       "id": "drop",
@@ -6213,7 +6283,12 @@
       "description": "Bas, który powala.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        12,
+        16
+      ],
+      "accuracy": 70
     },
     {
       "id": "deska",
@@ -6222,7 +6297,12 @@
       "description": "Płasko, z rozmachem.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        8,
+        11
+      ],
+      "accuracy": 88
     },
     {
       "id": "kickflip",
@@ -6231,7 +6311,12 @@
       "description": "Deska w powietrzu, rywal na ziemi.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        12,
+        16
+      ],
+      "accuracy": 72
     },
     {
       "id": "slizg",
@@ -6240,7 +6325,12 @@
       "description": "Łatwiej uniknąć ciosu w tej turze.",
       "hits": 1,
       "effect": "dodge",
-      "damage": false
+      "damage": false,
+      "power": [
+        0,
+        0
+      ],
+      "accuracy": 100
     },
     {
       "id": "freestyle",
@@ -6249,7 +6339,12 @@
       "description": "Dwie zwrotki prosto w ego rywala. Osłabia.",
       "hits": 2,
       "effect": "weaken",
-      "damage": true
+      "damage": true,
+      "power": [
+        5,
+        8
+      ],
+      "accuracy": 88
     },
     {
       "id": "tag",
@@ -6258,7 +6353,12 @@
       "description": "Podpis na twarzy rywala. Oślepia.",
       "hits": 1,
       "effect": "blind",
-      "damage": true
+      "damage": true,
+      "power": [
+        6,
+        9
+      ],
+      "accuracy": 92
     },
     {
       "id": "specjalny",
@@ -6267,7 +6367,12 @@
       "description": "Obrót i cios z całej siły.",
       "hits": 1,
       "effect": "",
-      "damage": true
+      "damage": true,
+      "power": [
+        12,
+        18
+      ],
+      "accuracy": 76
     }
   ],
   "weapons": [

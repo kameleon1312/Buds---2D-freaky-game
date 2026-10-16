@@ -152,6 +152,22 @@ TT#TT
         }
 
         [TestCaseSource(nameof(Ids))]
+        public void StandingThingsDrawOverTheGroundEverywhere(string id)
+        {
+            // characters, props and caches at the north end of a big map used to sort under the ground and road markings
+            var map = MapFormat.Load(id);
+            var previous = int.MaxValue;
+            for (var y = -1f; y <= map.Height + 1; y += 0.5f)
+            {
+                var order = WorldView.SortOrderFor(y);
+                Assert.Greater(order, -90, $"{id}: y {y} sorts under flat decorations");
+                Assert.Less(order, 20000, $"{id}: y {y} sorts over the quest markers");
+                Assert.Less(order, previous, $"{id}: y {y} lost the north-south order");
+                previous = order;
+            }
+        }
+
+        [TestCaseSource(nameof(Ids))]
         public void UsesOnlyKnownProps(string id)
         {
             var map = MapFormat.Load(id);
