@@ -43,7 +43,8 @@ starcie. Jeśli `/konto` dalej pisze „Konta są wyłączone”, usuń `apps/we
 2. Settings → **Config file path**: `apps/api/railway.json` (root directory zostaw na `/`).
 3. Zmienne: `WEB_ORIGIN` (URL z Vercel), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
    `SUPABASE_JWT_SECRET`. Opcjonalnie `RATE_LIMIT_PER_MINUTE`, `CREATE_LIMIT_PER_MINUTE`.
-   `PORT` ustawia Railway.
+   `PORT` ustawia Railway. Do logowania na konto w grze dodaj też `SUPABASE_PUBLISHABLE_KEY`
+   (ten sam publiczny klucz co `NEXT_PUBLIC_SUPABASE_ANON_KEY`) — API podaje go grze przez `GET /v1/auth/config`.
    **Bez `SUPABASE_SERVICE_ROLE_KEY` API trzyma dane w pamięci — na produkcji koniecznie ustaw.**
 4. Settings → Networking → Generate Domain; wpisz go jako `NEXT_PUBLIC_API_URL` w Vercel.
 

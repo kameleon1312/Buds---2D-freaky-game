@@ -83,6 +83,58 @@ namespace Buds.Api
         public string createdAt;
     }
 
+    /// <summary>GET /v1/auth/config: where the game signs players in (public values).</summary>
+    [Serializable]
+    public class AuthConfigDto
+    {
+        public bool enabled;
+        public string url;
+        public string publishableKey;
+    }
+
+    [Serializable]
+    public class SignInRequest
+    {
+        public string email;
+        public string password;
+    }
+
+    /// <summary>Supabase Auth's answer to a password sign-in (only what the game needs).</summary>
+    [Serializable]
+    public class SupabaseSessionDto
+    {
+        public string access_token;
+        public SupabaseUserDto user;
+    }
+
+    [Serializable]
+    public class SupabaseUserDto
+    {
+        public string email;
+    }
+
+    [Serializable]
+    public class SupabaseErrorDto
+    {
+        public string error_code;
+        public string error;
+        public string msg;
+        public string error_description;
+    }
+
+    [Serializable]
+    public class AccountBudDto
+    {
+        public BudDto bud;
+        public int level;
+    }
+
+    [Serializable]
+    public class AccountBudsDto
+    {
+        public AccountBudDto[] buds;
+    }
+
     [Serializable]
     public class BudResponse
     {

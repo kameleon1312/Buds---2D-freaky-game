@@ -49,7 +49,8 @@ namespace Buds.Core
             creatorScreen.SetBusy(true);
             try
             {
-                var res = await api.CreateBud(name, chosen);
+                // signed in from the game: the new bud goes straight onto the account
+                var res = await api.CreateBud(name, chosen, accountToken);
                 var created = new PlayerSession(res.token, res.bud.slug);
                 created.Save();
                 look = res.bud.look;

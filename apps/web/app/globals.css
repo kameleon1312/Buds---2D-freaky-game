@@ -56,6 +56,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* jumps to #anchors stop below the pinned header */
+  scroll-padding-top: 84px;
 }
 
 body {
@@ -164,6 +166,23 @@ h3 {
 }
 
 /* ---------- header / footer ---------- */
+/* the pinned header bar: frosted glass over the page, a hard hairline underneath (no soft shadow) */
+.site-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(22, 24, 31, 0.72);
+  border-bottom: var(--stroke-ui) solid rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-bar {
+    background: rgba(22, 24, 31, 0.94);
+  }
+}
+
 .site-header {
   display: flex;
   align-items: center;
@@ -187,6 +206,12 @@ h3 {
   -webkit-text-stroke: var(--stroke-text) var(--outline);
   paint-order: stroke fill;
   text-shadow: 0 2px 0 var(--outline);
+}
+
+/* the game icon (the bud in the lime cap); the picture has some air around the head */
+.logo-icon {
+  display: block;
+  margin: -6px -2px -6px -6px;
 }
 
 .site-header nav {

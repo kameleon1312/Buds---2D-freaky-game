@@ -1,0 +1,750 @@
+/*
+ * The landing page as a journey through Buds: scroll reveals, the progress bar, the winding road a bud walks as the
+ * reader scrolls, a phone frame for screenshots, gameplay tabs, the compact creator and the centred
+ * sign-in card. Design-system rules hold: hard lips and drops, outlines, no soft shadows; motion uses only
+ * transform and opacity, and stops with reduced motion.
+ */
+
+/* the page never scrolls sideways: reveals start shifted and the hero clouds drift (clip keeps sticky working) */
+.journey {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+/* ---------- scroll reveal ---------- */
+.reveal {
+  opacity: 0;
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.reveal-up {
+  transform: translateY(28px);
+}
+
+.reveal-left {
+  transform: translateX(-40px);
+}
+
+.reveal-right {
+  transform: translateX(40px);
+}
+
+.reveal-zoom {
+  transform: scale(0.94);
+}
+
+.reveal.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- journey progress ---------- */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 4px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.scroll-progress span {
+  display: block;
+  height: 100%;
+  background: var(--buds-400);
+  transform-origin: left center;
+  transition: transform 0.1s linear;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--buds-400);
+}
+
+.eyebrow-dark {
+  color: var(--buds-600);
+}
+
+/* ---------- hero ---------- */
+.journey .hero {
+  position: relative;
+  min-height: min(calc(100svh - 72px), 860px);
+  align-content: center;
+  padding-bottom: 72px;
+}
+
+.journey .crew::after {
+  display: none;
+}
+
+.crew-sun {
+  position: absolute;
+  right: 12%;
+  top: 9%;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background: #f9e6c6;
+  animation: sun-rise 6s ease-in-out infinite alternate;
+}
+
+.crew-cloud {
+  position: absolute;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: #fbf3e4;
+  opacity: 0.9;
+  animation: cloud-drift 26s linear infinite;
+}
+
+.crew-cloud-a {
+  top: 12%;
+  width: 90px;
+}
+
+.crew-cloud-b {
+  top: 24%;
+  width: 60px;
+  animation-duration: 34s;
+  animation-delay: -14s;
+}
+
+@keyframes cloud-drift {
+  from {
+    transform: translateX(-120px);
+  }
+  to {
+    transform: translateX(720px);
+  }
+}
+
+@keyframes sun-rise {
+  from {
+    transform: translateY(6px);
+  }
+  to {
+    transform: translateY(-6px);
+  }
+}
+
+/* ---------- a landscape phone around a screenshot ---------- */
+.device {
+  position: relative;
+  padding: 10px 14px;
+  background: var(--surface-800);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: 26px;
+  box-shadow: var(--drop-panel);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.device::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  width: 4px;
+  height: 36px;
+  margin-top: -18px;
+  border-radius: 2px;
+  background: var(--surface-700);
+}
+
+.stop:hover .device {
+  transform: translateY(-4px) rotate(-0.4deg);
+}
+
+.device-screen {
+  position: relative;
+  aspect-ratio: 1200 / 521;
+  overflow: hidden;
+  border-radius: 14px;
+  border: var(--stroke-ui) solid var(--outline);
+  background: var(--surface-900);
+}
+
+.device-shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.04);
+  transition:
+    opacity 0.6s ease,
+    transform 1.2s ease;
+}
+
+.device-shot.is-active {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- gameplay tabs ---------- */
+.gameplay {
+  margin-top: var(--space-6);
+}
+
+.gameplay-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.gameplay-tab {
+  position: relative;
+  overflow: hidden;
+  font: inherit;
+  font-weight: 800;
+  padding: 10px 18px;
+  color: var(--text-on-dark);
+  background: var(--surface-800);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.gameplay-tab:hover {
+  transform: translateY(-2px);
+}
+
+.gameplay-tab:focus-visible {
+  outline: 3px solid var(--buds-400);
+  outline-offset: 2px;
+}
+
+.gameplay-tab[aria-selected='true'] {
+  color: var(--ink);
+  background: var(--buds-400);
+}
+
+.gameplay-tab span {
+  position: relative;
+  z-index: 1;
+}
+
+.gameplay-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--buds-600);
+  transform-origin: left;
+  animation: tab-timer 5.2s linear forwards;
+}
+
+@keyframes tab-timer {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.gameplay-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  gap: var(--space-6);
+  align-items: center;
+}
+
+.gameplay-copy {
+  animation: copy-in 0.5s ease both;
+}
+
+.gameplay-copy h3 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.6rem;
+}
+
+.gameplay-copy p {
+  margin: 0;
+  color: var(--text-on-dark-muted);
+  line-height: 1.55;
+}
+
+@keyframes copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ---------- epilogue ---------- */
+.cta-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.cta-icon {
+  width: 120px;
+  height: 120px;
+  animation: icon-bob 3s ease-in-out infinite;
+}
+
+@keyframes icon-bob {
+  50% {
+    transform: translateY(-8px) rotate(-3deg);
+  }
+}
+
+/* ---------- compact creator: fits one screen ---------- */
+.journey .creator {
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: var(--space-6);
+  padding: var(--space-6);
+  align-items: start;
+}
+
+.journey .creator-preview {
+  position: sticky;
+  top: var(--space-4);
+}
+
+.journey .creator-preview .stage {
+  max-height: 300px;
+}
+
+.journey .creator-name {
+  font-size: 1.6rem;
+}
+
+.journey .creator-fields {
+  gap: var(--space-3);
+}
+
+.creator-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.creator-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 320px;
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  animation: copy-in 0.35s ease both;
+}
+
+/* ---------- account: the sign-in card in the middle of the screen ---------- */
+.auth-center {
+  min-height: min(calc(100svh - 72px - 120px), 760px);
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) 0;
+}
+
+.auth-center .auth {
+  margin: 0 auto;
+}
+
+.auth-title {
+  margin: 0 0 var(--space-4);
+  text-align: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- the winding road ---------- */
+.trail {
+  position: relative;
+  margin-top: var(--space-8);
+  padding: 120px 0 180px;
+}
+
+.trail-road {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.trail-road path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* a street: outlined pavements, asphalt with a dashed centre line and zebra crossings; the stretch already
+   walked turns the centre line lime */
+.trail-road-curb {
+  stroke: var(--outline);
+  stroke-width: 76;
+}
+
+.trail-road-pavement {
+  stroke: var(--paper-300);
+  stroke-width: 72;
+}
+
+.trail-road-edge {
+  stroke: var(--outline);
+  stroke-width: 48;
+}
+
+.trail-road-base {
+  stroke: var(--surface-700);
+  stroke-width: 44;
+}
+
+.trail-road-dash {
+  stroke: var(--paper-100);
+  stroke-width: 3;
+  stroke-dasharray: 18 16;
+  stroke-linecap: butt;
+}
+
+.trail-road-done {
+  stroke: var(--buds-400);
+  stroke-width: 4;
+}
+
+.trail-marks rect {
+  fill: var(--paper-100);
+}
+
+.trail-marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* without JavaScript there is no road to walk */
+.trail:not(.is-live) .trail-marker,
+.trail:not(.is-live) .trail-road,
+.trail:not(.is-live) .trail-goal {
+  display: none;
+}
+
+.trail-pose {
+  position: absolute;
+  left: -32px;
+  bottom: -10px;
+  display: none;
+}
+
+.trail-pose .bud-sprite {
+  display: block;
+  width: 64px;
+  height: auto;
+}
+
+/* a little bob on every step */
+.trail-marker[data-frame='1'] .trail-pose,
+.trail-marker[data-frame='2'] .trail-pose {
+  translate: 0 -3px;
+}
+
+.trail-marker.is-flipped .trail-pose {
+  transform: scaleX(-1);
+}
+
+.trail-marker[data-facing='down'][data-frame='0'] .trail-pose[data-facing='down'][data-frame='0'],
+.trail-marker[data-facing='down'][data-frame='1'] .trail-pose[data-facing='down'][data-frame='1'],
+.trail-marker[data-facing='down'][data-frame='2'] .trail-pose[data-facing='down'][data-frame='2'],
+.trail-marker[data-facing='side'][data-frame='0'] .trail-pose[data-facing='side'][data-frame='0'],
+.trail-marker[data-facing='side'][data-frame='1'] .trail-pose[data-facing='side'][data-frame='1'],
+.trail-marker[data-facing='side'][data-frame='2'] .trail-pose[data-facing='side'][data-frame='2'],
+.trail-marker[data-facing='up'][data-frame='0'] .trail-pose[data-facing='up'][data-frame='0'],
+.trail-marker[data-facing='up'][data-frame='1'] .trail-pose[data-facing='up'][data-frame='1'],
+.trail-marker[data-facing='up'][data-frame='2'] .trail-pose[data-facing='up'][data-frame='2'] {
+  display: block;
+}
+
+/* the finish at the end of the road */
+.trail-goal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+}
+
+/* the finish hangs off the end of the street towards the middle of the page */
+.trail-goal .btn {
+  translate: -22px 12px;
+  white-space: nowrap;
+}
+
+.trail-goal[data-side='right'] .btn {
+  translate: calc(-100% + 22px) 12px;
+}
+
+/* a ground shadow under the walker */
+.trail-marker::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: -6px;
+  width: 32px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(10, 10, 14, 0.45);
+}
+
+.trail-stops {
+  position: relative;
+  z-index: 2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 260px;
+}
+
+/* the street runs down one side of a stop: number on the street, then the screenshot, then the story */
+.stop {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: 'node shot copy';
+  gap: var(--space-6);
+  align-items: center;
+}
+
+.stop.is-flipped {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 96px;
+  grid-template-areas: 'copy shot node';
+}
+
+.stop-node {
+  grid-area: node;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 1.35rem;
+  color: var(--text-on-dark-muted);
+  background: var(--surface-800);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 0 var(--surface-700);
+  transition:
+    transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1),
+    background-color 0.3s ease;
+}
+
+.stop-shot {
+  grid-area: shot;
+}
+
+.stop-copy {
+  grid-area: copy;
+}
+
+.stop-kicker {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--buds-400);
+}
+
+.stop-copy h3 {
+  margin: 0 0 var(--space-3);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.1;
+}
+
+.stop-copy > p:not(.stop-kicker) {
+  margin: 0 0 var(--space-4);
+  color: var(--text-on-dark-muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+/* the trivia note: a paper slip with a gold tab */
+.stop-fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  color: var(--ink);
+  background: var(--paper-100);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: 14px;
+  box-shadow: var(--drop-panel);
+  rotate: -0.6deg;
+}
+
+.stop.is-flipped .stop-fact {
+  rotate: 0.6deg;
+}
+
+.stop-fact strong {
+  align-self: flex-start;
+  padding: 2px 10px;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--gold-400);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-pill);
+}
+
+.stop-fact span {
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* before the bud gets there a stop waits folded away; reaching it opens the screenshot and the story */
+.trail.is-live .stop .stop-shot,
+.trail.is-live .stop .stop-copy {
+  transition:
+    opacity 0.6s ease,
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.trail.is-live .stop:not(.is-reached) .stop-shot {
+  opacity: 0;
+  transform: translateY(28px) scale(0.92) rotate(-2deg);
+}
+
+.trail.is-live .stop:not(.is-reached) .stop-copy {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+.trail.is-live .stop.is-reached .stop-copy {
+  transition-delay: 0.15s;
+}
+
+.trail.is-live .stop.is-reached .stop-node {
+  color: var(--ink);
+  background: var(--buds-400);
+  box-shadow: var(--lip-buds);
+  transform: scale(1.12);
+}
+
+/* ---------- small screens ---------- */
+@media (max-width: 760px) {
+  .trail {
+    padding: 64px 0 160px;
+  }
+
+  .trail-road-curb {
+    stroke-width: 46;
+  }
+
+  .trail-road-pavement {
+    stroke-width: 42;
+  }
+
+  .trail-road-edge {
+    stroke-width: 30;
+  }
+
+  .trail-road-base {
+    stroke-width: 26;
+  }
+
+  .trail-road-dash {
+    stroke-width: 2;
+  }
+
+  .trail-road-done {
+    stroke-width: 3;
+  }
+
+  .trail-stops {
+    gap: 120px;
+  }
+
+  .stop,
+  .stop.is-flipped {
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-areas:
+      'node shot'
+      'node copy';
+    gap: var(--space-4) var(--space-3);
+    align-items: start;
+  }
+
+  .stop-node {
+    align-self: start;
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .trail-pose {
+    left: -20px;
+  }
+
+  .trail-pose .bud-sprite {
+    width: 40px;
+  }
+
+  .gameplay-stage,
+  .journey .creator {
+    grid-template-columns: 1fr;
+  }
+
+  .journey .creator-preview {
+    position: static;
+  }
+
+  .creator-panel {
+    height: auto;
+    max-height: 420px;
+  }
+
+  .journey .hero {
+    min-height: auto;
+    padding-bottom: 88px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .device-shot,
+  .trail.is-live .stop .stop-shot,
+  .trail.is-live .stop .stop-copy,
+  .stop-node {
+    transition: none;
+  }
+}

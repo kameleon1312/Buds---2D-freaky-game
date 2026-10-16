@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function AccountPage() {
   return (
     <main className="container account-page">
-      <h1>Konto</h1>
+      <h1 className="visually-hidden">Konto</h1>
       <AccountPanel />
     </main>
   );

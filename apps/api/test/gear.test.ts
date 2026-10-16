@@ -6,6 +6,7 @@ import {
   MAX_BUDS_PER_ACCOUNT,
   catalogItem,
   type AccountBud,
+  type AuthConfigResponse,
   type AccountBudsResponse,
   type ApiError,
   type BuyResponse,
@@ -273,6 +274,39 @@ describe('accounts', () => {
     expect(res.status).toBe(409);
     expect(((await res.json()) as ApiError).error.code).toBe('bud_taken');
     expect((await claim('x'.repeat(40), alice)).status).toBe(404);
+  });
+
+  it('gives an owner a device token to play an account bud in the game, nobody else', async () => {
+    const { app, json, create } = setup();
+    const alice = await es256('alice');
+    const { body } = await create('Konto', alice);
+    const device = (account?: string) =>
+      app.request(`/v1/account/buds/${body.bud.slug}/device`, {
+        method: 'POST',
+        ...json({}, account),
+      });
+
+    expect((await device()).status).toBe(401);
+    expect((await device(await es256('bob'))).status).toBe(404);
+    const res = await device(alice);
+    expect(res.status).toBe(200);
+    const issued = (await res.json()) as CreateBudResponse;
+    expect(issued.bud.slug).toBe(body.bud.slug);
+    expect(issued.token).not.toBe(body.token);
+    // the new token plays the same bud
+    const me = await app.request('/v1/buds/me', {
+      headers: { Authorization: `Bearer ${issued.token}` },
+    });
+    expect(((await me.json()) as { bud: { slug: string } }).bud.slug).toBe(body.bud.slug);
+  });
+
+  it('tells the game how to sign in (public values only)', async () => {
+    const { app } = setup();
+    const res = await app.request('/v1/auth/config');
+    expect(res.status).toBe(200);
+    const config = (await res.json()) as AuthConfigResponse;
+    expect(config.enabled).toBe(false); // the test server has no Supabase
+    expect(JSON.stringify(config)).not.toContain(SECRET);
   });
 
   it('links a bud from the game with the code it shows, once', async () => {

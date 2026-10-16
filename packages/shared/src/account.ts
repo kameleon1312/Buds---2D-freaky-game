@@ -34,6 +34,17 @@ export type AccountBudsResponse = z.infer<typeof accountBudsResponseSchema>;
  */
 export { redeemPairSchema as linkBudRequestSchema } from './schemas';
 
+/**
+ * Signing in from the game: the public Supabase values (the game talks to Supabase Auth itself, so the password
+ * never reaches the API). `enabled: false` when the server has no accounts configured.
+ */
+export const authConfigResponseSchema = z.object({
+  enabled: z.boolean(),
+  url: z.string().nullable(),
+  publishableKey: z.string().nullable(),
+});
+export type AuthConfigResponse = z.infer<typeof authConfigResponseSchema>;
+
 /** Links a guest bud: the guest token proves the browser created it. */
 export const claimBudRequestSchema = z.object({ token: z.string().min(16).max(200) });
 export type ClaimBudRequest = z.infer<typeof claimBudRequestSchema>;

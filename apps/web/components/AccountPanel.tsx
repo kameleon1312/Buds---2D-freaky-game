@@ -24,17 +24,24 @@ export function AccountPanel() {
   const session = useSession();
   if (!supabase()) {
     return (
-      <section className="card panel">
-        <h2>Konta są wyłączone</h2>
-        <p className="muted">
-          Ta wersja strony nie ma ustawionego połączenia z Supabase (NEXT_PUBLIC_SUPABASE_URL i
-          NEXT_PUBLIC_SUPABASE_ANON_KEY), więc logowanie i rejestracja nie działają. Twój Bud jest
-          zapisany w tej przeglądarce.
-        </p>
-      </section>
+      <div className="auth-center">
+        <section className="card panel auth">
+          <h2>Konta są wyłączone</h2>
+          <p className="muted">
+            Ta wersja strony nie ma ustawionego połączenia z Supabase (NEXT_PUBLIC_SUPABASE_URL i
+            NEXT_PUBLIC_SUPABASE_ANON_KEY), więc logowanie i rejestracja nie działają. Twój Bud jest
+            zapisany w tej przeglądarce.
+          </p>
+        </section>
+      </div>
     );
   }
-  if (session === undefined) return <p className="muted">Wczytuję…</p>;
+  if (session === undefined)
+    return (
+      <div className="auth-center">
+        <p className="muted">Wczytuję…</p>
+      </div>
+    );
   return session ? (
     <Dashboard email={session.user.email ?? ''} token={session.access_token} />
   ) : (
@@ -87,102 +94,104 @@ function AuthForm() {
   };
 
   return (
-    <section className="card auth">
-      <div className="tabs" role="tablist">
-        {(['login', 'register'] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            role="tab"
-            aria-selected={mode === m}
-            className="chip"
-            aria-pressed={mode === m}
-            onClick={() => {
-              setMode(m);
-              setError('');
-              setInfo('');
-            }}
-          >
-            {titles[m]}
-          </button>
-        ))}
-      </div>
-      <form className="auth-form" onSubmit={onSubmit} noValidate>
-        <h2>{titles[mode]}</h2>
-        {mode === 'register' && (
-          <p className="muted">
-            Konto przechowuje twoje Budy, ich postępy, ekwipunek i monety. Przetrwa zmianę telefonu
-            i przeglądarki.
-          </p>
-        )}
-        <label className="field">
-          <span className="field-label">E-mail</span>
-          <input
-            className="input"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
-        {mode !== 'reset' && (
+    <div className="auth-center">
+      <section className="card auth">
+        <div className="tabs" role="tablist">
+          {(['login', 'register'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              aria-selected={mode === m}
+              className="chip"
+              aria-pressed={mode === m}
+              onClick={() => {
+                setMode(m);
+                setError('');
+                setInfo('');
+              }}
+            >
+              {titles[m]}
+            </button>
+          ))}
+        </div>
+        <form className="auth-form" onSubmit={onSubmit} noValidate>
+          <h2>{titles[mode]}</h2>
+          {mode === 'register' && (
+            <p className="muted">
+              Konto przechowuje twoje Budy, ich postępy, ekwipunek i monety. Przetrwa zmianę
+              telefonu i przeglądarki.
+            </p>
+          )}
           <label className="field">
-            <span className="field-label">Hasło</span>
+            <span className="field-label">E-mail</span>
             <input
               className="input"
-              type="password"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={8}
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </label>
-        )}
-        {mode === 'register' && (
-          <>
+          {mode !== 'reset' && (
             <label className="field">
-              <span className="field-label">Powtórz hasło</span>
+              <span className="field-label">Hasło</span>
               <input
                 className="input"
                 type="password"
-                autoComplete="new-password"
-                value={repeat}
-                onChange={(e) => setRepeat(e.target.value)}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={8}
                 required
               />
             </label>
-            <label className="consent">
-              <input
-                type="checkbox"
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-              />
-              <span>
-                Akceptuję <Link href="/prywatnosc">zasady prywatności</Link>.
-              </span>
-            </label>
-          </>
-        )}
-        {error && <p className="form-error">{error}</p>}
-        {info && <p className="notice">{info}</p>}
-        <button type="submit" className="btn btn-primary btn-big" disabled={pending}>
-          {pending ? 'Chwila…' : titles[mode]}
-        </button>
-        {mode === 'login' ? (
-          <button type="button" className="link-button" onClick={() => setMode('reset')}>
-            Nie pamiętam hasła
+          )}
+          {mode === 'register' && (
+            <>
+              <label className="field">
+                <span className="field-label">Powtórz hasło</span>
+                <input
+                  className="input"
+                  type="password"
+                  autoComplete="new-password"
+                  value={repeat}
+                  onChange={(e) => setRepeat(e.target.value)}
+                  required
+                />
+              </label>
+              <label className="consent">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                />
+                <span>
+                  Akceptuję <Link href="/prywatnosc">zasady prywatności</Link>.
+                </span>
+              </label>
+            </>
+          )}
+          {error && <p className="form-error">{error}</p>}
+          {info && <p className="notice">{info}</p>}
+          <button type="submit" className="btn btn-primary btn-big" disabled={pending}>
+            {pending ? 'Chwila…' : titles[mode]}
           </button>
-        ) : (
-          mode === 'reset' && (
-            <button type="button" className="link-button" onClick={() => setMode('login')}>
-              Wróć do logowania
+          {mode === 'login' ? (
+            <button type="button" className="link-button" onClick={() => setMode('reset')}>
+              Nie pamiętam hasła
             </button>
-          )
-        )}
-      </form>
-    </section>
+          ) : (
+            mode === 'reset' && (
+              <button type="button" className="link-button" onClick={() => setMode('login')}>
+                Wróć do logowania
+              </button>
+            )
+          )}
+        </form>
+      </section>
+    </div>
   );
 }
 

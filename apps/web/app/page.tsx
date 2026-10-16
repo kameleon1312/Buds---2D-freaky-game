@@ -1,18 +1,12 @@
 import type { CSSProperties } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import {
-  CATALOG,
-  SKILLS,
-  SLOTS,
-  STATS,
-  moodBlurb,
-  moodLabel,
-  MOODS,
-  type BudLook,
-  type CatalogItem,
-} from '@buds/shared';
+import { CONTENT, type BudLook } from '@buds/shared';
 import { BudSprite } from '@/components/BudSprite';
 import { Creator } from '@/components/Creator';
+import { GameplayTabs, ScrollProgress, type Shot } from '@/components/JourneyBits';
+import { Reveal } from '@/components/Reveal';
+import { Trail, type TrailStop } from '@/components/Trail';
 import { sampleLooks } from '@/lib/looks';
 
 /** Hand-picked crew for the hero: varied genders, moods, styles and skin tones. */
@@ -84,171 +78,217 @@ const CREW: BudLook[] = [
   },
 ];
 
-/** "+10% Szybkość · +1 Spryt" — what a piece of gear adds. */
-function bonusText(item: CatalogItem): string {
-  const parts = STATS.filter((s) => item.bonus?.[s.id]).map(
-    (s) => `+${item.bonus![s.id]}${s.unit} ${s.name}`,
-  );
-  for (const [id, n] of Object.entries(item.bonus?.skills ?? {}))
-    parts.push(`+${n} ${SKILLS.find((s) => s.id === id)?.name ?? id}`);
-  return parts.join(' · ');
-}
+/** The journey: the six big things a bud does in the game, each stop with a bit of Buds trivia. */
+const STOPS: TrailStop[] = [
+  {
+    id: 'start',
+    kicker: 'Przystanek 1 · Początek',
+    title: 'Wszystko zaczyna się na wyspie',
+    text: 'Twój Bud budzi się na Wyspie Startowej. Zanim łódź zabierze go do miasta, nauczy się chodzić, rozmawiać i walczyć. To przygoda, a nie nudny samouczek.',
+    fact: 'Pierwszy rywal to Manekin treningowy na ringu Trenerki Ewy. Dopiero po tej walce Kapitan Bosman zabiera cię w rejs.',
+    src: '/screens/wyspa.png',
+    alt: 'Wyspa Startowa w grze Buds',
+  },
+  {
+    id: 'zadania',
+    kicker: 'Przystanek 2 · Zadania',
+    title: 'Każdy mieszkaniec ma swoją sprawę',
+    text: `${CONTENT.quests.length} zadań od ${CONTENT.npcs.length} mieszkańców: zgubiony pies, zakupy dla sąsiadki, zaginione listy, kokosy dla baru. Każde daje doświadczenie, a niektóre przedmiot, którego nie kupisz w żadnym sklepie.`,
+    fact: 'Pani Halina z Miasta Ziomków lubi przypominać, że „za jej czasów to się chodziło piechotą”.',
+    src: '/screens/zadania.png',
+    alt: 'Rozmowa z mieszkańcem i zadanie w grze Buds',
+  },
+  {
+    id: 'pojedynki',
+    kicker: 'Przystanek 3 · Pojedynki',
+    title: 'Walka, w której liczy się głowa',
+    text: 'Pojedynki są turowe: wybierasz ruch, przeciwnik odpowiada. Na twoje ruchy wpływa to, co trzymasz w ręku. Wygrana daje łup, od zwykłego po legendarny.',
+    fact: 'Mikrofon to też broń. Z nim w ręku walczysz ruchami Diss, Bit i Drop, a deskorolką robisz Kickflip.',
+    src: '/screens/pojedynek.png',
+    alt: 'Pojedynek turowy w grze Buds',
+  },
+  {
+    id: 'odkrywanie',
+    kicker: 'Przystanek 4 · Odkrywanie',
+    title: 'Świat pełen sekretów',
+    text: `Cztery dzielnice z własnym klimatem, budynki, do których da się wejść, i ${CONTENT.caches.length} ukrytych skrytek z monetami. Skrytki widać dopiero z bliska, a mapa odsłania się tam, gdzie twój Bud już był.`,
+    fact: 'Na Wzgórzu zakopano kuferek ze starym listem: „Dla tego, kto słucha, co mówią znaki”.',
+    src: '/screens/skrytka.png',
+    alt: 'Odkryta skrytka w grze Buds',
+  },
+  {
+    id: 'sprzet',
+    kicker: 'Przystanek 5 · Sprzęt i wierzchowce',
+    title: 'Od czapki po quada',
+    text: 'Dziewięć miejsc na ekwipunek, ponad sto przedmiotów i wierzchowce: deskorolka, rower, motocykl. Każda rzecz coś daje, a najlepsze zdobywasz w walce. Za prawdziwe pieniądze kupisz tylko wygląd, nigdy przewagę.',
+    fact: 'Ryk Motocykla Grzmot podobno słychać w trzech dzielnicach naraz.',
+    src: '/screens/ekwipunek.png',
+    alt: 'Ekwipunek Buda w grze Buds',
+  },
+  {
+    id: 'trening',
+    kicker: 'Przystanek 6 · Trening',
+    title: 'Trenuj, aż zostaniesz legendą',
+    text: 'Worek treningowy, scena freestyle, fala do surfowania, szachy w ogrodzie. Krótkie mini-gry podnoszą umiejętności, a wyższe rangi odblokowują ruchy specjalne.',
+    fact: 'Graffiti ćwiczysz na ścianie pod garażami. Tylko uważaj: dla Sierżanta Nowaka graffiti to wandalizm, „tak przynajmniej mówi regulamin”.',
+    src: '/screens/trening.png',
+    alt: 'Mini-gra treningowa w grze Buds',
+  },
+];
 
-/** One example item per slot, the strongest the coin shop or quests offer. */
-const GEAR = SLOTS.map((slot) => {
-  const items = CATALOG.filter((i) => i.available && !i.premium && i.slot === slot.id);
-  const best = items.sort((a, b) => b.price.amount - a.price.amount)[0];
-  return { slot, item: best };
-});
-
-const FEATURES = [
+/** A look around the world: the four districts and the rooms inside. */
+const SHOTS: Shot[] = [
   {
-    title: 'Cztery dzielnice',
-    text: 'Miasto Ziomków, tropikalne Las Palmas, Dwór Carski i niebezpieczne Los Karkos. Każda z mieszkańcami i zadaniami.',
+    id: 'miasto',
+    label: 'Miasto Ziomków',
+    title: 'Miasto, które cię zna',
+    text: 'Rynek z fontanną, skatepark, stadion i działki. Tu mieszkańcy pierwsi powiedzą ci „cześć”.',
+    src: '/screens/miasto.png',
   },
   {
-    title: 'Wejdź do środka',
-    text: 'Kawiarnia, komisariat, siłownia, salon dworku… Budynki mają wnętrza, a w nich niejedną tajemnicę.',
+    id: 'las-palmas',
+    label: 'Las Palmas',
+    title: 'Słońce, fale i dżungla',
+    text: 'Miasteczko na palach, laguna flamingów i ruiny za wodospadem.',
+    src: '/screens/las-palmas.png',
   },
   {
-    title: 'Ukryte skrytki',
-    text: 'Skrzynie, kufry i luźne cegły pojawiają się dopiero, gdy podejdziesz blisko. W środku monety i XP.',
+    id: 'dwor-carski',
+    label: 'Dwór Carski',
+    title: 'Elegancja z tajemnicą',
+    text: 'Różany ogród, labirynt i urzędnicy, którym lepiej nie ufać.',
+    src: '/screens/dwor-carski.png',
   },
   {
-    title: 'Ekwipunek ze statystykami',
-    text: 'Buty dodają szybkości, bluza z kewlaru daje pancerz, okulary szczęścia. Zdobywasz je w grze.',
+    id: 'los-karkos',
+    label: 'Los Karkos',
+    title: 'Tu nikt nie pyta dwa razy',
+    text: 'Bloki, złomowisko i ring. Najtwardsi przeciwnicy, najlepszy łup.',
+    src: '/screens/los-karkos.png',
+  },
+  {
+    id: 'wnetrza',
+    label: 'Wnętrza',
+    title: 'Zajrzyj do środka',
+    text: 'Kawiarnia, siłownia, salon dworku. W środku czekają mieszkańcy i niejedna skrytka.',
+    src: '/screens/wnetrza.png',
   },
 ];
 
 export default function HomePage() {
   const [initial] = sampleLooks(1, 11);
-  const moodModel = CREW[1]!;
 
   return (
-    <main>
+    <main className="journey">
+      <ScrollProgress />
+
+      {/* ---------- prolog ---------- */}
       <section className="hero container">
         <div className="hero-copy">
-          <h1>
-            Znajdź swojego <span className="hl">ziomka</span>.
-          </h1>
-          <p className="lead">
-            Ziomki i ziomeczki z charakterem. Ułóż swojego Buda, połącz go z grą i ruszaj na
-            przygodę: dzielnice, zadania od mieszkańców, ukryte skrytki i ekwipunek, który naprawdę
-            coś daje.
-          </p>
-          <div className="hero-actions">
-            <Link href="#kreator" className="btn btn-primary btn-big">
-              Stwórz Buda
-            </Link>
-            <Link href="/konto" className="btn btn-big">
-              Załóż konto
-            </Link>
-          </div>
-        </div>
-
-        <div className="crew" aria-hidden>
-          <div className="crew-hill" />
-          {CREW.map((look, i) => (
-            <div key={i} className={`crew-bud crew-bud-${i}`} style={{ '--i': i } as CSSProperties}>
-              <BudSprite look={look} height={i === 2 ? 230 : i % 2 ? 190 : 205} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="container section">
-        <h2 className="section-title">Co cię czeka w grze</h2>
-        <div className="features">
-          {FEATURES.map((f) => (
-            <div className="feature card" key={f.title}>
-              <h3>{f.title}</h3>
-              <p className="muted">{f.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="container section" id="kreator">
-        <h2 className="section-title">Ułóż swojego Buda</h2>
-        {initial && <Creator initialLook={initial} />}
-      </section>
-
-      <section className="container section">
-        <h2 className="section-title">Ekwipunek od stóp do głów</h2>
-        <p className="lead section-lead">
-          Osiem miejsc na postaci i wierzchowiec: od deskorolki po quada. Każdy przedmiot dodaje coś
-          do statystyk albo umiejętności, a zdobywasz je w zadaniach, skrytkach, pojedynkach i w
-          sklepie za monety z gry. Za prawdziwe pieniądze kupisz unikatowe wierzchowce i bronie:
-          wyjątkowy wygląd, ale dokładnie ta sama moc co przedmioty z gry.
-        </p>
-        <div className="gear-showcase card">
-          <div className="gear-doll" aria-hidden>
-            <BudSprite look={CREW[1]!} height={260} />
-          </div>
-          <ul className="gear-slots">
-            {GEAR.map(({ slot, item }) => (
-              <li key={slot.id}>
-                <span className="gear-slot-name">{slot.name}</span>
-                <strong>{item?.name ?? '—'}</strong>
-                {item && <span className="gear-bonus">{bonusText(item)}</span>}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="container section">
-        <h2 className="section-title">Każdy ma swój nastrój</h2>
-        <p className="lead section-lead">
-          Nastrój to nie tylko mina. To, jak twój Bud gada z mieszkańcami i jak reaguje na przygody.
-        </p>
-        <div className="moods">
-          {MOODS.map((mood) => (
-            <div className="mood card" key={mood}>
-              <BudSprite look={{ ...moodModel, mood }} height={96} crop="head" />
-              <div>
-                <h3>{moodLabel(mood, moodModel.gender)}</h3>
-                <p className="muted">{moodBlurb(mood, moodModel.gender)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="container section steps">
-        <div className="step card">
-          <span className="step-num">1</span>
-          <h3>Stwórz</h3>
-          <p>Płeć, nastrój, karnacja, fryzura, ciuchy. Twój Bud wygląda tak, jak chcesz.</p>
-        </div>
-        <div className="step card">
-          <span className="step-num">2</span>
-          <h3>Połącz</h3>
-          <p>
-            Na stronie Buda albo w koncie dostaniesz kod. Wpisujesz go w grze i gotowe. Konto jest
-            opcjonalne, ale chroni postępy.
-          </p>
-        </div>
-        <div className="step card">
-          <span className="step-num">3</span>
-          <h3>Graj</h3>
-          <p>Mapa, zadania od mieszkańców, skrytki i ekwipunek. Twój Bud rośnie razem z tobą.</p>
-        </div>
-      </section>
-
-      <section className="container section">
-        <div className="cta-band card">
-          <div>
-            <h2>Twój Bud bezpieczny na każdym urządzeniu</h2>
-            <p className="muted">
-              Załóż konto e-mailem i hasłem. Postępy, ekwipunek i monety zostają z tobą, nawet gdy
-              zmienisz telefon. Te dane widzisz tylko ty.
+          <Reveal>
+            <p className="eyebrow">Mobilne RPG · wczesny dostęp</p>
+          </Reveal>
+          <Reveal delay={80}>
+            <h1>
+              Znajdź swojego <span className="hl">ziomka</span>.
+            </h1>
+          </Reveal>
+          <Reveal delay={160}>
+            <p className="lead">
+              Stwórz Buda z charakterem, obudź się na wyspie i wyrusz w podróż: zadania od
+              mieszkańców, pojedynki, ukryte skrytki i sprzęt, który naprawdę coś daje.
             </p>
-          </div>
-          <Link href="/konto" className="btn btn-buds btn-big">
-            Załóż konto
-          </Link>
+          </Reveal>
+          <Reveal delay={240}>
+            <div className="hero-actions">
+              <Link href="#kreator" className="btn btn-primary btn-big">
+                Stwórz Buda
+              </Link>
+              <Link href="#podroz" className="btn btn-big">
+                Zacznij podróż
+              </Link>
+            </div>
+          </Reveal>
         </div>
+
+        <Reveal from="zoom" delay={120}>
+          <div className="crew" aria-hidden>
+            <div className="crew-sun" />
+            <div className="crew-cloud crew-cloud-a" />
+            <div className="crew-cloud crew-cloud-b" />
+            {CREW.map((look, i) => (
+              <div
+                key={i}
+                className={`crew-bud crew-bud-${i}`}
+                style={{ '--i': i } as CSSProperties}
+              >
+                <BudSprite look={look} height={i === 2 ? 230 : i % 2 ? 190 : 205} />
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ---------- podróż ---------- */}
+      <section className="container section" id="podroz">
+        <Reveal>
+          <p className="eyebrow">Podróż</p>
+          <h2 className="section-title">Droga przez świat Buds</h2>
+          <p className="lead section-lead">
+            Sześć przystanków, sześć przygód. Zobacz, co czeka na twojego Buda.
+          </p>
+        </Reveal>
+        <Trail stops={STOPS} walker={CREW[1]!} />
+      </section>
+
+      {/* ---------- rozgrywka ---------- */}
+      <section className="container section" id="rozgrywka">
+        <Reveal>
+          <p className="eyebrow">Rozgrywka</p>
+          <h2 className="section-title">Zajrzyj do świata</h2>
+        </Reveal>
+        <Reveal delay={100}>
+          <GameplayTabs shots={SHOTS} />
+        </Reveal>
+      </section>
+
+      {/* ---------- twój bud ---------- */}
+      <section className="container section" id="kreator">
+        <Reveal>
+          <p className="eyebrow">Twój Bud</p>
+          <h2 className="section-title">Kto wyruszy w tę podróż?</h2>
+        </Reveal>
+        <Reveal delay={100}>{initial && <Creator initialLook={initial} />}</Reveal>
+      </section>
+
+      {/* ---------- epilog ---------- */}
+      <section className="container section">
+        <Reveal from="zoom">
+          <div className="cta-band card">
+            <div>
+              <p className="eyebrow eyebrow-dark">Epilog</p>
+              <h2>Twoja legenda zostaje z tobą</h2>
+              <p className="muted">
+                Załóż konto e-mailem i hasłem: Bud, postępy, ekwipunek i monety są bezpieczne na
+                każdym urządzeniu. W grze wybierz „Zaloguj się na konto” i graj dalej, gdziekolwiek
+                jesteś.
+              </p>
+            </div>
+            <div className="cta-actions">
+              <Link href="/konto" className="btn btn-primary btn-big">
+                Załóż konto
+              </Link>
+              <Image
+                src="/buds-icon.png"
+                alt=""
+                width={120}
+                height={120}
+                className="cta-icon"
+                aria-hidden
+              />
+            </div>
+          </div>
+        </Reveal>
       </section>
     </main>
   );

@@ -211,8 +211,73 @@ namespace Buds.Api
             return DownloadHandlerTexture.GetContent(req);
         }
 
-        /// <summary>Creates a bud from the game (no website needed); returns it with its player token.</summary>
-        public async Awaitable<CreateBudResponse> CreateBud(string name, BudLookDto look)
+        // ---------- accounts (the website's e-mail + password) ----------
+
+        public async Awaitable<AuthConfigDto> GetAuthConfig()
+        {
+            using var req = UnityWebRequest.Get($"{baseUrl}/v1/auth/config");
+            req.timeout = TimeoutSeconds;
+            await req.SendWebRequest();
+            return Parse<AuthConfigDto>(req);
+        }
+
+        /// <summary>
+        /// Signs in with Supabase Auth directly (the password never goes to the Buds API); returns the account session.
+        /// </summary>
+        public static async Awaitable<SupabaseSessionDto> SignIn(AuthConfigDto config, string email, string password)
+        {
+            var body = JsonUtility.ToJson(new SignInRequest { email = email, password = password });
+            using var req = new UnityWebRequest($"{config.url.TrimEnd('/')}/auth/v1/token?grant_type=password", UnityWebRequest.kHttpVerbPOST)
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("apikey", config.publishableKey);
+            await req.SendWebRequest();
+            if (req.result == UnityWebRequest.Result.Success)
+                return JsonUtility.FromJson<SupabaseSessionDto>(req.downloadHandler.text);
+            if (req.result == UnityWebRequest.Result.ConnectionError)
+                throw new ApiException(0, "Brak połączenia z internetem.");
+            throw new ApiException(req.responseCode, SignInMessage(req.responseCode, req.downloadHandler?.text));
+        }
+
+        /// <summary>Supabase Auth errors in Polish (same wording as the website).</summary>
+        public static string SignInMessage(long status, string body)
+        {
+            SupabaseErrorDto e = null;
+            try
+            {
+                if (!string.IsNullOrEmpty(body)) e = JsonUtility.FromJson<SupabaseErrorDto>(body);
+            }
+            catch (ArgumentException)
+            {
+                // not JSON
+            }
+            var code = (e?.error_code ?? e?.error ?? "").ToLowerInvariant();
+            var text = $"{e?.msg} {e?.error_description}".ToLowerInvariant();
+            if (code.Contains("email_not_confirmed") || text.Contains("not confirmed"))
+                return "Najpierw potwierdź e-mail: kliknij link z wiadomości od nas.";
+            if (code.Contains("invalid_credentials") || code.Contains("invalid_grant") || text.Contains("invalid login"))
+                return "Zły e-mail albo hasło.";
+            if (status == 429 || text.Contains("rate limit")) return "Za dużo prób. Odczekaj chwilę.";
+            if (code.Contains("validation") || text.Contains("email")) return "Sprawdź adres e-mail i hasło.";
+            return status >= 500 ? "Logowanie ma chwilowe problemy. Spróbuj za moment." : "Nie udało się zalogować. Spróbuj ponownie.";
+        }
+
+        /// <summary>The signed-in account's buds.</summary>
+        public Awaitable<AccountBudsDto> GetAccountBuds(string accessToken) => Get<AccountBudsDto>("/v1/account/buds", accessToken);
+
+        /// <summary>A player token for one of the account's buds, for this device.</summary>
+        public Awaitable<CreateBudResponse> DeviceToken(string accessToken, string slug) =>
+            Post<CreateBudResponse>($"/v1/account/buds/{Uri.EscapeDataString(slug)}/device", accessToken, "{}");
+
+        /// <summary>
+        /// Creates a bud from the game (no website needed); returns it with its player token. With an account token it
+        /// goes straight onto that account.
+        /// </summary>
+        public async Awaitable<CreateBudResponse> CreateBud(string name, BudLookDto look, string accountToken = null)
         {
             var body = JsonUtility.ToJson(new CreateBudRequest { name = name, look = look });
             using var req = new UnityWebRequest($"{baseUrl}/v1/buds", UnityWebRequest.kHttpVerbPOST)
@@ -222,6 +287,7 @@ namespace Buds.Api
                 timeout = TimeoutSeconds,
             };
             req.SetRequestHeader("Content-Type", "application/json");
+            if (!string.IsNullOrEmpty(accountToken)) req.SetRequestHeader("Authorization", $"Bearer {accountToken}");
             await req.SendWebRequest();
             return Parse<CreateBudResponse>(req);
         }

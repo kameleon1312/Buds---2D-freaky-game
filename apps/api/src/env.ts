@@ -16,6 +16,13 @@ const envSchema = z.object({
   /** Without both of these the API keeps buds in memory (local dev only). */
   SUPABASE_URL: optional.pipe(z.string().url().optional()),
   SUPABASE_SERVICE_ROLE_KEY: optional,
+  /**
+   * The project's publishable (anon) key: public by design. The game reads it with the URL from
+   * GET /v1/auth/config to sign players in with Supabase Auth directly (passwords never pass through this API).
+   * Locally it falls back to NEXT_PUBLIC_SUPABASE_ANON_KEY from the shared .env.
+   */
+  SUPABASE_PUBLISHABLE_KEY: optional,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: optional,
 });
 
 export type Env = z.infer<typeof envSchema>;

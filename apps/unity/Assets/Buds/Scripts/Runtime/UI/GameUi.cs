@@ -51,6 +51,8 @@ namespace Buds.UI
         public bool DialogOpen => dialog && dialog.activeSelf;
         /// <summary>The safe area of the screen: every screen and panel is built in here.</summary>
         public Transform Root => safe;
+        /// <summary>The whole screen (behind the safe area): for full-screen backgrounds.</summary>
+        public Transform FullScreen => canvas.transform;
         readonly RectTransform safe;
         /// <summary>The action button or the dialog was tapped (acts like E).</summary>
         public event Action Tapped;
@@ -76,7 +78,7 @@ namespace Buds.UI
 
         // ---------- pairing ----------
 
-        public void ShowPair(Action<string> onConnect, Action onGuest, Action onCreate)
+        public void ShowPair(Action<string> onConnect, Action onGuest, Action onCreate, Action onLogin)
         {
             if (pairScreen) UnityEngine.Object.Destroy(pairScreen);
             HideLoading();
@@ -99,8 +101,10 @@ namespace Buds.UI
             Place(logo.rectTransform, -300, 110, 520, 200);
 
             var sub = UiKit.Label("Sub", group,
-                "Nowy? Stwórz swojego Buda tutaj.\nMasz już Buda ze strony? Wpisz kod z jego profilu.", 26, UiKit.TextOnDarkMuted);
-            Place(sub.rectTransform, -300, -30, 520, 90);
+                "Nowy? Stwórz swojego Buda tutaj.\nMasz konto na stronie? Zaloguj się i graj swoim Budem.", 26, UiKit.TextOnDarkMuted);
+            Place(sub.rectTransform, -300, -20, 520, 90);
+            var login = UiKit.Button("Login", group, "Zaloguj się na konto", new Vector2(460, 80), onLogin, UiKit.Tone.Buds, 32);
+            Place(login.transform as RectTransform, -300, -120, 460, 80);
 
             var body = UiKit.Window("Card", group, new Vector2(600, 600), "Witaj w Buds", null, out var card, out _);
             Place(card, 280, 0, 600, 600);
@@ -133,9 +137,9 @@ namespace Buds.UI
             {
                 // dev builds: point the game at a local API (e.g. http://192.168.1.10:4000)
                 var server = UiKit.Input("Server", group, new Vector2(500, 64), PlayerSession.ApiBaseUrl, 24);
-                Place((RectTransform)server.transform.parent, -300, -200, 500, 64);
-                var serverLabel = UiKit.Label("ServerLabel", group, "Serwer (wersja testowa)", 20, UiKit.TextOnDarkMuted, true);
-                Place(serverLabel.rectTransform, -300, -150, 500, 30);
+                Place((RectTransform)server.transform.parent, -300, -262, 500, 56);
+                var serverLabel = UiKit.Label("ServerLabel", group, "Serwer (wersja testowa)", 19, UiKit.TextOnDarkMuted, true);
+                Place(serverLabel.rectTransform, -300, -218, 500, 28);
                 server.text = PlayerSession.ApiBaseUrl;
                 server.onEndEdit.AddListener(v =>
                 {

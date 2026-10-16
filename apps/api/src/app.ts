@@ -50,6 +50,7 @@ import {
   fitsSlot,
   slotIdSchema,
   type AccountBud,
+  type AuthConfigResponse,
   type AccountBudsResponse,
   type BuyResponse,
   type EquipmentResponse,
@@ -617,6 +618,28 @@ export function createApp(
       return c.json<AccountBud>(await accountBud(slug));
     },
   );
+
+  /** Public sign-in settings for the game (the project URL and its publishable key, both public by design). */
+  app.get('/v1/auth/config', (c) => {
+    const key = env.SUPABASE_PUBLISHABLE_KEY ?? env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? null;
+    const url = env.SUPABASE_URL ?? null;
+    return c.json<AuthConfigResponse>({ enabled: !!(url && key), url, publishableKey: key });
+  });
+
+  /**
+   * Playing an account's bud on a new device: a signed-in owner gets a fresh player token for it (one token per
+   * device, like pairing). Buds of other accounts stay out of reach.
+   */
+  app.post('/v1/account/buds/:slug/device', requireAuth(keys), async (c) => {
+    const slug = budSlugSchema.safeParse(c.req.param('slug'));
+    if (!slug.success || (await store.ownerOf(slug.data)) !== c.get('user').id) {
+      throw new HTTPException(404, { message: 'Nie masz takiego Buda' });
+    }
+    const token = newPlayerToken();
+    await store.addToken(slug.data, hashToken(token));
+    const bud = (await store.getBySlug(slug.data))!;
+    return c.json<CreateBudResponse>({ bud, token });
+  });
 
   /** Links the guest bud this browser created (proved by its guest token) to the account. */
   app.post('/v1/account/buds/claim', requireAuth(keys), async (c) => {

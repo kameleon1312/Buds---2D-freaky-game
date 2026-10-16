@@ -70,6 +70,12 @@ namespace Buds.Core
                     await Awaitable.WaitForSecondsAsync(0.6f);
                     ScreenCapture.CaptureScreenshot(Path.Combine(shots, "00-pair.png"));
                     await Awaitable.WaitForSecondsAsync(0.4f);
+                    // and the account sign-in window (nothing is sent)
+                    await OpenLogin();
+                    await Awaitable.WaitForSecondsAsync(0.6f);
+                    ScreenCapture.CaptureScreenshot(Path.Combine(shots, "00-login.png"));
+                    await Awaitable.WaitForSecondsAsync(0.4f);
+                    loginScreen.Hide();
                 }
                 StartAsGuest();
                 return;
@@ -112,7 +118,7 @@ namespace Buds.Core
 
         void ShowPairing(string error = null)
         {
-            ui.ShowPair(code => _ = Connect(code), StartAsGuest, () => _ = OpenCreator());
+            ui.ShowPair(code => _ = Connect(code), StartAsGuest, () => _ = OpenCreator(), () => _ = OpenLogin());
             pairingVisible = true;
             if (error != null) ui.SetPairBusy(false, error);
         }

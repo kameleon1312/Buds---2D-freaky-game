@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Rubik } from 'next/font/google';
-import { BudSprite } from '@/components/BudSprite';
-import { sampleLooks } from '@/lib/looks';
 import { SITE_URL } from '@/lib/site';
 import './globals.css';
+import './journey.css';
 
 // Buds design system: Rubik everywhere (display 800-900 outlined, body 500-700).
 const rubik = Rubik({
@@ -27,23 +27,37 @@ export const viewport: Viewport = {
   themeColor: '#16181f',
 };
 
-const logoLook = { ...sampleLooks(1, 3)[0]!, mood: 'radosny' as const };
-
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pl" className={rubik.variable}>
+      <head>
+        {/* without JavaScript the scroll reveals never run: show everything */}
+        <noscript>
+          <style>{'.reveal{opacity:1;transform:none}'}</style>
+        </noscript>
+      </head>
       <body>
-        <header className="site-header">
-          <Link href="/" className="logo">
-            <BudSprite look={logoLook} height={38} crop="head" />
-            <span>Buds</span>
-          </Link>
-          <nav>
-            <Link href="/#kreator">Stwórz</Link>
-            <Link href="/top">Ranking</Link>
-            <Link href="/konto">Konto</Link>
-          </nav>
-        </header>
+        {/* pinned to the top while scrolling, frosted so the page shows through */}
+        <div className="site-bar">
+          <header className="site-header">
+            <Link href="/" className="logo">
+              <Image
+                src="/buds-icon.png"
+                alt=""
+                width={52}
+                height={52}
+                className="logo-icon"
+                priority
+              />
+              <span>Buds</span>
+            </Link>
+            <nav>
+              <Link href="/#kreator">Stwórz</Link>
+              <Link href="/top">Ranking</Link>
+              <Link href="/konto">Konto</Link>
+            </nav>
+          </header>
+        </div>
         {children}
         <footer className="site-footer">
           <span>Buds · gra o ziomkach z charakterem</span>
