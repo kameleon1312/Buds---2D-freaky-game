@@ -50,6 +50,19 @@ namespace Buds.Api
             return Parse<BudResponse>(req).bud;
         }
 
+        /// <summary>Signs this device out on the server: its player token stops working (other devices stay signed in).</summary>
+        public async Awaitable Logout(string token)
+        {
+            using var req = new UnityWebRequest($"{baseUrl}/v1/buds/me/logout", UnityWebRequest.kHttpVerbPOST)
+            {
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = 10, // signing out never waits for a sleeping server: the device forgets the token anyway
+            };
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await req.SendWebRequest();
+            if (req.result != UnityWebRequest.Result.Success && req.responseCode != 401) throw ToException(req);
+        }
+
         /// <summary>Ids of the quests this bud has completed (server is the source of truth).</summary>
         public async Awaitable<string[]> GetCompletedQuests(string token)
         {

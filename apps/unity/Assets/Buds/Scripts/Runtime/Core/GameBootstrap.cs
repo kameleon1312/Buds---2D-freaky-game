@@ -53,6 +53,21 @@ namespace Buds.Core
             };
             api = new BudsApi(PlayerSession.ApiBaseUrl);
 
+            // signed out a moment ago: back at the start screen, whatever the command line said
+            if (signedOut)
+            {
+                ShowPairing();
+                if (CommandLine.Get("-buds-autoshot") is { } outShots)
+                {
+                    await Awaitable.WaitForSecondsAsync(0.8f);
+                    ScreenCapture.CaptureScreenshot(Path.Combine(outShots, "o3-wylogowany.png"));
+                    await Awaitable.WaitForSecondsAsync(0.5f);
+                    Debug.Log($"[AutoPilot] signed out, saved session: {(PlayerSession.Load() == null ? "none" : "still there")}");
+                    Application.Quit();
+                }
+                return;
+            }
+
             var pairCode = CommandLine.Get("-buds-pair");
             if (pairCode != null)
             {
@@ -486,6 +501,11 @@ namespace Buds.Core
                 }
 
                 if (CommandLine.Has("-buds-panel-demo")) await PanelDemo(Shot);
+                if (CommandLine.Has("-buds-logout-demo"))
+                {
+                    await LogoutDemo(Shot);
+                    return; // the scene reloads; nothing after this runs
+                }
                 if (CommandLine.Has("-buds-tutorial-demo")) await TutorialDemo(Shot);
                 if (CommandLine.Has("-buds-quest-demo")) await QuestDemo(Shot);
                 if (CommandLine.Has("-buds-life-demo")) await LifeDemo(dir);

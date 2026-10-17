@@ -25,7 +25,7 @@ namespace Buds.Core
         void SetUpPanel()
         {
             panel ??= new BudPanel(ui.Root, quests.Content, id => _ = UpgradeSkill(id), (slot, id) => _ = Equip(slot, id),
-                id => _ = Buy(id), id => _ = Drink(id), () => _ = LinkAccount());
+                id => _ = Buy(id), id => _ = Drink(id), () => _ = LinkAccount(), () => _ = Logout());
             ui.ShowBudButton(() => _ = OpenPanel());
         }
 
@@ -40,6 +40,43 @@ namespace Buds.Core
             }
             if (input.PanelPressed && !ui.DialogOpen) _ = OpenPanel();
             return panel.IsOpen;
+        }
+
+        /// <summary>
+        /// Signs out: the server forgets this device's token (best effort: no network still signs out here), the saved
+        /// session is deleted and the scene starts over at the pairing screen, so nothing of the old bud stays in memory.
+        /// Guests just go back to the start screen.
+        /// </summary>
+        /// <summary>Survives the scene reload: after signing out the command line's pairing code is not used again.</summary>
+        static bool signedOut;
+
+        async Awaitable Logout()
+        {
+            signedOut = true;
+            if (session != null)
+            {
+                try
+                {
+                    await api.Logout(session.Token);
+                }
+                catch (ApiException e)
+                {
+                    Debug.LogWarning($"Sign-out on the server failed ({e.Message}); the token is forgotten on this device.");
+                }
+                PlayerSession.Clear();
+            }
+            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        }
+
+        /// <summary>Autopilot (-buds-logout-demo): Twój Bud → Wyloguj się, the confirmation, then the start screen.</summary>
+        async Awaitable LogoutDemo(Func<string, Awaitable> shot)
+        {
+            await OpenPanel();
+            panel.SelectTab(BudPanel.TabProfile);
+            await shot("o1-profil.png");
+            panel.PressLogout();
+            await shot("o2-na-pewno.png");
+            panel.PressLogout(); // the scene starts over; Start takes the last shot
         }
 
         async Awaitable OpenPanel()

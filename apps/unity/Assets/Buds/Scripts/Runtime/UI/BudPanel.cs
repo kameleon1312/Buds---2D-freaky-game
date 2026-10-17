@@ -72,6 +72,10 @@ namespace Buds.UI
         readonly Action<string> onBuy;
         readonly Action<string> onDrink;
         readonly Action onLink;
+        readonly Action onLogout;
+        Button logoutButton;
+        Text logoutLabel;
+        float logoutArmedUntil;
         Button linkButton;
         Text linkText;
         readonly GameObject root;
@@ -132,9 +136,10 @@ namespace Buds.UI
         public bool IsOpen => root.activeSelf;
 
         public BudPanel(Transform canvas, QuestContent content, Action<string> onUpgrade, Action<string, string> onEquip,
-            Action<string> onBuy, Action<string> onDrink, Action onLink)
+            Action<string> onBuy, Action<string> onDrink, Action onLink, Action onLogout)
         {
             this.onLink = onLink;
+            this.onLogout = onLogout;
             this.content = content;
             this.onUpgrade = onUpgrade;
             this.onEquip = onEquip;
@@ -216,6 +221,11 @@ namespace Buds.UI
         {
             if (!IsOpen || Time.realtimeSinceStartup < nextTick) return;
             nextTick = Time.realtimeSinceStartup + 1;
+            if (logoutArmedUntil > 0 && Time.realtimeSinceStartup > logoutArmedUntil)
+            {
+                logoutArmedUntil = 0;
+                logoutLabel.text = data.Guest ? "Wyjdź do menu" : "Wyloguj się";
+            }
             if (tab == TabDrinks) RefreshBuffs();
         }
 
@@ -283,11 +293,36 @@ namespace Buds.UI
             linkButton = UiKit.Button("Link", page, "Połącz z kontem", new Vector2(300, 70), () => onLink(), UiKit.Tone.Buds, 28);
             UiKit.Place((RectTransform)linkButton.transform, new Vector2(0, 1), new Vector2(0, -462), new Vector2(300, 70), new Vector2(0, 1));
             linkText = UiKit.Label("LinkText", page, "", 21, UiKit.Ink, false, TextAnchor.MiddleLeft);
-            UiKit.Place(linkText.rectTransform, new Vector2(0, 1), new Vector2(330, -452), new Vector2(740, 96), new Vector2(0, 1));
+            UiKit.Place(linkText.rectTransform, new Vector2(0, 1), new Vector2(330, -452), new Vector2(480, 96), new Vector2(0, 1));
+
+            // signing out: a second tap within a few seconds confirms (the destructive tone, bottom right)
+            logoutButton = UiKit.Button("Logout", page, "Wyloguj się", new Vector2(250, 70), Logout, UiKit.Tone.Alert, 26);
+            UiKit.Place((RectTransform)logoutButton.transform, new Vector2(1, 1), new Vector2(0, -462), new Vector2(250, 70), new Vector2(1, 1));
+            logoutLabel = logoutButton.GetComponentInChildren<Text>();
+        }
+
+        /// <summary>The "Wyloguj się" button, as a tap (the autopilot taps it twice).</summary>
+        public void PressLogout() => Logout();
+
+        void Logout()
+        {
+            if (Time.realtimeSinceStartup > logoutArmedUntil)
+            {
+                logoutArmedUntil = Time.realtimeSinceStartup + 4;
+                logoutLabel.text = "Na pewno?";
+                return;
+            }
+            logoutArmedUntil = 0;
+            logoutButton.interactable = false;
+            logoutLabel.text = "Wylogowuję…";
+            onLogout();
         }
 
         void RefreshProfile()
         {
+            // the confirmation runs out on its own
+            if (logoutArmedUntil <= 0 || Time.realtimeSinceStartup > logoutArmedUntil)
+                logoutLabel.text = data.Guest ? "Wyjdź do menu" : "Wyloguj się";
             portrait.sprite = data.Portrait;
             portrait.enabled = data.Portrait;
             nameText.text = data.Name;

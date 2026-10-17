@@ -22,6 +22,8 @@ export interface BudStore extends RivalryStore {
   getBySlug(slug: string): Promise<BudRecord | null>;
   getByTokenHash(tokenHash: string): Promise<BudRecord | null>;
   addToken(slug: string, tokenHash: string): Promise<void>;
+  /** Signs one device out: its token stops working (the bud and its other devices are untouched). */
+  removeToken(tokenHash: string): Promise<void>;
   /** Short-lived code shown on the web and typed into the game to link a device. */
   savePairCode(slug: string, code: string, expiresAt: Date): Promise<void>;
   /** Consumes the code; returns the bud's slug, or null if unknown/expired. */

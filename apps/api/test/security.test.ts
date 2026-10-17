@@ -117,3 +117,56 @@ describe('abuse protection', () => {
     expect(res.status).toBe(413);
   });
 });
+
+describe('signing a device out', () => {
+  const look = {
+    gender: 'on',
+    mood: 'radosny',
+    skin: 1,
+    hair: 'krotkie',
+    hairColor: 0,
+    outfit: 'bluza',
+    outfitColor: 1,
+    pantsColor: 0,
+  };
+
+  it('forgets only that device token; the bud and its other devices stay signed in', async () => {
+    const app = createApp(
+      loadEnv({ SUPABASE_JWT_SECRET: SECRET, WEB_ORIGIN: ORIGIN, RATE_LIMIT_PER_MINUTE: '100' }),
+      { store: createMemoryStore() },
+    );
+    const auth = (t: string) => ({ Authorization: `Bearer ${t}` });
+    const created = await app.request('/v1/buds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Wylogowany', look }),
+    });
+    const { token: phone, bud } = (await created.json()) as {
+      token: string;
+      bud: { slug: string };
+    };
+    // a second device paired with a code
+    const code = (await (
+      await app.request('/v1/buds/me/pair-code', { method: 'POST', headers: auth(phone) })
+    ).json()) as { code: string };
+    const paired = (await (
+      await app.request('/v1/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code.code }),
+      })
+    ).json()) as { token: string };
+
+    expect((await app.request('/v1/buds/me/logout', { method: 'POST' })).status).toBe(401);
+    expect(
+      (await app.request('/v1/buds/me/logout', { method: 'POST', headers: auth(phone) })).status,
+    ).toBe(204);
+    expect((await app.request('/v1/buds/me', { headers: auth(phone) })).status).toBe(401);
+    expect(
+      (await app.request('/v1/buds/me/logout', { method: 'POST', headers: auth(phone) })).status,
+    ).toBe(401);
+    const other = await app.request('/v1/buds/me', { headers: auth(paired.token) });
+    expect(other.status).toBe(200);
+    expect(((await other.json()) as { bud: { slug: string } }).bud.slug).toBe(bud.slug);
+  });
+});

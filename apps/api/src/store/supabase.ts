@@ -113,6 +113,11 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       if (error) throw error;
     },
 
+    async removeToken(tokenHash) {
+      const { error } = await db.from('bud_tokens').delete().eq('token_hash', tokenHash);
+      if (error) throw error;
+    },
+
     async savePairCode(slug, code, expiresAt) {
       const { error } = await db
         .from('bud_pair_codes')

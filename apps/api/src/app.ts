@@ -208,6 +208,13 @@ export function createApp(
 
   app.get('/v1/buds/me', requirePlayer(store), (c) => c.json<BudResponse>({ bud: c.get('bud') }));
 
+  /** Signs this device out: its player token is forgotten; other devices of the bud stay signed in. */
+  app.post('/v1/buds/me/logout', requirePlayer(store), async (c) => {
+    const token = (c.req.header('authorization') ?? '').split(' ')[1]!;
+    await store.removeToken(hashToken(token));
+    return c.body(null, 204);
+  });
+
   // items granted beyond the starter set; only the server writes these
   app.get('/v1/buds/me/items', requirePlayer(store), async (c) =>
     c.json<OwnedItemsResponse>({ items: await store.items(c.get('bud').slug) }),

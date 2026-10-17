@@ -55,6 +55,10 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
       tokens.set(tokenHash, slug);
     },
 
+    async removeToken(tokenHash) {
+      tokens.delete(tokenHash);
+    },
+
     async savePairCode(slug, code, expiresAt) {
       pairCodes.set(code, { slug, expiresAt });
     },
