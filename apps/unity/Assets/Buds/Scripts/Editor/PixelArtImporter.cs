@@ -7,7 +7,7 @@ namespace Buds.EditorTools
     public sealed class PixelArtImporter : AssetPostprocessor
     {
         // bump when the rules change so Unity reimports existing textures
-        public override uint GetVersion() => 3;
+        public override uint GetVersion() => 4;
 
         void OnPreprocessTexture()
         {
@@ -21,10 +21,10 @@ namespace Buds.EditorTools
             importer.alphaIsTransparency = true;
             importer.wrapMode = TextureWrapMode.Clamp;
 
-            // character sheets and world props are smooth vector renders, not pixel art
+            // character sheets, world props, icons and duel effects are smooth vector renders, not pixel art
             if (assetPath.StartsWith("Assets/Buds/Resources/Sheets/") || assetPath.StartsWith("Assets/Buds/Resources/World/") ||
                 assetPath.StartsWith("Assets/Buds/Resources/Npcs/") || assetPath.StartsWith("Assets/Buds/Resources/Items/") ||
-                assetPath.StartsWith("Assets/Buds/Resources/Skills/"))
+                assetPath.StartsWith("Assets/Buds/Resources/Skills/") || assetPath.StartsWith("Assets/Buds/Resources/Ui/"))
             {
                 importer.filterMode = FilterMode.Trilinear;
                 importer.mipmapEnabled = true;

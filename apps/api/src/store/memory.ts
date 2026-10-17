@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { BudRecord, FightState, OwnedItem, SlotId } from '@buds/shared';
 import { makeSlug } from './slug.js';
+import { createMemoryRivalry } from './memory-rivalry.js';
 import type { BudStore } from './types.js';
 
 /** In-process store for tests and for local dev without Supabase. Data is lost on restart. */
@@ -29,6 +30,8 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const copy = (bud: BudRecord | undefined) => (bud ? { ...bud, look: { ...bud.look } } : null);
 
   return {
+    ...createMemoryRivalry({ now, buds, coins, owned, gear }),
+
     async create(input, tokenHash, userId) {
       let slug = makeSlug(input.name);
       while (buds.has(slug)) slug = makeSlug(input.name);
@@ -168,11 +171,14 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
     },
 
     async abandonFights(slug) {
+      const ended: { enemyId: string; turn: number }[] = [];
       for (const f of fights.values())
         if (f.slug === slug && f.state.status === 'active') {
           f.state.status = 'fled';
           f.finishedAt = now();
+          ended.push({ enemyId: f.state.enemyId, turn: f.state.turn });
         }
+      return ended;
     },
 
     async fight(slug, id) {

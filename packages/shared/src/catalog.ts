@@ -50,7 +50,7 @@ export const CURRENCIES = ['free', 'coins', 'gems'] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
 /** reward = quest or cache, shop = bought for coins in the game, purchase = verified real-money receipt. */
-export const ITEM_SOURCES = ['reward', 'shop', 'purchase', 'gift', 'promo'] as const;
+export const ITEM_SOURCES = ['reward', 'shop', 'purchase', 'gift', 'promo', 'trade'] as const;
 export type ItemSource = (typeof ITEM_SOURCES)[number];
 
 export const itemIdSchema = z.string().regex(/^[a-z0-9-]{3,40}$/);

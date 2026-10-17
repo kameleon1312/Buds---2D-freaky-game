@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { influenceSchema, pvpResultSchema } from './influence';
 import { budLookSchema } from './bud/look';
 import { levelOf, type CatalogItem, type Rarity } from './catalog';
 import { coinsWithLuck, weaponKindSchema, type CharacterStats, type WeaponKind } from './gear';
@@ -342,6 +343,8 @@ export const fightStateSchema = z.object({
   enemy: fighterSchema,
   /** Seeded RNG state (the server keeps it; clients never see it). */
   rng: z.number().int(),
+  /** Which of the opponent's spots the duel is at (the turf it counts for). */
+  spot: z.number().int().min(0).max(5).optional(),
 });
 export type FightState = z.infer<typeof fightStateSchema>;
 
@@ -691,7 +694,10 @@ function rollItem(
 export const fightViewSchema = fightStateSchema.omit({ rng: true }).extend({ id: z.string() });
 export type FightView = z.infer<typeof fightViewSchema>;
 
-export const startFightRequestSchema = z.object({ enemyId: id });
+export const startFightRequestSchema = z.object({
+  enemyId: id,
+  spot: z.number().int().min(0).max(5).optional(),
+});
 export const fightMoveRequestSchema = z.object({ move: moveIdSchema });
 
 export const fightRewardSchema = z.object({
@@ -722,6 +728,10 @@ export const fightResponseSchema = z.object({
   fight: fightViewSchema,
   events: z.array(turnEventSchema),
   reward: fightRewardSchema.nullable(),
+  /** Influence a won duel earned in its turf. */
+  influence: influenceSchema.nullable().default(null),
+  /** A finished duel against another bud. */
+  pvp: pvpResultSchema.nullable().default(null),
 });
 export type FightResponse = z.infer<typeof fightResponseSchema>;
 

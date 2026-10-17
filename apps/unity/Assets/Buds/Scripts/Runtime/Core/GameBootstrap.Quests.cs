@@ -132,7 +132,10 @@ namespace Buds.Core
                 SetXp(res.xp);
                 var item = string.IsNullOrEmpty(res.item) ? null : quests.Content.Item(res.item);
                 var reward = item != null ? $"<b>+{res.xpGained} XP  ·  {item.name}</b>" : $"<b>+{res.xpGained} XP</b>";
+                var influence = Rivalry.InfluenceLine(res.influence);
+                if (influence != null) reward += $"\n<color=#5d9a12><b>{influence}</b></color>";
                 ui.ShowDialog(npc.name, $"{quest.done}\n{reward}");
+                OnInfluence(res.influence, false);
                 if (res.levelUp) ui.ShowToast($"Awans! Poziom {res.level} (+1 punkt)", 3.5f);
                 else if (item != null) ui.ShowToast($"Nowy przedmiot: {item.name}", 3f);
                 else ui.ShowToast($"+{res.xpGained} XP");

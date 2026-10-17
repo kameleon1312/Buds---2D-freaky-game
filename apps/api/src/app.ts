@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
@@ -82,6 +82,11 @@ import {
   type LeaderboardResponse,
   type MeResponse,
   type PairCodeResponse,
+  pvpOpponentOf,
+  turfAt,
+  turfOf,
+  type BudRecord,
+  type Fighter,
 } from '@buds/shared';
 import type { Env } from './env.js';
 import { randomInt } from 'node:crypto';
@@ -96,6 +101,7 @@ import {
 } from './middleware/player.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { budSheetPng } from './png.js';
+import { createRivalry } from './rivalry.js';
 import { makePairCode } from './store/slug.js';
 import type { BudStore } from './store/types.js';
 
@@ -127,6 +133,7 @@ export function createApp(
         : undefined),
   };
   const app = new Hono<{ Variables: AuthVariables & PlayerVariables }>();
+  const rivalry = createRivalry({ store, now, catalog, content });
 
   app.use('*', requestId());
   app.use('*', secureHeaders());
@@ -241,6 +248,14 @@ export function createApp(
     if (quest.rewardItem) await store.grantItem(bud.slug, quest.rewardItem, 'reward');
     const before = levelFromXp(bud.xp).level;
     const level = levelFromXp(xp).level;
+    // handed in to the giver: influence in the giver's turf
+    const giver = content.npcs.find((n) => n.id === quest.giver);
+    const influence = await rivalry.earn(
+      bud.slug,
+      giver ? turfAt(giver.district, giver.x, giver.y) : undefined,
+      'quest',
+      'zadania',
+    );
     return c.json<CompleteQuestResponse>({
       questId: quest.id,
       xpGained: quest.xp,
@@ -248,6 +263,7 @@ export function createApp(
       level,
       levelUp: level > before,
       item: quest.rewardItem ?? null,
+      influence,
     });
   });
 
@@ -432,20 +448,38 @@ export function createApp(
         409,
       );
     }
-    await store.abandonFights(bud.slug);
+    await rivalry.abandon(bud.slug);
+    const spot = Math.min(input.data!.spot ?? 0, enemy.spots.length - 1);
+    return startFight(c, bud, enemy.id, await fighterOf(bud, true), enemyFighter(enemy), spot);
+  });
+
+  /** The bud's fighter as the server trusts it: worn gear, skills and perks, and running drinks if asked. */
+  const fighterOf = async (bud: BudRecord, withDrinks: boolean) => {
     const slots = await equipmentOf(bud.slug);
     const stats = await statsOf(bud.slug, slots);
     const weapon = slots.held ? catalogItem(slots.held, catalog) : undefined;
-    const [ranks, buffs] = await Promise.all([ranksOf(bud.slug), buffsOf(bud.slug)]);
-    const state = newFight(
-      enemy.id,
-      budFighter(bud.name, bud.xp, stats, weapon, { perks: perksFor(ranks), buffs }),
-      enemyFighter(enemy),
-      randomInt(1, 2 ** 31 - 1),
-    );
+    const [ranks, buffs] = await Promise.all([
+      ranksOf(bud.slug),
+      withDrinks ? buffsOf(bud.slug) : Promise.resolve([]),
+    ]);
+    return budFighter(bud.name, bud.xp, stats, weapon, { perks: perksFor(ranks), buffs });
+  };
+
+  const startFight = async (
+    c: Context,
+    bud: BudRecord,
+    enemyId: string,
+    me: Fighter,
+    them: Fighter,
+    spot?: number,
+  ) => {
+    const state: FightState = { ...newFight(enemyId, me, them, randomInt(1, 2 ** 31 - 1)), spot };
     const id = await store.createFight(bud.slug, state);
-    return c.json<FightResponse>({ fight: view(id, state), events: [], reward: null }, 201);
-  });
+    return c.json<FightResponse>(
+      { fight: view(id, state), events: [], reward: null, influence: null, pvp: null },
+      201,
+    );
+  };
 
   /** One turn: the bud's move, the opponent's answer. A win grants XP, coins and maybe loot, once. */
   app.post('/v1/fights/:id/move', requirePlayer(store), async (c) => {
@@ -471,14 +505,22 @@ export function createApp(
     const conflict = () =>
       c.json<ApiError>({ error: { code: 'fight_busy', message: 'Ruch już został wykonany' } }, 409);
 
+    const done = { fight: view(id.data, state), events, reward: null, influence: null, pvp: null };
     if (state.status === 'active') {
       if (!(await store.saveTurn(bud.slug, id.data, before.turn, state))) return conflict();
-      return c.json<FightResponse>({ fight: view(id.data, state), events, reward: null });
+      return c.json<FightResponse>(done);
+    }
+    // against another bud: no XP or loot, the rating moves and the day's first wins pay coins
+    if (pvpOpponentOf(state.enemyId)) {
+      if (!(await store.finishFight(bud.slug, id.data, before.turn, state, state.status, 0, 0)))
+        return conflict();
+      const { pvp, reward } = await rivalry.finishPvp(bud, state);
+      return c.json<FightResponse>({ ...done, reward, pvp });
     }
     if (state.status === 'lost') {
       if (!(await store.finishFight(bud.slug, id.data, before.turn, state, 'lost', 0, 0)))
         return conflict();
-      return c.json<FightResponse>({ fight: view(id.data, state), events, reward: null });
+      return c.json<FightResponse>(done);
     }
 
     // won: XP for the level gap, coins with luck, loot by the opponent's rarity table
@@ -502,9 +544,19 @@ export function createApp(
     if (loot.itemId) await store.grantItem(bud.slug, loot.itemId, 'reward');
     if (loot.drink) await store.grantConsumable(bud.slug, loot.drink, 1);
     const level = levelFromXp(result.xp).level;
+    const spot = enemy.spots[Math.min(state.spot ?? 0, enemy.spots.length - 1)]!;
+    const influence = await rivalry.earn(
+      bud.slug,
+      turfAt(enemy.district, spot.x, spot.y),
+      'duel',
+      'zwyciestwa',
+      enemy.boss ? 2 : 1,
+    );
     return c.json<FightResponse>({
       fight: view(id.data, state),
       events,
+      influence,
+      pvp: null,
       reward: {
         xpGained,
         xp: result.xp,
@@ -525,8 +577,17 @@ export function createApp(
     const before = id.success ? await store.fight(bud.slug, id.data) : null;
     if (!id.success || !before)
       throw new HTTPException(404, { message: 'Nie ma takiego pojedynku' });
-    if (before.status === 'active')
-      await store.finishFight(bud.slug, id.data, before.turn, before, 'fled', 0, 0);
+    const opponent = pvpOpponentOf(before.enemyId);
+    let pvp: FightResponse['pvp'] = null;
+    if (
+      before.status === 'active' &&
+      (await store.finishFight(bud.slug, id.data, before.turn, before, 'fled', 0, 0)) &&
+      opponent &&
+      before.turn > 0
+    ) {
+      // running from another bud after the first exchange counts as a loss (no dodging a bad rating)
+      pvp = await rivalry.finishPvp(bud, { ...before, status: 'lost' }).then((r) => r.pvp);
+    }
     return c.json<FightResponse>({
       fight: view(id.data, {
         ...before,
@@ -534,6 +595,8 @@ export function createApp(
       }),
       events: [],
       reward: null,
+      influence: null,
+      pvp,
     });
   });
 
@@ -732,7 +795,14 @@ export function createApp(
     if (!result) return c.json<ApiError>(already, 409);
     const before = levelFromXp(bud.xp).level;
     const level = levelFromXp(result.xp).level;
+    const influence = await rivalry.earn(
+      bud.slug,
+      turfOf(cache.district, cache.map, cache.x, cache.y),
+      'cache',
+      'skrytki',
+    );
     return c.json<OpenCacheResponse>({
+      influence,
       cacheId: cache.id,
       coinsGained: coins,
       coins: result.coins,
@@ -838,7 +908,18 @@ export function createApp(
     }
     const after = await ranksOf(bud.slug);
     const had = new Set(perksFor(before));
+    // a round that scored at all counts in the turf where the spot stands
+    const influence =
+      input.data.score > 0
+        ? await rivalry.earn(
+            bud.slug,
+            turfOf(spot.district, spot.map, spot.x, spot.y),
+            'training',
+            'trening',
+          )
+        : null;
     return c.json<TrainResponse>({
+      influence,
       spotId: spot.id,
       skill: spot.skill,
       xpGained,
@@ -980,6 +1061,10 @@ export function createApp(
     if (!bud) throw new HTTPException(404, { message: 'Bud not found' });
     return c.json<BudResponse>({ bud });
   });
+
+  // ---------- rywalizacja: turfs, rankings, crews, PvP, market ----------
+
+  rivalry.routes(app, { fighterOf, startFight });
 
   app.notFound((c) =>
     c.json<ApiError>({ error: { code: 'not_found', message: 'Not found' } }, 404),

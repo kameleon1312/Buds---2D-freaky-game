@@ -445,6 +445,38 @@ const ICONS_UI: Record<string, Icon> = {
   },
 };
 
+// Rywalizacja: the HUD button (a spray can that crowned its turf) and the ruler's crown.
+ICONS_UI.rewiry = {
+  body:
+    // a tag sprayed on the wall behind
+    stroke('M8 46Q14 36 20 44T32 40', '#a3e635', 5) +
+    stroke('M8 46Q14 36 20 44T32 40', LINE, 1.5, 0.5) +
+    // the can
+    shaded(rr(26, 22, 20, 34, 4), ['#4cc7ff', '#1b86c9'], LINE, -3, -2) +
+    flat(rr(26, 30, 20, 9, 1), '#f6f2e9', LINE, 2) +
+    shaded(rr(30, 14, 12, 9, 2), ['#b7bec9', '#8a929e'], LINE, -1, -1, 2.5) +
+    flat(rr(33, 9, 6, 6, 1.5), '#ff3d50', LINE, 2) +
+    // spray mist from the nozzle
+    [
+      [24, 10, 1.6],
+      [20, 13, 1.2],
+      [18, 8, 1],
+      [22, 6, 1],
+    ]
+      .map(([x, y, r]) => flat(circ(x!, y!, r!), '#a3e635', LINE, 0.8))
+      .join('') +
+    // the crown on top of it all
+    shaded('M40 4L44 12L49 6L53 12L57 4L56 18H41Z', ['#ffe27a', '#ffc93c'], LINE, -2, -2, 2.5),
+};
+ICONS_UI.korona = {
+  body:
+    shaded('M8 48L6 18L20 30L32 10L44 30L58 18L56 48Z', ['#ffe27a', '#ffc93c'], LINE, -4, -4) +
+    flat(rr(8, 46, 48, 8, 3), '#d98a0b', LINE, 2.5) +
+    flat(circ(32, 36, 5), '#ff3d50', LINE, 2) +
+    flat(circ(18, 40, 3), '#4cc7ff', LINE, 1.5) +
+    flat(circ(46, 40, 3), '#a3e635', LINE, 1.5),
+};
+
 export const ICONS = {
   items: { ...GEAR_ICONS, ...RIDE_ICONS, ...ICONS_ITEMS },
   skills: ICONS_SKILLS,

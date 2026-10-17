@@ -3,11 +3,11 @@ using System;
 namespace Buds.Quests
 {
     /// <summary>
-    /// The training mini-game as plain logic: a marker sweeps a bar back and forth, the player stops it inside the
+    /// Skupienie (Spryt's training, ITrainingGame): a marker sweeps a bar back and forth, the player stops it inside the
     /// green zone. Five rounds; every round the zone shrinks and the marker speeds up. The score (hits) goes to the
     /// server, which turns it into training XP.
     /// </summary>
-    public sealed class TimingGame
+    public sealed class TimingGame : ITrainingGame
     {
         public const float StartWidth = 0.26f;
         public const float WidthStep = 0.03f;
@@ -16,6 +16,7 @@ namespace Buds.Quests
 
         readonly Random rng;
         int dir = 1;
+        int feedback;
 
         public int Rounds { get; }
         public int Round { get; private set; }
@@ -65,6 +66,7 @@ namespace Buds.Quests
             if (Done) return false;
             LastHit = Marker >= ZoneMin && Marker <= ZoneMax;
             if (LastHit) Score++;
+            feedback = LastHit ? 1 : -1;
             Round++;
             if (!Done) NextZone();
             return LastHit;
@@ -75,6 +77,26 @@ namespace Buds.Quests
             ZoneWidth = Math.Max(0.08f, StartWidth - WidthStep * Round);
             Speed = StartSpeed + SpeedStep * Round;
             ZoneCenter = 0.2f + (float)rng.NextDouble() * 0.6f;
+        }
+
+        void ITrainingGame.Press(int action) => Press();
+
+        public void Release(int action)
+        {
+        }
+
+        public int TakeFeedback()
+        {
+            var f = feedback;
+            feedback = 0;
+            return f;
+        }
+
+        /// <summary>Stops the marker as soon as it is well inside the zone.</summary>
+        public void Bot(float dt)
+        {
+            Tick(dt);
+            if (!Done && Math.Abs(Marker - ZoneCenter) < ZoneWidth * 0.2f) Press();
         }
 
         /// <summary>Puts the marker somewhere (tests and the autopilot).</summary>

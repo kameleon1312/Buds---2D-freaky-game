@@ -193,6 +193,7 @@ namespace Buds.Core
             SetUpCaches();
             SetUpMap();
             SetUpFights();
+            SetUpRivalry();
             // dev/test: start in another district (-buds-district las-palmas)
             // new buds start on the tutorial island; -buds-district <id> starts elsewhere (dev/test)
             LoadDistrict(CommandLine.Get("-buds-district") ?? StartMap(), null);
@@ -223,7 +224,8 @@ namespace Buds.Core
             player.Blocked = (x, y) => !map.IsWalkable(x, map.Height - 1 - y);
             // strolling NPCs stop for the player and stand still while anyone talks or a screen is open
             questWorld.PlayerFeet = () => player ? (Vector2?)player.transform.position : null;
-            questWorld.Busy = () => ui.DialogOpen || (fightScreen?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false);
+            questWorld.Busy = () => ui.DialogOpen || (fightScreen?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
+                                    (rivalryScreen?.IsOpen ?? false);
             // walking into a room you face into it; stepping out of one you face the street
             if (map.IsInterior) player.Look(Vector2.up);
             else if (map.Doors.Exists(d => d.Target == fromDistrict)) player.Look(Vector2.down);
@@ -239,6 +241,8 @@ namespace Buds.Core
             atExit = map.ExitAt(at.x, at.y);
             atZone = map.ZoneAt(at.x, at.y);
             ui.ShowToast(map.IsInterior || atZone == null ? map.Name : $"{map.Name} · {atZone.Name}");
+            // who rules the turfs here this week (the zone banner, the tribute dot on the Rewiry button)
+            _ = RefreshTurfs();
         }
 
         void Update()
@@ -249,13 +253,14 @@ namespace Buds.Core
             if (travelling) return;
             var input = player.Input;
             input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
-                            (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false);
+                            (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false);
             if (UpdateFight()) return;
             if (UpdateRidesAndTraining(input)) return;
             ui.UpdateStick(input);
 
             if (UpdateMapScreen(input)) return;
             if (UpdatePanel(input)) return;
+            if (UpdateRivalry(input)) return;
 
             // quest offers wait for a choice: E / Enter accepts, Esc / Q declines, or tap a button
             if (ui.ChoiceOpen)
@@ -304,7 +309,7 @@ namespace Buds.Core
             var zone = world.Map.ZoneAt(cell.x, cell.y);
             if (zone == atZone) return;
             atZone = zone;
-            if (zone != null) ui.ShowToast(zone.Name);
+            if (zone != null) ui.ShowToast(ZoneLine(zone));
         }
 
         /// <summary>Walking onto a road out of the map travels to that district, or says why you can't yet.</summary>
@@ -480,6 +485,7 @@ namespace Buds.Core
                 if (CommandLine.Has("-buds-tutorial-demo")) await TutorialDemo(Shot);
                 if (CommandLine.Has("-buds-quest-demo")) await QuestDemo(Shot);
                 if (CommandLine.Has("-buds-life-demo")) await LifeDemo(dir);
+                if (CommandLine.Has("-buds-training-demo")) await TrainingDemo(Shot);
 
                 // tour: every zone of every district (or just the current one without -buds-tour)
                 var districts = CommandLine.Has("-buds-tour") ? Districts.All : new[] { Districts.Get(world.Map.Id) };
@@ -505,6 +511,11 @@ namespace Buds.Core
 
                 if (CommandLine.Has("-buds-gear-demo") && session != null) await GearDemo(Shot);
                 if (CommandLine.Has("-buds-ride-demo") && session != null) await RideDemo(Shot);
+                if (CommandLine.Has("-buds-rivalry-demo") && session != null)
+                {
+                    if (world.Map.Id != Districts.Start) LoadDistrict(Districts.Start, null);
+                    await RivalryDemo(Shot);
+                }
                 if (CommandLine.Has("-buds-fight-demo") && session != null)
                 {
                     if (world.Map.Id != Districts.Start) LoadDistrict(Districts.Start, null);

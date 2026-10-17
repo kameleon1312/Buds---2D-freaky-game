@@ -8,6 +8,7 @@ import {
   createBudResponseSchema,
   leaderboardResponseSchema,
   pairCodeResponseSchema,
+  rankingResponseSchema,
   type BudRecord,
   type CreateBudInput,
   type CreateBudResponse,
@@ -78,6 +79,17 @@ export async function getLeaderboard(limit = 50): Promise<BudRecord[]> {
     next: { revalidate: 30 },
   });
   return buds;
+}
+
+/** The week's rivalry rankings; null while the API doesn't have them (an older deploy) or is waking up. */
+export async function getRanking(): Promise<z.infer<typeof rankingResponseSchema> | null> {
+  try {
+    return await request('/v1/rivalry/ranking', rankingResponseSchema, {
+      next: { revalidate: 30 },
+    });
+  } catch {
+    return null;
+  }
 }
 
 // ---------- browser ----------

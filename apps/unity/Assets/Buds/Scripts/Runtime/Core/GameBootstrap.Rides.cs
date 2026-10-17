@@ -149,10 +149,40 @@ namespace Buds.Core
             var skill = Array.Find(quests.Content.skills, s => s.id == spot.skill)?.name ?? spot.skill;
             activeTraining = spot;
             ui.SetHint(null);
-            trainingScreen.Open(spot, skill, quests.Content.trainingMaxScore);
+            trainingScreen.Open(spot, skill, quests.Content.trainingMaxScore, sheet);
         }
 
         TrainingSpotData activeTraining;
+
+        /// <summary>
+        /// Autopilot (-buds-training-demo): every skill's mini-game at a real spot of its skill, played by the bot, with a
+        /// shot mid-game and one of the result. Nothing is sent (no active spot), so no cooldown is spent.
+        /// </summary>
+        async Awaitable TrainingDemo(Func<string, Awaitable> shot)
+        {
+            foreach (var skill in new[] { "walka", "flow", "graffiti", "surfing", "przetrwanie", "spryt" })
+            {
+                var spot = Array.Find(quests.Content.training, t => t.skill == skill);
+                if (spot == null) continue;
+                activeTraining = null;
+                var skillName = Array.Find(quests.Content.skills, s => s.id == skill)?.name ?? skill;
+                trainingScreen.Open(spot, skillName, quests.Content.trainingMaxScore, sheet);
+                var mid = false;
+                for (var t = 0f; t < 60 && !trainingScreen.Finished; t += Time.deltaTime)
+                {
+                    trainingScreen.BotTick(Time.deltaTime);
+                    if (!mid && trainingScreen.Game.Round >= 2)
+                    {
+                        mid = true;
+                        await shot($"t-{skill}-gra.png");
+                    }
+                    await Awaitable.NextFrameAsync();
+                }
+                await shot($"t-{skill}-wynik.png");
+                Debug.Log($"[AutoPilot] training {skill} ({trainingScreen.Kind}): {trainingScreen.Game.Score}/{trainingScreen.Game.Rounds}");
+                trainingScreen.Close();
+            }
+        }
 
         /// <summary>Sends the score; returns the line the screen shows (XP, a new rank, unlocked abilities).</summary>
         async Awaitable<string> FinishTraining(int score)
@@ -181,6 +211,9 @@ namespace Buds.Core
                     ui.ShowToast($"Wyjątkowa umiejętność: {perk?.name ?? id}!", 3.5f);
                 }
                 if (BuffActive("skupienie")) text += "\n<size=18>Skupienie: podwójne XP</size>";
+                var influence = Rivalry.InfluenceLine(res.influence);
+                if (influence != null) text += $"\n<color=#5d9a12>{influence}</color>";
+                OnInfluence(res.influence, false);
                 return text;
             }
             catch (ApiException e)
@@ -328,18 +361,20 @@ namespace Buds.Core
                 await shot("r5-stanowisko.png");
                 player.Input.PressInteract();
                 await Awaitable.WaitForSecondsAsync(0.4f);
-                for (var round = 0; round < 5 && trainingScreen.IsOpen && !trainingScreen.Game.Done; round++)
+                // the bot plays the spot's mini-game; a shot halfway through
+                var shotTaken = false;
+                for (var t = 0f; t < 60 && trainingScreen.IsOpen && !trainingScreen.Finished; t += Time.deltaTime)
                 {
-                    await Awaitable.WaitForSecondsAsync(0.3f);
-                    var g = trainingScreen.Game;
-                    // four hits and one miss
-                    g.SetMarker(round == 2 ? (g.ZoneMax + 0.1f > 1 ? g.ZoneMin - 0.1f : g.ZoneMax + 0.1f) : g.ZoneCenter);
-                    if (round == 1) await shot("r6-trening.png");
-                    trainingScreen.Press();
+                    trainingScreen.BotTick(Time.deltaTime);
+                    if (!shotTaken && trainingScreen.Game.Round >= 2)
+                    {
+                        shotTaken = true;
+                        await shot("r6-trening.png");
+                    }
+                    await Awaitable.NextFrameAsync();
                 }
-                for (var i = 0; i < 50 && !trainingScreen.Finished; i++) await Awaitable.WaitForSecondsAsync(0.1f);
                 await shot("r7-trening-wynik.png");
-                trainingScreen.Press();
+                trainingScreen.Close();
             }
 
             await OpenPanel();

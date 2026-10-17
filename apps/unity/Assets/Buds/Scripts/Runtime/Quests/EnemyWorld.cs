@@ -10,6 +10,8 @@ namespace Buds.Quests
     {
         public EnemyData Data { get; private set; }
         public BudSheet Sheet { get; private set; }
+        /// <summary>Which of the opponent's spots this is (the turf a duel here counts for).</summary>
+        public int Spot { get; private set; }
         SpriteRenderer body;
         SpriteRenderer marker;
         BoxCollider2D box;
@@ -18,7 +20,7 @@ namespace Buds.Quests
 
         public bool Available => Time.time >= hiddenUntil;
 
-        public static EnemyView Spawn(EnemyData data, BudSheet sheet, Vector3 feet, Transform parent, Sprite markerSprite)
+        public static EnemyView Spawn(EnemyData data, BudSheet sheet, Vector3 feet, Transform parent, Sprite markerSprite, int spot = 0)
         {
             var go = new GameObject("Enemy " + data.id);
             go.transform.SetParent(parent, false);
@@ -26,6 +28,7 @@ namespace Buds.Quests
             var view = go.AddComponent<EnemyView>();
             view.Data = data;
             view.Sheet = sheet;
+            view.Spot = spot;
             // 2.5D: a shadow on the ground, the body and its marker stand up towards the camera
             WorldView.Shadow(go.transform, 0.9f);
             var visual = WorldView.StandCharacter(go.transform);
@@ -97,10 +100,10 @@ namespace Buds.Quests
                     continue;
                 }
                 var sheet = new BudSheet(tex);
-                foreach (var spot in e.spots)
+                for (var i = 0; i < e.spots.Length; i++)
                 {
-                    var feet = world.CellCenter(spot.x, spot.y) + new Vector3(0, -0.3f, 0);
-                    ew.enemies.Add(EnemyView.Spawn(e, sheet, feet, ew.transform, marker));
+                    var feet = world.CellCenter(e.spots[i].x, e.spots[i].y) + new Vector3(0, -0.3f, 0);
+                    ew.enemies.Add(EnemyView.Spawn(e, sheet, feet, ew.transform, marker, i));
                 }
             }
             return ew;

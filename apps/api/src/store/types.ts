@@ -16,7 +16,7 @@ export type ClaimResult = 'ok' | 'mine' | 'taken';
 /**
  * A bud can have several player tokens (web browser, phone app…). Only sha256 hashes are stored.
  */
-export interface BudStore {
+export interface BudStore extends RivalryStore {
   /** `userId`: the account creating it (signed in on the website), if any. */
   create(input: CreateBudInput, tokenHash: string, userId?: string): Promise<BudRecord>;
   getBySlug(slug: string): Promise<BudRecord | null>;
@@ -81,8 +81,8 @@ export interface BudStore {
   claimBud(slug: string, userId: string): Promise<ClaimResult>;
   /** Starts a duel; returns its id. */
   createFight(slug: string, state: FightState): Promise<string>;
-  /** Ends any duel the bud left unfinished (status "fled", no reward). */
-  abandonFights(slug: string): Promise<void>;
+  /** Ends any duel the bud left unfinished (status "fled", no reward); the ones it ended, with their last turn. */
+  abandonFights(slug: string): Promise<{ enemyId: string; turn: number }[]>;
   fight(slug: string, id: string): Promise<FightState | null>;
   /** Saves a played turn if the fight is still active at `turn`; false on a race or retry. */
   saveTurn(slug: string, id: string, turn: number, state: FightState): Promise<boolean>;
@@ -126,4 +126,143 @@ export interface BudStore {
   useConsumable(slug: string, itemId: string, buff: string, seconds: number): Promise<Date | null>;
   /** Boosts with their end (also ended ones; the API filters by time). */
   buffs(slug: string): Promise<{ buff: string; until: Date }[]>;
+}
+
+// ---------- rywalizacja (packages/shared rivalry.ts, migration 20261017000000_rivalry.sql) ----------
+
+export type InfluenceResult = { gained: number; total: number; captured: boolean };
+export type CrewStatus = 'ok' | 'in_crew' | 'taken' | 'full' | 'unknown';
+export type ListStatus = 'ok' | 'not_owned' | 'worn' | 'too_many';
+export type MarketBuyStatus = 'ok' | 'gone' | 'own' | 'owned' | 'poor';
+export type ListingRecord = {
+  id: string;
+  itemId: string;
+  price: number;
+  seller: { slug: string; name: string };
+  createdAt: string;
+};
+
+/** Weekly turfs, challenges, crews, PvP and the market. Every write is atomic (SQL functions in Supabase). */
+export interface RivalryStore {
+  /**
+   * Influence for something done in a turf, capped per bud, turf and day; also counts the week's `challenge`.
+   * `captured`: the bud rules the turf now (at least `min` points, first there on a tie) and didn't before.
+   */
+  addInfluence(
+    slug: string,
+    turf: string,
+    week: string,
+    day: string,
+    points: number,
+    cap: number,
+    min: number,
+    challenge: string | null,
+  ): Promise<InfluenceResult>;
+  /** Counts a weekly challenge on its own (PvP wins). */
+  bumpChallenge(slug: string, week: string, challenge: string): Promise<number>;
+  /** Every bud's influence this week in these turfs, best first (ties: first there first). */
+  turfBoards(
+    turfs: readonly string[],
+    week: string,
+  ): Promise<{ turf: string; slug: string; name: string; points: number }[]>;
+  /** The ruler collects today's tribute; the new coin balance, or null (not the ruler / already collected). */
+  claimTribute(
+    slug: string,
+    turf: string,
+    week: string,
+    day: string,
+    coins: number,
+    min: number,
+  ): Promise<number | null>;
+  /** Turfs whose tribute the bud collected on `day`. */
+  tributesClaimed(slug: string, day: string): Promise<string[]>;
+  /** Settles a finished week once (titles and coins for its winners); false when already settled. */
+  settleWeek(
+    week: string,
+    min: number,
+    turfCoins: number,
+    topCoins: readonly number[],
+  ): Promise<boolean>;
+  titles(slug: string): Promise<{ week: string; title: string }[]>;
+  /** Buds by total influence this week, best first. */
+  weekTotals(
+    week: string,
+    limit: number,
+  ): Promise<{ slug: string; name: string; xp: number; points: number }[]>;
+  /** A bud's total influence this week and its place (null without points). */
+  weekStanding(slug: string, week: string): Promise<{ points: number; rank: number | null }>;
+  challengeLeaders(
+    week: string,
+    challenge: string,
+    limit: number,
+  ): Promise<{ slug: string; name: string; count: number }[]>;
+  /** The bud's count and place in every challenge it took part in this week. */
+  challengeStanding(
+    slug: string,
+    week: string,
+  ): Promise<{ challenge: string; count: number; rank: number }[]>;
+
+  createCrew(slug: string, name: string, tag: string): Promise<CrewStatus>;
+  joinCrew(slug: string, tag: string, max: number): Promise<CrewStatus>;
+  leaveCrew(slug: string): Promise<boolean>;
+  crewOf(slug: string): Promise<{ tag: string; name: string } | null>;
+  /** A crew with its members, leader first, then by joining. */
+  crewByTag(tag: string): Promise<{
+    tag: string;
+    name: string;
+    members: { slug: string; name: string; xp: number; role: 'leader' | 'member' }[];
+  } | null>;
+  /** Crews by size, then age. */
+  crews(limit: number): Promise<{ tag: string; name: string; members: number }[]>;
+  /** Crew tags of these buds (buds without a crew are absent). */
+  crewTags(slugs: readonly string[]): Promise<Map<string, string>>;
+  /** Crews by their members' influence this week. */
+  crewWeekTotals(
+    week: string,
+    limit: number,
+  ): Promise<{ tag: string; name: string; points: number; members: number }[]>;
+
+  /** PvP ratings of these buds (absent = never fought: the starting rating). */
+  ratings(
+    slugs: readonly string[],
+  ): Promise<Map<string, { rating: number; wins: number; losses: number }>>;
+  /** Buds with XP in the range, for matchmaking. */
+  budsAround(minXp: number, maxXp: number, limit: number): Promise<BudRecord[]>;
+  /** When the bud last challenged each opponent. */
+  pvpLastChallenges(slug: string): Promise<Map<string, Date>>;
+  /** Records a challenge if the rematch cooldown has passed. */
+  pvpChallenge(slug: string, opponent: string, cooldownSeconds: number): Promise<boolean>;
+  /**
+   * The challenger won: ratings move by `delta`; the day's first `paidWins` wins pay `coins` (atomically).
+   * The winner's new rating, wins today, coins paid and coin balance.
+   */
+  pvpWin(
+    winner: string,
+    loser: string,
+    delta: number,
+    day: string,
+    coins: number,
+    paidWins: number,
+  ): Promise<{ rating: number; winsToday: number; paid: number; coins: number }>;
+  /** The challenger lost: ratings move by `delta`; the loser's new rating. */
+  pvpLoss(loser: string, winner: string, delta: number): Promise<number>;
+  pvpLeaders(limit: number): Promise<{ slug: string; name: string; rating: number }[]>;
+  /** PvP wins of the bud on `day` (the paid ones are the first PVP_PAID_WINS). */
+  pvpWinsToday(slug: string, day: string): Promise<number>;
+
+  marketList(
+    slug: string,
+    itemId: string,
+    price: number,
+    max: number,
+  ): Promise<{ status: ListStatus; id?: string }>;
+  marketCancel(slug: string, id: string): Promise<boolean>;
+  marketBuy(
+    slug: string,
+    id: string,
+    fee: number,
+  ): Promise<{ status: MarketBuyStatus; coins: number }>;
+  /** Unsold listings, newest first. */
+  listings(limit: number): Promise<ListingRecord[]>;
+  listing(id: string): Promise<ListingRecord | null>;
 }

@@ -190,7 +190,10 @@ namespace Buds.Core
                 caches.Open(cache.id);
                 if (cacheWorld) cacheWorld.Burst(cache.id);
                 SetXp(res.xp);
-                ui.ShowDialog("Skrytka", $"{cache.text}\n<b>+{Coins(res.coinsGained)}  ·  +{res.xpGained} XP</b>");
+                var influence = Rivalry.InfluenceLine(res.influence);
+                ui.ShowDialog("Skrytka", $"{cache.text}\n<b>+{Coins(res.coinsGained)}  ·  +{res.xpGained} XP</b>" +
+                                         (influence != null ? $"\n<color=#5d9a12><b>{influence}</b></color>" : ""));
+                OnInfluence(res.influence, false);
                 if (res.levelUp) ui.ShowToast($"Awans! Poziom {res.level} (+1 punkt)", 3.5f);
                 else ui.ShowToast($"+{Coins(res.coinsGained)} (masz {res.coins})", 2.4f);
             }

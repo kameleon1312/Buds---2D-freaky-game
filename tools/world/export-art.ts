@@ -8,6 +8,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { ICONS } from './art/icons';
+import { FX } from './art/fx';
 import { ALL_PROPS } from './art/index';
 import { T } from './art/kit';
 
@@ -28,7 +29,33 @@ const SIGN_FONT = {
 };
 
 const args = process.argv.slice(2);
-if (args[0] === '--preview') {
+if (args[0] === '--fx-preview') {
+  // every effect on the duel arena's dark surface, as the player sees them
+  const gap = 30;
+  let x = gap;
+  let y = gap;
+  let rowH = 0;
+  let body = '';
+  const W = 1900;
+  for (const [name, p] of Object.entries(FX)) {
+    if (x + p.w > W) {
+      x = gap;
+      y += rowH + gap + 24;
+      rowH = 0;
+    }
+    body += `<g transform="translate(${x} ${y + 24})">${p.body}</g>`;
+    body += `<text x="${x}" y="${y + 14}" font-family="sans-serif" font-size="18" fill="#a9afbd">${name}</text>`;
+    rowH = Math.max(rowH, p.h);
+    x += p.w + gap;
+  }
+  const H = y + rowH + 60;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#23262f"/>${body}</svg>`;
+  writeFileSync(
+    args[1]!,
+    new Resvg(svg, { font: { ...SIGN_FONT, loadSystemFonts: true } }).render().asPng(),
+  );
+  console.info(`preview of ${Object.keys(FX).length} effects → ${args[1]}`);
+} else if (args[0] === '--preview') {
   const filter = args[2];
   // a filter like "karuzela|mlyn" matches any of its parts
   const parts = filter?.split('|') ?? [];
@@ -116,4 +143,13 @@ if (args[0] === '--preview') {
     }
     console.info(`wrote ${Object.keys(icons).length} icons to ${out}`);
   }
+
+  // duel and rivalry effects: Resources/Ui/Fx/<name>.png, 1 px per unit
+  const fxDir = fileURLToPath(
+    new URL('../../apps/unity/Assets/Buds/Resources/Ui/Fx/', import.meta.url),
+  );
+  mkdirSync(fxDir, { recursive: true });
+  for (const [name, p] of Object.entries(FX))
+    writeFileSync(`${fxDir}${name}.png`, new Resvg(svgOf(p), { font: SIGN_FONT }).render().asPng());
+  console.info(`wrote ${Object.keys(FX).length} effects to ${fxDir}`);
 }

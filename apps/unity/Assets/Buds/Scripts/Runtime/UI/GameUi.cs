@@ -387,6 +387,8 @@ namespace Buds.UI
         const float ButtonH = 66; // the old row height: the toast still sits below it
         const float IconSize = 92;
         const float IconStep = IconSize + 44; // button + caption + gap
+        /// <summary>The second button column (Rewiry) sits this far left of the first; captions are wider than buttons.</summary>
+        const float SecondColumn = IconSize + 72;
         const float BudW = 230, MapW = 180, RideW = 210, Gap = 14;
         /// <summary>Right edge of the left column (player plate, quests) in UI units.</summary>
         const float LeftColumn = 24 + 380;
@@ -417,6 +419,88 @@ namespace Buds.UI
             mapButton = button.gameObject;
         }
 
+        GameObject rivalryButton;
+        GameObject rivalryBadge;
+
+        /// <summary>
+        /// "Rewiry": the spray can with a crown, left of "Twój Bud" (the column under it ends above the phone joystick).
+        /// A gold dot on it says a tribute is waiting.
+        /// </summary>
+        public void ShowRivalryButton(Action onClick)
+        {
+            if (rivalryButton) return;
+            var button = UiKit.IconButton("RivalryButton", Root, UiKit.Picture("Ui/rewiry"), "Rewiry  [G]", IconSize, onClick, out _, out _);
+            UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-28 - SecondColumn, -24),
+                new Vector2(IconSize, IconSize), new Vector2(1, 1));
+            button.transform.SetAsFirstSibling();
+            var badge = UiKit.OutlinedBox("Badge", button.transform, UiKit.Gold400, 14);
+            var badgeRt = (RectTransform)badge.transform.parent;
+            UiKit.Place(badgeRt, Vector2.one, new Vector2(8, 8), new Vector2(28, 28), new Vector2(1, 1));
+            rivalryBadge = badgeRt.gameObject;
+            rivalryBadge.SetActive(false);
+            rivalryButton = button.gameObject;
+        }
+
+        public void SetRivalryBadge(bool on)
+        {
+            if (rivalryBadge) rivalryBadge.SetActive(on);
+        }
+
+        GameObject stamp;
+        Image stampArt;
+        Text stampCaption;
+        int stampToken;
+
+        /// <summary>
+        /// A turf taken: "TWÓJ REWIR" is sprayed across the middle of the screen with the turf's name under it, holds,
+        /// and fades. It never blocks a tap.
+        /// </summary>
+        public async Awaitable ShowCapture(string turfName)
+        {
+            if (!stamp)
+            {
+                var rt = UiKit.Rect("Capture", Root);
+                UiKit.Place(rt, new Vector2(0.5f, 0.5f), new Vector2(0, 90), new Vector2(560, 420));
+                stampArt = UiKit.Rect("Art", rt).gameObject.AddComponent<Image>();
+                stampArt.sprite = UiKit.Picture("Ui/Fx/fx-rewir");
+                stampArt.preserveAspect = true;
+                stampArt.raycastTarget = false;
+                stampArt.type = Image.Type.Filled;
+                stampArt.fillMethod = Image.FillMethod.Horizontal;
+                UiKit.Place(stampArt.rectTransform, new Vector2(0.5f, 1), Vector2.zero, new Vector2(560, 330), new Vector2(0.5f, 1));
+                stampCaption = UiKit.Outlined("Name", rt, "", 40, UiKit.Buds400);
+                stampCaption.horizontalOverflow = HorizontalWrapMode.Overflow;
+                UiKit.Place(stampCaption.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 20), new Vector2(560, 60), new Vector2(0.5f, 0));
+                stamp = rt.gameObject;
+            }
+            var token = ++stampToken;
+            stamp.SetActive(true);
+            stamp.transform.SetAsLastSibling();
+            stampCaption.text = turfName;
+            stampArt.color = Color.white;
+            stampCaption.color = UiKit.Buds400;
+            stamp.transform.localEulerAngles = new Vector3(0, 0, UnityEngine.Random.Range(-5f, 3f));
+            // sprayed on left to right, a beat, then gone
+            for (var t = 0f; t < 0.5f; t += Time.unscaledDeltaTime)
+            {
+                if (token != stampToken) return;
+                stampArt.fillAmount = 1 - (1 - t / 0.5f) * (1 - t / 0.5f);
+                stampCaption.color = new Color(UiKit.Buds400.r, UiKit.Buds400.g, UiKit.Buds400.b, Mathf.Clamp01(t / 0.5f));
+                await Awaitable.NextFrameAsync();
+            }
+            stampArt.fillAmount = 1;
+            await Awaitable.WaitForSecondsAsync(1.6f);
+            for (var t = 0f; t < 0.4f; t += Time.unscaledDeltaTime)
+            {
+                if (token != stampToken) return;
+                var a = 1 - t / 0.4f;
+                stampArt.color = new Color(1, 1, 1, a);
+                stampCaption.color = new Color(UiKit.Buds400.r, UiKit.Buds400.g, UiKit.Buds400.b, a);
+                await Awaitable.NextFrameAsync();
+            }
+            if (token == stampToken) stamp.SetActive(false);
+        }
+
         GameObject rideButton;
         Text rideLabel;
         Image rideIcon;
@@ -442,10 +526,10 @@ namespace Buds.UI
         {
             if (!buffLine)
             {
-                // left of the button column, right aligned
+                // left of both button columns, right aligned
                 buffLine = UiKit.Outlined("Buffs", Root, "", 24, UiKit.Gold400);
                 buffLine.alignment = TextAnchor.UpperRight;
-                UiKit.Place(buffLine.rectTransform, new Vector2(1, 1), new Vector2(-28 - IconSize - 24, -30), new Vector2(560, 34),
+                UiKit.Place(buffLine.rectTransform, new Vector2(1, 1), new Vector2(-28 - SecondColumn - IconSize - 24, -30), new Vector2(560, 34),
                     new Vector2(1, 1));
                 buffLine.transform.SetAsFirstSibling();
             }

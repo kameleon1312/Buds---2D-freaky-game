@@ -596,7 +596,7 @@ export const DZIKA_PUSZCZA: {
       skill: 'przetrwanie',
       name: 'Tor przeszkód harcerzy',
       look: 'tor',
-      hint: 'Skacz nad przeszkodami w samą porę.',
+      hint: 'Płotki przeskakuj, pod belkami się prześlizgnij.',
     },
   ],
 };

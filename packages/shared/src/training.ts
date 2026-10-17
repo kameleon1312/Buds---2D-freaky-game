@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { influenceSchema } from './influence';
 import { skillIdSchema, TRAINING_MAX_SCORE } from './skills';
 
 /**
@@ -58,5 +59,7 @@ export const trainResponseSchema = z.object({
   perksUnlocked: z.array(z.string()),
   /** Seconds before this spot can be used again. */
   cooldown: z.number().int().nonnegative(),
+  /** Influence earned in the turf where it happened (none outside turfs). */
+  influence: influenceSchema.nullable().default(null),
 });
 export type TrainResponse = z.infer<typeof trainResponseSchema>;

@@ -176,6 +176,7 @@ namespace Buds.Api
         public int level;
         public bool levelUp;
         public string item;
+        public InfluenceDto influence;
     }
 
     [Serializable]
@@ -223,6 +224,7 @@ namespace Buds.Api
         public bool rankUp;
         public string[] perksUnlocked;
         public int cooldown;
+        public InfluenceDto influence;
     }
 
     [Serializable]
@@ -270,6 +272,7 @@ namespace Buds.Api
         public int xp;
         public int level;
         public bool levelUp;
+        public InfluenceDto influence;
     }
 
     /// <summary>Worn item per slot ("" or null = empty). Stats are recomputed in the game (Gear.Stats).</summary>
@@ -405,6 +408,8 @@ namespace Buds.Api
         public FightDto fight;
         public TurnEventDto[] events;
         public FightRewardDto reward;
+        public InfluenceDto influence;
+        public PvpResultDto pvp;
     }
 
     [Serializable]

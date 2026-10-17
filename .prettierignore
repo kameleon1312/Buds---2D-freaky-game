@@ -3,3 +3,4 @@ pnpm-lock.yaml
 dist
 coverage
 apps/unity
+packages/shared/src/turfs.ts

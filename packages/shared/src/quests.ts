@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { influenceSchema } from './influence';
 import { budLookSchema } from './bud/look';
 import { cacheProblems, cacheSchema } from './caches';
 import { enemySchema } from './combat';
@@ -220,5 +221,7 @@ export const completeQuestResponseSchema = z.object({
   levelUp: z.boolean(),
   /** Item granted with the quest, if any. */
   item: z.string().nullable(),
+  /** Influence earned in the turf where it happened (none outside turfs). */
+  influence: influenceSchema.nullable().default(null),
 });
 export type CompleteQuestResponse = z.infer<typeof completeQuestResponseSchema>;

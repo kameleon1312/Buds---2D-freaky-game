@@ -923,6 +923,102 @@ h3 {
   text-align: right;
 }
 
+/* rows without a sprite (weekly rankings) */
+.board-row-plain {
+  grid-template-columns: 40px minmax(0, 1fr) 96px;
+}
+
+.crew-tag {
+  font-weight: 900;
+  font-size: 0.85em;
+  color: var(--rep-600);
+  white-space: nowrap;
+}
+
+.week-clock {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-m);
+  background: var(--surface-800);
+  color: var(--text-on-dark);
+}
+
+.week-clock strong {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  color: var(--buds-400);
+}
+
+.rank-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.rank-tabs .chip {
+  text-decoration: none;
+  padding-inline: var(--space-3);
+}
+
+.challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.challenge-card {
+  padding: var(--space-4);
+}
+
+.challenge-card h2 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.2rem;
+}
+
+.mini-board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mini-board li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mini-board .board-rank {
+  height: 28px;
+  font-size: 0.95rem;
+}
+
+.mini-board a {
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-count {
+  font-weight: 900;
+  text-align: right;
+}
+
+.mini-count small {
+  display: block;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
 .empty {
   padding: var(--space-8);
   text-align: center;

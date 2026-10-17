@@ -58,10 +58,12 @@ namespace Buds.Core
             fightBusy = true;
             try
             {
-                var res = await api.StartFight(session.Token, enemy.Data.id);
+                var res = await api.StartFight(session.Token, enemy.Data.id, enemy.Spot);
                 currentFight = res.fight;
                 fightingWith = enemy;
                 lastReward = null;
+                lastPvp = null;
+                lastInfluence = null;
                 var line = enemy.Data.lines.Length > 0 ? enemy.Data.lines[0] : "";
                 fightScreen.Open(res.fight, sheet, enemy.Sheet, line);
             }
@@ -90,6 +92,8 @@ namespace Buds.Core
                     fightScreen.SetBusy(false);
                     return;
                 }
+                lastPvp = res.pvp != null && res.pvp.Present ? res.pvp : null;
+                lastInfluence = res.influence != null && res.influence.Present ? res.influence : null;
                 if (res.fight.status == "won")
                 {
                     lastReward = res.reward;
@@ -101,7 +105,7 @@ namespace Buds.Core
                         if (quests.Duel(fightingWith.Data.id)) ui.ShowToast("Cel zadania osiągnięty!", 2.5f);
                     }
                 }
-                fightScreen.ShowResult(res.fight, res.reward);
+                fightScreen.ShowResult(res.fight, res.reward, lastInfluence, lastPvp);
             }
             catch (ApiException e)
             {
@@ -120,9 +124,11 @@ namespace Buds.Core
             fightBusy = true;
             try
             {
+                // the result first, then the screen's busy state: a flee mid-turn waits for the turn to finish
                 var res = await api.Flee(session.Token, currentFight.id);
                 currentFight = res.fight;
-                fightScreen.ShowResult(res.fight, res.reward);
+                lastPvp = res.pvp != null && res.pvp.Present ? res.pvp : null;
+                fightScreen.ShowResult(res.fight, res.reward, null, lastPvp);
             }
             catch (ApiException e)
             {
@@ -137,11 +143,28 @@ namespace Buds.Core
         void CloseFight()
         {
             fightScreen.Hide();
+            if (currentFight?.enemyId != null && currentFight.enemyId.StartsWith("pvp-"))
+            {
+                // back to the list of rivals, with the rating as it stands now (no change when fled before a blow)
+                if (lastPvp != null)
+                {
+                    var delta = lastPvp.delta >= 0 ? $"+{lastPvp.delta}" : lastPvp.delta.ToString();
+                    ui.ShowToast($"{delta} pkt rankingu · liga {lastPvp.league}", 3f);
+                }
+                lastPvp = null;
+                lastReward = null;
+                OpenRivalry(RivalryScreen.TabPvp);
+                return;
+            }
+            var influence = lastInfluence;
+            lastInfluence = null;
             if (lastReward == null) return;
             var item = string.IsNullOrEmpty(lastReward.item) ? null : quests.Content.Item(lastReward.item);
+            var earned = influence != null && influence.gained > 0 ? $" · +{influence.gained} wpływu" : "";
             if (lastReward.levelUp) ui.ShowToast($"Awans! Poziom {lastReward.level} (+1 punkt)", 3.5f);
             else if (item != null) ui.ShowToast($"Łup: {item.name}. Załóż w Ekwipunku.", 3f);
-            else ui.ShowToast($"+{lastReward.xpGained} XP · +{Coins(lastReward.coinsGained)}", 2.5f);
+            else ui.ShowToast($"+{lastReward.xpGained} XP · +{Coins(lastReward.coinsGained)}{earned}", 2.5f);
+            OnInfluence(influence, false);
             lastReward = null;
         }
 
@@ -159,6 +182,11 @@ namespace Buds.Core
             Teleport(Mathf.FloorToInt(target.transform.position.x), cell + 1);
             await Awaitable.WaitForSecondsAsync(0.5f);
             await shot("f0-opponent.png");
+            var moments = 0;
+            fightScreen.Moment = async name =>
+            {
+                if (moments++ < 4) await shot($"f-moment-{moments}-{name}.png");
+            };
             await StartDuel(target);
             await Awaitable.WaitForSecondsAsync(0.3f);
             await shot("f0b-intro.png");
@@ -179,6 +207,7 @@ namespace Buds.Core
             }
             await Awaitable.WaitForSecondsAsync(0.4f);
             await shot("f4-result.png");
+            fightScreen.Moment = null;
             CloseFight();
             Debug.Log($"[AutoPilot] duel with {target.Data.id}: {currentFight?.status}");
         }

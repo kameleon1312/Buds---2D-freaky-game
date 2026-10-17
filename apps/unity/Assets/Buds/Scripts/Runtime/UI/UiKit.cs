@@ -488,6 +488,37 @@ namespace Buds.UI
         }
 
         /// <summary>Filled disc sprite for the joystick.</summary>
+        static Sprite arrow;
+
+        /// <summary>A white arrow pointing right; rotate it for the other directions (the font has no arrow glyphs).</summary>
+        public static Sprite Arrow => arrow ??= MakeArrow();
+
+        static Sprite MakeArrow()
+        {
+            const int size = 64;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear };
+            var pixels = new Color32[size * size];
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                // 4×4 supersampling for smooth edges
+                var hits = 0;
+                for (var sy = 0; sy < 4; sy++)
+                for (var sx = 0; sx < 4; sx++)
+                {
+                    var px = (x + (sx + 0.5f) / 4) / size;
+                    var py = (y + (sy + 0.5f) / 4) / size - 0.5f;
+                    var shaft = px >= 0.12f && px <= 0.58f && Mathf.Abs(py) <= 0.12f;
+                    var head = px >= 0.5f && px <= 0.9f && Mathf.Abs(py) <= (0.9f - px) * 0.95f;
+                    if (shaft || head) hits++;
+                }
+                pixels[y * size + x] = new Color32(255, 255, 255, (byte)(hits * 255 / 16));
+            }
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return Sprite.Create(tex, new UnityEngine.Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+        }
+
         public static Sprite Circle(int radius)
         {
             var size = radius * 2;

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { influenceSchema } from './influence';
 import { levelFromXp } from './level';
 
 /**
@@ -76,5 +77,7 @@ export const openCacheResponseSchema = z.object({
   xp: z.number().int().nonnegative(),
   level: z.number().int().min(1),
   levelUp: z.boolean(),
+  /** Influence earned in the turf where it happened (none outside turfs). */
+  influence: influenceSchema.nullable().default(null),
 });
 export type OpenCacheResponse = z.infer<typeof openCacheResponseSchema>;

@@ -14,7 +14,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'walka',
     name: 'Worek treningowy',
     look: 'worek',
-    hint: 'Uderzaj, gdy znacznik jest w zielonym polu.',
+    hint: 'Wybij kombinację ciosów, zanim worek wróci.',
   },
   {
     id: 'trening-mz-scena',
@@ -24,7 +24,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'flow',
     name: 'Scena freestyle',
     look: 'scena',
-    hint: 'Rymuj w rytm bitu.',
+    hint: 'Łap bit: każda nuta w swoim torze, równo z linią.',
   },
   {
     id: 'trening-mz-sciana',
@@ -34,7 +34,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'graffiti',
     name: 'Ściana pod garażami',
     look: 'sciana',
-    hint: 'Psikaj, zanim farba spłynie.',
+    hint: 'Trzymaj spray nad otworami szablonu, puszczaj nad maską.',
   },
   {
     id: 'trening-mz-worek',
@@ -45,7 +45,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'walka',
     name: 'Worek przy stadionie',
     look: 'worek',
-    hint: 'Uderzaj, gdy znacznik jest w zielonym polu.',
+    hint: 'Wybij kombinację ciosów, zanim worek wróci.',
   },
   {
     id: 'trening-lp-deska',
@@ -55,7 +55,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'surfing',
     name: 'Deska na piasku',
     look: 'deska',
-    hint: 'Łap równowagę na szczycie fali.',
+    hint: 'Fala buja deską: kontruj, żeby utrzymać równowagę.',
   },
   {
     id: 'trening-lp-tor',
@@ -65,7 +65,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'przetrwanie',
     name: 'Tor w dżungli',
     look: 'tor',
-    hint: 'Skacz nad przeszkodami w samą porę.',
+    hint: 'Płotki przeskakuj, pod belkami się prześlizgnij.',
   },
   {
     id: 'trening-dc-szachy',
@@ -75,7 +75,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'spryt',
     name: 'Szachy w ogrodzie',
     look: 'szachy',
-    hint: 'Wybierz ruch w odpowiedniej chwili.',
+    hint: 'Skup się i zatrzymaj znacznik w zielonym polu.',
   },
   {
     id: 'trening-dc-sciana',
@@ -85,7 +85,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'graffiti',
     name: 'Mur kamienicy',
     look: 'sciana',
-    hint: 'Psikaj, zanim farba spłynie.',
+    hint: 'Trzymaj spray nad otworami szablonu, puszczaj nad maską.',
   },
   {
     id: 'trening-lk-worek',
@@ -95,7 +95,7 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'walka',
     name: 'Worek na siłowni',
     look: 'worek',
-    hint: 'Uderzaj, gdy znacznik jest w zielonym polu.',
+    hint: 'Wybij kombinację ciosów, zanim worek wróci.',
   },
   {
     id: 'trening-lk-tor',
@@ -105,6 +105,6 @@ export const TRAINING_SPOTS: TrainingSpotInput[] = [
     skill: 'przetrwanie',
     name: 'Tor na złomowisku',
     look: 'tor',
-    hint: 'Skacz nad przeszkodami w samą porę.',
+    hint: 'Płotki przeskakuj, pod belkami się prześlizgnij.',
   },
 ];

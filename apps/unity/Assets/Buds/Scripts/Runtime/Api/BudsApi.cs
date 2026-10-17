@@ -146,9 +146,62 @@ namespace Buds.Api
             return Parse<BuyResponse>(req);
         }
 
-        /// <summary>Starts a duel; the server builds both fighters from its own data.</summary>
-        public Awaitable<FightResponse> StartFight(string token, string enemyId) =>
-            Post<FightResponse>("/v1/fights", token, $"{{\"enemyId\":\"{enemyId}\"}}");
+        /// <summary>Starts a duel at one of the opponent's spots (the turf it counts for); the server builds both fighters.</summary>
+        public Awaitable<FightResponse> StartFight(string token, string enemyId, int spot = 0) =>
+            Post<FightResponse>("/v1/fights", token, $"{{\"enemyId\":\"{enemyId}\",\"spot\":{Math.Clamp(spot, 0, 5)}}}");
+
+        // ---------- rywalizacja ----------
+
+        /// <summary>Who rules each turf of a district this week, and this bud's standing there.</summary>
+        public Awaitable<TurfsResponse> GetTurfs(string token, string district) =>
+            Get<TurfsResponse>($"/v1/rivalry/district/{Uri.EscapeDataString(district)}", token);
+
+        public Awaitable<RivalryMeResponse> GetRivalryMe(string token) => Get<RivalryMeResponse>("/v1/rivalry/me", token);
+
+        public Awaitable<RankingResponse> GetRanking(string token) => Get<RankingResponse>("/v1/rivalry/ranking", token);
+
+        /// <summary>The ruler's daily tribute; the server checks who rules and that it wasn't collected today.</summary>
+        public Awaitable<TributeResponse> CollectTribute(string token, string turf) =>
+            Post<TributeResponse>($"/v1/rivalry/turfs/{Uri.EscapeDataString(turf)}/tribute", token, "{}");
+
+        public Awaitable<CrewResponse> GetMyCrew(string token) => Get<CrewResponse>("/v1/buds/me/crew", token);
+
+        public Awaitable<CrewListResponse> GetCrews(string token) => Get<CrewListResponse>("/v1/crews", token);
+
+        public Awaitable<CrewResponse> CreateCrew(string token, string name, string tag) =>
+            Post<CrewResponse>("/v1/crews", token, JsonUtility.ToJson(new CreateCrewRequest { name = name, tag = tag }));
+
+        public Awaitable<CrewResponse> JoinCrew(string token, string tag) =>
+            Post<CrewResponse>($"/v1/crews/{Uri.EscapeDataString(tag)}/join", token, "{}");
+
+        public Awaitable<CrewResponse> LeaveCrew(string token) => Post<CrewResponse>("/v1/crews/leave", token, "{}");
+
+        public Awaitable<PvpOpponentsResponse> GetPvpOpponents(string token) =>
+            Get<PvpOpponentsResponse>("/v1/pvp/opponents", token);
+
+        /// <summary>Challenges another bud's saved fighter; the duel then runs through FightMove like any other.</summary>
+        public Awaitable<FightResponse> StartPvp(string token, string opponentSlug) =>
+            Post<FightResponse>("/v1/pvp/fights", token, $"{{\"opponent\":\"{opponentSlug}\"}}");
+
+        public Awaitable<MarketResponse> GetMarket(string token) => Get<MarketResponse>("/v1/market", token);
+
+        public Awaitable<MarketResponse> Sell(string token, string itemId, int price) =>
+            Post<MarketResponse>("/v1/market", token, JsonUtility.ToJson(new SellRequest { itemId = itemId, price = price }));
+
+        public Awaitable<MarketResponse> BuyListing(string token, string listingId) =>
+            Post<MarketResponse>($"/v1/market/{Uri.EscapeDataString(listingId)}/buy", token, "{}");
+
+        public async Awaitable<MarketResponse> CancelListing(string token, string listingId)
+        {
+            using var req = new UnityWebRequest($"{baseUrl}/v1/market/{Uri.EscapeDataString(listingId)}", UnityWebRequest.kHttpVerbDELETE)
+            {
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await req.SendWebRequest();
+            return Parse<MarketResponse>(req);
+        }
 
         /// <summary>Plays one turn; the server answers with what happened (and the reward on a win).</summary>
         public Awaitable<FightResponse> FightMove(string token, string fightId, string move) =>

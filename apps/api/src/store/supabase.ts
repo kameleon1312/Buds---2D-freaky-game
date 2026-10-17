@@ -7,6 +7,7 @@ import {
   type SlotId,
 } from '@buds/shared';
 import { makeSlug } from './slug.js';
+import { createSupabaseRivalry } from './supabase-rivalry.js';
 import type { BudStore, BuyResult, GemBuyResult } from './types.js';
 
 type BudRow = {
@@ -49,7 +50,22 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
     return row.id;
   }
 
+  async function budsAround(q: { minXp: number; maxXp: number; limit: number }) {
+    const { data, error } = await db
+      .from('buds')
+      .select(COLUMNS)
+      .gte('xp', q.minXp)
+      .lte('xp', q.maxXp)
+      .order('xp', { ascending: false })
+      .order('created_at', { ascending: true })
+      .limit(q.limit);
+    if (error) throw error;
+    return (data as BudRow[]).map(toRecord);
+  }
+
   return {
+    ...createSupabaseRivalry(db, idBySlug, budsAround),
+
     async getBySlug(slug) {
       const row = await rowBySlug(slug);
       return row ? toRecord(row) : null;
@@ -271,12 +287,17 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
     },
 
     async abandonFights(slug) {
-      const { error } = await db
+      const { data, error } = await db
         .from('bud_fights')
         .update({ status: 'fled', finished_at: new Date().toISOString() })
         .eq('bud_id', await idBySlug(slug))
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .select('enemy_id, turn');
       if (error) throw error;
+      return (data as { enemy_id: string; turn: number }[]).map((r) => ({
+        enemyId: r.enemy_id,
+        turn: r.turn,
+      }));
     },
 
     async fight(slug, id) {

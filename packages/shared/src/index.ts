@@ -17,3 +17,4 @@ export * from './premium';
 export * from './combat';
 export * from './account';
 export * from './skills';
+export * from './rivalry';
