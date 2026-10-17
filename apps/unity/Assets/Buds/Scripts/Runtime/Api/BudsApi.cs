@@ -23,6 +23,22 @@ namespace Buds.Api
         const int TimeoutSeconds = 70;
         readonly string baseUrl;
 
+        /// <summary>Requests on their way right now, across every client (the corner spinner shows while any is).</summary>
+        public static int InFlight { get; private set; }
+
+        static async Awaitable Send(UnityWebRequest req)
+        {
+            InFlight++;
+            try
+            {
+                await req.SendWebRequest();
+            }
+            finally
+            {
+                InFlight--;
+            }
+        }
+
         public BudsApi(string baseUrl)
         {
             this.baseUrl = baseUrl.TrimEnd('/');
@@ -37,7 +53,7 @@ namespace Buds.Api
                 timeout = TimeoutSeconds,
             };
             req.SetRequestHeader("Content-Type", "application/json");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<PairResponse>(req);
         }
 
@@ -46,7 +62,7 @@ namespace Buds.Api
             using var req = UnityWebRequest.Get($"{baseUrl}/v1/buds/me");
             req.timeout = TimeoutSeconds;
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<BudResponse>(req).bud;
         }
 
@@ -59,7 +75,7 @@ namespace Buds.Api
                 timeout = 10, // signing out never waits for a sleeping server: the device forgets the token anyway
             };
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             if (req.result != UnityWebRequest.Result.Success && req.responseCode != 401) throw ToException(req);
         }
 
@@ -69,7 +85,7 @@ namespace Buds.Api
             using var req = UnityWebRequest.Get($"{baseUrl}/v1/buds/me/quests");
             req.timeout = TimeoutSeconds;
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<QuestsResponse>(req).completed ?? Array.Empty<string>();
         }
 
@@ -83,7 +99,7 @@ namespace Buds.Api
                 timeout = TimeoutSeconds,
             };
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<CompleteQuestResponse>(req);
         }
 
@@ -104,7 +120,7 @@ namespace Buds.Api
                 timeout = TimeoutSeconds,
             };
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<SkillsResponse>(req);
         }
 
@@ -122,7 +138,7 @@ namespace Buds.Api
                 timeout = TimeoutSeconds,
             };
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<OpenCacheResponse>(req);
         }
 
@@ -142,7 +158,7 @@ namespace Buds.Api
             };
             req.SetRequestHeader("Content-Type", "application/json");
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<EquipmentResponse>(req);
         }
 
@@ -155,7 +171,7 @@ namespace Buds.Api
                 timeout = TimeoutSeconds,
             };
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<BuyResponse>(req);
         }
 
@@ -212,7 +228,7 @@ namespace Buds.Api
                 timeout = TimeoutSeconds,
             };
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<MarketResponse>(req);
         }
 
@@ -253,7 +269,7 @@ namespace Buds.Api
             };
             req.SetRequestHeader("Content-Type", "application/json");
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<T>(req);
         }
 
@@ -263,7 +279,7 @@ namespace Buds.Api
         {
             using var req = UnityWebRequest.Get($"{baseUrl}/v1/look/options");
             req.timeout = TimeoutSeconds;
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<LookOptionsDto>(req);
         }
 
@@ -274,7 +290,7 @@ namespace Buds.Api
                 .TrimEnd('=').Replace('+', '-').Replace('/', '_');
             using var req = UnityWebRequestTexture.GetTexture($"{baseUrl}/v1/look/sheet.png?look={encoded}&scale={scale}", false);
             req.timeout = TimeoutSeconds;
-            await req.SendWebRequest();
+            await Send(req);
             if (req.result != UnityWebRequest.Result.Success) throw ToException(req);
             return DownloadHandlerTexture.GetContent(req);
         }
@@ -285,7 +301,7 @@ namespace Buds.Api
         {
             using var req = UnityWebRequest.Get($"{baseUrl}/v1/auth/config");
             req.timeout = TimeoutSeconds;
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<AuthConfigDto>(req);
         }
 
@@ -303,7 +319,7 @@ namespace Buds.Api
             };
             req.SetRequestHeader("Content-Type", "application/json");
             req.SetRequestHeader("apikey", config.publishableKey);
-            await req.SendWebRequest();
+            await Send(req);
             if (req.result == UnityWebRequest.Result.Success)
                 return JsonUtility.FromJson<SupabaseSessionDto>(req.downloadHandler.text);
             if (req.result == UnityWebRequest.Result.ConnectionError)
@@ -356,7 +372,7 @@ namespace Buds.Api
             };
             req.SetRequestHeader("Content-Type", "application/json");
             if (!string.IsNullOrEmpty(accountToken)) req.SetRequestHeader("Authorization", $"Bearer {accountToken}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<CreateBudResponse>(req);
         }
 
@@ -365,7 +381,7 @@ namespace Buds.Api
             using var req = UnityWebRequest.Get(baseUrl + path);
             req.timeout = TimeoutSeconds;
             req.SetRequestHeader("Authorization", $"Bearer {token}");
-            await req.SendWebRequest();
+            await Send(req);
             return Parse<T>(req);
         }
 
@@ -375,7 +391,7 @@ namespace Buds.Api
             // readable, so BudSheet can build mipmaps from it
             using var req = UnityWebRequestTexture.GetTexture($"{baseUrl}/v1/buds/{Uri.EscapeDataString(slug)}/sheet.png", false);
             req.timeout = TimeoutSeconds;
-            await req.SendWebRequest();
+            await Send(req);
             if (req.result != UnityWebRequest.Result.Success) throw ToException(req);
             return DownloadHandlerTexture.GetContent(req);
         }

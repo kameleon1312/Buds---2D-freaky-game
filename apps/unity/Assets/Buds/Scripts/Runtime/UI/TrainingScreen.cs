@@ -86,11 +86,11 @@ namespace Buds.UI
             root.SetActive(false);
         }
 
-        public void Open(TrainingSpotData spot, string skillName, int rounds, BudSheet sheet = null)
+        public void Open(TrainingSpotData spot, string skillName, int rounds, BudSheet sheet = null, int rank = 0)
         {
             budSheet = sheet;
             kind = TrainingGames.KindFor(spot.skill);
-            game = TrainingGames.For(spot.skill, rounds, Environment.TickCount);
+            game = TrainingGames.For(spot.skill, rounds, Environment.TickCount, rank);
             busy = false;
             finished = false;
             botDriven = false;
@@ -133,7 +133,7 @@ namespace Buds.UI
         static string HowTo(string kind) => kind switch
         {
             "combo" => "Strzałki albo WASD w kolejności z kafelków, zanim skończy się czas.",
-            "rhythm" => "A / S / D (albo przyciski) dokładnie, gdy nuta mija linię. Fraza zalicza się od 3 z 4 nut.",
+            "rhythm" => "A / S / D (albo przyciski), gdy nuta mija linię. Fraza liczy się od 3 z 4 nut; tempo rośnie z rangą Flow.",
             "stencil" => "Trzymaj Spację (albo przycisk) nad otworami, puść nad maską. Liczy się czysta robota.",
             "balance" => "A / D (albo przyciski) popychają deskę. Trzymaj ją w zielonym polu do końca fali.",
             "runner" => "W: skok nad płotkiem, S: ślizg pod belką. Obie przeszkody rundy muszą przejść czysto.",
@@ -463,11 +463,11 @@ namespace Buds.UI
                     var n = g.Notes[i];
                     var ahead = n.Time - g.Clock;
                     var img = noteImages[i];
-                    var visible = n.State != 1 && ahead < RhythmGame.Lead && ahead > -0.5f;
+                    var visible = n.State != 1 && ahead < g.Lead && ahead > -0.5f;
                     img.enabled = visible;
                     if (!visible) continue;
                     var y = top - n.Lane * (laneH + gap) - laneH / 2;
-                    img.rectTransform.anchoredPosition = new Vector2(hitX + ahead / RhythmGame.Lead * (BoardW - hitX - 30), y);
+                    img.rectTransform.anchoredPosition = new Vector2(hitX + ahead / g.Lead * (BoardW - hitX - 30), y);
                     img.color = n.State == -1 ? new Color(0.6f, 0.62f, 0.68f, 0.6f) : tones[n.Lane];
                 }
                 if (g.LastLane >= 0 && (g.LastLane != lastPressLane || pressFlash <= 0))

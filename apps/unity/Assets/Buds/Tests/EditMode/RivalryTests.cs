@@ -88,6 +88,33 @@ namespace Buds.Tests
         }
 
         [Test]
+        public void TheRhythmFollowsTheFlowRankAndStaysPlayable([Values(0, 1, 3, 5)] int rank)
+        {
+            var beginner = new RhythmGame(5, 4, 0);
+            var g = new RhythmGame(5, 4, rank);
+            Assert.LessOrEqual(g.FirstBeat, beginner.FirstBeat);
+            Assert.LessOrEqual(g.Lead, beginner.Lead);
+            // never tighter than a human can press, never two notes closer than a quarter of a second
+            Assert.GreaterOrEqual(g.Window, 0.15f);
+            for (var i = 1; i < g.Notes.Count; i++) Assert.GreaterOrEqual(g.Notes[i].Time - g.Notes[i - 1].Time, 0.44f);
+            Assert.AreEqual(5, PlayBot(g));
+            // a player who presses 0.12 s late every time still clears a beginner's rhythm
+            var late = new RhythmGame(5, 4, 0);
+            var pressed = new HashSet<RhythmGame.Note>();
+            for (var t = 0f; t < 120 && !late.Done; t += Dt)
+            {
+                late.Tick(Dt);
+                foreach (var n in late.Notes)
+                    if (n.State == 0 && !pressed.Contains(n) && late.Clock - n.Time >= 0.12f)
+                    {
+                        pressed.Add(n);
+                        late.Press(n.Lane);
+                    }
+            }
+            Assert.AreEqual(5, late.Score);
+        }
+
+        [Test]
         public void ARhythmPressCountsOnlyNearTheLineAndInItsLane()
         {
             var g = new RhythmGame(5, 9);
@@ -135,6 +162,33 @@ namespace Buds.Tests
                 PlayBot(g);
                 Assert.That(g.Score, Is.InRange(0, 5), s);
             }
+        }
+    }
+
+    public class GearDiffTests
+    {
+        [Test]
+        public void TheEquipToastSaysWhatReallyChanged()
+        {
+            var content = new QuestContent
+            {
+                skills = new[] { new SkillData { id = "walka", name = "Walka" } },
+                stats = System.Array.Empty<StatData>(),
+                items = new[]
+                {
+                    new ItemData { id = "kask", slot = "head", armor = 3, skillBonus = System.Array.Empty<SkillBonusData>() },
+                    new ItemData { id = "rekawice", slot = "hands", attack = 3, armor = 1,
+                        skillBonus = new[] { new SkillBonusData { id = "walka", rank = 1 } } },
+                    new ItemData { id = "czapka-premium", slot = "head", premium = true, skillBonus = System.Array.Empty<SkillBonusData>() },
+                },
+            };
+            var none = Gear.Stats(content, new string[0], new Dictionary<string, int>());
+            var helmet = Gear.Stats(content, new[] { "kask" }, new Dictionary<string, int>());
+            var both = Gear.Stats(content, new[] { "kask", "rekawice" }, new Dictionary<string, int>());
+            var looks = Gear.Stats(content, new[] { "czapka-premium" }, new Dictionary<string, int>());
+            Assert.AreEqual("Pancerz 0 → 3", Gear.Diff(content, none, helmet));
+            Assert.AreEqual("Atak 0 → 3  ·  Pancerz 3 → 4  ·  Walka 0 → 1", Gear.Diff(content, helmet, both));
+            Assert.AreEqual("", Gear.Diff(content, none, looks));
         }
     }
 

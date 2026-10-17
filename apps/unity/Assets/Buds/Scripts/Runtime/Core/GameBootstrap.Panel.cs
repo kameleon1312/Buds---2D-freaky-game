@@ -234,10 +234,14 @@ namespace Buds.Core
             panel.Refresh(panelData);
             try
             {
+                var before = gear;
                 ApplyEquipment(await api.Equip(session.Token, slot, itemId));
                 panelData.Error = null;
                 var item = itemId != null ? quests.Content.Item(itemId) : null;
-                ui.ShowToast(item != null ? $"Założono: {item.name}" : "Zdjęto przedmiot", 2f);
+                // say what it really changed: the same numbers the server uses in duels and caches
+                var diff = Gear.Diff(quests.Content, before, gear);
+                var what = item != null ? $"Założono: {item.name}" : "Zdjęto przedmiot";
+                ui.ShowToast(diff.Length > 0 ? $"{what}  ·  {diff}" : what, 3.5f);
             }
             catch (ApiException e)
             {

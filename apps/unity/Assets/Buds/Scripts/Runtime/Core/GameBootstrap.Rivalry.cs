@@ -281,7 +281,7 @@ namespace Buds.Core
                 lastReward = null;
                 lastPvp = null;
                 lastInfluence = null;
-                fightScreen.Open(res.fight, sheet, theirs, "Pokaż, co potrafisz.");
+                fightScreen.Open(res.fight, sheet, theirs, "Pokaż, co potrafisz.", gear);
             }
             catch (ApiException e)
             {

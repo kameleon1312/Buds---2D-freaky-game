@@ -19,7 +19,7 @@ namespace Buds.Tests
             var shoes = Content.Item("buty-sprintery");
             Assert.IsNotNull(shoes);
             Assert.AreEqual("feet", shoes.slot);
-            Assert.AreEqual(10, shoes.speed);
+            Assert.AreEqual(6, shoes.speed);
             Assert.IsTrue(shoes.shop);
             Assert.IsTrue(shoes.IsGear);
             Assert.IsFalse(Content.Item("outfit-bluza").IsGear, "looks are not gear");
@@ -45,7 +45,7 @@ namespace Buds.Tests
         public void AddsUpWornItems()
         {
             var s = Gear.Stats(Content, new[] { "buty-sprintery", "spodnie-dresy", "bluza-kewlar" }, NoRanks);
-            Assert.AreEqual(12, s.Speed);
+            Assert.AreEqual(8, s.Speed); // Sprintery Błysk +6, Dresy +2
             Assert.AreEqual(8, s.Armor);
             Assert.AreEqual(0, s.Luck);
         }
@@ -71,7 +71,7 @@ namespace Buds.Tests
         [Test]
         public void DescribesWhatAnItemGives()
         {
-            Assert.AreEqual("+10% Szybkość", Gear.Describe(Content, Content.Item("buty-sprintery")));
+            Assert.AreEqual("+6% Szybkość", Gear.Describe(Content, Content.Item("buty-sprintery")));
             StringAssert.Contains("+1 Spryt", Gear.Describe(Content, Content.Item("plecak-szperacz")));
             Assert.AreEqual("Bez bonusów", Gear.Describe(Content, Content.Item("outfit-bluza")));
         }

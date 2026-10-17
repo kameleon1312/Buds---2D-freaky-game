@@ -70,6 +70,32 @@ namespace Buds.Quests
             return fallback;
         }
 
+        /// <summary>
+        /// What putting an item on (or taking it off) changed: "Pancerz 0 → 3 · Szybkość +0% → +6%". Only stats that moved;
+        /// empty when nothing did (a look-only item).
+        /// </summary>
+        public static string Diff(QuestContent content, GearStats before, GearStats after)
+        {
+            var parts = new List<string>();
+            void Stat(string name, int a, int b, string unit, bool plus)
+            {
+                if (a == b) return;
+                string F(int v) => (plus ? "+" : "") + v + unit;
+                parts.Add($"{name} {F(a)} → {F(b)}");
+            }
+            Stat("Atak", before.Attack, after.Attack, "", false);
+            Stat("Pancerz", before.Armor, after.Armor, "", false);
+            Stat("Szybkość", before.Speed, after.Speed, "%", true);
+            Stat("Szczęście", before.Luck, after.Luck, "%", true);
+            foreach (var s in content.skills)
+            {
+                var a = before.SkillRank(s.id);
+                var b = after.SkillRank(s.id);
+                if (a != b) parts.Add($"{s.name} {a} → {b}");
+            }
+            return string.Join("  ·  ", parts);
+        }
+
         /// <summary>"+10% Szybkość · +1 Spryt": what an item adds, for the panel and the shop.</summary>
         public static string Describe(QuestContent content, ItemData item)
         {

@@ -8,7 +8,9 @@ namespace Buds.UI
 {
     /// <summary>
     /// Signing in with the website account (e-mail + password) and picking which of its buds to play, or making a new
-    /// one straight onto the account. GameBootstrap does the talking (Supabase Auth, then the API).
+    /// one straight onto the account. GameBootstrap does the talking (Supabase Auth, then the API). The phone turns
+    /// upright while it is open (typing an e-mail and a password is easier that way): a tall, narrow window with the
+    /// fields at the top, so the keyboard coming up from below never covers them.
     /// </summary>
     public sealed class LoginScreen
     {
@@ -26,7 +28,26 @@ namespace Buds.UI
         readonly Action<string, string> onSignIn;
         readonly Action<string> onPick;
 
+        /// <summary>The window: tall and narrow, held upright.</summary>
+        const float W = 620;
+        const float H = 780;
+        const float Field = 520;
+        const float BudRow = 88;
+
         public bool IsOpen => root.activeSelf;
+
+        static void Caption(Transform page, string text, float y)
+        {
+            var label = UiKit.Label("Caption", page, text, 22, UiKit.Ink, true, TextAnchor.LowerLeft);
+            UiKit.Place(label.rectTransform, new Vector2(0.5f, 1), new Vector2(0, y), new Vector2(Field, 30), new Vector2(0.5f, 1));
+        }
+
+        void Open()
+        {
+            if (!root.activeSelf) UiKit.SetPortrait(true);
+            root.SetActive(true);
+            root.transform.SetAsLastSibling();
+        }
 
         public LoginScreen(Transform canvas, Transform safeRoot, Action<string, string> onSignIn, Action<string> onPick, Action onCreate,
             Action onBack)
@@ -42,57 +63,58 @@ namespace Buds.UI
             UiKit.Stretch(area);
             area.gameObject.AddComponent<SafeArea>();
             var group = UiKit.Rect("Group", area);
-            UiKit.Place(group, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760, 620));
+            UiKit.Place(group, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(W + 40, H + 40));
             group.gameObject.AddComponent<FitInParent>();
-            var body = UiKit.Window("Window", group, new Vector2(720, 600), "Twoje konto", onBack, out var window, out _);
+            var body = UiKit.Window("Window", group, new Vector2(W, H), "Twoje konto", onBack, out var window, out _);
             UiKit.Place(window, new Vector2(0.5f, 0.5f), Vector2.zero, window.sizeDelta);
 
             // ---------- e-mail + password ----------
             formPage = UiKit.Rect("Form", body);
             UiKit.Stretch(formPage);
-            var intro = UiKit.Label("Intro", formPage, "Zaloguj się kontem ze strony Buds: zagrasz swoim Budem na tym telefonie.", 23,
+            var intro = UiKit.Label("Intro", formPage, "Zaloguj się kontem ze strony Buds: zagrasz swoim Budem na tym telefonie.", 24,
                 UiKit.InkSoft, false, TextAnchor.UpperCenter);
-            UiKit.Place(intro.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -4), new Vector2(600, 60), new Vector2(0.5f, 1));
-            // fields, then the error line, all above the button so a message is never hidden behind it
-            email = UiKit.Input("Email", formPage, new Vector2(560, 76), "e-mail", 30);
-            UiKit.Place((RectTransform)email.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -72), new Vector2(560, 76),
+            UiKit.Place(intro.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -4), new Vector2(Field, 66), new Vector2(0.5f, 1));
+            // labelled fields at the top, the error line under them, then the button: nothing hides behind the keyboard
+            Caption(formPage, "E-mail", -86);
+            email = UiKit.Input("Email", formPage, new Vector2(Field, 84), "ty@przyklad.pl", 30);
+            UiKit.Place((RectTransform)email.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -118), new Vector2(Field, 84),
                 new Vector2(0.5f, 1));
             email.contentType = InputField.ContentType.EmailAddress;
-            password = UiKit.Input("Password", formPage, new Vector2(560, 76), "hasło", 30);
-            UiKit.Place((RectTransform)password.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -160), new Vector2(560, 76),
+            Caption(formPage, "Hasło", -220);
+            password = UiKit.Input("Password", formPage, new Vector2(Field, 84), "hasło", 30);
+            UiKit.Place((RectTransform)password.transform.parent, new Vector2(0.5f, 1), new Vector2(0, -252), new Vector2(Field, 84),
                 new Vector2(0.5f, 1));
             password.contentType = InputField.ContentType.Password;
             password.inputType = InputField.InputType.Password;
-            error = UiKit.Label("Error", formPage, "", 20, UiKit.Alert700, false, TextAnchor.MiddleCenter);
-            UiKit.Place(error.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -242), new Vector2(620, 52), new Vector2(0.5f, 1));
+            error = UiKit.Label("Error", formPage, "", 21, UiKit.Alert700, false, TextAnchor.MiddleCenter);
+            UiKit.Place(error.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -346), new Vector2(Field, 60), new Vector2(0.5f, 1));
             // the one gold action
-            signIn = UiKit.Button("SignIn", formPage, "Zaloguj się", new Vector2(440, 88), () => this.onSignIn(email.text.Trim(), password.text),
+            signIn = UiKit.Button("SignIn", formPage, "Zaloguj się", new Vector2(Field, 92), () => this.onSignIn(email.text.Trim(), password.text),
                 UiKit.Tone.Gold, 36);
-            UiKit.Place((RectTransform)signIn.transform, new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(440, 88), new Vector2(0.5f, 0));
+            UiKit.Place((RectTransform)signIn.transform, new Vector2(0.5f, 1), new Vector2(0, -418), new Vector2(Field, 92), new Vector2(0.5f, 1));
             signInLabel = signIn.GetComponentInChildren<Text>();
-            var hint = UiKit.Label("Hint", formPage, "Nie masz konta? Załóż je na stronie Buds (Konto).", 19, UiKit.InkSoft, false,
-                TextAnchor.LowerCenter);
-            UiKit.Place(hint.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 0), new Vector2(600, 32), new Vector2(0.5f, 0));
+            var hint = UiKit.Label("Hint", formPage, "Nie masz konta? Załóż je na stronie Buds (Konto).", 21, UiKit.InkSoft, false,
+                TextAnchor.UpperCenter);
+            UiKit.Place(hint.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -534), new Vector2(Field, 64), new Vector2(0.5f, 1));
 
             // ---------- the account's buds ----------
             budsPage = UiKit.Rect("Buds", body);
             UiKit.Stretch(budsPage);
-            budsTitle = UiKit.Label("Title", budsPage, "", 26, UiKit.Ink, true, TextAnchor.UpperCenter);
-            UiKit.Place(budsTitle.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -4), new Vector2(600, 40), new Vector2(0.5f, 1));
+            budsTitle = UiKit.Label("Title", budsPage, "", 28, UiKit.Ink, true, TextAnchor.UpperCenter);
+            UiKit.Place(budsTitle.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -4), new Vector2(Field, 80), new Vector2(0.5f, 1));
             budList = UiKit.Rect("List", budsPage);
-            UiKit.Place(budList, new Vector2(0.5f, 1), new Vector2(0, -56), new Vector2(560, 330), new Vector2(0.5f, 1));
+            UiKit.Place(budList, new Vector2(0.5f, 1), new Vector2(0, -96), new Vector2(Field, 5 * BudRow), new Vector2(0.5f, 1));
             budsError = UiKit.Label("Error", budsPage, "", 21, UiKit.Alert700, false, TextAnchor.MiddleCenter);
-            UiKit.Place(budsError.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 104), new Vector2(600, 30), new Vector2(0.5f, 0));
-            var create = UiKit.Button("Create", budsPage, "Stwórz nowego Buda na koncie", new Vector2(500, 76), () => onCreate(), UiKit.Tone.Rep, 28);
-            UiKit.Place((RectTransform)create.transform, new Vector2(0.5f, 0), new Vector2(0, 16), new Vector2(500, 76), new Vector2(0.5f, 0));
+            UiKit.Place(budsError.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 112), new Vector2(Field, 40), new Vector2(0.5f, 0));
+            var create = UiKit.Button("Create", budsPage, "Stwórz nowego Buda na koncie", new Vector2(Field, 84), () => onCreate(), UiKit.Tone.Rep, 28);
+            UiKit.Place((RectTransform)create.transform, new Vector2(0.5f, 0), new Vector2(0, 16), new Vector2(Field, 84), new Vector2(0.5f, 0));
 
             root.SetActive(false);
         }
 
         public void ShowForm(string message = null)
         {
-            root.SetActive(true);
-            root.transform.SetAsLastSibling();
+            Open();
             formPage.gameObject.SetActive(true);
             budsPage.gameObject.SetActive(false);
             SetBusy(false, message);
@@ -117,8 +139,7 @@ namespace Buds.UI
         /// <summary>The account's buds as big buttons (name · level); tapping one plays it.</summary>
         public void ShowBuds(string accountEmail, IReadOnlyList<AccountBudDto> buds)
         {
-            root.SetActive(true);
-            root.transform.SetAsLastSibling();
+            Open();
             formPage.gameObject.SetActive(false);
             budsPage.gameObject.SetActive(true);
             budsError.text = "";
@@ -130,13 +151,18 @@ namespace Buds.UI
             {
                 var b = buds[i];
                 var slug = b.bud.slug;
-                var button = UiKit.Button("Bud " + slug, budList, $"{b.bud.name}  ·  poziom {Math.Max(1, b.level)}", new Vector2(540, 60),
-                    () => onPick(slug), UiKit.Tone.Buds, 28);
-                UiKit.Place((RectTransform)button.transform, new Vector2(0.5f, 1), new Vector2(0, -i * 66), new Vector2(540, 60),
+                var button = UiKit.Button("Bud " + slug, budList, $"{b.bud.name}  ·  poziom {Math.Max(1, b.level)}", new Vector2(Field, BudRow - 14),
+                    () => onPick(slug), UiKit.Tone.Buds, 30);
+                UiKit.Place((RectTransform)button.transform, new Vector2(0.5f, 1), new Vector2(0, -i * BudRow), new Vector2(Field, BudRow - 14),
                     new Vector2(0.5f, 1));
             }
         }
 
-        public void Hide() => root.SetActive(false);
+        /// <summary>Closes the screen and turns the phone back to landscape for the game.</summary>
+        public void Hide()
+        {
+            if (root.activeSelf) UiKit.SetPortrait(false);
+            root.SetActive(false);
+        }
     }
 }

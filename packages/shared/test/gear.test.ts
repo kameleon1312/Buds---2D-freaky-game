@@ -58,7 +58,7 @@ describe('characterStats', () => {
 
   it('adds up what the bud wears', () => {
     const stats = characterStats(worn('buty-sprintery', 'spodnie-dresy', 'bluza-kewlar'));
-    expect(stats).toMatchObject({ speed: 12, armor: 8, luck: 0 });
+    expect(stats).toMatchObject({ speed: 8, armor: 8, luck: 0 }); // Sprintery Błysk +6, Dresy +2
   });
 
   it('adds gear to trained skills, within limits', () => {

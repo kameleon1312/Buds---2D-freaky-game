@@ -68,6 +68,18 @@ namespace Buds.Core
                 return;
             }
 
+            // automated check of the corner spinner: a request that never answers (pass an unreachable -buds-api)
+            if (CommandLine.Has("-buds-net-demo") && CommandLine.Get("-buds-autoshot") is { } netShots)
+            {
+                ShowPairing();
+                _ = api.GetLookOptions();
+                await Awaitable.WaitForSecondsAsync(1.2f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(netShots, "n1-spinner.png"));
+                await Awaitable.WaitForSecondsAsync(0.4f);
+                Application.Quit();
+                return;
+            }
+
             var pairCode = CommandLine.Get("-buds-pair");
             if (pairCode != null)
             {

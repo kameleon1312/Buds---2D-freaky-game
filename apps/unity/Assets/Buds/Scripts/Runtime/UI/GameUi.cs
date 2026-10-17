@@ -66,6 +66,8 @@ namespace Buds.UI
         public GameUi()
         {
             canvas = UiKit.CreateCanvas("UI", 10);
+            // talking to the server shows as a small ring in the corner, never as text over the screen
+            NetSpinner.Create();
             safe = UiKit.Rect("Safe", canvas.transform);
             UiKit.Stretch(safe);
             safe.gameObject.AddComponent<SafeArea>();

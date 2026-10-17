@@ -94,6 +94,20 @@ namespace Buds.UI
             return inches < 3.2f ? 540 : inches < 4.5f ? 620 : 720;
         }
 
+        /// <summary>
+        /// Holds the phone upright (the sign-in screen: typing an e-mail and a password is easier) or back in landscape
+        /// (the game). On a PC the window keeps its shape; the canvases follow whatever shape the screen has.
+        /// </summary>
+        public static void SetPortrait(bool portrait)
+        {
+            if (!Application.isMobilePlatform) return;
+            Screen.autorotateToPortrait = portrait;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = !portrait;
+            Screen.autorotateToLandscapeRight = !portrait;
+            Screen.orientation = portrait ? ScreenOrientation.Portrait : ScreenOrientation.AutoRotation;
+        }
+
         // ---------- canvas ----------
         public static Canvas CreateCanvas(string name, int sortOrder)
         {
@@ -105,8 +119,10 @@ namespace Buds.UI
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             // landscape everywhere: the canvas is a fixed height, its width follows the screen
             var simulated = Mobile && !Application.isMobilePlatform; // -buds-mobile on a PC: a 6" phone
-            scaler.referenceResolution = new Vector2(1280,
-                CanvasHeight(simulated ? 1080 : Screen.height, simulated ? 420 : Screen.dpi, Mobile));
+            var shortSide = CanvasHeight(simulated ? 1080 : Mathf.Min(Screen.width, Screen.height), simulated ? 420 : Screen.dpi, Mobile);
+            scaler.referenceResolution = new Vector2(1280, shortSide);
+            // the sign-in screen turns the phone upright: the canvas follows (OrientationFit)
+            go.AddComponent<OrientationFit>().ShortSide = shortSide;
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 1f;
             scaler.referencePixelsPerUnit = 100;

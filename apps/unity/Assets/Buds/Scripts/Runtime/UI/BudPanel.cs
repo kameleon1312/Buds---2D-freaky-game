@@ -336,13 +336,12 @@ namespace Buds.UI
             var sb = new System.Text.StringBuilder();
             sb.Append($"<b>Zadania:</b> {data.QuestsDone} / {data.QuestsTotal}\n");
             sb.Append($"<b>Portfel:</b> {Core.GameBootstrap.Coins(data.Coins)} · {data.Gems} gemów\n");
-            sb.Append($"<b>Statystyki:</b> Szybkość +{stats.Speed}% · Pancerz {stats.Armor} · Szczęście +{stats.Luck}%\n");
+            sb.Append($"<b>Ze sprzętu:</b> Atak +{stats.Attack} · Pancerz +{stats.Armor} · Szybkość +{stats.Speed}% · Szczęście +{stats.Luck}%\n");
             sb.Append($"<b>Punkty umiejętności:</b> {data.Available} wolne z {data.Points}\n");
             sb.Append("<b>Dzielnice:</b>\n");
             foreach (var (name, level, open) in data.Districts)
                 sb.Append(open ? $"   <color=#5d9a12>{name}</color> — otwarta\n" : $"   <color=#55514a>{name} — od poziomu {level}</color>\n");
             if (data.Guest) sb.Append("\n<i>Grasz jako gość: stwórz Buda, żeby zapisywać postępy.</i>");
-            else if (data.Loading) sb.Append("\n<i>Wczytuję dane z serwera…</i>");
             else if (data.Error != null) sb.Append($"\n<color=#bd1c31>{data.Error}</color>");
             statsText.text = sb.ToString();
 

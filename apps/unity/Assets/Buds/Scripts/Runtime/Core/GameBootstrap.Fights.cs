@@ -65,7 +65,7 @@ namespace Buds.Core
                 lastPvp = null;
                 lastInfluence = null;
                 var line = enemy.Data.lines.Length > 0 ? enemy.Data.lines[0] : "";
-                fightScreen.Open(res.fight, sheet, enemy.Sheet, line);
+                fightScreen.Open(res.fight, sheet, enemy.Sheet, line, gear);
             }
             catch (ApiException e)
             {

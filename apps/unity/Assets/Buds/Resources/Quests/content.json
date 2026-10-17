@@ -4724,7 +4724,7 @@
     },
     {
       "id": "rekawiczki-pedal",
-      "name": "Rękawiczki Pedał",
+      "name": "Rękawiczki Kolarza",
       "kind": "gear",
       "rarity": "common",
       "slot": "hands",
@@ -5453,7 +5453,7 @@
       "kind": "gear",
       "rarity": "rare",
       "slot": "feet",
-      "speed": 10,
+      "speed": 6,
       "armor": 0,
       "luck": 0,
       "skillBonus": [],
@@ -5468,7 +5468,7 @@
       "drink": "",
       "premium": false,
       "available": true,
-      "description": "Najszybsze buty w mieście."
+      "description": "Lekkie buty do biegania po mieście."
     },
     {
       "id": "kolce-biezni",
@@ -5476,7 +5476,7 @@
       "kind": "gear",
       "rarity": "rare",
       "slot": "feet",
-      "speed": 7,
+      "speed": 8,
       "armor": 0,
       "luck": 0,
       "skillBonus": [],

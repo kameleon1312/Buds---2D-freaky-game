@@ -228,7 +228,7 @@ const TORSO: Row[] = [
 ];
 
 const HANDS: Row[] = [
-  ['rekawiczki-pedal', 'Rękawiczki Pedał', 'common', 1, { speed: 1 }, 'Rowerowe, bez palców.'],
+  ['rekawiczki-pedal', 'Rękawiczki Kolarza', 'common', 1, { speed: 1 }, 'Rowerowe, bez palców.'],
   [
     'rekawice-budowlanca',
     'Rękawice Budowlańca',
@@ -376,8 +376,15 @@ const FEET: Row[] = [
     'Żadna kałuża nie straszna.',
   ],
   ['traperki-szlak', 'Traperki Szlak', 'uncommon', 5, { speed: 2, armor: 2 }, 'Na każdy teren.'],
-  ['buty-sprintery', 'Sprintery Błysk', 'rare', 6, { speed: 10 }, 'Najszybsze buty w mieście.'],
-  ['kolce-biezni', 'Kolce Bieżni', 'rare', 7, { speed: 7 }, 'Wbijają się w każdą nawierzchnię.'],
+  [
+    'buty-sprintery',
+    'Sprintery Błysk',
+    'rare',
+    6,
+    { speed: 6 },
+    'Lekkie buty do biegania po mieście.',
+  ],
+  ['kolce-biezni', 'Kolce Bieżni', 'rare', 7, { speed: 8 }, 'Wbijają się w każdą nawierzchnię.'],
   [
     'kowbojki',
     'Kowbojki Dziki Zachód',

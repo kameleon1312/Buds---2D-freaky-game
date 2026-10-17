@@ -176,7 +176,7 @@ namespace Buds.UI
 
         // ---------- open / state ----------
 
-        public void Open(FightDto fight, BudSheet budSheet, BudSheet enemySheet, string line)
+        public void Open(FightDto fight, BudSheet budSheet, BudSheet enemySheet, string line, GearStats gear = null)
         {
             for (var i = stage.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(stage.GetChild(i).gameObject);
             for (var i = fx.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(fx.GetChild(i).gameObject);
@@ -207,7 +207,7 @@ namespace Buds.UI
                 moveLabels[i].lineSpacing = 0.9f;
             }
             var weapon = string.IsNullOrEmpty(fight.bud.weaponItem) ? null : content.Item(fight.bud.weaponItem);
-            info.text = $"Broń: <b>{weapon?.name ?? "pięści"}</b>  ·  Atak {fight.bud.attack}  ·  Pancerz {fight.bud.armor}  ·  Szybkość {fight.bud.speed}\n" +
+            info.text = $"Broń: <b>{weapon?.name ?? "pięści"}</b>  ·  Atak {fight.bud.attack}{FromGear(gear?.Attack)}  ·  Pancerz {fight.bud.armor}{FromGear(gear?.Armor)}  ·  Szybkość {fight.bud.speed}{FromGear(gear?.Speed)}\n" +
                         $"{(pvp ? "Bud" : "Rywal")}: poziom {fight.enemy.level}, {WeaponName(fight.enemy.weapon)}" +
                         (pvp ? "  ·  wynik liczy się do rankingu" : "");
             log.text = $"„{line}”";
@@ -222,6 +222,9 @@ namespace Buds.UI
             _ = Intro();
             _ = Idle(++idleToken);
         }
+
+        /// <summary>" (+3 ze sprzętu)" after a duel stat, so the player sees what the worn items add.</summary>
+        static string FromGear(int? n) => n is > 0 ? $" <color=#5d9a12>(+{n} ze sprzętu)</color>" : "";
 
         /// <summary>The line under a move's name: damage and accuracy, or what it does.</summary>
         static string MoveLine(MoveData m)

@@ -36,10 +36,11 @@ namespace Buds.Quests
             _ => "timing", // spryt: focus, stop the marker in the zone
         };
 
-        public static ITrainingGame For(string skill, int rounds, int seed) => KindFor(skill) switch
+        /// <param name="rank">The bud's rank in the skill: the rhythm's tempo follows it (a beginner gets a slow, wide beat).</param>
+        public static ITrainingGame For(string skill, int rounds, int seed, int rank = 0) => KindFor(skill) switch
         {
             "combo" => new ComboGame(rounds, seed),
-            "rhythm" => new RhythmGame(rounds, seed),
+            "rhythm" => new RhythmGame(rounds, seed, rank),
             "stencil" => new StencilGame(rounds, seed),
             "balance" => new BalanceGame(rounds, seed),
             "runner" => new RunnerGame(rounds, seed),
@@ -152,7 +153,9 @@ namespace Buds.Quests
 
     /// <summary>
     /// Rytm: notes slide along three lanes to the line; hit the lane as a note crosses it. Rounds are phrases of four
-    /// notes; a phrase counts with at least three hits. The tempo picks up phrase by phrase.
+    /// notes; a phrase counts with at least three hits. The tempo follows the bud's Flow rank: a beginner gets a slow beat,
+    /// notes in view for longer and a wide window; every rank speeds it up a little, and it picks up gently phrase by
+    /// phrase. Even at the top rank there is more than a quarter of a second between notes.
     /// </summary>
     public sealed class RhythmGame : ITrainingGame
     {
@@ -168,10 +171,12 @@ namespace Buds.Quests
         public const int Lanes = 3;
         public const int NotesPerPhrase = 4;
         public const int HitsNeeded = 3;
-        /// <summary>How far from the line a press still counts (seconds).</summary>
-        public const float Window = 0.16f;
-        /// <summary>Seconds a note is visible before it reaches the line.</summary>
-        public const float Lead = 1.6f;
+        /// <summary>How far from the line a press still counts (seconds): 0.22 for a beginner, 0.16 at rank 5.</summary>
+        public float Window { get; }
+        /// <summary>Seconds a note is visible before it reaches the line: 2.6 for a beginner, 1.8 at rank 5.</summary>
+        public float Lead { get; }
+        /// <summary>Seconds between notes in the first phrase.</summary>
+        public float FirstBeat { get; }
 
         readonly List<Note> notes = new();
         readonly int[] phraseHits;
@@ -186,16 +191,20 @@ namespace Buds.Quests
         /// <summary>The lane pressed last and when (for the flash on the line).</summary>
         public int LastLane { get; private set; } = -1;
 
-        public RhythmGame(int rounds = 5, int seed = 0)
+        public RhythmGame(int rounds = 5, int seed = 0, int rank = 0)
         {
             Rounds = Math.Max(1, rounds);
+            rank = Math.Clamp(rank, 0, 5); // the top trained rank; gear never makes the beat faster
+            Window = 0.22f - 0.012f * rank;
+            Lead = 2.6f - 0.16f * rank;
+            FirstBeat = 1.0f - 0.07f * rank;
             phraseHits = new int[Rounds];
             phraseJudged = new int[Rounds];
             var rng = new Random(seed);
             var t = Lead + 0.4f;
             for (var p = 0; p < Rounds; p++)
             {
-                var beat = 0.62f - 0.05f * p;
+                var beat = Math.Max(0.45f, FirstBeat - 0.04f * p);
                 var lane = rng.Next(Lanes);
                 for (var i = 0; i < NotesPerPhrase; i++)
                 {

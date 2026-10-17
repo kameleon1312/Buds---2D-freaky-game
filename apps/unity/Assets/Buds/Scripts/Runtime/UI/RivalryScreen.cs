@@ -284,7 +284,7 @@ namespace Buds.UI
             var t = data.Turfs;
             if (t == null)
             {
-                heads[TabTurfs].text = "Wczytuję rewiry…";
+                heads[TabTurfs].text = ""; // the corner spinner says it is loading
                 return;
             }
             var me = data.Me;
@@ -321,7 +321,7 @@ namespace Buds.UI
             var me = data.Me;
             if (r == null)
             {
-                heads[TabRanking].text = "Wczytuję ranking…";
+                heads[TabRanking].text = "";
                 return;
             }
             var titles = me != null ? Rivalry.Titles(me.titles) : "";
@@ -386,7 +386,7 @@ namespace Buds.UI
             var mine = data.Crew;
             if (mine == null)
             {
-                heads[TabCrew].text = "Wczytuję ekipę…";
+                heads[TabCrew].text = "";
                 crewForm.SetActive(false);
                 return;
             }
@@ -444,7 +444,7 @@ namespace Buds.UI
             }
             if (p == null)
             {
-                heads[TabPvp].text = "Szukam rywali…";
+                heads[TabPvp].text = "";
                 return;
             }
             heads[TabPvp].text = $"Liga <b>{p.league}</b> · {p.rating} pkt · wygrane {p.wins}, przegrane {p.losses}" +
@@ -557,7 +557,7 @@ namespace Buds.UI
             if (m == null)
             {
                 sellForm.SetActive(false);
-                heads[TabMarket].text = "Wczytuję Bazar…";
+                heads[TabMarket].text = "";
                 return;
             }
             sellForm.SetActive(true);

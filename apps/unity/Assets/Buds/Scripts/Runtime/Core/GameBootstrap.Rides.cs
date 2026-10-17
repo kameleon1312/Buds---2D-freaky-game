@@ -149,7 +149,7 @@ namespace Buds.Core
             var skill = Array.Find(quests.Content.skills, s => s.id == spot.skill)?.name ?? spot.skill;
             activeTraining = spot;
             ui.SetHint(null);
-            trainingScreen.Open(spot, skill, quests.Content.trainingMaxScore, sheet);
+            trainingScreen.Open(spot, skill, quests.Content.trainingMaxScore, sheet, trainedRanks.TryGetValue(spot.skill, out var rank) ? rank : 0);
         }
 
         TrainingSpotData activeTraining;
@@ -166,7 +166,7 @@ namespace Buds.Core
                 if (spot == null) continue;
                 activeTraining = null;
                 var skillName = Array.Find(quests.Content.skills, s => s.id == skill)?.name ?? skill;
-                trainingScreen.Open(spot, skillName, quests.Content.trainingMaxScore, sheet);
+                trainingScreen.Open(spot, skillName, quests.Content.trainingMaxScore, sheet, trainedRanks.TryGetValue(skill, out var rank) ? rank : 0);
                 var mid = false;
                 for (var t = 0f; t < 60 && !trainingScreen.Finished; t += Time.deltaTime)
                 {

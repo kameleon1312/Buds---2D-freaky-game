@@ -124,7 +124,9 @@ namespace Buds.Core
         async Awaitable WakeUpNote()
         {
             await Awaitable.WaitForSecondsAsync(5f);
-            if (signingIn && loginScreen.IsOpen) loginScreen.ShowWaiting("Budzę serwer, to może potrwać do minuty…");
+            // no text over the form: the corner spinner keeps turning; only after a long wait a short note under the fields
+            await Awaitable.WaitForSecondsAsync(10f);
+            if (signingIn && loginScreen.IsOpen) loginScreen.ShowWaiting("Serwer się budzi, chwila…");
         }
 
         /// <summary>A bud tapped on the account's list.</summary>

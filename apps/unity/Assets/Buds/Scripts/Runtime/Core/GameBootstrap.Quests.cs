@@ -124,7 +124,7 @@ namespace Buds.Core
             }
 
             handingIn = true;
-            ui.ShowDialog(npc.name, "…");
+            ui.ShowDialog(npc.name, quest.done); // the reward line follows once the server answers (the corner spinner turns meanwhile)
             try
             {
                 var res = await api.CompleteQuest(session.Token, quest.id);
