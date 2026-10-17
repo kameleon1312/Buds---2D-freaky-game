@@ -468,6 +468,17 @@ ICONS_UI.rewiry = {
     // the crown on top of it all
     shaded('M40 4L44 12L49 6L53 12L57 4L56 18H41Z', ['#ffe27a', '#ffc93c'], LINE, -2, -2, 2.5),
 };
+// The quest log button: a rolled-up job sheet with a big question mark (drawn, the icons have no font).
+ICONS_UI.zadania = {
+  body:
+    shaded(rr(13, 8, 38, 46, 4), ['#f3dfa8', '#d8bd7a'], LINE, -3, -3) +
+    shaded(rr(9, 4, 46, 9, 4.5), ['#e6cc8c', '#c4a35f'], LINE, -1, -1, 2.5) +
+    shaded(rr(9, 50, 46, 9, 4.5), ['#e6cc8c', '#c4a35f'], LINE, -1, -1, 2.5) +
+    // the question mark: a hook and a dot, ink under gold
+    stroke('M24 25Q24 18 32 18Q40 18 40 25Q40 29 35 31Q32 32.5 32 36V38', LINE, 9) +
+    stroke('M24 25Q24 18 32 18Q40 18 40 25Q40 29 35 31Q32 32.5 32 36V38', '#ffc93c', 5) +
+    flat(circ(32, 44.5, 3.8), '#ffc93c', LINE, 2.5),
+};
 ICONS_UI.korona = {
   body:
     shaded('M8 48L6 18L20 30L32 10L44 30L58 18L56 48Z', ['#ffe27a', '#ffc93c'], LINE, -4, -4) +

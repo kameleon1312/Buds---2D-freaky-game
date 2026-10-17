@@ -200,22 +200,24 @@ namespace Buds.UI
             // dark plate: level badge, name and the xp bar
             var plate = UiKit.OutlinedBox("Hud", Root, UiKit.Surface800, UiKit.RadiusL);
             var rt = (RectTransform)plate.transform.parent;
-            UiKit.Place(rt, new Vector2(0, 1), new Vector2(24, -24), new Vector2(380, 124), new Vector2(0, 1));
+            UiKit.Place(rt, new Vector2(0, 1), new Vector2(24, -24), new Vector2(PlateW, PlateH), new Vector2(0, 1));
 
             var badge = UiKit.OutlinedBox("Level", plate.transform, UiKit.Buds400, 999);
-            UiKit.Place((RectTransform)badge.transform.parent, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(84, 84),
+            UiKit.Place((RectTransform)badge.transform.parent, new Vector2(0, 0.5f), new Vector2(10, 0), new Vector2(60, 60),
                 new Vector2(0, 0.5f));
-            hudLevel = UiKit.Outlined("Num", badge.transform, "", 44);
-            UiKit.Stretch(hudLevel.rectTransform, 0, 4, 0, 0);
+            hudLevel = UiKit.Outlined("Num", badge.transform, "", 32);
+            UiKit.Stretch(hudLevel.rectTransform, 0, 3, 0, 0);
 
-            hudName = UiKit.Outlined("Name", plate.transform, "", 38, null, TextAnchor.MiddleLeft);
-            UiKit.Place(hudName.rectTransform, new Vector2(0, 1), new Vector2(112, -8), new Vector2(250, 50), new Vector2(0, 1));
+            hudName = UiKit.Outlined("Name", plate.transform, "", 26, null, TextAnchor.MiddleLeft);
+            hudName.horizontalOverflow = HorizontalWrapMode.Overflow;
+            UiKit.Place(hudName.rectTransform, new Vector2(0, 1), new Vector2(80, -6), new Vector2(PlateW - 94, 36), new Vector2(0, 1));
 
             hudXp = UiKit.Bar("Xp", plate.transform, UiKit.XpFill, out var bar);
-            UiKit.Place(bar, Vector2.zero, new Vector2(112, 16), new Vector2(246, 40), Vector2.zero);
-            hudXpText = UiKit.Outlined("Value", bar, "", 22);
-            UiKit.Stretch(hudXpText.rectTransform, 0, 2, 0, 0);
+            UiKit.Place(bar, Vector2.zero, new Vector2(80, 10), new Vector2(PlateW - 94, 28), Vector2.zero);
+            hudXpText = UiKit.Outlined("Value", bar, "", 16);
+            UiKit.Stretch(hudXpText.rectTransform, 0, 1, 0, 0);
             hud = rt.gameObject;
+            BuildQuestButton(rt);
             hud.SetActive(false);
 
             // the action button: what E does right now (talk, fight, search…); tapping it does the same
@@ -233,7 +235,9 @@ namespace Buds.UI
 
         public void ShowHud(string name, int level, int xp, int nextXp)
         {
+            // long names shrink to fit the plate instead of running past it
             hudName.text = name;
+            hudName.fontSize = name.Length > 14 ? 20 : 26;
             hudLevel.text = level.ToString();
             hudXpText.text = $"{xp} / {nextXp} XP";
             hud.SetActive(true);
@@ -391,7 +395,11 @@ namespace Buds.UI
         const float SecondColumn = IconSize + 72;
         const float BudW = 230, MapW = 180, RideW = 210, Gap = 14;
         /// <summary>Right edge of the left column (player plate, quests) in UI units.</summary>
-        const float LeftColumn = 24 + 380;
+        const float PlateW = 270;
+        const float PlateH = 84;
+        const float QuestButton = 72;
+        /// <summary>Right edge of the top-left group (the plate and the quest button).</summary>
+        const float LeftColumn = 24 + PlateW + 12 + QuestButton;
 
         /// <summary>Puts a picture button into the right column (row 0 at the top).</summary>
         static void RightColumn(Button button, int row)
@@ -569,14 +577,14 @@ namespace Buds.UI
             fade.color = c;
         }
 
-        // ---------- quest tracker (top right) ----------
+        // ---------- quest log (top left, folds under the player plate) ----------
 
         void BuildTracker()
         {
             // the quests: top left, under the player plate
             var plate = UiKit.OutlinedBox("Tracker", Root, UiKit.Surface800, UiKit.RadiusM);
             trackerRect = (RectTransform)plate.transform.parent;
-            UiKit.Place(trackerRect, new Vector2(0, 1), new Vector2(24, -160), new Vector2(380, 120), new Vector2(0, 1));
+            UiKit.Place(trackerRect, new Vector2(0, 1), new Vector2(24, -24 - PlateH - 14), new Vector2(LeftColumn - 24, 120), new Vector2(0, 1));
             trackerText = UiKit.Label("Text", plate.transform, "", 23, UiKit.TextOnDark, false, TextAnchor.UpperLeft);
             UiKit.Stretch(trackerText.rectTransform, 18, 12, 18, 12);
             trackerText.lineSpacing = 1.05f;
@@ -584,12 +592,70 @@ namespace Buds.UI
             tracker.SetActive(false);
         }
 
-        /// <summary>Lists active quests: title (lime) and what to do next. Empty list hides the panel.</summary>
+        GameObject questCount;
+        Text questCountText;
+        Image questButtonFace;
+        int questTotal;
+        bool questsOpen;
+
+        /// <summary>Whether the quest list is unfolded (tests and the autopilot).</summary>
+        public bool QuestsOpen => questsOpen;
+
+        /// <summary>
+        /// The quest log button right of the player plate: a job sheet with a question mark and, in its top-right
+        /// corner, a red count of active quests. A tap (or J) unfolds the list under the plate and folds it again.
+        /// </summary>
+        void BuildQuestButton(RectTransform plate)
+        {
+            var button = UiKit.Button("QuestButton", plate, "", new Vector2(QuestButton, QuestButton), ToggleQuests, UiKit.Tone.Rep, 20);
+            UiKit.Place((RectTransform)button.transform, new Vector2(0, 1), new Vector2(PlateW + 12, -(PlateH - QuestButton) / 2),
+                new Vector2(QuestButton, QuestButton), new Vector2(0, 1));
+            var face = button.transform.Find("Face") ?? button.transform;
+            questButtonFace = face.Find("Fill")?.GetComponent<Image>();
+            var icon = UiKit.Rect("Icon", face).gameObject.AddComponent<Image>();
+            icon.sprite = UiKit.Picture("Ui/zadania");
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            UiKit.Stretch(icon.rectTransform, 9);
+
+            var badge = UiKit.OutlinedBox("Count", button.transform, UiKit.Alert500, 15);
+            var badgeRt = (RectTransform)badge.transform.parent;
+            UiKit.Place(badgeRt, Vector2.one, new Vector2(10, 10), new Vector2(32, 32), new Vector2(1, 1));
+            questCountText = UiKit.Outlined("Num", badge.transform, "", 18);
+            foreach (var effect in questCountText.GetComponents<Shadow>())
+                if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
+            UiKit.Stretch(questCountText.rectTransform, 0, 1, 0, 0);
+            questCount = badgeRt.gameObject;
+            questCount.SetActive(false);
+        }
+
+        public void ToggleQuests() => SetQuestsOpen(!questsOpen);
+
+        public void SetQuestsOpen(bool open)
+        {
+            questsOpen = open;
+            tracker.SetActive(open);
+            // the button stays lit while the list is out
+            if (questButtonFace) questButtonFace.color = open ? UiKit.Buds400 : UiKit.Rep400;
+            if (open) FitTracker();
+        }
+
+        void FitTracker()
+        {
+            Canvas.ForceUpdateCanvases();
+            trackerRect.sizeDelta = new Vector2(LeftColumn - 24, trackerText.preferredHeight + 28);
+        }
+
+        /// <summary>Lists active quests (title in lime and what to do next) in the folding log; the button shows how many.</summary>
         public void SetQuests(IReadOnlyList<(string title, string objective)> quests)
         {
+            questTotal = quests.Count;
+            questCount.SetActive(questTotal > 0);
+            questCountText.text = questTotal > 9 ? "9+" : questTotal.ToString();
             if (quests.Count == 0)
             {
-                tracker.SetActive(false);
+                trackerText.text = "<color=#a9afbd>Brak aktywnych zadań. Szukaj postaci z wykrzyknikiem.</color>";
+                if (questsOpen) FitTracker();
                 return;
             }
             var sb = new System.Text.StringBuilder();
@@ -600,9 +666,7 @@ namespace Buds.UI
             }
             if (quests.Count > 3) sb.Append($"\n<color=#a9afbd>+{quests.Count - 3} więcej</color>");
             trackerText.text = sb.ToString();
-            tracker.SetActive(true);
-            Canvas.ForceUpdateCanvases();
-            trackerRect.sizeDelta = new Vector2(380, trackerText.preferredHeight + 28);
+            if (questsOpen) FitTracker();
         }
 
         // ---------- toast (district / zone name) ----------
@@ -634,6 +698,10 @@ namespace Buds.UI
         public void Tick()
         {
             if (toast.activeSelf && Time.time > toastUntil) toast.SetActive(false);
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            var typing = EventSystem.current && EventSystem.current.currentSelectedGameObject &&
+                         EventSystem.current.currentSelectedGameObject.GetComponent<InputField>();
+            if (kb != null && hud.activeSelf && !typing && kb.jKey.wasPressedThisFrame) ToggleQuests();
         }
 
         // ---------- joystick ----------

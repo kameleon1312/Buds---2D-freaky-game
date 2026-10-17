@@ -454,6 +454,10 @@ namespace Buds.Core
             try
             {
                 await Shot("01-spawn.png");
+                // the quest log: unfolded by its button, then folded away again
+                ui.SetQuestsOpen(true);
+                await Shot("01b-quests-open.png");
+                ui.SetQuestsOpen(false);
                 await Walk(Vector2.right, 0.8f);
                 await Shot("02-walk.png");
                 // running: the shot is taken mid-run, with the dust
