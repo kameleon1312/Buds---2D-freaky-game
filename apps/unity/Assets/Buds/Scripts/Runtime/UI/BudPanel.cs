@@ -59,8 +59,8 @@ namespace Buds.UI
             ["mythic"] = ("Mityczny", UiKit.Hex("#ff3d7a")),
         };
 
-        public const int TabProfile = 0, TabGear = 1, TabSkills = 2, TabDrinks = 3, TabShop = 4;
-        const int Tabs = 5;
+        public const int TabProfile = 0, TabGear = 1, TabSkills = 2, TabMoves = 3, TabDrinks = 4, TabShop = 5;
+        const int Tabs = 6;
         /// <summary>The shop filter for energy drinks (they have no slot).</summary>
         const string DrinkFilter = "drink";
         /// <summary>The shop filter for premium items (for gems).</summary>
@@ -110,7 +110,12 @@ namespace Buds.UI
 
         // skills
         Text pointsText;
-        readonly List<(string id, Image[] pips, Button upgrade, Text bonus, RectTransform train, Text perks)> skillRows = new();
+        readonly List<(string id, Image[] pips, Button upgrade, Text bonus, RectTransform train, Text trainText, Text perks)> skillRows = new();
+
+        // moves
+        Text movesTitle;
+        Text movesPerks;
+        readonly List<(Image card, Text now, Text next, Text needLevel, Image levelChip, Text needSkill, Image skillChip, Image arrow)> moveRows = new();
 
         // drinks
         RectTransform drinkGrid;
@@ -160,18 +165,20 @@ namespace Buds.UI
             var body = UiKit.Window("Window", group, new Vector2(1140, 800), "Twój Bud", Hide, out var window, out _);
             UiKit.Place(window, new Vector2(0.5f, 0.5f), Vector2.zero, window.sizeDelta);
 
-            string[] names = { "Profil", "Ekwipunek", "Umiejętności", "Napoje", "Sklep" };
+            string[] names = { "Profil", "Ekwipunek", "Umiejętności", "Ciosy", "Napoje", "Sklep" };
+            // six tabs across the 1076-wide body, 10 apart
+            const float TabW = 171, TabStep = 181;
             for (var i = 0; i < Tabs; i++)
             {
                 var index = i;
-                tabs[i] = UiKit.Button("Tab" + i, body, names[i], new Vector2(208, 72), () => ShowTab(index), UiKit.Tone.Rep, 30);
-                UiKit.Place((RectTransform)tabs[i].transform, new Vector2(0, 1), new Vector2(i * 218, 0), new Vector2(208, 72),
+                tabs[i] = UiKit.Button("Tab" + i, body, names[i], new Vector2(TabW, 72), () => ShowTab(index), UiKit.Tone.Rep, 28);
+                UiKit.Place((RectTransform)tabs[i].transform, new Vector2(0, 1), new Vector2(i * TabStep, 0), new Vector2(TabW, 72),
                     new Vector2(0, 1));
                 // one line per tab: a long name (Umiejętności) shrinks a little
                 var tabText = tabs[i].GetComponentInChildren<Text>();
                 tabText.resizeTextForBestFit = true;
-                tabText.resizeTextMinSize = 20;
-                tabText.resizeTextMaxSize = 30;
+                tabText.resizeTextMinSize = 16;
+                tabText.resizeTextMaxSize = 28;
                 tabText.horizontalOverflow = HorizontalWrapMode.Wrap;
                 tabText.verticalOverflow = VerticalWrapMode.Truncate;
                 pages[i] = UiKit.Rect(names[i], body);
@@ -180,6 +187,7 @@ namespace Buds.UI
             BuildProfile(pages[0]);
             BuildGear(pages[1]);
             BuildSkills(pages[TabSkills]);
+            BuildMoves(pages[TabMoves]);
             BuildDrinks(pages[TabDrinks]);
             BuildShop(pages[TabShop]);
             root.SetActive(false);
@@ -240,6 +248,7 @@ namespace Buds.UI
             RefreshProfile();
             RefreshGear();
             RefreshSkills();
+            RefreshMoves();
             RefreshDrinks();
             RefreshShop();
         }
@@ -591,35 +600,45 @@ namespace Buds.UI
                 17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
             UiKit.Place(note.rectTransform, new Vector2(0, 1), new Vector2(0, -40), new Vector2(1000, 30), new Vector2(0, 1));
 
+            // a card (530 × 148): icon with the training bar under it on the left; name, rank pips and the gear
+            // badge in the strip left of "Ulepsz"; the description and the special abilities below, all 12 px from the frame
             var gearMax = content.skillGearMax > 0 ? content.skillGearMax : 2;
+            const float CardW = 530, CardH = 148, Pad = 14, TextX = 88, PipStep = 25, ButtonW = 140, ButtonH = 54;
+            const float TextW = CardW - TextX - Pad;
             for (var i = 0; i < content.skills.Length; i++)
             {
                 var skill = content.skills[i];
                 var row = UiKit.OutlinedBox("Skill " + skill.id, page, UiKit.Paper300, UiKit.RadiusM);
                 var rt = (RectTransform)row.transform.parent;
-                UiKit.Place(rt, new Vector2(0, 1), new Vector2((i % 2) * 546, -76 - (i / 2) * 150), new Vector2(530, 140),
+                UiKit.Place(rt, new Vector2(0, 1), new Vector2((i % 2) * 546, -76 - (i / 2) * (CardH + 8)), new Vector2(CardW, CardH),
                     new Vector2(0, 1));
                 var icon = UiKit.Rect("Icon", row.transform).gameObject.AddComponent<Image>();
                 icon.sprite = Icon("Skills/" + skill.id);
                 icon.preserveAspect = true;
                 icon.raycastTarget = false;
-                UiKit.Place(icon.rectTransform, new Vector2(0, 1), new Vector2(12, -12), new Vector2(64, 64), new Vector2(0, 1));
+                UiKit.Place(icon.rectTransform, new Vector2(0, 1), new Vector2(Pad, -Pad), new Vector2(60, 60), new Vector2(0, 1));
+                var train = UiKit.Bar("Training", row.transform, UiKit.Rep400, out var trainBar);
+                UiKit.Place(trainBar, new Vector2(0, 1), new Vector2(Pad, -84), new Vector2(60, 18), new Vector2(0, 1));
+                var trainText = UiKit.Label("Training", row.transform, "", 13, UiKit.InkSoft, true, TextAnchor.UpperCenter);
+                UiKit.Place(trainText.rectTransform, new Vector2(0, 1), new Vector2(Pad - 6, -106), new Vector2(72, 32), new Vector2(0, 1));
+                trainText.lineSpacing = 0.9f;
+                trainText.verticalOverflow = VerticalWrapMode.Truncate;
+
                 var title = UiKit.Label("Name", row.transform, skill.name, 25, UiKit.Ink, true, TextAnchor.UpperLeft);
-                UiKit.Place(title.rectTransform, new Vector2(0, 1), new Vector2(86, -8), new Vector2(270, 32), new Vector2(0, 1));
+                UiKit.Place(title.rectTransform, new Vector2(0, 1), new Vector2(TextX, -12), new Vector2(CardW - TextX - ButtonW - Pad - 10, 32),
+                    new Vector2(0, 1));
                 // long names shrink instead of wrapping onto the rank pips
                 title.resizeTextForBestFit = true;
                 title.resizeTextMinSize = 16;
                 title.resizeTextMaxSize = 25;
                 title.horizontalOverflow = HorizontalWrapMode.Wrap;
                 title.verticalOverflow = VerticalWrapMode.Truncate;
-                var desc = UiKit.Label("Desc", row.transform, skill.description, 16, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-                UiKit.Place(desc.rectTransform, new Vector2(0, 1), new Vector2(86, -72), new Vector2(432, 40), new Vector2(0, 1));
+                var desc = UiKit.Label("Desc", row.transform, skill.description, 15, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+                UiKit.Place(desc.rectTransform, new Vector2(0, 1), new Vector2(TextX, -78), new Vector2(TextW, 38), new Vector2(0, 1));
                 desc.lineSpacing = 0.95f;
                 desc.verticalOverflow = VerticalWrapMode.Truncate;
-                var train = UiKit.Bar("Training", row.transform, UiKit.Rep400, out var trainBar);
-                UiKit.Place(trainBar, new Vector2(0, 1), new Vector2(12, -116), new Vector2(64, 14), new Vector2(0, 1));
                 var perks = UiKit.Label("Perks", row.transform, "", 15, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-                UiKit.Place(perks.rectTransform, new Vector2(0, 1), new Vector2(86, -114), new Vector2(432, 22), new Vector2(0, 1));
+                UiKit.Place(perks.rectTransform, new Vector2(0, 1), new Vector2(TextX, -116), new Vector2(TextW, 20), new Vector2(0, 1));
                 perks.horizontalOverflow = HorizontalWrapMode.Wrap;
                 perks.verticalOverflow = VerticalWrapMode.Truncate;
                 perks.resizeTextForBestFit = true;
@@ -630,19 +649,27 @@ namespace Buds.UI
                 for (var p = 0; p < pips.Length; p++)
                 {
                     var pip = UiKit.OutlinedBox("Pip" + p, row.transform, UiKit.Surface700, 999);
-                    UiKit.Place((RectTransform)pip.transform.parent, new Vector2(0, 1), new Vector2(86 + p * 28, -44), new Vector2(22, 22),
-                        new Vector2(0, 1));
+                    var size = p >= content.skillMaxRank ? 16f : 20f; // the gear-only pips are smaller
+                    UiKit.Place((RectTransform)pip.transform.parent, new Vector2(0, 1), new Vector2(TextX + p * PipStep + (20 - size) / 2, -49 - (20 - size) / 2),
+                        new Vector2(size, size), new Vector2(0, 1));
                     pips[p] = pip;
-                    if (p >= content.skillMaxRank) pip.transform.parent.localScale = Vector3.one * 0.8f;
                 }
-                var bonus = UiKit.Label("Bonus", row.transform, "", 18, UiKit.Buds600, true, TextAnchor.UpperLeft);
-                UiKit.Place(bonus.rectTransform, new Vector2(0, 1), new Vector2(86 + pips.Length * 28 + 4, -42), new Vector2(120, 26),
-                    new Vector2(0, 1));
+                // what the gear adds: a small lime badge after the pips, in the free strip left of the button
+                var badgeX = TextX + pips.Length * PipStep + 4;
+                var badge = UiKit.OutlinedBox("Bonus", row.transform, UiKit.Buds400, 999);
+                UiKit.Place((RectTransform)badge.transform.parent, new Vector2(0, 1), new Vector2(badgeX, -47),
+                    new Vector2(CardW - Pad - ButtonW - 12 - badgeX, 24), new Vector2(0, 1));
+                var bonus = UiKit.Label("Text", badge.transform, "", 14, UiKit.Ink, true);
+                UiKit.Stretch(bonus.rectTransform, 6, 1, 6, 0);
+                bonus.resizeTextForBestFit = true;
+                bonus.resizeTextMinSize = 10;
+                bonus.resizeTextMaxSize = 14;
                 var id = skill.id;
-                var upgrade = UiKit.Button("Upgrade", row.transform, "Ulepsz", new Vector2(150, 58), () => onUpgrade(id), UiKit.Tone.Buds,
-                    27);
-                UiKit.Place((RectTransform)upgrade.transform, new Vector2(1, 1), new Vector2(-10, -10), new Vector2(150, 58), new Vector2(1, 1));
-                skillRows.Add((id, pips, upgrade, bonus, train, perks));
+                var upgrade = UiKit.Button("Upgrade", row.transform, "Ulepsz", new Vector2(ButtonW, ButtonH), () => onUpgrade(id), UiKit.Tone.Buds,
+                    25);
+                UiKit.Place((RectTransform)upgrade.transform, new Vector2(1, 1), new Vector2(-Pad + 2, -12), new Vector2(ButtonW, ButtonH),
+                    new Vector2(1, 1));
+                skillRows.Add((id, pips, upgrade, bonus, train, trainText, perks));
             }
         }
 
@@ -653,7 +680,7 @@ namespace Buds.UI
                 : $"Wolne punkty: {data.Available}";
             var stats = Stats;
             Canvas.ForceUpdateCanvases();
-            foreach (var (id, pips, upgrade, bonusText, train, perksText) in skillRows)
+            foreach (var (id, pips, upgrade, bonusText, train, trainText, perksText) in skillRows)
             {
                 var rank = data.Ranks.TryGetValue(id, out var r) ? r : 0; // spent + trained
                 var spent = data.Spent.TryGetValue(id, out var sp) ? Math.Min(sp, rank) : rank;
@@ -663,7 +690,12 @@ namespace Buds.UI
                 // the extra (gear-only) pips show only when gear fills them
                 for (var p = content.skillMaxRank; p < pips.Length; p++)
                     pips[p].transform.parent.gameObject.SetActive(p < rank + bonus);
-                bonusText.text = bonus > 0 ? $"+{bonus} z ekwipunku" : "";
+                bonusText.text = bonus > 0 ? $"+{bonus} sprzęt" : "";
+                var badge = (RectTransform)bonusText.transform.parent.parent;
+                badge.gameObject.SetActive(bonus > 0);
+                // right after the last pip that shows
+                var last = (RectTransform)pips[Math.Min(pips.Length, Math.Max(content.skillMaxRank, rank + bonus)) - 1].transform.parent;
+                badge.anchoredPosition = new Vector2(last.anchoredPosition.x + last.sizeDelta.x + 8, badge.anchoredPosition.y);
                 upgrade.interactable = !data.Guest && !data.Loading && data.Available > 0 && rank < content.skillMaxRank;
 
                 // training towards the next rank, and the two special abilities of the skill
@@ -679,9 +711,117 @@ namespace Buds.UI
                         ? $"<color=#5d9a12><b>{perk.name}</b></color>"
                         : $"<color=#8a857c>{perk.name} (r. {perk.rank})</color>");
                 }
-                var where = rank >= content.skillMaxRank ? "Mistrzostwo!" : $"Trening {txp % per}/{per}";
-                perksText.text = $"{where}  ·  {string.Join("  ·  ", parts)}";
+                trainText.text = rank >= content.skillMaxRank ? "Mistrz" : $"Trening\n{txp % per}/{per}";
+                perksText.text = string.Join("  ·  ", parts);
             }
+        }
+
+        // ---------- moves: what the weapon in hand fights with, and the stronger versions still to learn ----------
+
+        const float MoveRowH = 96, MoveRowStep = 104;
+
+        void BuildMoves(RectTransform page)
+        {
+            movesTitle = UiKit.Label("Title", page, "", 28, UiKit.Ink, true, TextAnchor.UpperLeft);
+            UiKit.Place(movesTitle.rectTransform, new Vector2(0, 1), Vector2.zero, new Vector2(1076, 40), new Vector2(0, 1));
+            var note = UiKit.Label("Note", page, "", 17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+            note.text = "Każdy cios ma mocniejszą wersję. Uczysz się jej z poziomem i umiejętnością broni (trening i sprzęt też się liczą).";
+            UiKit.Place(note.rectTransform, new Vector2(0, 1), new Vector2(0, -40), new Vector2(1076, 26), new Vector2(0, 1));
+            for (var i = 0; i < 4; i++)
+            {
+                var card = UiKit.OutlinedBox("Move" + i, page, UiKit.Paper300, UiKit.RadiusM);
+                UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(0, -74 - i * MoveRowStep),
+                    new Vector2(1076, MoveRowH), new Vector2(0, 1));
+                // the move it has now | an arrow | the stronger one | what it takes, as two chips on the right
+                var now = UiKit.Label("Now", card.transform, "", 24, UiKit.Ink, true, TextAnchor.MiddleLeft);
+                UiKit.Place(now.rectTransform, new Vector2(0, 0.5f), new Vector2(18, 0), new Vector2(330, MoveRowH - 16), new Vector2(0, 0.5f));
+                now.lineSpacing = 0.95f;
+                now.resizeTextForBestFit = true;
+                now.resizeTextMinSize = 14;
+                now.resizeTextMaxSize = 24;
+                var arrow = UiKit.Rect("Arrow", card.transform).gameObject.AddComponent<Image>();
+                arrow.sprite = UiKit.Arrow;
+                arrow.color = UiKit.InkSoft;
+                arrow.raycastTarget = false;
+                UiKit.Place(arrow.rectTransform, new Vector2(0, 0.5f), new Vector2(358, 0), new Vector2(34, 34), new Vector2(0, 0.5f));
+                var next = UiKit.Label("Next", card.transform, "", 24, UiKit.Ink, true, TextAnchor.MiddleLeft);
+                UiKit.Place(next.rectTransform, new Vector2(0, 0.5f), new Vector2(408, 0), new Vector2(370, MoveRowH - 16), new Vector2(0, 0.5f));
+                next.lineSpacing = 0.95f;
+                next.resizeTextForBestFit = true;
+                next.resizeTextMinSize = 14;
+                next.resizeTextMaxSize = 24;
+                var levelChip = UiKit.OutlinedBox("Level", card.transform, UiKit.Surface700, 999);
+                UiKit.Place((RectTransform)levelChip.transform.parent, new Vector2(1, 0.5f), new Vector2(-180, 0), new Vector2(118, 40),
+                    new Vector2(1, 0.5f));
+                var needLevel = UiKit.Label("Text", levelChip.transform, "", 18, UiKit.TextOnDark, true);
+                UiKit.Stretch(needLevel.rectTransform, 6, 1, 6, 0);
+                var skillChip = UiKit.OutlinedBox("Skill", card.transform, UiKit.Surface700, 999);
+                UiKit.Place((RectTransform)skillChip.transform.parent, new Vector2(1, 0.5f), new Vector2(-16, 0), new Vector2(156, 40),
+                    new Vector2(1, 0.5f));
+                var needSkill = UiKit.Label("Text", skillChip.transform, "", 18, UiKit.TextOnDark, true);
+                UiKit.Stretch(needSkill.rectTransform, 6, 1, 6, 0);
+                needSkill.resizeTextForBestFit = true;
+                needSkill.resizeTextMinSize = 12;
+                needSkill.resizeTextMaxSize = 18;
+                moveRows.Add((card, now, next, needLevel, levelChip, needSkill, skillChip, arrow));
+            }
+            movesPerks = UiKit.Label("Perks", page, "", 17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+            UiKit.Place(movesPerks.rectTransform, new Vector2(0, 1), new Vector2(0, -74 - 4 * MoveRowStep + 2), new Vector2(1076, 50),
+                new Vector2(0, 1));
+            movesPerks.verticalOverflow = VerticalWrapMode.Truncate;
+        }
+
+        static string ShortSkill(string id) => id.Length > 0 ? char.ToUpperInvariant(id[0]) + id.Substring(1) : id;
+
+        void RefreshMoves()
+        {
+            var item = data.Equipped.TryGetValue("held", out var held) && held != null ? content.Item(held) : null;
+            var weapon = string.IsNullOrEmpty(item?.weapon) ? "piesci" : item.weapon;
+            movesTitle.text = item != null ? $"Ciosy: {item.name}" : "Ciosy: gołe pięści";
+            var stats = Stats;
+            var baseMoves = content.MovesFor(weapon);
+            for (var i = 0; i < moveRows.Count; i++)
+            {
+                var (card, now, next, needLevel, levelChip, needSkill, skillChip, arrow) = moveRows[i];
+                var has = i < baseMoves.Length;
+                card.transform.parent.gameObject.SetActive(has);
+                if (!has) continue;
+                var from = content.Move(baseMoves[i]);
+                var u = content.UpgradeOf(baseMoves[i]);
+                var to = u != null ? content.Move(u.to) : null;
+                var learned = u != null && u.Known(data.Level, stats.SkillRank);
+                string Line(MoveData m) => m == null ? "" : $"{m.name}\n<size=16><color=#55514a>{FightScreen.MoveLine(m)}</color></size>";
+                // the move in use is in ink; the one it was (or will be) is muted
+                now.text = Line(from);
+                now.color = learned ? new Color(0.53f, 0.52f, 0.49f) : UiKit.Ink;
+                next.text = to != null ? Line(to) : "";
+                next.color = learned ? UiKit.Buds600 : UiKit.Ink;
+                card.color = learned ? UiKit.Hex("#e9f5d2") : UiKit.Paper300;
+                arrow.gameObject.SetActive(to != null);
+                levelChip.transform.parent.gameObject.SetActive(u != null);
+                skillChip.transform.parent.gameObject.SetActive(u != null);
+                if (u == null) continue;
+                var levelOk = data.Level >= u.level;
+                var skillOk = stats.SkillRank(u.skill) >= u.rank;
+                needLevel.text = $"Poziom {u.level}";
+                levelChip.color = levelOk ? UiKit.Buds600 : UiKit.Surface700;
+                // the short name fits the chip: "Przetrwanie 1", not "Instynkt przetrwania 1"
+                needSkill.text = $"{ShortSkill(u.skill)} {u.rank}";
+                skillChip.color = skillOk ? UiKit.Buds600 : UiKit.Surface700;
+            }
+            // the special moves skills give on top (rank 3 or 5 abilities)
+            var perks = new List<string>();
+            foreach (var perk in content.perks)
+            {
+                if (string.IsNullOrEmpty(perk.move)) continue;
+                var mv = content.Move(perk.move);
+                var skillName = Array.Find(content.skills, s => s.id == perk.skill)?.name ?? perk.skill;
+                var owned = data.Perks.Contains(perk.id);
+                perks.Add(owned
+                    ? $"<color=#5d9a12><b>{mv?.name ?? perk.move}</b></color>"
+                    : $"{mv?.name ?? perk.move} ({skillName} {perk.rank})");
+            }
+            movesPerks.text = perks.Count > 0 ? $"<b>Ciosy specjalne z umiejętności, z każdą bronią:</b> {string.Join("  ·  ", perks)}" : "";
         }
 
         // ---------- shop (coins earned in the game; premium = looks only, later) ----------

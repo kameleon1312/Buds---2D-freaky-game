@@ -71,6 +71,13 @@ namespace Buds.Core
             {
                 ui.ShowDialog(enemy.Data.name, e.Message);
             }
+            catch (Exception e)
+            {
+                // the duel could not be shown: back to the street, never a half-open screen
+                Debug.LogException(e);
+                if (fightScreen.IsOpen) CloseFight();
+                ui.ShowDialog(enemy.Data.name, "Coś przerwało pojedynek. Spróbuj jeszcze raz.");
+            }
             finally
             {
                 fightBusy = false;
@@ -110,6 +117,12 @@ namespace Buds.Core
             catch (ApiException e)
             {
                 fightScreen.ShowMessage(e.Message);
+                fightScreen.SetBusy(false);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                fightScreen.ShowMessage("Coś się zacięło. Wybierz ruch jeszcze raz.");
                 fightScreen.SetBusy(false);
             }
             finally
@@ -161,7 +174,7 @@ namespace Buds.Core
             if (lastReward == null) return;
             var item = string.IsNullOrEmpty(lastReward.item) ? null : quests.Content.Item(lastReward.item);
             var earned = influence != null && influence.gained > 0 ? $" · +{influence.gained} wpływu" : "";
-            if (lastReward.levelUp) ui.ShowToast($"Awans! Poziom {lastReward.level} (+1 punkt)", 3.5f);
+            if (lastReward.levelUp) ui.ShowToast($"Awans! Poziom {lastReward.level} (+1 punkt)" + MovesNote(CurrentMoves(lastReward.level - 1)), 4f);
             else if (item != null) ui.ShowToast($"Łup: {item.name}. Załóż w Ekwipunku.", 3f);
             else ui.ShowToast($"+{lastReward.xpGained} XP · +{Coins(lastReward.coinsGained)}{earned}", 2.5f);
             OnInfluence(influence, false);
@@ -185,7 +198,7 @@ namespace Buds.Core
             var moments = 0;
             fightScreen.Moment = async name =>
             {
-                if (moments++ < 4) await shot($"f-moment-{moments}-{name}.png");
+                if (moments++ < 8) await shot($"f-moment-{moments}-{name}.png");
             };
             await StartDuel(target);
             await Awaitable.WaitForSecondsAsync(0.3f);

@@ -5,7 +5,7 @@ import { levelOf, type CatalogItem, type Rarity } from './catalog';
 import { coinsWithLuck, weaponKindSchema, type CharacterStats, type WeaponKind } from './gear';
 import { levelFromXp } from './level';
 import { buffBonus, type BuffId } from './consumables';
-import type { PerkId } from './skills';
+import type { PerkId, SkillId } from './skills';
 
 /**
  * Duels (pojedynki): turn-based fights against the people of the districts, resolved on the server one turn at a
@@ -236,6 +236,161 @@ export const MOVES = {
     anim: 'spin',
     description: 'Obrót i cios z całej siły.',
   }),
+  // ---------- learned moves: stronger versions of the weapon's moves (MOVE_UPGRADES) ----------
+  kontra: m({
+    id: 'kontra',
+    name: 'Kontra',
+    power: [4, 6],
+    accuracy: 90,
+    effect: 'guard',
+    anim: 'guard',
+    description: 'Zasłaniasz się i oddajesz: połowa obrażeń i cios w odpowiedzi.',
+  }),
+  'seria-ciosow': m({
+    id: 'seria-ciosow',
+    name: 'Seria ciosów',
+    power: [4, 6],
+    accuracy: 93,
+    hits: 2,
+    anim: 'jab',
+    description: 'Dwa proste jeden po drugim.',
+  }),
+  bomba: m({
+    id: 'bomba',
+    name: 'Bomba',
+    power: [11, 15],
+    accuracy: 82,
+    anim: 'hook',
+    description: 'Sierpowy z całego ciała.',
+  }),
+  'z-polobrotu': m({
+    id: 'z-polobrotu',
+    name: 'Z półobrotu',
+    power: [12, 17],
+    accuracy: 74,
+    effect: 'weaken',
+    anim: 'kick',
+    description: 'Kopniak z obrotu. Rywal słabiej bije przez 2 tury.',
+  }),
+  'szybkie-pchniecie': m({
+    id: 'szybkie-pchniecie',
+    name: 'Szybkie pchnięcie',
+    power: [4, 6],
+    accuracy: 91,
+    hits: 2,
+    anim: 'thrust',
+    description: 'Dwa krótkie pchnięcia końcem kija.',
+  }),
+  'z-gory': m({
+    id: 'z-gory',
+    name: 'Cios z góry',
+    power: [13, 18],
+    accuracy: 79,
+    anim: 'swing',
+    description: 'Kij spada z góry. Trudno się zasłonić.',
+  }),
+  huragan: m({
+    id: 'huragan',
+    name: 'Huragan',
+    power: [9, 12],
+    accuracy: 67,
+    hits: 2,
+    anim: 'spin',
+    description: 'Dwa obroty z kijem.',
+  }),
+  'precyzyjny-strzal': m({
+    id: 'precyzyjny-strzal',
+    name: 'Precyzyjny strzał',
+    power: [9, 12],
+    accuracy: 94,
+    anim: 'shoot',
+    description: 'Kamyk tam, gdzie boli.',
+  }),
+  grad: m({
+    id: 'grad',
+    name: 'Grad kamieni',
+    power: [4, 6],
+    accuracy: 80,
+    hits: 3,
+    anim: 'shoot',
+    description: 'Trzy strzały, zanim rywal mrugnie.',
+  }),
+  snajper: m({
+    id: 'snajper',
+    name: 'Oko snajpera',
+    power: [5, 7],
+    accuracy: 100,
+    effect: 'aim',
+    anim: 'aim',
+    description: 'Strzał na pewno, a następny cios na pewno krytyczny.',
+  }),
+  'psik-z-bliska': m({
+    id: 'psik-z-bliska',
+    name: 'Psik z bliska',
+    power: [5, 7],
+    accuracy: 95,
+    effect: 'blind',
+    anim: 'spray',
+    description: 'Prosto w oczy. Rywal gorzej trafia przez 2 tury.',
+  }),
+  'burza-farby': m({
+    id: 'burza-farby',
+    name: 'Burza farby',
+    power: [10, 13],
+    accuracy: 86,
+    anim: 'spray',
+    description: 'Cała puszka naraz.',
+  }),
+  roast: m({
+    id: 'roast',
+    name: 'Roast',
+    power: [4, 6],
+    accuracy: 95,
+    effect: 'weaken',
+    anim: 'shout',
+    description: 'Rywal słabiej bije przez 2 tury.',
+  }),
+  'basowy-bit': m({
+    id: 'basowy-bit',
+    name: 'Basowy bit',
+    power: [10, 13],
+    accuracy: 86,
+    anim: 'shout',
+    description: 'Bas, aż drżą szyby.',
+  }),
+  'mega-drop': m({
+    id: 'mega-drop',
+    name: 'Mega drop',
+    power: [15, 20],
+    accuracy: 71,
+    anim: 'shout',
+    description: 'Drop, po którym nikt nie stoi.',
+  }),
+  ollie: m({
+    id: 'ollie',
+    name: 'Ollie w twarz',
+    power: [10, 13],
+    accuracy: 88,
+    anim: 'flip',
+    description: 'Deska wyskakuje prosto w rywala.',
+  }),
+  'flip-360': m({
+    id: 'flip-360',
+    name: '360 flip',
+    power: [14, 19],
+    accuracy: 73,
+    anim: 'flip',
+    description: 'Pełny obrót deski.',
+  }),
+  grind: m({
+    id: 'grind',
+    name: 'Grind',
+    power: [4, 6],
+    accuracy: 90,
+    effect: 'dodge',
+    anim: 'dodge',
+    description: 'Ślizgiem obok ciosu, deską po kostkach.',
+  }),
 } satisfies Record<string, Move>;
 export type MoveId = keyof typeof MOVES;
 export const moveIdSchema = z.enum(Object.keys(MOVES) as [MoveId, ...MoveId[]]);
@@ -256,6 +411,60 @@ export const MOVES_BY_WEAPON: Record<WeaponKind, MoveId[]> = {
   mikrofon: ['diss', 'bit', 'drop', 'garda'],
   deska: ['deska', 'kickflip', 'slizg', 'garda'],
 };
+
+/**
+ * Learned moves (techniki): every weapon move has a stronger version the bud learns with experience and the skill
+ * that goes with the weapon (training and gear count). It replaces the old move on the same button, so the moves
+ * row never grows: progress shows as better moves, not more buttons.
+ */
+export type MoveUpgrade = { to: MoveId; level: number; skill: SkillId; rank: number };
+
+const up = (to: MoveId, level: number, skill: SkillId, rank: number): MoveUpgrade => ({
+  to,
+  level,
+  skill,
+  rank,
+});
+
+export const MOVE_UPGRADES: Partial<Record<MoveId, MoveUpgrade>> = {
+  garda: up('kontra', 5, 'przetrwanie', 1),
+  prosty: up('seria-ciosow', 4, 'walka', 1),
+  sierpowy: up('bomba', 7, 'walka', 2),
+  kopniak: up('z-polobrotu', 10, 'walka', 3),
+  pchniecie: up('szybkie-pchniecie', 4, 'walka', 1),
+  zamach: up('z-gory', 7, 'walka', 2),
+  mlyniec: up('huragan', 10, 'walka', 3),
+  strzal: up('precyzyjny-strzal', 4, 'spryt', 1),
+  seria: up('grad', 7, 'spryt', 2),
+  celowanie: up('snajper', 10, 'spryt', 3),
+  psik: up('psik-z-bliska', 4, 'graffiti', 1),
+  chmura: up('burza-farby', 7, 'graffiti', 2),
+  diss: up('roast', 4, 'flow', 1),
+  bit: up('basowy-bit', 7, 'flow', 2),
+  drop: up('mega-drop', 10, 'flow', 3),
+  deska: up('ollie', 4, 'surfing', 1),
+  kickflip: up('flip-360', 7, 'surfing', 2),
+  slizg: up('grind', 10, 'surfing', 3),
+};
+
+/** Whether a fighter with this level and these skill ranks has learned an upgrade. */
+export const knowsUpgrade = (
+  u: MoveUpgrade,
+  level: number,
+  skills: Partial<Record<SkillId, number>>,
+) => level >= u.level && (skills[u.skill] ?? 0) >= u.rank;
+
+/** The weapon's moves as this bud knows them: each one swapped for its learned version when it qualifies. */
+export function learnedMoves(
+  weapon: WeaponKind,
+  level: number,
+  skills: Partial<Record<SkillId, number>>,
+): MoveId[] {
+  return MOVES_BY_WEAPON[weapon].map((id) => {
+    const u = MOVE_UPGRADES[id];
+    return u && knowsUpgrade(u, level, skills) ? u.to : id;
+  });
+}
 
 // ---------- opponents ----------
 
@@ -426,7 +635,7 @@ export function budFighter(
     spryt: stats.skills.spryt ?? 0,
     weapon,
     weaponItem: weaponItem?.id ?? null,
-    moves: [...MOVES_BY_WEAPON[weapon], ...extra],
+    moves: [...learnedMoves(weapon, level, stats.skills), ...extra],
     perks: [...perks],
     status: { blind: 0, weaken: 0, aim: false, secondWind: false },
   };
@@ -536,8 +745,16 @@ export function playTurn(
   const state = clone(before);
   const rng = new Rng(state.rng);
   const choice = { bud: budMove, enemy: enemyMove(state, rng) };
-  const guarding = { bud: choice.bud === 'garda', enemy: choice.enemy === 'garda' };
-  const dodging = { bud: choice.bud === 'slizg', enemy: choice.enemy === 'slizg' };
+  // guard and dodge moves (Garda, Kontra, Ślizg, Grind) take hold before anyone acts
+  const effectOf = (moveId: MoveId) => (MOVES[moveId] as Move).effect;
+  const guarding = {
+    bud: effectOf(choice.bud) === 'guard',
+    enemy: effectOf(choice.enemy) === 'guard',
+  };
+  const dodging = {
+    bud: effectOf(choice.bud) === 'dodge',
+    enemy: effectOf(choice.enemy) === 'dodge',
+  };
   const order: ('bud' | 'enemy')[] =
     state.enemy.speed > state.bud.speed ? ['enemy', 'bud'] : ['bud', 'enemy'];
   const events: TurnEvent[] = [];
@@ -551,7 +768,7 @@ export function playTurn(
     const event: TurnEvent = { actor, move: move.id as MoveId, hits: [], budHp: 0, enemyHp: 0 };
 
     if (move.effect === 'guard' || move.effect === 'dodge') event.effect = move.effect;
-    else if (move.effect === 'aim') {
+    else if (move.effect === 'aim' && move.power[1] === 0) {
       me.status.aim = true;
       event.effect = 'aim';
     }
@@ -584,6 +801,11 @@ export function playTurn(
           other.status.secondWind = true;
           event.secondWind = { who: target, hp: back };
         }
+      }
+      // a shot that also takes aim (Oko snajpera): the aim is for the next move, not this one
+      if (move.effect === 'aim') {
+        me.status.aim = true;
+        event.effect = 'aim';
       }
       // blind and weaken stick only when the move landed
       if (event.hits.some((h) => h.hit) && (move.effect === 'blind' || move.effect === 'weaken')) {

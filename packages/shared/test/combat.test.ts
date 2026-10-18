@@ -4,6 +4,8 @@ import {
   CONTENT,
   DISTRICTS,
   MAX_TURNS,
+  MOVE_ANIMS,
+  MOVE_UPGRADES,
   MOVES,
   MOVES_BY_WEAPON,
   WEAPON_KINDS,
@@ -15,12 +17,14 @@ import {
   enemyFighter,
   fightXp,
   hitChance,
+  learnedMoves,
   newFight,
   playTurn,
   rollLoot,
   type Enemy,
   type FightState,
   type MoveId,
+  type MoveUpgrade,
 } from '../src';
 
 const xpForLevel = (level: number) => 100 * (level - 1) ** 2;
@@ -46,7 +50,8 @@ function autoplay(state: FightState): FightState {
       const v = (id: MoveId) => (MOVES[id].power[0] + MOVES[id].power[1]) * MOVES[id].accuracy;
       return v(b) - v(a);
     })[0]!;
-    s = playTurn(s, low && s.turn % 3 === 0 ? 'garda' : best).state;
+    const guard = s.bud.moves.find((m) => MOVES[m].effect === 'guard')!;
+    s = playTurn(s, low && s.turn % 3 === 0 ? guard : best).state;
   }
   return s;
 }
@@ -217,5 +222,54 @@ describe('rewards', () => {
       return;
     }
     throw new Error('no drop in 50 seeds');
+  });
+});
+
+describe('learned moves', () => {
+  const none = {};
+  it('swap the weapon moves for stronger versions with level and the matching skill', () => {
+    expect(learnedMoves('piesci', 3, { walka: 3 })).toEqual(MOVES_BY_WEAPON.piesci);
+    // level alone or skill alone is not enough
+    expect(learnedMoves('piesci', 12, none)).toEqual(MOVES_BY_WEAPON.piesci);
+    expect(learnedMoves('piesci', 4, { walka: 1 })).toContain('seria-ciosow');
+    expect(learnedMoves('piesci', 12, { walka: 3, przetrwanie: 1 })).toEqual([
+      'seria-ciosow',
+      'bomba',
+      'z-polobrotu',
+      'kontra',
+    ]);
+  });
+
+  it('keep four moves per weapon, with known animations, and every upgrade is worth it', () => {
+    const value = (id: MoveId) => {
+      const mv = MOVES[id];
+      return ((mv.power[0] + mv.power[1]) * (mv.hits ?? 1) * mv.accuracy) / 2;
+    };
+    for (const kind of WEAPON_KINDS) {
+      const all = learnedMoves(kind, 99, {
+        walka: 5,
+        spryt: 5,
+        graffiti: 5,
+        flow: 5,
+        surfing: 5,
+        przetrwanie: 5,
+      });
+      expect(all).toHaveLength(4);
+      expect(all.every((id) => MOVE_ANIMS.includes(MOVES[id].anim))).toBe(true);
+    }
+    for (const [from, u] of Object.entries(MOVE_UPGRADES) as [MoveId, MoveUpgrade][]) {
+      expect(value(u.to), `${from} → ${u.to}`).toBeGreaterThanOrEqual(value(from));
+      // a guard stays a guard, a blind stays a blind…
+      if (MOVES[from].effect) expect(MOVES[u.to].effect).toBe(MOVES[from].effect);
+    }
+  });
+
+  it('Kontra guards like Garda and hits back', () => {
+    const base = fight(dresiarz, 12, [], 7);
+    base.bud.moves = learnedMoves('piesci', 12, { przetrwanie: 1 });
+    const { events } = playTurn(base, 'kontra');
+    const mine = events.find((e) => e.actor === 'bud')!;
+    expect(mine.effect).toBe('guard');
+    expect(mine.hits).toHaveLength(1);
   });
 });

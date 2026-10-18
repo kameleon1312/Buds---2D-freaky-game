@@ -150,10 +150,13 @@ water : water : 2.4 : 0.44 #3f93c9, 0.5 #c4ecfc, 0.56 #5cbdeb, 0.88 #48a8de
 
 [scatter]
 grass2 : 0.25 : tuft
-grass : 0.02 : flowers-a|flowers-b|flowers-c|tuft
+grass : 0.05 : flowers-a|flowers-b|flowers-c|tuft|liscie-a|tuft
+sidewalk : 0.035 : chwast|rysa|liscie-b|rysa
+plaza : 0.02 : liscie-a|chwast|rysa
+concrete : 0.02 : rysa|plama-oleju
 path : 0.05 : pebbles
 dirt : 0.04 : pebbles
-asphalt : 0.006 : manhole
+asphalt : 0.02 : manhole|kratka|plama-oleju|kratka
 water : 0.15 : lily
 
 [signs]

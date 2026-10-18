@@ -135,7 +135,7 @@ namespace Buds.Core
                 var bud = await api.GetMe(session.Token);
                 look = bud.look;
                 var sheet = await api.GetSheet(bud.slug);
-                EnterWorld(bud.name, bud.xp, new BudSheet(sheet), session, await LoadCompleted(session));
+                EnterWorld(bud.name, bud.xp, new BudSheet(sheet, true), session, await LoadCompleted(session));
             }
             catch (ApiException e) when (e.Status == 401)
             {
@@ -184,7 +184,7 @@ namespace Buds.Core
                 var sheet = await api.GetSheet(res.bud.slug);
                 var completed = await LoadCompleted(paired);
                 HidePairing();
-                EnterWorld(res.bud.name, res.bud.xp, new BudSheet(sheet), paired, completed);
+                EnterWorld(res.bud.name, res.bud.xp, new BudSheet(sheet, true), paired, completed);
             }
             catch (ApiException e)
             {
@@ -263,7 +263,13 @@ namespace Buds.Core
             // rooms: a little room above the map so the whole back wall shows; around them, the map's dark base
             cam.bounds = new Rect(0, 0, map.Width, map.Height + (map.IsInterior ? 1.6f : 0));
             Camera.main.backgroundColor = map.BaseColor;
+            WorldGrade.Apply(Camera.main, map); // the district's light (World/WorldGrade)
             cam.SnapToTarget();
+            // what the old map loaded (its prop textures, sheets) goes back to the system
+            Resources.UnloadUnusedAssets();
+            if (CommandLine.Has("-buds-autoshot"))
+                Debug.Log($"[Mem] {map.Id}: {UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / (1024 * 1024)} MB allocated, " +
+                          $"{UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver() / (1024 * 1024)} MB graphics");
 
             atExit = map.ExitAt(at.x, at.y);
             atZone = map.ZoneAt(at.x, at.y);

@@ -81,7 +81,7 @@ shore : water : 2.4 : 0.44 #3f93c9, 0.5 #c4ecfc, 0.56 #5cbdeb, 0.88 #48a8de
 [scatter]
 lawn : 0.015 : roze|tuft
 lawn2 : 0.12 : tuft
-gravel : 0.03 : pebbles
+gravel : 0.05 : pebbles|liscie-a|pebbles
 dirt : 0.05 : pebbles|tuft
 water : 0.12 : lily
 

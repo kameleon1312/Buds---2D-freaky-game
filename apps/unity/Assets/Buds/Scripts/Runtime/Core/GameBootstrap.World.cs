@@ -155,11 +155,35 @@ namespace Buds.Core
             travelling = true;
             player.Input.Blocked = true;
             ui.SetHint(null);
-            await ui.FadeTo(1, 0.16f);
-            LoadDistrict(mapId, from);
-            player.Input.Blocked = true;
-            await ui.FadeTo(0, 0.22f);
-            travelling = false;
+            var back = world ? world.Map.Id : null;
+            try
+            {
+                await ui.FadeTo(1, 0.16f);
+                LoadDistrict(mapId, from);
+                player.Input.Blocked = true;
+            }
+            catch (Exception e)
+            {
+                // a map that failed to load never leaves the screen black and the bud frozen: back where it was
+                Debug.LogException(e);
+                ui.ShowToast("Nie udało się tam przejść. Spróbuj jeszcze raz.", 3f);
+                if (back != null && (!world || !player || world.Map.Id != back))
+                {
+                    try
+                    {
+                        LoadDistrict(back, null);
+                    }
+                    catch (Exception again)
+                    {
+                        Debug.LogException(again);
+                    }
+                }
+            }
+            finally
+            {
+                await ui.FadeTo(0, 0.22f);
+                travelling = false;
+            }
         }
 
         // ---------- caches ----------
@@ -195,7 +219,7 @@ namespace Buds.Core
                 ui.ShowDialog("Skrytka", $"{cache.text}\n<b>+{Coins(res.coinsGained)}{lucky}  ·  +{res.xpGained} XP</b>" +
                                          (influence != null ? $"\n<color=#5d9a12><b>{influence}</b></color>" : ""));
                 OnInfluence(res.influence, false);
-                if (res.levelUp) ui.ShowToast($"Awans! Poziom {res.level} (+1 punkt)", 3.5f);
+                if (res.levelUp) ui.ShowToast($"Awans! Poziom {res.level} (+1 punkt)" + MovesNote(CurrentMoves(res.level - 1)), 4f);
                 else ui.ShowToast($"+{Coins(res.coinsGained)} (masz {res.coins})", 2.4f);
             }
             catch (ApiException e) when (e.Status == 409 && e.Message.Contains("pusta"))
@@ -303,7 +327,7 @@ namespace Buds.Core
                 await shot($"p{tab}-panel.png");
             }
             panel.SelectShopItem("mount-motocykl-smok");
-            await shot("p5-sklep-premium.png");
+            await shot("p5b-sklep-premium.png");
             panel.Hide();
             OpenMap();
             await shot("p6-mapa.png");

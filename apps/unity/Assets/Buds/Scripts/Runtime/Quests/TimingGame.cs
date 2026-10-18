@@ -43,6 +43,7 @@ namespace Buds.Quests
         public void Tick(float dt)
         {
             if (Done) return;
+            dt = Math.Min(dt, 0.1f); // back from the background: no giant jump
             Marker += dir * Speed * dt;
             // bounce off the ends
             while (Marker > 1 || Marker < 0)

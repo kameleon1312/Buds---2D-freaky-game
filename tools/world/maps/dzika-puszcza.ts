@@ -254,7 +254,7 @@ export function dzikaPuszcza(): MapCanvas {
   m.scatter.push(
     { ground: 'grass', chance: 0.05, props: 'tuft|tuft|flowers-a|flowers-c' },
     { ground: 'grass2', chance: 0.06, props: 'grzyby|tuft|tuft|flowers-b' },
-    { ground: 'forest', chance: 0.05, props: 'grzyby|tuft' },
+    { ground: 'forest', chance: 0.08, props: 'grzyby|tuft|liscie-a|liscie-b' },
     { ground: 'bog', chance: 0.08, props: 'kaluza|tuft' },
     { ground: 'path', chance: 0.05, props: 'pebbles' },
     { ground: 'rock', chance: 0.04, props: 'pebbles' },

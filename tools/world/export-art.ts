@@ -10,6 +10,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { ICONS } from './art/icons';
 import { FX } from './art/fx';
 import { ALL_PROPS } from './art/index';
+import { finish } from './art/finish';
 import { T } from './art/kit';
 
 export const PPU = 96; // output pixels per tile (Unity sprite pixelsPerUnit)
@@ -43,7 +44,10 @@ if (args[0] === '--fx-preview') {
       y += rowH + gap + 24;
       rowH = 0;
     }
-    body += `<g transform="translate(${x} ${y + 24})">${p.body}</g>`;
+    // each effect rendered exactly as the export renders it (same fonts, same canvas), so cut-off art shows here too
+    const png = new Resvg(svgOf(p), { font: SIGN_FONT }).render().asPng().toString('base64');
+    body += `<rect x="${x}" y="${y + 24}" width="${p.w}" height="${p.h}" fill="none" stroke="#363a47" stroke-dasharray="6 6"/>`;
+    body += `<image x="${x}" y="${y + 24}" width="${p.w}" height="${p.h}" href="data:image/png;base64,${png}"/>`;
     body += `<text x="${x}" y="${y + 14}" font-family="sans-serif" font-size="18" fill="#a9afbd">${name}</text>`;
     rowH = Math.max(rowH, p.h);
     x += p.w + gap;
@@ -75,7 +79,7 @@ if (args[0] === '--fx-preview') {
       rowH = 0;
     }
     const scale = Math.min(1, cell / p.w);
-    body += `<g transform="translate(${x + (cell - p.w * scale) / 2} ${y + 30}) scale(${scale})">${p.body}</g>`;
+    body += `<g transform="translate(${x + (cell - p.w * scale) / 2} ${y + 30}) scale(${scale})">${finish(p)}</g>`;
     body += `<text x="${x + cell / 2}" y="${y + 20}" font-family="sans-serif" font-size="22" text-anchor="middle" fill="#333">${name}</text>`;
     rowH = Math.max(rowH, p.h * scale);
     x += cell;
@@ -107,7 +111,8 @@ if (args[0] === '--fx-preview') {
     foot: [number, number];
   }[] = [];
   for (const [name, p] of Object.entries(ALL_PROPS)) {
-    const png = new Resvg(svgOf(p), {
+    // every standing prop gets the finishing light and grain (art/finish.ts)
+    const png = new Resvg(svgOf({ ...p, body: finish(p) }), {
       fitTo: { mode: 'zoom', value: scale },
       font: SIGN_FONT,
     }).render();

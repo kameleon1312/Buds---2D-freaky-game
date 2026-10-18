@@ -8,6 +8,31 @@ using UnityEngine;
 
 namespace Buds.Tests
 {
+    public class LightTests
+    {
+        [Test]
+        public void ShadowsFallNorthEastFromTheGroundPoint()
+        {
+            // the ground point and what lies under it stay put; the rest stretches away from the low sun
+            Assert.AreEqual(Vector2.zero, Buds.World.WorldView.ShadowPoint(Vector2.zero));
+            Assert.AreEqual(new Vector2(0.3f, -0.1f), Buds.World.WorldView.ShadowPoint(new Vector2(0.3f, -0.1f)));
+            var top = Buds.World.WorldView.ShadowPoint(new Vector2(0, 2));
+            Assert.Greater(top.x, 0);
+            Assert.Less(top.y, 2);
+            Assert.Greater(top.y, 0);
+        }
+
+        [Test]
+        public void PlantsSwayAndHousesStandStill()
+        {
+            Assert.Greater(Buds.World.WorldView.SwayFor("tree-a"), 0);
+            Assert.Greater(Buds.World.WorldView.SwayFor("bush-b"), Buds.World.WorldView.SwayFor("tree-a"));
+            Assert.AreEqual(0, Buds.World.WorldView.SwayFor("kamienica-a"));
+            for (var t = 0f; t < 20; t += 0.37f)
+                Assert.LessOrEqual(Mathf.Abs(Buds.World.WorldView.Wind(12, 40, t)), 1.0001f);
+        }
+    }
+
     public class FourWayTests
     {
         [Test]

@@ -273,7 +273,7 @@ namespace Buds.Core
             try
             {
                 rivalryScreen.SetStatus("Rywal wchodzi na plac…");
-                var theirs = new BudSheet(await api.GetSheet(slug));
+                var theirs = new BudSheet(await api.GetSheet(slug), true);
                 var res = await api.StartPvp(session.Token, slug);
                 rivalryScreen.Hide();
                 currentFight = res.fight;

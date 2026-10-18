@@ -276,7 +276,7 @@ export function dworCarski(): MapCanvas {
   m.scatter.push(
     { ground: 'lawn', chance: 0.015, props: 'roze|tuft' },
     { ground: 'lawn2', chance: 0.12, props: 'tuft' },
-    { ground: 'gravel', chance: 0.03, props: 'pebbles' },
+    { ground: 'gravel', chance: 0.05, props: 'pebbles|liscie-a|pebbles' },
     { ground: 'dirt', chance: 0.05, props: 'pebbles|tuft' },
     { ground: 'water', chance: 0.12, props: 'lily' },
   );

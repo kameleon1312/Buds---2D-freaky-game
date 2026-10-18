@@ -231,7 +231,7 @@ export function losKarkos(): MapCanvas {
   );
   m.scatter.push(
     { ground: 'concrete', chance: 0.06, props: 'gruz|kaluza|pekniecie|gruz' },
-    { ground: 'asphalt', chance: 0.06, props: 'pekniecie|kaluza' },
+    { ground: 'asphalt', chance: 0.07, props: 'pekniecie|kaluza|plama-oleju|kratka' },
     { ground: 'dirt', chance: 0.04, props: 'gruz|tuft' },
     { ground: 'weeds', chance: 0.06, props: 'tuft' },
     { ground: 'rubble', chance: 0.06, props: 'gruz' },

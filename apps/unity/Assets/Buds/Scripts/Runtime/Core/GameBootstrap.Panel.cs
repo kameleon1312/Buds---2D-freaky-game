@@ -188,6 +188,24 @@ namespace Buds.Core
             ApplyRide(); // the ride may have changed; speed = gear × ride × perks × Turbo
         }
 
+        /// <summary>The weapon kind in hand ("piesci" when empty).</summary>
+        string HeldWeapon()
+        {
+            var item = equipped.TryGetValue("held", out var id) && id != null ? quests.Content.Item(id) : null;
+            return string.IsNullOrEmpty(item?.weapon) ? "piesci" : item.weapon;
+        }
+
+        /// <summary>The bud's moves now (or at another level): what the server will let it use in a duel.</summary>
+        string[] CurrentMoves(int? atLevel = null) =>
+            quests.Content.LearnedMoves(HeldWeapon(), atLevel ?? level, gear.SkillRank);
+
+        /// <summary>"  ·  Nowy cios: Bomba" when something since <paramref name="before"/> taught a stronger move.</summary>
+        string MovesNote(string[] before)
+        {
+            var names = quests.Content.NewlyLearned(before, CurrentMoves()).ConvertAll(id => quests.Content.Move(id)?.name ?? id);
+            return names.Count > 0 ? $"  ·  Nowy cios: {string.Join(", ", names)}" : "";
+        }
+
         async Awaitable UpgradeSkill(string skillId)
         {
             if (session == null || panelData == null || panelData.Loading) return;
@@ -195,9 +213,10 @@ namespace Buds.Core
             panel.Refresh(panelData);
             try
             {
+                var movesBefore = CurrentMoves();
                 ApplySkills(await api.UpgradeSkill(session.Token, skillId));
                 panelData.Error = null;
-                ui.ShowToast("Umiejętność ulepszona!");
+                ui.ShowToast("Umiejętność ulepszona!" + MovesNote(movesBefore), 3.5f);
             }
             catch (ApiException e)
             {
@@ -235,13 +254,14 @@ namespace Buds.Core
             try
             {
                 var before = gear;
+                var movesBefore = CurrentMoves();
                 ApplyEquipment(await api.Equip(session.Token, slot, itemId));
                 panelData.Error = null;
                 var item = itemId != null ? quests.Content.Item(itemId) : null;
                 // say what it really changed: the same numbers the server uses in duels and caches
                 var diff = Gear.Diff(quests.Content, before, gear);
                 var what = item != null ? $"Założono: {item.name}" : "Zdjęto przedmiot";
-                ui.ShowToast(diff.Length > 0 ? $"{what}  ·  {diff}" : what, 3.5f);
+                ui.ShowToast((diff.Length > 0 ? $"{what}  ·  {diff}" : what) + MovesNote(movesBefore), 3.5f);
             }
             catch (ApiException e)
             {

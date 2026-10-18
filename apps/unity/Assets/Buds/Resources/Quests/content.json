@@ -8169,6 +8169,258 @@
         18
       ],
       "accuracy": 76
+    },
+    {
+      "id": "kontra",
+      "name": "Kontra",
+      "anim": "guard",
+      "description": "Zasłaniasz się i oddajesz: połowa obrażeń i cios w odpowiedzi.",
+      "hits": 1,
+      "effect": "guard",
+      "damage": true,
+      "power": [
+        4,
+        6
+      ],
+      "accuracy": 90
+    },
+    {
+      "id": "seria-ciosow",
+      "name": "Seria ciosów",
+      "anim": "jab",
+      "description": "Dwa proste jeden po drugim.",
+      "hits": 2,
+      "effect": "",
+      "damage": true,
+      "power": [
+        4,
+        6
+      ],
+      "accuracy": 93
+    },
+    {
+      "id": "bomba",
+      "name": "Bomba",
+      "anim": "hook",
+      "description": "Sierpowy z całego ciała.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        11,
+        15
+      ],
+      "accuracy": 82
+    },
+    {
+      "id": "z-polobrotu",
+      "name": "Z półobrotu",
+      "anim": "kick",
+      "description": "Kopniak z obrotu. Rywal słabiej bije przez 2 tury.",
+      "hits": 1,
+      "effect": "weaken",
+      "damage": true,
+      "power": [
+        12,
+        17
+      ],
+      "accuracy": 74
+    },
+    {
+      "id": "szybkie-pchniecie",
+      "name": "Szybkie pchnięcie",
+      "anim": "thrust",
+      "description": "Dwa krótkie pchnięcia końcem kija.",
+      "hits": 2,
+      "effect": "",
+      "damage": true,
+      "power": [
+        4,
+        6
+      ],
+      "accuracy": 91
+    },
+    {
+      "id": "z-gory",
+      "name": "Cios z góry",
+      "anim": "swing",
+      "description": "Kij spada z góry. Trudno się zasłonić.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        13,
+        18
+      ],
+      "accuracy": 79
+    },
+    {
+      "id": "huragan",
+      "name": "Huragan",
+      "anim": "spin",
+      "description": "Dwa obroty z kijem.",
+      "hits": 2,
+      "effect": "",
+      "damage": true,
+      "power": [
+        9,
+        12
+      ],
+      "accuracy": 67
+    },
+    {
+      "id": "precyzyjny-strzal",
+      "name": "Precyzyjny strzał",
+      "anim": "shoot",
+      "description": "Kamyk tam, gdzie boli.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        9,
+        12
+      ],
+      "accuracy": 94
+    },
+    {
+      "id": "grad",
+      "name": "Grad kamieni",
+      "anim": "shoot",
+      "description": "Trzy strzały, zanim rywal mrugnie.",
+      "hits": 3,
+      "effect": "",
+      "damage": true,
+      "power": [
+        4,
+        6
+      ],
+      "accuracy": 80
+    },
+    {
+      "id": "snajper",
+      "name": "Oko snajpera",
+      "anim": "aim",
+      "description": "Strzał na pewno, a następny cios na pewno krytyczny.",
+      "hits": 1,
+      "effect": "aim",
+      "damage": true,
+      "power": [
+        5,
+        7
+      ],
+      "accuracy": 100
+    },
+    {
+      "id": "psik-z-bliska",
+      "name": "Psik z bliska",
+      "anim": "spray",
+      "description": "Prosto w oczy. Rywal gorzej trafia przez 2 tury.",
+      "hits": 1,
+      "effect": "blind",
+      "damage": true,
+      "power": [
+        5,
+        7
+      ],
+      "accuracy": 95
+    },
+    {
+      "id": "burza-farby",
+      "name": "Burza farby",
+      "anim": "spray",
+      "description": "Cała puszka naraz.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        10,
+        13
+      ],
+      "accuracy": 86
+    },
+    {
+      "id": "roast",
+      "name": "Roast",
+      "anim": "shout",
+      "description": "Rywal słabiej bije przez 2 tury.",
+      "hits": 1,
+      "effect": "weaken",
+      "damage": true,
+      "power": [
+        4,
+        6
+      ],
+      "accuracy": 95
+    },
+    {
+      "id": "basowy-bit",
+      "name": "Basowy bit",
+      "anim": "shout",
+      "description": "Bas, aż drżą szyby.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        10,
+        13
+      ],
+      "accuracy": 86
+    },
+    {
+      "id": "mega-drop",
+      "name": "Mega drop",
+      "anim": "shout",
+      "description": "Drop, po którym nikt nie stoi.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        15,
+        20
+      ],
+      "accuracy": 71
+    },
+    {
+      "id": "ollie",
+      "name": "Ollie w twarz",
+      "anim": "flip",
+      "description": "Deska wyskakuje prosto w rywala.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        10,
+        13
+      ],
+      "accuracy": 88
+    },
+    {
+      "id": "flip-360",
+      "name": "360 flip",
+      "anim": "flip",
+      "description": "Pełny obrót deski.",
+      "hits": 1,
+      "effect": "",
+      "damage": true,
+      "power": [
+        14,
+        19
+      ],
+      "accuracy": 73
+    },
+    {
+      "id": "grind",
+      "name": "Grind",
+      "anim": "dodge",
+      "description": "Ślizgiem obok ciosu, deską po kostkach.",
+      "hits": 1,
+      "effect": "dodge",
+      "damage": true,
+      "power": [
+        4,
+        6
+      ],
+      "accuracy": 90
     }
   ],
   "weapons": [
@@ -8225,6 +8477,134 @@
         "slizg",
         "garda"
       ]
+    }
+  ],
+  "moveUpgrades": [
+    {
+      "from": "garda",
+      "to": "kontra",
+      "level": 5,
+      "skill": "przetrwanie",
+      "rank": 1
+    },
+    {
+      "from": "prosty",
+      "to": "seria-ciosow",
+      "level": 4,
+      "skill": "walka",
+      "rank": 1
+    },
+    {
+      "from": "sierpowy",
+      "to": "bomba",
+      "level": 7,
+      "skill": "walka",
+      "rank": 2
+    },
+    {
+      "from": "kopniak",
+      "to": "z-polobrotu",
+      "level": 10,
+      "skill": "walka",
+      "rank": 3
+    },
+    {
+      "from": "pchniecie",
+      "to": "szybkie-pchniecie",
+      "level": 4,
+      "skill": "walka",
+      "rank": 1
+    },
+    {
+      "from": "zamach",
+      "to": "z-gory",
+      "level": 7,
+      "skill": "walka",
+      "rank": 2
+    },
+    {
+      "from": "mlyniec",
+      "to": "huragan",
+      "level": 10,
+      "skill": "walka",
+      "rank": 3
+    },
+    {
+      "from": "strzal",
+      "to": "precyzyjny-strzal",
+      "level": 4,
+      "skill": "spryt",
+      "rank": 1
+    },
+    {
+      "from": "seria",
+      "to": "grad",
+      "level": 7,
+      "skill": "spryt",
+      "rank": 2
+    },
+    {
+      "from": "celowanie",
+      "to": "snajper",
+      "level": 10,
+      "skill": "spryt",
+      "rank": 3
+    },
+    {
+      "from": "psik",
+      "to": "psik-z-bliska",
+      "level": 4,
+      "skill": "graffiti",
+      "rank": 1
+    },
+    {
+      "from": "chmura",
+      "to": "burza-farby",
+      "level": 7,
+      "skill": "graffiti",
+      "rank": 2
+    },
+    {
+      "from": "diss",
+      "to": "roast",
+      "level": 4,
+      "skill": "flow",
+      "rank": 1
+    },
+    {
+      "from": "bit",
+      "to": "basowy-bit",
+      "level": 7,
+      "skill": "flow",
+      "rank": 2
+    },
+    {
+      "from": "drop",
+      "to": "mega-drop",
+      "level": 10,
+      "skill": "flow",
+      "rank": 3
+    },
+    {
+      "from": "deska",
+      "to": "ollie",
+      "level": 4,
+      "skill": "surfing",
+      "rank": 1
+    },
+    {
+      "from": "kickflip",
+      "to": "flip-360",
+      "level": 7,
+      "skill": "surfing",
+      "rank": 2
+    },
+    {
+      "from": "slizg",
+      "to": "grind",
+      "level": 10,
+      "skill": "surfing",
+      "rank": 3
     }
   ],
   "caches": [

@@ -31,6 +31,7 @@ namespace Buds.World
 
         readonly Dictionary<string, Sprite> sprites = new();
         readonly HashSet<string> flat = new();
+        Texture2D atlas;
 
         public static Manifest Parse(string json) => JsonUtility.FromJson<Manifest>(json);
 
@@ -60,7 +61,8 @@ namespace Buds.World
             if (textures.Count == 0) return art;
 
             var readable = textures.TrueForAll(t => t.isReadable);
-            var atlas = new Texture2D(MaxAtlas, MaxAtlas, TextureFormat.RGBA32, true) { name = "Props atlas" };
+            // PackTextures grows the atlas to what the props need (up to MaxAtlas): never a 4096² texture for a marker
+            var atlas = art.atlas = new Texture2D(2, 2, TextureFormat.RGBA32, true) { name = "Props atlas" };
             var rects = readable ? atlas.PackTextures(textures.ToArray(), 4, MaxAtlas, true) : null;
             if (rects == null) Debug.LogWarning("Prop textures are not readable: drawing them without an atlas");
             atlas.filterMode = FilterMode.Trilinear;
@@ -86,6 +88,16 @@ namespace Buds.World
         }
 
         public Sprite Get(string name) => sprites.TryGetValue(name, out var s) ? s : null;
+
+        /// <summary>Frees the atlas and its sprites (the owner's map is gone); the art must not be used after.</summary>
+        public void Dispose()
+        {
+            foreach (var s in sprites.Values)
+                if (s) UnityEngine.Object.Destroy(s);
+            sprites.Clear();
+            if (atlas) UnityEngine.Object.Destroy(atlas);
+            atlas = null;
+        }
 
         public bool IsFlat(string name) => flat.Contains(name);
     }

@@ -112,6 +112,7 @@ namespace Buds.Characters
             var sprite = art.AddComponent<SpriteRenderer>();
             sprite.sortingOrder = WorldView.SortOrderFor(position.y);
             sprite.sprite = sheet.Get(Facing.Down, 0);
+            CastShadow.Attach(go.transform, sprite, visual);
 
             var bud = go.AddComponent<BudController>();
             bud.sheet = sheet;
@@ -140,6 +141,8 @@ namespace Buds.Characters
                 // riding: the bud stands still on the ride, both bob a little over bumps
                 Walk.Reset();
                 sprite.transform.localScale = Vector3.one;
+                sprite.transform.localRotation = Quaternion.identity;
+                lean = 0;
                 sprite.sprite = sheet.Get(Motor.Facing, 0);
                 rideTime += Time.deltaTime * speed;
                 var bob = speed > 0.25f ? Mathf.Abs(Mathf.Sin(rideTime * 2.4f)) * 0.025f : 0;
@@ -158,8 +161,15 @@ namespace Buds.Characters
                 Walk.Tick(speed, Time.deltaTime);
                 sprite.sprite = sheet.Get(Motor.Facing, Walk.Frame);
                 sprite.transform.localPosition = new Vector3(0, Walk.Lift, 0);
+                // standing still the bud breathes: a slow rise and fall of the chest
+                breath += Time.deltaTime;
+                var squash = Walk.Walking ? Walk.Squash : Walk.Squash * (1 + Mathf.Sin(breath * 2.3f) * 0.014f);
                 // the squash keeps the volume: a little wider as it gets a little shorter
-                sprite.transform.localScale = new Vector3(1 + (1 - Walk.Squash) * 0.6f, Walk.Squash, 1);
+                sprite.transform.localScale = new Vector3(1 + (1 - squash) * 0.6f, squash, 1);
+                // walking sideways the body leans into the step, more when running
+                var leanTo = Motor.Facing == Facing.Side && Walk.Walking ? -Mathf.Sign(body.linearVelocity.x) * Mathf.Min(speed, 7f) * 0.55f : 0;
+                lean = Mathf.Lerp(lean, leanTo, 1 - Mathf.Exp(-Time.deltaTime * 10f));
+                sprite.transform.localRotation = Quaternion.Euler(0, 0, lean);
                 // running: a puff of dust where each foot lands
                 if (Walk.Landed && speed > BudMotor.WalkSpeed + 0.3f)
                     dust.Puff(transform.position + new Vector3(UnityEngine.Random.Range(-0.12f, 0.12f), 0.04f, 0));
@@ -180,6 +190,9 @@ namespace Buds.Characters
 
         /// <summary>This frame's move, turned into one of four directions (Update picks it, FixedUpdate walks it).</summary>
         Vector2 fourWay;
+
+        /// <summary>Breathing clock and the current sideways lean (degrees).</summary>
+        float breath, lean;
 
         void FixedUpdate()
         {

@@ -221,33 +221,54 @@ namespace Buds.UI
             return inner;
         }
 
-        /// <summary>Pill progress bar (xp/hp/energy) with a highlight stripe. Returns the fill to resize.</summary>
+        /// <summary>A shape whose ends are always perfect half circles, whatever size it is laid out at.</summary>
+        public static Image Pill(string name, Transform parent, Color color)
+        {
+            var img = Shape(name, parent, color, PillRadius);
+            img.gameObject.AddComponent<PillFit>();
+            return img;
+        }
+
+        /// <summary>
+        /// Pill progress bar (xp/hp/energy/timers): an outlined pill track, a dark gap of even width all round, and a pill
+        /// fill with a highlight stripe that sits exactly inside it. Returns the fill to resize with <see cref="SetBar"/>.
+        /// </summary>
         public static RectTransform Bar(string name, Transform parent, Color fill, out RectTransform root)
         {
-            var track = OutlinedBox(name, parent, Surface800, 10 * U);
-            root = (RectTransform)track.transform.parent;
-            var mask = Rect("Mask", track.transform);
-            Stretch(mask);
-            mask.gameObject.AddComponent<RectMask2D>();
-            var f = Shape("Fill", mask, fill, 8 * U).rectTransform;
+            var outline = Pill(name, parent, Outline);
+            root = outline.rectTransform;
+            var track = Pill("Track", root, Surface800);
+            Stretch(track.rectTransform, Stroke * 0.75f);
+            // the fill moves inside a slot inset by the same gap on every side, so it never touches the track's edge
+            var slot = Rect("Slot", track.transform);
+            Stretch(slot, BarGap);
+            var f = Pill("Fill", slot, fill).rectTransform;
             f.anchorMin = Vector2.zero;
             f.anchorMax = new Vector2(0, 1);
             f.pivot = new Vector2(0, 0.5f);
             f.offsetMin = Vector2.zero;
             f.offsetMax = Vector2.zero;
-            var shine = Shape("Shine", f, new Color(1, 1, 1, 0.35f), 2 * U).rectTransform;
-            shine.anchorMin = new Vector2(0, 1);
-            shine.anchorMax = new Vector2(1, 1);
-            shine.pivot = new Vector2(0.5f, 1);
-            shine.offsetMin = new Vector2(4 * U, -7 * U);
-            shine.offsetMax = new Vector2(-4 * U, -3 * U);
+            var shine = Pill("Shine", f, new Color(1, 1, 1, 0.32f)).rectTransform;
+            shine.anchorMin = new Vector2(0, 0.56f);
+            shine.anchorMax = new Vector2(1, 0.84f);
+            f.GetComponent<PillFit>().Shine = shine;
             return f;
+        }
+
+        /// <summary>The dark gap between a bar's track and its fill.</summary>
+        public const float BarGap = 1.5f * U;
+
+        /// <summary>The fill width for a value: never thinner than its own height, so the ends stay round.</summary>
+        public static float BarWidth(RectTransform fill, float value)
+        {
+            var slot = ((RectTransform)fill.parent).rect;
+            if (value <= 0.001f) return 0;
+            return Mathf.Lerp(Mathf.Min(slot.height, slot.width), slot.width, Mathf.Clamp01(value));
         }
 
         public static void SetBar(RectTransform fill, float value)
         {
-            var track = ((RectTransform)fill.parent).rect.width;
-            fill.sizeDelta = new Vector2(Mathf.Clamp01(value) * track, 0);
+            fill.sizeDelta = new Vector2(BarWidth(fill, value), 0);
             fill.gameObject.SetActive(value > 0.001f);
         }
 
@@ -292,6 +313,8 @@ namespace Buds.UI
             Tone tone = Tone.Gold, int fontSize = 40)
         {
             text = Keys(text);
+            // the type always fits the face above its lip: small row buttons never push their text onto the edge
+            fontSize = Math.Min(fontSize, Mathf.FloorToInt((size.y - Stroke * 2) * 0.62f));
             var (faceColor, lipColor) = Colors(tone);
             var root = Rect(name, parent);
             root.sizeDelta = size;
@@ -485,6 +508,36 @@ namespace Buds.UI
         }
 
         /// <summary>White rounded-rect sprite with anti-aliased corners and a 9-slice border of the radius.</summary>
+        const int PillRadius = 64;
+
+        /// <summary>
+        /// Scales a pill sprite's corners to half the shape's short side as it is laid out, so a bar of any height has
+        /// round ends, and keeps its highlight stripe inside the straight part.
+        /// </summary>
+        public sealed class PillFit : UIBehaviour
+        {
+            public RectTransform Shine;
+            Image image;
+
+            protected override void OnEnable() => Fit();
+            protected override void OnRectTransformDimensionsChange() => Fit();
+
+            void Fit()
+            {
+                if (!image) image = GetComponent<Image>();
+                var r = ((RectTransform)transform).rect;
+                var side = Mathf.Min(r.width, r.height);
+                if (!image || side <= 0.5f) return;
+                // the sprite's slice border is PillRadius + 1 texels; shown at half the short side
+                image.pixelsPerUnitMultiplier = (PillRadius + 1) * 2f / side;
+                if (!Shine) return;
+                var inset = r.height * 0.42f;
+                Shine.offsetMin = new Vector2(inset, 0);
+                Shine.offsetMax = new Vector2(-inset, 0);
+                Shine.gameObject.SetActive(r.width - inset * 2 > r.height * 0.3f);
+            }
+        }
+
         static Sprite Rounded(int radius)
         {
             radius = Mathf.Min(radius, 128); // larger radii (pills) clamp; the slice keeps them round at any height ≤ 256

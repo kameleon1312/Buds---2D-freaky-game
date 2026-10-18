@@ -37,6 +37,7 @@ namespace Buds.Quests
             view.body = bodyGo.AddComponent<SpriteRenderer>();
             view.body.sprite = sheet.Get(Facing.Down, 0);
             view.body.sortingOrder = WorldView.SortOrderFor(feet.y);
+            CastShadow.Attach(go.transform, view.body, visual);
             view.box = go.AddComponent<BoxCollider2D>();
             view.box.size = new Vector2(10f / 16, 5f / 16);
             view.box.offset = new Vector2(0, 2.5f / 16);
@@ -85,11 +86,14 @@ namespace Buds.Quests
 
         public IReadOnlyList<EnemyView> Enemies => enemies;
 
+        static PropArt markerArt;
+
         public static EnemyWorld Create(WorldView world, QuestContent content)
         {
             var ew = new GameObject("Enemies").AddComponent<EnemyWorld>();
             ew.transform.SetParent(world.transform, false);
-            var marker = PropArt.Load(new HashSet<string> { "marker-fight" }).Get("marker-fight");
+            markerArt ??= PropArt.Load(new HashSet<string> { "marker-fight" }); // loaded once for every map
+            var marker = markerArt.Get("marker-fight");
             foreach (var e in content.enemies)
             {
                 if (e.district != world.Map.Id) continue;
@@ -99,7 +103,7 @@ namespace Buds.Quests
                     Debug.LogWarning($"Missing Resources/Enemies/{e.id}.png — run tools/world/export-quests.ts");
                     continue;
                 }
-                var sheet = new BudSheet(tex);
+                var sheet = BudSheet.Shared(tex);
                 for (var i = 0; i < e.spots.Length; i++)
                 {
                     var feet = world.CellCenter(e.spots[i].x, e.spots[i].y) + new Vector3(0, -0.3f, 0);

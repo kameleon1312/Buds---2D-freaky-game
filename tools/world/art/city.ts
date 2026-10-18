@@ -543,6 +543,76 @@ const rails = (vertical: boolean): Prop => {
   return { w: T, h: T, ax: T / 2, ay: T / 2 + 16, flat: true, body: sleepers };
 };
 
+// ---------- street details (flat, scattered by the maps' [scatter] rules) ----------
+
+/** A gully grate by the kerb. */
+const drain = (): Prop => ({
+  w: 44,
+  h: 34,
+  ax: 22,
+  ay: 26,
+  flat: true,
+  body:
+    flat(rr(4, 6, 36, 22, 3), '#3b3f49', '#262930', 2) +
+    stroke('M10 10v14M16 10v14M22 10v14M28 10v14M34 10v14', '#1c1e24', 2.4) +
+    stroke('M7 9h30', '#6b707c', 1.6, 0.7),
+});
+
+/** An oil stain on the asphalt, with a faint rainbow sheen. */
+const oil = (): Prop => ({
+  w: 56,
+  h: 34,
+  ax: 28,
+  ay: 26,
+  flat: true,
+  body:
+    `<ellipse cx="28" cy="18" rx="22" ry="11" fill="#1e2027" opacity="0.45"/>` +
+    `<ellipse cx="24" cy="16" rx="11" ry="5" fill="#2a2d36" opacity="0.6"/>` +
+    stroke('M14 17q8 -6 18 -3', '#7b6fd1', 1.6, 0.35) +
+    stroke('M18 20q8 -5 16 -2', '#4cc7ff', 1.4, 0.3),
+});
+
+/** A handful of fallen leaves. */
+const leaves = (seed: number): Prop => {
+  const r = rng(seed);
+  let body = '';
+  const colors = ['#d9922e', '#c4572f', '#e8b83c', '#9a6b2f'];
+  for (let i = 0; i < 5; i++) {
+    const x = 8 + r() * 40;
+    const y = 8 + r() * 16;
+    const a = Math.round(r() * 180);
+    const c = colors[Math.floor(r() * colors.length)]!;
+    body +=
+      `<g transform="rotate(${a} ${n(x)} ${n(y)})">` +
+      `<path d="M${n(x - 6)} ${n(y)}q6 -5 12 0q-6 5 -12 0Z" fill="${c}" stroke="#6b4426" stroke-width="1"/>` +
+      `<path d="M${n(x - 5)} ${n(y)}h10" stroke="#6b4426" stroke-width="0.8" opacity="0.6"/></g>`;
+  }
+  return { w: 56, h: 32, ax: 28, ay: 26, flat: true, body };
+};
+
+/** A weed pushing through a gap between paving slabs. */
+const weed = (): Prop => ({
+  w: 40,
+  h: 30,
+  ax: 20,
+  ay: 24,
+  flat: true,
+  body:
+    stroke('M4 22h12l4 -3h16', '#7d776b', 2, 0.6) +
+    stroke('M18 21q-2 -8 -7 -11M20 21q0 -9 2 -14M22 21q3 -7 8 -9', '#5fa843', 2.6) +
+    `<circle cx="22" cy="7" r="2.6" fill="#ffd25c"/>`,
+});
+
+/** A hairline crack across a slab. */
+const hairline = (): Prop => ({
+  w: 52,
+  h: 30,
+  ax: 26,
+  ay: 24,
+  flat: true,
+  body: stroke('M4 18l10 -4l6 3l9 -7l7 2l10 -6M20 17l3 6', '#5e594f', 1.8, 0.55),
+});
+
 const GRAFFITI = ['#ff3d50', '#4cc7ff', '#a3e635', '#b45cff', '#ff9a1f', '#ffc93c'];
 
 export const CITY: Record<string, Prop> = {
@@ -575,6 +645,12 @@ export const CITY: Record<string, Prop> = {
   zebra: zebra(false),
   'zebra-v': zebra(true),
   manhole: manhole(),
+  kratka: drain(),
+  'plama-oleju': oil(),
+  'liscie-a': leaves(71),
+  'liscie-b': leaves(72),
+  chwast: weed(),
+  rysa: hairline(),
   'rails-h': rails(false),
   'rails-v': rails(true),
 };

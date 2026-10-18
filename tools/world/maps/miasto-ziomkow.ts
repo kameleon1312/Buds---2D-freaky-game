@@ -459,10 +459,13 @@ export function miastoZiomkow(): MapCanvas {
   );
   m.scatter.push(
     { ground: 'grass2', chance: 0.25, props: 'tuft' },
-    { ground: 'grass', chance: 0.02, props: 'flowers-a|flowers-b|flowers-c|tuft' },
+    { ground: 'grass', chance: 0.05, props: 'flowers-a|flowers-b|flowers-c|tuft|liscie-a|tuft' },
+    { ground: 'sidewalk', chance: 0.035, props: 'chwast|rysa|liscie-b|rysa' },
+    { ground: 'plaza', chance: 0.02, props: 'liscie-a|chwast|rysa' },
+    { ground: 'concrete', chance: 0.02, props: 'rysa|plama-oleju' },
     { ground: 'path', chance: 0.05, props: 'pebbles' },
     { ground: 'dirt', chance: 0.04, props: 'pebbles' },
-    { ground: 'asphalt', chance: 0.006, props: 'manhole' },
+    { ground: 'asphalt', chance: 0.02, props: 'manhole|kratka|plama-oleju|kratka' },
     { ground: 'water', chance: 0.15, props: 'lily' },
   );
   miastoZiomkowOutskirts(m);

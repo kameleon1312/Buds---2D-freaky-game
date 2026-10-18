@@ -20,7 +20,13 @@ namespace Buds.Api
     {
         // the free Render plan sleeps after 15 min idle and takes up to a minute to wake: wait that long rather than
         // telling the player there is no connection (no network at all still fails right away)
-        const int TimeoutSeconds = 70;
+        /// <summary>
+        /// How long a request may take: long until the server has answered once this session (a sleeping server on
+        /// Render takes up to a minute to wake), then short, so a lost connection never keeps a screen waiting long.
+        /// </summary>
+        static int TimeoutSeconds => awake ? 30 : 75;
+
+        static bool awake;
         readonly string baseUrl;
 
         /// <summary>Requests on their way right now, across every client (the corner spinner shows while any is).</summary>
@@ -32,6 +38,7 @@ namespace Buds.Api
             try
             {
                 await req.SendWebRequest();
+                if (req.responseCode > 0) awake = true;
             }
             finally
             {
@@ -416,7 +423,15 @@ namespace Buds.Api
         static T Parse<T>(UnityWebRequest req)
         {
             if (req.result != UnityWebRequest.Result.Success) throw ToException(req);
-            return JsonUtility.FromJson<T>(req.downloadHandler.text);
+            try
+            {
+                return JsonUtility.FromJson<T>(req.downloadHandler.text);
+            }
+            catch (ArgumentException)
+            {
+                // a proxy page or a cut-off answer: an error the screens already know how to show
+                throw new ApiException(req.responseCode, "Serwer odpowiedział niezrozumiale. Spróbuj jeszcze raz.");
+            }
         }
 
         static ApiException ToException(UnityWebRequest req)

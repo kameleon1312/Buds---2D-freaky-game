@@ -356,7 +356,7 @@ export const FX: Record<string, FxArt> = {
   'fx-vs': vs(),
   'fx-walcz': tape('WALCZ!', 440, 150, LIME, LIME_D),
   'fx-ko': stencil(['K.O.'], 560, 300, ALERT, ALERT_D, 220, 91, [122, 178, 300, 362]),
-  'fx-wygrana': tag('WYGRANA!', 720, 260, LIME, 128),
+  'fx-wygrana': tag('WYGRANA!', 780, 290, LIME, 104),
   // rivalry: a turf taken
   'fx-rewir': stencil(['TWÓJ', 'REWIR'], 560, 330, LIME, LIME_D, 128, 131, [170, 262, 330, 404]),
 };

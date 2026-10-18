@@ -11,6 +11,9 @@ namespace Buds.Quests
     public sealed class TrainingWorld : MonoBehaviour
     {
         readonly List<(TrainingSpotData data, Vector3 at)> spots = new();
+        PropArt art;
+
+        void OnDestroy() => art?.Dispose();
 
         public static TrainingWorld Create(WorldView world, QuestContent content)
         {
@@ -21,7 +24,7 @@ namespace Buds.Quests
                 if (t.map == world.Map.Id) here.Add(t);
             var names = new HashSet<string>();
             foreach (var t in here) names.Add("trening-" + t.look);
-            var art = PropArt.Load(names);
+            var art = tw.art = PropArt.Load(names);
             foreach (var t in here)
             {
                 var feet = world.CellCenter(t.x, t.y) + new Vector3(0, -0.35f, 0);

@@ -165,7 +165,7 @@ namespace Buds.Core
             var tex = await api.GetSheet(res.bud.slug);
             var completed = await LoadCompleted(device);
             loginScreen.Hide();
-            EnterWorld(res.bud.name, res.bud.xp, new BudSheet(tex), device, completed);
+            EnterWorld(res.bud.name, res.bud.xp, new BudSheet(tex, true), device, completed);
             ui.ShowToast($"Zalogowano: {res.bud.name}", 2.5f);
             accountToken = null; // the device token is all the game keeps
         }

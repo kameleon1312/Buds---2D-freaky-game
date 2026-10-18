@@ -182,7 +182,9 @@ namespace Buds.UI
             status.text = "…";
             try
             {
-                sheet = new BudSheet(await preview(look));
+                var old = sheet;
+                sheet = new BudSheet(await preview(look), true);
+                old?.Dispose(); // every preview is a new download: the last one goes
                 ShowFrame();
                 status.text = "";
             }

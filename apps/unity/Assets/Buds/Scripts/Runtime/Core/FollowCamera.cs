@@ -22,7 +22,7 @@ namespace Buds.Core
         public float smoothing = 10f;
 
         /// <summary>Vertical field of view: narrow, so the depth is gentle and the HUD-sized world stays readable.</summary>
-        public const float FieldOfView = 32f;
+        public const float FieldOfView = 36f;
 
         Camera cam;
         int lastW;

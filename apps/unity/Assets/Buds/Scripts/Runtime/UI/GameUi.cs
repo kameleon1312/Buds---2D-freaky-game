@@ -522,7 +522,14 @@ namespace Buds.UI
             if (!rideButton && visible)
             {
                 var button = UiKit.IconButton("RideButton", Root, null, label, IconSize, onClick, out rideIcon, out rideLabel);
-                RightColumn(button, 2);
+                if (UiKit.Mobile)
+                {
+                    // phones: under "Rewiry" in the second column, clear of the joystick in the corner
+                    UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-28 - SecondColumn, -24 - IconStep),
+                        new Vector2(IconSize, IconSize), new Vector2(1, 1));
+                    button.transform.SetAsFirstSibling();
+                }
+                else RightColumn(button, 2);
                 rideButton = button.gameObject;
             }
             if (!rideButton) return;

@@ -542,6 +542,66 @@
       ]
     },
     {
+      "name": "kratka",
+      "pivotX": 0.5,
+      "pivotY": 0.2353,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "plama-oleju",
+      "pivotX": 0.5,
+      "pivotY": 0.2353,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "liscie-a",
+      "pivotX": 0.5,
+      "pivotY": 0.1875,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "liscie-b",
+      "pivotX": 0.5,
+      "pivotY": 0.1875,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "chwast",
+      "pivotX": 0.5,
+      "pivotY": 0.2,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "rysa",
+      "pivotX": 0.5,
+      "pivotY": 0.2,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
       "name": "rails-h",
       "pivotX": 0.5,
       "pivotY": 0.25,

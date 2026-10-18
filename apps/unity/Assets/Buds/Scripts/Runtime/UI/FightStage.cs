@@ -476,6 +476,8 @@ namespace Buds.UI
         public readonly SpriteRenderer Body;
         public readonly Transform Weapon;
         public readonly SpriteRenderer WeaponSprite;
+        /// <summary>The near hand, cut from the frame and drawn over the weapon's grip.</summary>
+        public readonly SpriteRenderer Hand;
         public readonly SpriteRenderer Shadow;
         public readonly BudSheet Sheet;
         public readonly Vector3 Home;
@@ -519,8 +521,8 @@ namespace Buds.UI
             var w = new GameObject("Weapon");
             w.transform.SetParent(Visual, false);
             Weapon = w.transform;
-            // the hand, about two thirds up the body, a little in front of it
-            Weapon.localPosition = new Vector3(-0.26f, 0.5f, 0);
+            // the grip sits in the near hand (where the generator draws it), and moves with the hand on every frame
+            Weapon.localPosition = BudSheet.SideHand(0);
             // the icons point up and right from their handle; in the card "forward" (the rival) is to the left
             Weapon.localScale = new Vector3(0.64f, 0.64f, 1);
             WeaponSprite = w.AddComponent<SpriteRenderer>();
@@ -528,6 +530,11 @@ namespace Buds.UI
             WeaponSprite.enabled = weapon;
             WeaponSprite.sortingOrder = order + 1;
             WeaponAngle = RestAngle;
+            var h = new GameObject("Hand");
+            h.transform.SetParent(Visual, false);
+            Hand = h.AddComponent<SpriteRenderer>();
+            Hand.sortingOrder = order + 2;
+            Hand.enabled = weapon;
         }
 
         public void Apply(FightStage stage)
@@ -545,8 +552,16 @@ namespace Buds.UI
             Visual.localScale = new Vector3(-Dir * Scale * SquashX, Scale * SquashY, 1);
             Body.sprite = Sheet.Get(Facing.Side, Mathf.Clamp(Frame, 0, 2));
             Body.color = new Color(Tint.r, Tint.g, Tint.b, Alpha);
+            var frame = Mathf.Clamp(Frame, 0, 2);
+            Weapon.localPosition = BudSheet.SideHand(frame);
             Weapon.localEulerAngles = new Vector3(0, 0, WeaponAngle);
             WeaponSprite.color = new Color(1, 1, 1, Alpha);
+            if (Hand.enabled)
+            {
+                Hand.sprite = Sheet.SideHandCap(frame);
+                Hand.transform.localPosition = Weapon.localPosition;
+                Hand.color = Body.color;
+            }
         }
     }
 }

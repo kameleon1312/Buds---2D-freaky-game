@@ -65,8 +65,10 @@ namespace Buds.Core
             {
                 var bud = await api.UpdateLook(session.Token, chosen);
                 look = bud.look;
-                sheet = new BudSheet(await api.GetSheet(bud.slug, fresh: true));
+                var old = sheet;
+                sheet = new BudSheet(await api.GetSheet(bud.slug, fresh: true), true);
                 if (player) player.SetSheet(sheet);
+                old?.Dispose();
                 creatorScreen.Hide();
                 ui.ShowToast("Nowy wygląd zapisany!", 2.5f);
             }
@@ -126,7 +128,7 @@ namespace Buds.Core
                 look = res.bud.look;
                 var tex = await api.GetSheet(res.bud.slug);
                 creatorScreen.Hide();
-                EnterWorld(res.bud.name, res.bud.xp, new BudSheet(tex), created, Array.Empty<string>());
+                EnterWorld(res.bud.name, res.bud.xp, new BudSheet(tex, true), created, Array.Empty<string>());
                 ui.ShowToast($"Witaj, {res.bud.name}!", 3f);
             }
             catch (ApiException e)

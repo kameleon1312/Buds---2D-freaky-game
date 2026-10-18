@@ -79,7 +79,7 @@ sludge : sludge : 1.6 : 0.44 #3f4a30, 0.5 #6b7d4f, 0.75 #5a6b42
 
 [scatter]
 concrete : 0.06 : gruz|kaluza|pekniecie|gruz
-asphalt : 0.06 : pekniecie|kaluza
+asphalt : 0.07 : pekniecie|kaluza|plama-oleju|kratka
 dirt : 0.04 : gruz|tuft
 weeds : 0.06 : tuft
 rubble : 0.06 : gruz

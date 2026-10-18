@@ -135,6 +135,19 @@ namespace Buds.Quests
         public string[] moves;
     }
 
+    /// <summary>A learned move: <see cref="from"/> turns into <see cref="to"/> from a level and a skill rank.</summary>
+    [Serializable]
+    public sealed class MoveUpgradeData
+    {
+        public string from;
+        public string to;
+        public int level;
+        public string skill;
+        public int rank;
+
+        public bool Known(int budLevel, Func<string, int> rankOf) => budLevel >= level && rankOf(skill) >= rank;
+    }
+
     [Serializable]
     public sealed class StatData
     {
@@ -230,6 +243,7 @@ namespace Buds.Quests
         public EnemyData[] enemies;
         public MoveData[] moves;
         public WeaponData[] weapons;
+        public MoveUpgradeData[] moveUpgrades;
         public PerkData[] perks;
         public BuffData[] buffs;
         public TrainingSpotData[] training;
@@ -250,6 +264,7 @@ namespace Buds.Quests
             content.enemies ??= Array.Empty<EnemyData>();
             content.moves ??= Array.Empty<MoveData>();
             content.weapons ??= Array.Empty<WeaponData>();
+            content.moveUpgrades ??= Array.Empty<MoveUpgradeData>();
             content.perks ??= Array.Empty<PerkData>();
             content.buffs ??= Array.Empty<BuffData>();
             content.training ??= Array.Empty<TrainingSpotData>();
@@ -305,6 +320,33 @@ namespace Buds.Quests
         {
             var w = Array.Find(weapons, x => x.kind == weapon) ?? Array.Find(weapons, x => x.kind == "piesci");
             return w?.moves ?? Array.Empty<string>();
+        }
+
+        public MoveUpgradeData UpgradeOf(string move) => Array.Find(moveUpgrades, u => u.from == move);
+
+        /// <summary>
+        /// The weapon's moves as this bud knows them (the same rule the server fights with): each one swapped for its
+        /// learned version once the level and the skill rank (training and gear count) are there.
+        /// </summary>
+        public string[] LearnedMoves(string weapon, int level, Func<string, int> rankOf)
+        {
+            var moves = (string[])MovesFor(weapon).Clone();
+            for (var i = 0; i < moves.Length; i++)
+            {
+                var u = UpgradeOf(moves[i]);
+                if (u != null && u.Known(level, rankOf)) moves[i] = u.to;
+            }
+            return moves;
+        }
+
+        /// <summary>Moves learned between two sets of the same weapon (for the "Nowy cios" note).</summary>
+        public List<string> NewlyLearned(string[] before, string[] after)
+        {
+            var learned = new List<string>();
+            if (before == null || after == null || before.Length != after.Length) return learned;
+            for (var i = 0; i < after.Length; i++)
+                if (before[i] != after[i] && UpgradeOf(before[i])?.to == after[i]) learned.Add(after[i]);
+            return learned;
         }
 
         public QuestData Quest(string id) => Array.Find(quests, q => q.id == id);

@@ -42,6 +42,7 @@ namespace Buds.Quests
             view.body = bodyGo.AddComponent<SpriteRenderer>();
             view.body.sprite = sheet.Get(Facing.Down, 0);
             view.body.sortingOrder = WorldView.SortOrderFor(feet.y);
+            CastShadow.Attach(go.transform, view.body, visual);
             var box = go.AddComponent<BoxCollider2D>(); // same footprint as the player's feet
             box.size = new Vector2(10f / 16, 5f / 16);
             box.offset = new Vector2(0, 2.5f / 16);
@@ -172,7 +173,7 @@ namespace Buds.Quests
                     continue;
                 }
                 var feet = world.CellCenter(n.x, n.y) + new Vector3(0, -0.3f, 0);
-                var view = NpcView.Spawn(n, new BudSheet(tex), feet, qw.transform);
+                var view = NpcView.Spawn(n, BudSheet.Shared(tex), feet, qw.transform);
                 if (n.wander > 0) view.Wander(qw.Walkable, () => qw.PlayerFeet?.Invoke(), () => qw.Busy?.Invoke() ?? false);
                 qw.npcs.Add(view);
             }
@@ -184,6 +185,7 @@ namespace Buds.Quests
         void OnDestroy()
         {
             if (log != null) log.Changed -= Refresh;
+            art?.Dispose();
         }
 
         /// <summary>Can feet stand here (world units)? The whole feet box must be on walkable cells.</summary>

@@ -24,6 +24,7 @@ import {
   TRAINING_XP_PER_RANK,
   MOVES,
   MOVES_BY_WEAPON,
+  MOVE_UPGRADES,
   SLOTS,
   STATS,
   WEAPON_KINDS,
@@ -313,6 +314,14 @@ const json = {
     accuracy: mv.accuracy,
   })),
   weapons: WEAPON_KINDS.map((kind) => ({ kind, moves: MOVES_BY_WEAPON[kind] })),
+  // learned moves: the stronger version of a weapon move, from a level and a skill rank (the server decides in duels)
+  moveUpgrades: Object.entries(MOVE_UPGRADES).map(([from, u]) => ({
+    from,
+    to: u!.to,
+    level: u!.level,
+    skill: u!.skill,
+    rank: u!.rank,
+  })),
   caches: CONTENT.caches.map((c) => ({
     id: c.id,
     district: c.district,

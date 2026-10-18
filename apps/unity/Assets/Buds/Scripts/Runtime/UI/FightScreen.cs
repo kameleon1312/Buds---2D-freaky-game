@@ -169,11 +169,11 @@ namespace Buds.UI
             UiKit.Place(bar, new Vector2(0.5f, 1), new Vector2(0, -42), new Vector2(392, 32), new Vector2(0.5f, 1));
             p.HpImage = p.HpFill.GetComponent<Image>();
             // what was just lost stays as a pale trail behind the bar for a moment
-            var ghost = UiKit.Panel("Trail", p.HpFill.parent, new Color(1, 1, 1, 0.7f)).rectTransform;
+            var ghost = UiKit.Pill("Trail", p.HpFill.parent, new Color(1, 1, 1, 0.7f)).rectTransform;
             ghost.anchorMin = p.HpFill.anchorMin;
             ghost.anchorMax = p.HpFill.anchorMax;
             ghost.pivot = p.HpFill.pivot;
-            ghost.anchoredPosition = Vector2.zero;
+            ghost.offsetMin = ghost.offsetMax = Vector2.zero;
             ghost.SetSiblingIndex(p.HpFill.GetSiblingIndex());
             p.HpGhost = ghost;
             p.HpText = UiKit.Outlined("Value", bar, "", 19);
@@ -213,6 +213,9 @@ namespace Buds.UI
             round.text = "RUNDA 1";
             streak = 0;
             timeScale = 1;
+            introPlaying = false;
+            animating = false;
+            stuckFor = 0;
             result.SetActive(false);
             HideWorldHud();
             root.SetActive(true);
@@ -270,7 +273,7 @@ namespace Buds.UI
         static string FromGear(int? n) => n is > 0 ? $" <color=#a3e635>(+{n} ze sprzętu)</color>" : "";
 
         /// <summary>The line under a move's name: damage and accuracy, or what it does.</summary>
-        static string MoveLine(MoveData m)
+        public static string MoveLine(MoveData m)
         {
             if (m == null) return "";
             if (m.damage && m.power is { Length: 2 })
@@ -310,8 +313,10 @@ namespace Buds.UI
         /// <summary>Keyboard: 1–6 moves, Esc runs away, E closes the result.</summary>
         public void Tick()
         {
+            if (!IsOpen) return;
+            Unstick();
             var kb = Keyboard.current;
-            if (kb == null || !IsOpen) return;
+            if (kb == null) return;
             if (ShowingResult)
             {
                 if (kb.eKey.wasPressedThisFrame || kb.enterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame) onClose();
@@ -323,6 +328,29 @@ namespace Buds.UI
                 if (kb[keys[i]].wasPressedThisFrame) Choose(i);
             if (kb.escapeKey.wasPressedThisFrame) onFlee();
         }
+
+        /// <summary>A turn is being played on the stage.</summary>
+        bool animating;
+        float stuckFor;
+
+        /// <summary>
+        /// The safety net: when the moves stay locked for a few seconds with no turn playing and nothing sent to the
+        /// server, the screen unlocks itself (and plays no intro any more), so the player can always move or run away.
+        /// </summary>
+        void Unstick()
+        {
+            var waiting = (busy || introPlaying) && !ShowingResult && !animating && Api.BudsApi.InFlight == 0;
+            stuckFor = waiting ? stuckFor + Time.unscaledDeltaTime : 0;
+            if (stuckFor < StuckSeconds) return;
+            Debug.LogWarning("Duel screen was locked with nothing happening: unlocked.");
+            stuckFor = 0;
+            introPlaying = false;
+            timeScale = 1;
+            SetBusy(false);
+        }
+
+        /// <summary>How long the duel screen may stay locked with nothing going on (the intro takes about 1.5 s).</summary>
+        public const float StuckSeconds = 6f;
 
         void Choose(int index)
         {
@@ -337,7 +365,33 @@ namespace Buds.UI
         /// <summary>Plays the events of one turn, then shows the state the server sent.</summary>
         public async Awaitable PlayTurn(FightResponse res)
         {
-            while (introPlaying && IsOpen) await Awaitable.NextFrameAsync();
+            animating = true;
+            try
+            {
+                await PlayTurnShots(res);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                timeScale = 1;
+                if (IsOpen)
+                {
+                    RefreshFighter(budPlate, res.fight.bud);
+                    RefreshFighter(enemyPlate, res.fight.enemy);
+                }
+            }
+            finally
+            {
+                animating = false;
+                stuckFor = 0;
+            }
+        }
+
+        async Awaitable PlayTurnShots(FightResponse res)
+        {
+            // the intro is short; never wait on it for ever
+            for (var waited = 0f; introPlaying && IsOpen && waited < 4; waited += Time.unscaledDeltaTime)
+                await Awaitable.NextFrameAsync();
             round.text = $"RUNDA {Mathf.Max(1, res.fight.turn)}";
             foreach (var e in res.events ?? Array.Empty<TurnEventDto>())
             {
@@ -447,7 +501,7 @@ namespace Buds.UI
             var finalHp = e.actor == "bud" ? e.enemyHp : e.budHp;
 
             // the camera leans in towards where the blow will land
-            stage.Frame(FightStage.Towards(Math.Sign(other.Home.x), 0.8f, 9, 3), 7);
+            stage.Frame(FightStage.Towards(Math.Sign(other.Home.x), 0.94f, 7, 1), 7);
             switch (anim)
             {
                 case "guard":
@@ -814,7 +868,7 @@ namespace Buds.UI
             if (hit.crit)
             {
                 // a snap zoom onto the blow, the world slows down, focus lines and halftone flare, then a shake
-                stage.Cut(FightStage.Towards(Math.Sign(target.Home.x), 0.62f, 14, 9));
+                stage.Cut(FightStage.Towards(Math.Sign(target.Home.x), 0.8f, 10, 4));
                 _ = Focus(UiKit.Gold400);
                 timeScale = 0.25f;
                 await Wait(0.06f);
@@ -836,7 +890,7 @@ namespace Buds.UI
             target.Tint = Color.white;
             target.Lean = 0;
             target.X = 0;
-            if (hit.crit) stage.Frame(FightStage.Towards(Math.Sign(target.Home.x), 0.8f, 9, 3), 4);
+            if (hit.crit) stage.Frame(FightStage.Towards(Math.Sign(target.Home.x), 0.94f, 7, 1), 4);
         }
 
         /// <summary>The fighters walk in from the edges while the camera dollies in under a VS sticker, then WALCZ! tape.</summary>
@@ -844,6 +898,25 @@ namespace Buds.UI
         {
             introPlaying = true;
             SetBusy(busy);
+            try
+            {
+                await IntroShots();
+            }
+            catch (Exception e)
+            {
+                // a broken effect never keeps the moves locked
+                Debug.LogException(e);
+            }
+            finally
+            {
+                introPlaying = false;
+                timeScale = 1;
+                if (IsOpen) SetBusy(busy);
+            }
+        }
+
+        async Awaitable IntroShots()
+        {
             // wide and from the side, then into the neutral shot
             var wide = FightStage.Neutral;
             wide.Distance = 15;
@@ -887,8 +960,6 @@ namespace Buds.UI
                 if (go) go.rectTransform.localScale = new Vector3(Mathf.Lerp(0.2f, 1, Ease(t)), Mathf.Lerp(1.4f, 1, t), 1);
             });
             _ = FadeArt(go, 0.35f, 1.1f, 0.35f);
-            introPlaying = false;
-            SetBusy(busy);
         }
 
         /// <summary>Both fighters breathe while the bud picks a move; the camera drifts a little; a low bar pulses.</summary>
@@ -931,11 +1002,14 @@ namespace Buds.UI
             _ = Focus(budWon ? UiKit.Buds400 : UiKit.Alert500);
             stage.Shake(0.35f, 0.2f);
             var orbit = FightStage.Neutral;
-            orbit.Look = loser.Home + new Vector3(-loser.Dir * 0.6f, 0.2f, -0.6f);
-            orbit.Distance = 6.2f;
-            orbit.Yaw = Math.Sign(loser.Home.x) * 26;
+            // both fighters stay in the shot: centred between them, a little nearer the loser
+            // a slow orbit that keeps both in the shot: the winner standing, the loser falling back (away from it),
+            // aimed a little above the street so the one on the ground stays clear of the moves bar
+            orbit.Look = Vector3.Lerp(loser.Home + new Vector3(-loser.Dir * 0.9f, 0, 0), winner.Home, 0.5f) + new Vector3(0, 0.5f, -0.5f);
+            orbit.Distance = 10.4f;
+            orbit.Yaw = Math.Sign(loser.Home.x) * 18;
             orbit.Pitch = 66;
-            orbit.Fov = 32;
+            orbit.Fov = 34;
             stage.Frame(orbit, 2.2f);
             timeScale = 0.45f; // the fall in slow motion
             await Tween(0.5f, t =>
@@ -957,9 +1031,10 @@ namespace Buds.UI
             if (Moment != null) await Moment("ko");
             if (budWon)
             {
-                winTag = Art("fx-wygrana", TopCenter(150), 0.7f, 0);
+                winTag = Art("fx-wygrana", TopCenter(150), 0.58f, 0);
                 Clamp(winTag);
-                _ = SprayOn(winTag, 0.45f);
+                await SprayOn(winTag, 0.45f);
+                if (Moment != null) await Moment("wygrana");
             }
             for (var hop = 0; hop < 2; hop++)
             {

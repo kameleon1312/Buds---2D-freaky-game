@@ -80,6 +80,7 @@ namespace Buds.Quests
         void OnDestroy()
         {
             if (log != null) log.Changed -= Refresh;
+            art?.Dispose();
         }
 
         public void Refresh()

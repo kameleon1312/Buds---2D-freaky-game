@@ -64,7 +64,7 @@ water : water : 2.4 : 0.44 #2f7fb0, 0.5 #a9dcf5, 0.56 #4aa8d6, 0.88 #3a94c8
 [scatter]
 grass : 0.05 : tuft|tuft|flowers-a|flowers-c
 grass2 : 0.06 : grzyby|tuft|tuft|flowers-b
-forest : 0.05 : grzyby|tuft
+forest : 0.08 : grzyby|tuft|liscie-a|liscie-b
 bog : 0.08 : kaluza|tuft
 path : 0.05 : pebbles
 rock : 0.04 : pebbles

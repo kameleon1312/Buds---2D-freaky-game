@@ -136,7 +136,7 @@ namespace Buds.Core
                 if (influence != null) reward += $"\n<color=#5d9a12><b>{influence}</b></color>";
                 ui.ShowDialog(npc.name, $"{quest.done}\n{reward}");
                 OnInfluence(res.influence, false);
-                if (res.levelUp) ui.ShowToast($"Awans! Poziom {res.level} (+1 punkt)", 3.5f);
+                if (res.levelUp) ui.ShowToast($"Awans! Poziom {res.level} (+1 punkt)" + MovesNote(CurrentMoves(res.level - 1)), 4f);
                 else if (item != null) ui.ShowToast($"Nowy przedmiot: {item.name}", 3f);
                 else ui.ShowToast($"+{res.xpGained} XP");
             }
