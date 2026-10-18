@@ -73,6 +73,8 @@ namespace Buds.UI
         readonly Action<string> onDrink;
         readonly Action onLink;
         readonly Action onLogout;
+        readonly Action onEditLook;
+        Button editLookButton;
         Button logoutButton;
         Text logoutLabel;
         float logoutArmedUntil;
@@ -136,10 +138,11 @@ namespace Buds.UI
         public bool IsOpen => root.activeSelf;
 
         public BudPanel(Transform canvas, QuestContent content, Action<string> onUpgrade, Action<string, string> onEquip,
-            Action<string> onBuy, Action<string> onDrink, Action onLink, Action onLogout)
+            Action<string> onBuy, Action<string> onDrink, Action onLink, Action onLogout, Action onEditLook)
         {
             this.onLink = onLink;
             this.onLogout = onLogout;
+            this.onEditLook = onEditLook;
             this.content = content;
             this.onUpgrade = onUpgrade;
             this.onEquip = onEquip;
@@ -265,7 +268,7 @@ namespace Buds.UI
         void BuildProfile(RectTransform page)
         {
             var card = UiKit.OutlinedBox("PortraitCard", page, UiKit.Paper300, UiKit.RadiusL);
-            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), Vector2.zero, new Vector2(300, 440), new Vector2(0, 1));
+            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), Vector2.zero, new Vector2(300, 376), new Vector2(0, 1));
             portrait = UiKit.Rect("Portrait", card.transform).gameObject.AddComponent<Image>();
             portrait.preserveAspect = true;
             portrait.raycastTarget = false;
@@ -285,9 +288,14 @@ namespace Buds.UI
             xpText = UiKit.Outlined("Value", bar, "", 24);
             UiKit.Stretch(xpText.rectTransform, 0, 2, 0, 0);
 
-            statsText = UiKit.Label("Stats", page, "", 24, UiKit.Ink, false, TextAnchor.UpperLeft);
-            UiKit.Place(statsText.rectTransform, new Vector2(0, 1), new Vector2(330, -150), new Vector2(740, 300), new Vector2(0, 1));
-            statsText.lineSpacing = 1.05f;
+            statsText = UiKit.Label("Stats", page, "", 22, UiKit.Ink, false, TextAnchor.UpperLeft);
+            UiKit.Place(statsText.rectTransform, new Vector2(0, 1), new Vector2(330, -144), new Vector2(740, 290), new Vector2(0, 1));
+            statsText.lineSpacing = 1.1f;
+            statsText.verticalOverflow = VerticalWrapMode.Truncate; // the bottom row (link, sign out) is never covered
+
+            // a new look any time: the creator opens with this bud's look
+            editLookButton = UiKit.Button("EditLook", page, "Zmień wygląd", new Vector2(300, 62), () => onEditLook(), UiKit.Tone.Rep, 26);
+            UiKit.Place((RectTransform)editLookButton.transform, new Vector2(0, 1), new Vector2(0, -388), new Vector2(300, 62), new Vector2(0, 1));
 
             // link the bud to an account on the website: a code to type in Twoje konto
             linkButton = UiKit.Button("Link", page, "Połącz z kontem", new Vector2(300, 70), () => onLink(), UiKit.Tone.Buds, 28);
@@ -334,18 +342,20 @@ namespace Buds.UI
 
             var stats = Stats;
             var sb = new System.Text.StringBuilder();
-            sb.Append($"<b>Zadania:</b> {data.QuestsDone} / {data.QuestsTotal}\n");
-            sb.Append($"<b>Portfel:</b> {Core.GameBootstrap.Coins(data.Coins)} · {data.Gems} gemów\n");
-            sb.Append($"<b>Ze sprzętu:</b> Atak +{stats.Attack} · Pancerz +{stats.Armor} · Szybkość +{stats.Speed}% · Szczęście +{stats.Luck}%\n");
+            sb.Append($"<b>Zadania:</b> {data.QuestsDone} / {data.QuestsTotal}     <b>Portfel:</b> {Core.GameBootstrap.Coins(data.Coins)} · {data.Gems} gemów\n");
+            sb.Append($"<b>Sprzęt:</b> Atak +{stats.Attack} · Pancerz +{stats.Armor} · Szybkość +{stats.Speed}% · Szczęście +{stats.Luck}%\n");
             sb.Append($"<b>Punkty umiejętności:</b> {data.Available} wolne z {data.Points}\n");
-            sb.Append("<b>Dzielnice:</b>\n");
+            // the districts on one or two lines: open ones in lime, the rest with the level that opens them
+            var districts = new List<string>();
             foreach (var (name, level, open) in data.Districts)
-                sb.Append(open ? $"   <color=#5d9a12>{name}</color> — otwarta\n" : $"   <color=#55514a>{name} — od poziomu {level}</color>\n");
+                districts.Add(open ? $"<color=#5d9a12>{name}</color>" : $"<color=#8a857c>{name} (poz. {level})</color>");
+            sb.Append($"<b>Dzielnice:</b> {string.Join(", ", districts)}\n");
             if (data.Guest) sb.Append("\n<i>Grasz jako gość: stwórz Buda, żeby zapisywać postępy.</i>");
             else if (data.Error != null) sb.Append($"\n<color=#bd1c31>{data.Error}</color>");
             statsText.text = sb.ToString();
 
             linkButton.interactable = !data.Guest && !data.Loading;
+            editLookButton.interactable = !data.Guest && !data.Loading;
             linkText.text = data.Guest
                 ? "<color=#55514a>Gość nie ma konta. Stwórz Buda w grze, a potem połącz go z kontem na stronie.</color>"
                 : data.LinkCode != null
@@ -369,7 +379,7 @@ namespace Buds.UI
             ["mount"] = new Vector2Int(2, 4),
         };
 
-        const float Tile = 84;
+        const float Tile = 70;
         const float RowH = 106;
 
         void BuildGear(RectTransform page)
@@ -382,7 +392,7 @@ namespace Buds.UI
             dollPortrait.raycastTarget = false;
             dollPortrait.color = new Color(1, 1, 1, 0.32f);
             UiKit.Place(dollPortrait.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -6), new Vector2(360, 540));
-            float[] columns = { 40, 193, 346 };
+            float[] columns = { 54, 200, 346 };
             foreach (var (slot, at) in BodyLayout)
                 DollSlot(page, slot, new Vector2(columns[at.x], -8 - at.y * RowH));
 
@@ -427,7 +437,7 @@ namespace Buds.UI
         void DollSlot(RectTransform page, string slot, Vector2 at)
         {
             var root = UiKit.Rect("Slot " + slot, page);
-            UiKit.Place(root, new Vector2(0, 1), at, new Vector2(Tile, Tile + 20), new Vector2(0, 1));
+            UiKit.Place(root, new Vector2(0, 1), at, new Vector2(Tile, Tile + 24), new Vector2(0, 1));
             var frame = UiKit.OutlinedBox("Frame", root, UiKit.Surface700, UiKit.RadiusM);
             UiKit.Place((RectTransform)frame.transform.parent, new Vector2(0.5f, 1), Vector2.zero, new Vector2(Tile, Tile), new Vector2(0.5f, 1));
             var inner = UiKit.Shape("Inner", frame.transform, UiKit.Surface800, UiKit.RadiusM - 6);
@@ -436,8 +446,9 @@ namespace Buds.UI
             icon.preserveAspect = true;
             icon.raycastTarget = false;
             UiKit.Stretch(icon.rectTransform, 7);
-            var label = UiKit.Label("Label", root, SlotName(slot), 17, UiKit.InkSoft, true, TextAnchor.LowerCenter);
-            UiKit.Stretch(label.rectTransform, -16, 0, -16, 0);
+            // the name sits right under the tile, inside the slot's own box (never under the next row)
+            var label = UiKit.Label("Label", root, SlotName(slot), 16, UiKit.InkSoft, true, TextAnchor.UpperCenter);
+            UiKit.Place(label.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -Tile - 2), new Vector2(Tile + 60, 22), new Vector2(0.5f, 1));
             label.horizontalOverflow = HorizontalWrapMode.Overflow; // "Wierzchowiec" stays on one line
             frame.raycastTarget = true;
             var button = root.gameObject.AddComponent<Button>();
@@ -602,16 +613,18 @@ namespace Buds.UI
                 title.horizontalOverflow = HorizontalWrapMode.Wrap;
                 title.verticalOverflow = VerticalWrapMode.Truncate;
                 var desc = UiKit.Label("Desc", row.transform, skill.description, 16, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-                UiKit.Place(desc.rectTransform, new Vector2(0, 1), new Vector2(86, -70), new Vector2(430, 22), new Vector2(0, 1));
-                desc.resizeTextForBestFit = true; // long descriptions shrink to one line
-                desc.resizeTextMinSize = 11;
-                desc.resizeTextMaxSize = 16;
+                UiKit.Place(desc.rectTransform, new Vector2(0, 1), new Vector2(86, -72), new Vector2(432, 40), new Vector2(0, 1));
+                desc.lineSpacing = 0.95f;
                 desc.verticalOverflow = VerticalWrapMode.Truncate;
                 var train = UiKit.Bar("Training", row.transform, UiKit.Rep400, out var trainBar);
-                UiKit.Place(trainBar, new Vector2(0, 1), new Vector2(12, -96), new Vector2(64, 14), new Vector2(0, 1));
+                UiKit.Place(trainBar, new Vector2(0, 1), new Vector2(12, -116), new Vector2(64, 14), new Vector2(0, 1));
                 var perks = UiKit.Label("Perks", row.transform, "", 15, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-                UiKit.Place(perks.rectTransform, new Vector2(0, 1), new Vector2(86, -92), new Vector2(436, 44), new Vector2(0, 1));
-                perks.lineSpacing = 0.95f;
+                UiKit.Place(perks.rectTransform, new Vector2(0, 1), new Vector2(86, -114), new Vector2(432, 22), new Vector2(0, 1));
+                perks.horizontalOverflow = HorizontalWrapMode.Wrap;
+                perks.verticalOverflow = VerticalWrapMode.Truncate;
+                perks.resizeTextForBestFit = true;
+                perks.resizeTextMinSize = 12;
+                perks.resizeTextMaxSize = 15;
 
                 var pips = new Image[content.skillMaxRank + gearMax];
                 for (var p = 0; p < pips.Length; p++)
@@ -661,11 +674,12 @@ namespace Buds.UI
                 foreach (var perk in content.perks)
                 {
                     if (perk.skill != id) continue;
+                    // the names only: what each does is in the drinks/duel screens where it shows
                     parts.Add(data.Perks.Contains(perk.id) || rank >= perk.rank
-                        ? $"<color=#5d9a12><b>{perk.name}</b></color>: {perk.description}"
-                        : $"<color=#8a857c>{perk.name} (ranga {perk.rank})</color>");
+                        ? $"<color=#5d9a12><b>{perk.name}</b></color>"
+                        : $"<color=#8a857c>{perk.name} (r. {perk.rank})</color>");
                 }
-                var where = rank >= content.skillMaxRank ? "Mistrzostwo!" : $"Trening {txp % per}/{per} XP";
+                var where = rank >= content.skillMaxRank ? "Mistrzostwo!" : $"Trening {txp % per}/{per}";
                 perksText.text = $"{where}  ·  {string.Join("  ·  ", parts)}";
             }
         }
@@ -674,7 +688,7 @@ namespace Buds.UI
 
         // shop layout (page is 1076 × 552): categories | items (4 per row) | the selected item
         const float PageH = 552;
-        const float CategoryW = 200, CategoryStep = 62;
+        const float CategoryW = 200, CategoryStep = 47;
         const int ShopCols = 4;
         const float ShopTile = 96, ShopStepX = 112, ShopStepY = 124;
         const float GridX = CategoryW + 18;
@@ -715,11 +729,11 @@ namespace Buds.UI
                     shopSlot = slot;
                     selectedShop = null;
                     RefreshShop();
-                }, slot == PremiumFilter ? UiKit.Tone.Gold : UiKit.Tone.Rep, 24);
+                }, slot == PremiumFilter ? UiKit.Tone.Gold : UiKit.Tone.Rep, 21);
                 var chipText = chip.GetComponentInChildren<Text>();
                 chipText.resizeTextForBestFit = true;
-                chipText.resizeTextMinSize = 16;
-                chipText.resizeTextMaxSize = 24;
+                chipText.resizeTextMinSize = 15;
+                chipText.resizeTextMaxSize = 21;
                 UiKit.Place((RectTransform)chip.transform, new Vector2(0.5f, 1), new Vector2(0, -i * CategoryStep), new Vector2(CategoryW - 24, CategoryStep - 8),
                     new Vector2(0.5f, 1));
                 shopFilters.Add((slot, chip));
@@ -736,24 +750,30 @@ namespace Buds.UI
             UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(CardX, 0), new Vector2(CardW, PageH),
                 new Vector2(0, 1));
             var iconBox = UiKit.Shape("IconBox", card.transform, UiKit.Surface800, UiKit.RadiusM);
-            UiKit.Place(iconBox.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(150, 150), new Vector2(0.5f, 1));
+            UiKit.Place(iconBox.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(124, 124), new Vector2(0.5f, 1));
             shopIcon = UiKit.Rect("Icon", iconBox.transform).gameObject.AddComponent<Image>();
             shopIcon.preserveAspect = true;
             shopIcon.raycastTarget = false;
             UiKit.Stretch(shopIcon.rectTransform, 14);
             shopTitle = UiKit.Label("Title", card.transform, "", 30, UiKit.Ink, true, TextAnchor.UpperCenter);
-            UiKit.Place(shopTitle.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -180), new Vector2(CardW - 30, 44), new Vector2(0.5f, 1));
+            UiKit.Place(shopTitle.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -144), new Vector2(CardW - 30, 40), new Vector2(0.5f, 1));
             shopTitle.resizeTextForBestFit = true;
             shopTitle.resizeTextMinSize = 18;
             shopTitle.resizeTextMaxSize = 30;
             shopDetails = UiKit.Label("Details", card.transform, "", 21, UiKit.Ink, false, TextAnchor.UpperCenter);
-            UiKit.Place(shopDetails.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -230), new Vector2(CardW - 30, 200), new Vector2(0.5f, 1));
-            shopDetails.lineSpacing = 1.1f;
+            // everything about the item fits between the title and the wallet line: long texts shrink instead of running under it
+            UiKit.Place(shopDetails.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -188), new Vector2(CardW - 30, PageH - 188 - 132), new Vector2(0.5f, 1));
+            shopDetails.lineSpacing = 1.05f;
+            shopDetails.resizeTextForBestFit = true;
+            shopDetails.resizeTextMinSize = 14;
+            shopDetails.resizeTextMaxSize = 21;
+            shopDetails.verticalOverflow = VerticalWrapMode.Truncate;
             shopWallet = UiKit.Label("Wallet", card.transform, "", 21, UiKit.InkSoft, true, TextAnchor.LowerCenter);
             UiKit.Place(shopWallet.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 96), new Vector2(CardW - 20, 30), new Vector2(0.5f, 0));
             shopWallet.resizeTextForBestFit = true;
             shopWallet.resizeTextMinSize = 14;
             shopWallet.resizeTextMaxSize = 21;
+            shopWallet.verticalOverflow = VerticalWrapMode.Truncate;
             // the one gold action on this screen
             shopBuy = UiKit.Button("Buy", card.transform, "Kup", new Vector2(CardW - 60, 72), () =>
             {

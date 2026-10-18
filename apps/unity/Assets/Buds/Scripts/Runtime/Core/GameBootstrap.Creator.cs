@@ -26,11 +26,7 @@ namespace Buds.Core
             try
             {
                 var options = await api.GetLookOptions();
-                creatorScreen ??= new CreatorScreen(ui.Root, l => api.PreviewSheet(l), (name, l) => _ = CreateBud(name, l), () =>
-                {
-                    creatorScreen.Hide();
-                    ShowPairing();
-                });
+                EnsureCreator();
                 ui.HideLoading();
                 creatorScreen.Show(options);
             }
@@ -40,6 +36,80 @@ namespace Buds.Core
                 ShowPairing(e.Message);
             }
         }
+
+        bool savingLook;
+
+        /// <summary>Twój Bud → Zmień wygląd: the creator with the bud's own look; saving redraws the bud right away.</summary>
+        async Awaitable OpenLookEditor()
+        {
+            if (session == null || look == null) return;
+            panel?.Hide();
+            try
+            {
+                var options = await api.GetLookOptions();
+                EnsureCreator();
+                creatorScreen.ShowEdit(options, look, l => _ = SaveLook(l), () => creatorScreen.Hide());
+            }
+            catch (ApiException e)
+            {
+                ui.ShowToast(e.Message, 3f);
+            }
+        }
+
+        async Awaitable SaveLook(BudLookDto chosen)
+        {
+            if (savingLook) return;
+            savingLook = true;
+            creatorScreen.SetBusy(true);
+            try
+            {
+                var bud = await api.UpdateLook(session.Token, chosen);
+                look = bud.look;
+                sheet = new BudSheet(await api.GetSheet(bud.slug, fresh: true));
+                if (player) player.SetSheet(sheet);
+                creatorScreen.Hide();
+                ui.ShowToast("Nowy wygląd zapisany!", 2.5f);
+            }
+            catch (ApiException e)
+            {
+                creatorScreen.SetBusy(false, e.Message);
+            }
+            finally
+            {
+                savingLook = false;
+                if (creatorScreen.IsOpen) creatorScreen.SetBusy(false);
+            }
+        }
+
+        /// <summary>Autopilot (-buds-look-demo): Twój Bud → Zmień wygląd, a new look, saved, and the bud in it.</summary>
+        async Awaitable LookDemo(Func<string, Awaitable> shot)
+        {
+            await OpenPanel();
+            await shot("k0-profil.png");
+            await OpenLookEditor();
+            await Awaitable.WaitForSecondsAsync(1.5f);
+            await shot("k1-edytor.png");
+            creatorScreen.Set(l =>
+            {
+                l.skin = (l.skin + 1) % 4;
+                l.hairColor = (l.hairColor + 1) % 4;
+                l.outfitColor = (l.outfitColor + 2) % 5;
+            });
+            creatorScreen.SelectTab(2);
+            await Awaitable.WaitForSecondsAsync(1.5f);
+            await shot("k2-zmiany.png");
+            await SaveLook(creatorScreen.Look.Clone());
+            await Awaitable.WaitForSecondsAsync(0.8f);
+            await shot("k3-nowy-wyglad.png");
+            Debug.Log($"[AutoPilot] look saved: skin {look?.skin}, hair colour {look?.hairColor}");
+        }
+
+                void EnsureCreator() =>
+            creatorScreen ??= new CreatorScreen(ui.Root, l => api.PreviewSheet(l), (name, l) => _ = CreateBud(name, l), () =>
+            {
+                creatorScreen.Hide();
+                ShowPairing();
+            });
 
         /// <summary>The server creates the bud and hands back its token: this phone is linked right away.</summary>
         async Awaitable CreateBud(string name, BudLookDto chosen)

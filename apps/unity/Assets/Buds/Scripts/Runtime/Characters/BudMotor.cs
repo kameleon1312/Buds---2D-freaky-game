@@ -4,9 +4,10 @@ using UnityEngine;
 namespace Buds.Characters
 {
     /// <summary>
-    /// How a bud moves, as plain math (EditMode-testable): it speeds up and slows down quickly instead of snapping,
-    /// walks slower on a half-pushed stick, runs, keeps its facing steady on diagonals, and slips around the corners
-    /// of walls it would otherwise snag on.
+    /// How a bud moves, as plain math (EditMode-testable): up, down, left or right like a classic top-down RPG (a
+    /// diagonal push keeps the axis it started on until the other clearly wins), speeding up and slowing down quickly
+    /// instead of snapping, slower on a half-pushed stick, running, and slipping around the corners of walls it would
+    /// otherwise snag on.
     /// </summary>
     public sealed class BudMotor
     {
@@ -20,6 +21,35 @@ namespace Buds.Characters
         public const float FacingBias = 1.3f;
         /// <summary>How far (tiles) the bud is nudged sideways around a corner it pushes against.</summary>
         public const float CornerReach = 0.45f;
+
+        /// <summary>The other axis has to be this much stronger before a diagonal push changes the walking axis.</summary>
+        public const float AxisBias = 1.25f;
+
+        /// <summary>0 = standing, 1 = walking along x, 2 = along y.</summary>
+        int axis;
+
+        /// <summary>
+        /// The stick or keys turned into one of four directions, keeping its strength. Pushing diagonally keeps the axis
+        /// the bud already walks on until the other one wins by <see cref="AxisBias"/>, so it never zig-zags.
+        /// </summary>
+        public Vector2 FourWay(Vector2 input)
+        {
+            var ax = Mathf.Abs(input.x);
+            var ay = Mathf.Abs(input.y);
+            if (ax < 0.01f && ay < 0.01f)
+            {
+                axis = 0;
+                return Vector2.zero;
+            }
+            axis = axis switch
+            {
+                1 => ay > ax * AxisBias ? 2 : 1,
+                2 => ax > ay * AxisBias ? 1 : 2,
+                _ => ax >= ay ? 1 : 2,
+            };
+            var strength = Mathf.Min(1, input.magnitude);
+            return axis == 1 ? new Vector2(Mathf.Sign(input.x) * strength, 0) : new Vector2(0, Mathf.Sign(input.y) * strength);
+        }
 
         public Vector2 Velocity { get; private set; }
         /// <summary>Speed from gear (1.1 = +10%).</summary>

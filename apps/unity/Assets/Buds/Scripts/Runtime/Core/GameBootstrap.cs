@@ -280,7 +280,9 @@ namespace Buds.Core
             if (travelling) return;
             var input = player.Input;
             input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
-                            (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false);
+                            (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
+                            (creatorScreen?.IsOpen ?? false);
+            if (creatorScreen?.IsOpen ?? false) return; // the look editor is open over the world
             if (UpdateFight()) return;
             if (UpdateRidesAndTraining(input)) return;
             ui.UpdateStick(input);
@@ -513,6 +515,7 @@ namespace Buds.Core
                 }
 
                 if (CommandLine.Has("-buds-panel-demo")) await PanelDemo(Shot);
+                if (CommandLine.Has("-buds-look-demo") && session != null) await LookDemo(Shot);
                 if (CommandLine.Has("-buds-logout-demo"))
                 {
                     await LogoutDemo(Shot);

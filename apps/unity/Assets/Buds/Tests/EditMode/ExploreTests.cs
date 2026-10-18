@@ -8,6 +8,26 @@ using UnityEngine;
 
 namespace Buds.Tests
 {
+    public class FourWayTests
+    {
+        [Test]
+        public void TheBudWalksAlongOneAxisAtATime()
+        {
+            var m = new BudMotor();
+            Assert.AreEqual(Vector2.right, m.FourWay(Vector2.right));
+            // a diagonal keeps the axis it started on…
+            Assert.AreEqual(new Vector2(1, 0), m.FourWay(new Vector2(0.7f, 0.7f)).normalized);
+            // …until the other clearly wins
+            var turned = m.FourWay(new Vector2(0.3f, 0.95f));
+            Assert.AreEqual(0, turned.x, 1e-5);
+            Assert.Greater(turned.y, 0);
+            // a half-pushed stick keeps its strength
+            m.FourWay(Vector2.zero);
+            Assert.AreEqual(0.5f, m.FourWay(new Vector2(0, -0.5f)).magnitude, 1e-4);
+            Assert.AreEqual(Vector2.zero, m.FourWay(Vector2.zero));
+        }
+    }
+
     public class BudMotorTests
     {
         [Test]

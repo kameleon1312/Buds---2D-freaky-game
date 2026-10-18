@@ -74,6 +74,7 @@ import {
   type CatalogResponse,
   type OwnedItemsResponse,
   createBudSchema,
+  updateLookSchema,
   redeemPairSchema,
   type ApiError,
   type BudResponse,
@@ -207,6 +208,28 @@ export function createApp(
   });
 
   app.get('/v1/buds/me', requirePlayer(store), (c) => c.json<BudResponse>({ bud: c.get('bud') }));
+
+  /**
+   * A new look for the bud (the in-game look editor): the same look rules as creating one, and only items the bud
+   * owns. The sheet at /v1/buds/:slug/sheet.png follows at once.
+   */
+  app.put('/v1/buds/me/look', requirePlayer(store), async (c) => {
+    const input = updateLookSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success) {
+      const message = input.error.issues[0]?.message ?? 'Nieprawidłowy wygląd';
+      return c.json<ApiError>({ error: { code: 'invalid_input', message } }, 400);
+    }
+    const bud = c.get('bud');
+    const owned = new Set((await store.items(bud.slug)).map((i) => i.itemId));
+    const locked = lockedItems(input.data.look, owned, catalog);
+    if (locked.length) {
+      return c.json<ApiError>(
+        { error: { code: 'item_locked', message: `Nie masz jeszcze: ${locked.join(', ')}` } },
+        403,
+      );
+    }
+    return c.json<BudResponse>({ bud: await store.updateLook(bud.slug, input.data.look) });
+  });
 
   /** Signs this device out: its player token is forgotten; other devices of the bud stay signed in. */
   app.post('/v1/buds/me/logout', requirePlayer(store), async (c) => {

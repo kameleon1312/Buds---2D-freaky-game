@@ -4,6 +4,20 @@ W każdej dzielnicy stoją postaci, z którymi można się zmierzyć (czerwony z
 naciskasz `E` i przyjmujesz wyzwanie. Walka jest turowa: wybierasz jeden z czterech ruchów (klawisze 1–4), rywal
 odpowiada, a serwer rozstrzyga każdą turę. Dzięki temu XP, monet i łupu nie da się podrobić.
 
+## Arena
+
+Walka toczy się na nocnej ulicy w 3D: asfalt, krawężnik, kamienice, latarnie z kręgami światła. Kamera prowadzi
+walkę jak w filmie:
+
+- najazd na wejściu pod naklejką VS;
+- przybliżenie w stronę ciosu;
+- krótkie spowolnienie i zbliżenie przy krytyku;
+- przelot wokół powalonego rywala przy nokaucie.
+
+Postacie robią wypady i skoki (cień zostaje na ziemi), uskakują w głąb ulicy i padają płasko na asfalt. Komiksowe
+dymki (PAC!, ŁUP!, BAM!, TRZASK!, K.O., WYGRANA!) są przypięte do postaci i zawsze w całości na ekranie. Paski
+życia, broń i statystyki (z tym, co daje sprzęt) są na tabliczkach u góry, ruchy u dołu.
+
 ## Ruchy zależą od broni
 
 Broń to przedmiot w miejscu „W ręku”. Bez niej walczysz pięściami. Każdy ruch ma w grze własną animację.

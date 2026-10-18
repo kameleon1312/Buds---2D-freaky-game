@@ -39,6 +39,10 @@ export const createBudSchema = z.object({
 });
 export type CreateBudInput = z.infer<typeof createBudSchema>;
 
+/** Changing a bud's look later (the in-game look editor): the same rules as creating one. */
+export const updateLookSchema = z.object({ look: budLookSchema });
+export type UpdateLookInput = z.infer<typeof updateLookSchema>;
+
 export const budSlugSchema = z.string().regex(/^[a-z0-9-]{3,40}$/);
 
 /** Public view of a bud — safe to show anyone. */

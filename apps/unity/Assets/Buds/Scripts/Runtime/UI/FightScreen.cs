@@ -10,25 +10,20 @@ using UnityEngine.UI;
 namespace Buds.UI
 {
     /// <summary>
-    /// The duel screen: the bud (left) and the opponent (right) side on, health bars, the four moves of the bud's
-    /// weapon and a way out. The server decides every turn; this plays what happened — each move with its own motion:
-    /// a jab is a quick punch, a hook an arc, a kick a hop and a turn, a swing a wide arc of the weapon, a thrust a
-    /// stab, a spin a full turn, a shot a flying stone, spray a cloud, a shout rings of sound, a kickflip the board in
-    /// the air — and every hit flashes, shakes and shows its damage. Around that: the fighters walk in under a "VS",
-    /// the move buttons show damage and accuracy, health bars leave a trail of what was lost and pulse when low, a
-    /// round counter and a hit streak run along. The look is comic street art (Resources/Ui/Fx, drawn by
-    /// tools/world/art/fx.ts): every blow lands with its sound in a burst (PAC!, ŁUP!, BAM!, a crit TRZASK!), crits
-    /// freeze a beat behind focus lines and halftone, the fighters walk in under a VS sticker and a strip of WALCZ!
-    /// tape, and a knockout gets a BUM!, a sprayed K.O. stencil over the fallen and, for the bud, a WYGRANA! tag.
-    /// Waiting for a move, both fighters breathe.
+    /// The duel, fought on a 3D night street (FightStage) under a fighting-game HUD: the two plates with health at the
+    /// top, the moves of the bud's weapon at the bottom, the result card in the middle. The server decides every turn;
+    /// this plays what happened. Every move has its own motion in 3D — a jab is a quick lunge, a hook an arc with the body
+    /// turning, a kick a hop with a lean, a swing a wide arc of the weapon, a thrust a stab, a spin a full turn, a shot a
+    /// stone flying in an arc, spray a cloud of paint, a shout rings of sound, a kickflip the board in the air — and the
+    /// camera moves with it: it pushes towards the blow, snaps in and freezes a beat on a crit, orbits a knockout. The
+    /// comic street effects (Resources/Ui/Fx) sit on a layer over the stage, pinned to the fighters and kept fully on
+    /// the screen: PAC!/ŁUP!/BAM!/TRZASK!, focus lines and halftone, the VS sticker, the WALCZ! tape, the sprayed K.O.
+    /// and the WYGRANA! tag.
     /// </summary>
     public sealed class FightScreen
     {
-        const float StageW = 1076;
-        const float StageH = 380;
-        const float FighterW = 156;
-        const float FighterH = 234;
         static Sprite disc;
+        static Sprite ring;
 
         /// <summary>A sample icon per weapon kind, for opponents (who carry no catalog item).</summary>
         static readonly Dictionary<string, string> KindIcon = new()
@@ -40,27 +35,21 @@ namespace Buds.UI
             ["deska"] = "deska-fala",
         };
 
-        sealed class FighterView
+        /// <summary>A fighter's plate on the HUD.</summary>
+        sealed class Plate
         {
-            public RectTransform Root;
-            public Image Body;
-            public RectTransform WeaponRt;
-            public Image Weapon;
-            public BudSheet Sheet;
-            public string Name;
-            public Vector2 Home;
-            public int Dir; // +1 faces right (the bud), -1 left
+            public Text Name;
             public RectTransform HpFill;
-            public Text HpText;
-            public Text NameText;
-            public Text StatusText;
-            public int Hp;
-            public int MaxHp;
-            public float WeaponRest = 25;
             public RectTransform HpGhost;
             public Image HpImage;
             public Color HpColor;
+            public Text HpText;
+            public Text Status;
+            public int Hp;
+            public int MaxHp;
             public int TrailToken;
+            /// <summary>The fighter's weapon and stats, shown under the bar with any status effects.</summary>
+            public string Stats = "";
         }
 
         readonly QuestContent content;
@@ -68,41 +57,39 @@ namespace Buds.UI
         readonly Action onFlee;
         readonly Action onClose;
         readonly GameObject root;
-        readonly Text title;
-        readonly RectTransform back; // behind the fighters: focus lines, halftone
-        readonly RectTransform stage;
-        readonly RectTransform fx; // in front: bursts, stencils, tags
+        readonly RectTransform fx;
         readonly Text log;
-        readonly Text info;
+        readonly Text round;
         /// <summary>Four moves from the weapon plus up to two special moves from skill perks.</summary>
         const int MaxMoves = 6;
         readonly Button[] moveButtons = new Button[MaxMoves];
         readonly Text[] moveLabels = new Text[MaxMoves];
+        readonly RectTransform movesRow;
         readonly Button fleeButton;
         readonly GameObject result;
         readonly Text resultTitle;
         readonly Text resultBody;
         readonly Image resultIcon;
-        readonly Dictionary<string, Sprite> icons = new();
-        FighterView bud;
-        FighterView enemy;
+        readonly Plate budPlate;
+        readonly Plate enemyPlate;
+        readonly List<GameObject> hiddenHud = new();
+        FightStage stage;
         string[] moves = Array.Empty<string>();
         bool busy;
-        RectTransform arenaRt;
-        Vector2 arenaHome;
-        Text round;
         bool pvp;
-        /// <summary>The WYGRANA! tag of a won duel; it steps aside when the result card comes up.</summary>
-        Image winTag;
-        /// <summary>The bud's hits in a row (a miss or a hit taken ends it).</summary>
-        int streak;
         bool introPlaying;
         int idleToken;
+        /// <summary>The bud's hits in a row (a miss or a hit taken ends it).</summary>
+        int streak;
+        /// <summary>The WYGRANA! tag of a won duel; it steps aside when the result card comes up.</summary>
+        Image winTag;
+        /// <summary>1 = normal speed; a crit slows the world down for a moment.</summary>
+        float timeScale = 1;
 
         public bool IsOpen => root.activeSelf;
+        public bool ShowingResult => result.activeSelf;
         /// <summary>Autopilot only: called at a crit ("crit") and once the K.O. is sprayed ("ko"), for screenshots.</summary>
         public Func<string, Awaitable> Moment;
-        public bool ShowingResult => result.activeSelf;
 
         public FightScreen(Transform canvas, QuestContent content, Func<string, Awaitable> onMove, Action onFlee, Action onClose)
         {
@@ -111,57 +98,50 @@ namespace Buds.UI
             this.onFlee = onFlee;
             this.onClose = onClose;
             disc ??= UiKit.Circle(32);
+            ring ??= MakeRing(64);
 
-            var dim = UiKit.Panel("Fight", canvas, new Color(0.086f, 0.094f, 0.122f, 0.82f));
-            dim.raycastTarget = true;
-            UiKit.Stretch(dim.rectTransform);
-            root = dim.gameObject;
-            var group = UiKit.Rect("Group", dim.transform);
-            UiKit.Place(group, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1180, 820));
-            group.gameObject.AddComponent<FitInParent>();
-            var body = UiKit.Window("Window", group, new Vector2(1140, 800), "Pojedynek", null, out var window, out title);
-            UiKit.Place(window, new Vector2(0.5f, 0.5f), Vector2.zero, window.sizeDelta);
+            // a clear layer over the 3D stage: it takes the taps so nothing reaches the world behind
+            var cover = UiKit.Panel("Fight", canvas, new Color(0, 0, 0, 0));
+            cover.raycastTarget = true;
+            UiKit.Stretch(cover.rectTransform);
+            root = cover.gameObject;
 
-            // the arena: night sky over asphalt
-            var arena = UiKit.OutlinedBox("Arena", body, UiKit.Surface800, UiKit.RadiusM);
-            arenaRt = (RectTransform)arena.transform.parent;
-            UiKit.Place(arenaRt, new Vector2(0, 1), Vector2.zero, new Vector2(StageW, StageH), new Vector2(0, 1));
-            arenaHome = arenaRt.anchoredPosition;
-            var ground = UiKit.Shape("Ground", arena.transform, UiKit.Surface700, UiKit.RadiusM - 4);
-            UiKit.Place(ground.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 6), new Vector2(StageW - 12, 84), new Vector2(0.5f, 0));
-            var line = UiKit.Panel("Line", arena.transform, UiKit.Outline);
-            UiKit.Place(line.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 88), new Vector2(StageW - 12, 3), new Vector2(0.5f, 0));
-            back = UiKit.Rect("Back", arena.transform);
-            UiKit.Stretch(back);
-            // the art may reach past the arena's edge (focus lines), but never past its frame
-            arena.gameObject.AddComponent<RectMask2D>();
-            stage = UiKit.Rect("Stage", arena.transform);
-            UiKit.Stretch(stage);
-            fx = UiKit.Rect("Fx", arena.transform);
+            // a soft dark band behind the plates and behind the moves, so the HUD reads over any part of the street
+            var top = UiKit.Panel("TopShade", cover.transform, new Color(0.04f, 0.05f, 0.08f, 0.55f));
+            UiKit.Place(top.rectTransform, new Vector2(0.5f, 1), Vector2.zero, new Vector2(4000, 140), new Vector2(0.5f, 1));
+            var bottom = UiKit.Panel("BottomShade", cover.transform, new Color(0.04f, 0.05f, 0.08f, 0.6f));
+            UiKit.Place(bottom.rectTransform, new Vector2(0.5f, 0), Vector2.zero, new Vector2(4000, 128), new Vector2(0.5f, 0));
+
+            fx = UiKit.Rect("Fx", cover.transform);
             UiKit.Stretch(fx);
-            round = UiKit.Outlined("Round", arena.transform, "", 22, UiKit.Gold400, TextAnchor.UpperLeft);
-            UiKit.Stretch(round.rectTransform, 16, 0, 0, 10);
 
-            log = UiKit.Label("Log", body, "", 28, UiKit.Ink, true, TextAnchor.MiddleCenter);
-            UiKit.Place(log.rectTransform, new Vector2(0, 1), new Vector2(0, -StageH - 8), new Vector2(StageW, 44), new Vector2(0, 1));
+            budPlate = BuildPlate(cover.transform, true);
+            enemyPlate = BuildPlate(cover.transform, false);
+            round = UiKit.Outlined("Round", cover.transform, "", 30, UiKit.Gold400);
+            UiKit.Place(round.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(260, 40), new Vector2(0.5f, 1));
+            log = UiKit.Outlined("Log", cover.transform, "", 28, UiKit.TextOnDark);
+            log.horizontalOverflow = HorizontalWrapMode.Overflow;
+            UiKit.Place(log.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 136), new Vector2(900, 40), new Vector2(0.5f, 0));
 
+            movesRow = UiKit.Rect("Moves", cover.transform);
+            movesRow.anchorMin = new Vector2(0, 0);
+            movesRow.anchorMax = new Vector2(1, 0);
+            movesRow.pivot = new Vector2(0.5f, 0);
+            movesRow.offsetMin = new Vector2(20, 22);
+            movesRow.offsetMax = new Vector2(-250, 112);
             for (var i = 0; i < MaxMoves; i++)
             {
                 var index = i;
-                moveButtons[i] = UiKit.Button("Move" + i, body, "", new Vector2(256, 84), () => Choose(index),
-                    i >= 4 ? UiKit.Tone.Gold : UiKit.Tone.Buds, 28);
-                UiKit.Place((RectTransform)moveButtons[i].transform, new Vector2(0, 1), new Vector2(i * 273, -StageH - 64),
-                    new Vector2(256, 84), new Vector2(0, 1));
+                moveButtons[i] = UiKit.Button("Move" + i, movesRow, "", new Vector2(200, 86), () => Choose(index),
+                    i >= 4 ? UiKit.Tone.Gold : UiKit.Tone.Buds, 26);
                 moveLabels[i] = moveButtons[i].GetComponentInChildren<Text>();
             }
-            info = UiKit.Label("Info", body, "", 20, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-            UiKit.Place(info.rectTransform, new Vector2(0, 0), new Vector2(0, 4), new Vector2(800, 64), Vector2.zero);
-            fleeButton = UiKit.Button("Flee", body, "Uciekaj  [Esc]", new Vector2(240, 62), () => onFlee(), UiKit.Tone.Rep, 24);
-            UiKit.Place((RectTransform)fleeButton.transform, new Vector2(1, 0), new Vector2(0, 8), new Vector2(240, 62), new Vector2(1, 0));
+            fleeButton = UiKit.Button("Flee", cover.transform, "Uciekaj  [Esc]", new Vector2(210, 70), () => onFlee(), UiKit.Tone.Rep, 24);
+            UiKit.Place((RectTransform)fleeButton.transform, new Vector2(1, 0), new Vector2(-20, 30), new Vector2(210, 70), new Vector2(1, 0));
 
-            // result card over the arena
-            var card = UiKit.Window("Result", arena.transform, new Vector2(660, 330), "", null, out var cardRt, out resultTitle);
-            UiKit.Place(cardRt, new Vector2(0.5f, 0.5f), new Vector2(0, 10), cardRt.sizeDelta);
+            // the result card in the middle of the screen
+            var card = UiKit.Window("Result", cover.transform, new Vector2(660, 330), "", null, out var cardRt, out resultTitle);
+            UiKit.Place(cardRt, new Vector2(0.5f, 0.5f), new Vector2(0, -10), cardRt.sizeDelta);
             resultIcon = UiKit.Rect("Icon", card).gameObject.AddComponent<Image>();
             resultIcon.preserveAspect = true;
             UiKit.Place(resultIcon.rectTransform, new Vector2(0, 1), new Vector2(0, -6), new Vector2(110, 110), new Vector2(0, 1));
@@ -174,57 +154,120 @@ namespace Buds.UI
             root.SetActive(false);
         }
 
+        Plate BuildPlate(Transform parent, bool left)
+        {
+            var p = new Plate();
+            var anchor = left ? new Vector2(0, 1) : new Vector2(1, 1);
+            var box = UiKit.OutlinedBox(left ? "BudPlate" : "RivalPlate", parent, UiKit.Surface800, UiKit.RadiusM);
+            var rt = (RectTransform)box.transform.parent;
+            UiKit.Place(rt, anchor, new Vector2(left ? 20 : -20, -14), new Vector2(420, 112), anchor);
+            p.Name = UiKit.Outlined("Name", box.transform, "", 24, UiKit.TextOnDark, left ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight);
+            p.Name.horizontalOverflow = HorizontalWrapMode.Overflow;
+            UiKit.Place(p.Name.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -6), new Vector2(392, 32), new Vector2(0.5f, 1));
+            p.HpColor = left ? UiKit.Buds400 : UiKit.Alert500;
+            p.HpFill = UiKit.Bar("Hp", box.transform, p.HpColor, out var bar);
+            UiKit.Place(bar, new Vector2(0.5f, 1), new Vector2(0, -42), new Vector2(392, 32), new Vector2(0.5f, 1));
+            p.HpImage = p.HpFill.GetComponent<Image>();
+            // what was just lost stays as a pale trail behind the bar for a moment
+            var ghost = UiKit.Panel("Trail", p.HpFill.parent, new Color(1, 1, 1, 0.7f)).rectTransform;
+            ghost.anchorMin = p.HpFill.anchorMin;
+            ghost.anchorMax = p.HpFill.anchorMax;
+            ghost.pivot = p.HpFill.pivot;
+            ghost.anchoredPosition = Vector2.zero;
+            ghost.SetSiblingIndex(p.HpFill.GetSiblingIndex());
+            p.HpGhost = ghost;
+            p.HpText = UiKit.Outlined("Value", bar, "", 19);
+            UiKit.Stretch(p.HpText.rectTransform, 0, 2, 0, 0);
+            p.Status = UiKit.Label("Status", box.transform, "", 16, UiKit.TextOnDarkMuted, true, left ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight);
+            UiKit.Place(p.Status.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -78), new Vector2(392, 26), new Vector2(0.5f, 1));
+            p.Status.resizeTextForBestFit = true;
+            p.Status.resizeTextMinSize = 11;
+            p.Status.resizeTextMaxSize = 16;
+            p.Status.verticalOverflow = VerticalWrapMode.Truncate;
+            return p;
+        }
+
         // ---------- open / state ----------
 
         public void Open(FightDto fight, BudSheet budSheet, BudSheet enemySheet, string line, GearStats gear = null)
         {
-            for (var i = stage.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(stage.GetChild(i).gameObject);
             for (var i = fx.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(fx.GetChild(i).gameObject);
-            for (var i = back.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(back.GetChild(i).gameObject);
+            if (stage) stage.Close();
             pvp = fight.enemyId != null && fight.enemyId.StartsWith("pvp-");
-            title.text = pvp ? $"Pojedynek z Budem · {fight.enemy.name}" : $"Pojedynek · {fight.enemy.name}";
-            bud = Fighter(fight.bud, budSheet, new Vector2(StageW * 0.27f, 54), +1, fight.bud.weaponItem);
-            // another bud holds its own weapon; the district's people a typical one of their kind
-            enemy = Fighter(fight.enemy, enemySheet, new Vector2(StageW * 0.73f, 54), -1,
-                !string.IsNullOrEmpty(fight.enemy.weaponItem) ? fight.enemy.weaponItem
-                : KindIcon.TryGetValue(fight.enemy.weapon ?? "", out var icon) ? icon : null);
+            var enemyWeapon = !string.IsNullOrEmpty(fight.enemy.weaponItem) ? fight.enemy.weaponItem
+                : KindIcon.TryGetValue(fight.enemy.weapon ?? "", out var icon) ? icon : null;
+            stage = FightStage.Create(budSheet, enemySheet, WeaponSprite(fight.bud.weaponItem), WeaponSprite(enemyWeapon));
+
+            budPlate.Name.text = $"{fight.bud.name}  ·  poz. {fight.bud.level}";
+            enemyPlate.Name.text = pvp ? $"{fight.enemy.name}  ·  poz. {fight.enemy.level}  ·  Bud" : $"{fight.enemy.name}  ·  poz. {fight.enemy.level}";
+            budPlate.HpGhost.sizeDelta = enemyPlate.HpGhost.sizeDelta = Vector2.zero;
+
             moves = fight.bud.moves ?? Array.Empty<string>();
-            // four wide buttons, or six narrower ones when perks add special moves
+            LayOutMoves();
+            var weapon = string.IsNullOrEmpty(fight.bud.weaponItem) ? null : content.Item(fight.bud.weaponItem);
+            // under each bar: what the fighter brings (and, for the bud, what of it comes from gear)
+            budPlate.Stats = $"{weapon?.name ?? "pięści"} · Atak {fight.bud.attack}{FromGear(gear?.Attack)} · Pancerz {fight.bud.armor}{FromGear(gear?.Armor)} · Szybk. {fight.bud.speed}{FromGear(gear?.Speed)}";
+            enemyPlate.Stats = $"{WeaponName(fight.enemy.weapon)} · Atak {fight.enemy.attack} · Pancerz {fight.enemy.armor}" +
+                               (pvp ? " · liczy się do rankingu" : "");
+            log.text = $"„{line}”";
+            round.text = "RUNDA 1";
+            streak = 0;
+            timeScale = 1;
+            result.SetActive(false);
+            HideWorldHud();
+            root.SetActive(true);
+            root.transform.SetAsLastSibling();
+            RefreshFighter(budPlate, fight.bud);
+            RefreshFighter(enemyPlate, fight.enemy);
+            busy = false;
+            _ = Intro();
+            _ = Idle(++idleToken);
+        }
+
+        /// <summary>The world's own HUD (plate, quests, buttons, hint) steps aside for the duel's.</summary>
+        void HideWorldHud()
+        {
+            hiddenHud.Clear();
+            var parent = root.transform.parent;
+            for (var i = 0; i < parent.childCount; i++)
+            {
+                var child = parent.GetChild(i).gameObject;
+                if (child == root || !child.activeSelf) continue;
+                child.SetActive(false);
+                hiddenHud.Add(child);
+            }
+        }
+
+        /// <summary>Four wide buttons, or six narrower ones when perks add special moves.</summary>
+        void LayOutMoves()
+        {
             var count = Mathf.Min(moves.Length, MaxMoves);
-            var w = count <= 4 ? 256f : 170f;
-            var step = count <= 4 ? 273f : 181f;
+            Canvas.ForceUpdateCanvases();
+            var width = Mathf.Max(600, movesRow.rect.width);
+            var gap = 12f;
+            var w = Mathf.Min(count <= 4 ? 230 : 170, (width - gap * (count - 1)) / Mathf.Max(1, count));
+            var total = w * count + gap * (count - 1);
             for (var i = 0; i < MaxMoves; i++)
             {
                 var has = i < count;
                 moveButtons[i].gameObject.SetActive(has);
                 if (!has) continue;
                 var rt = (RectTransform)moveButtons[i].transform;
-                UiKit.Place(rt, new Vector2(0, 1), new Vector2(i * step, -StageH - 64), new Vector2(w, 84), new Vector2(0, 1));
+                UiKit.Place(rt, new Vector2(0.5f, 0), new Vector2(-total / 2 + w / 2 + i * (w + gap), 0), new Vector2(w, 86), new Vector2(0.5f, 0));
                 var m = content.Move(moves[i]);
-                var sub = count <= 4 ? 18 : 15;
+                var big = count <= 4 ? 26 : 21;
+                var sub = count <= 4 ? 17 : 15;
                 moveLabels[i].text = UiKit.Keys($"{m?.name ?? moves[i]}  [{i + 1}]") + $"\n<size={sub}>{MoveLine(m)}</size>";
-                moveLabels[i].fontSize = count <= 4 ? 27 : 21;
+                moveLabels[i].fontSize = big;
                 moveLabels[i].lineSpacing = 0.9f;
+                moveLabels[i].resizeTextForBestFit = true;
+                moveLabels[i].resizeTextMinSize = 14;
+                moveLabels[i].resizeTextMaxSize = big;
             }
-            var weapon = string.IsNullOrEmpty(fight.bud.weaponItem) ? null : content.Item(fight.bud.weaponItem);
-            info.text = $"Broń: <b>{weapon?.name ?? "pięści"}</b>  ·  Atak {fight.bud.attack}{FromGear(gear?.Attack)}  ·  Pancerz {fight.bud.armor}{FromGear(gear?.Armor)}  ·  Szybkość {fight.bud.speed}{FromGear(gear?.Speed)}\n" +
-                        $"{(pvp ? "Bud" : "Rywal")}: poziom {fight.enemy.level}, {WeaponName(fight.enemy.weapon)}" +
-                        (pvp ? "  ·  wynik liczy się do rankingu" : "");
-            log.text = $"„{line}”";
-            round.text = "Runda 1";
-            streak = 0;
-            result.SetActive(false);
-            root.SetActive(true);
-            root.transform.SetAsLastSibling();
-            RefreshFighter(bud, fight.bud);
-            RefreshFighter(enemy, fight.enemy);
-            busy = false;
-            _ = Intro();
-            _ = Idle(++idleToken);
         }
 
         /// <summary>" (+3 ze sprzętu)" after a duel stat, so the player sees what the worn items add.</summary>
-        static string FromGear(int? n) => n is > 0 ? $" <color=#5d9a12>(+{n} ze sprzętu)</color>" : "";
+        static string FromGear(int? n) => n is > 0 ? $" <color=#a3e635>(+{n} ze sprzętu)</color>" : "";
 
         /// <summary>The line under a move's name: damage and accuracy, or what it does.</summary>
         static string MoveLine(MoveData m)
@@ -243,7 +286,16 @@ namespace Buds.UI
             };
         }
 
-        public void Hide() => root.SetActive(false);
+        public void Hide()
+        {
+            idleToken++;
+            if (stage) stage.Close();
+            stage = null;
+            root.SetActive(false);
+            foreach (var go in hiddenHud)
+                if (go) go.SetActive(true);
+            hiddenHud.Clear();
+        }
 
         public void SetBusy(bool value)
         {
@@ -251,12 +303,11 @@ namespace Buds.UI
             var open = !value && !introPlaying;
             foreach (var b in moveButtons) b.interactable = open;
             fleeButton.interactable = open;
-            if (value) StandStill();
         }
 
         public void ShowMessage(string text) => log.text = text;
 
-        /// <summary>Keyboard: 1–4 moves, Esc runs away, E closes the result.</summary>
+        /// <summary>Keyboard: 1–6 moves, Esc runs away, E closes the result.</summary>
         public void Tick()
         {
             var kb = Keyboard.current;
@@ -287,7 +338,7 @@ namespace Buds.UI
         public async Awaitable PlayTurn(FightResponse res)
         {
             while (introPlaying && IsOpen) await Awaitable.NextFrameAsync();
-            round.text = $"Runda {Mathf.Max(1, res.fight.turn)}";
+            round.text = $"RUNDA {Mathf.Max(1, res.fight.turn)}";
             foreach (var e in res.events ?? Array.Empty<TurnEventDto>())
             {
                 if (!IsOpen) return;
@@ -295,10 +346,11 @@ namespace Buds.UI
                 await Wait(0.12f);
             }
             if (!IsOpen) return;
-            RefreshFighter(bud, res.fight.bud);
-            RefreshFighter(enemy, res.fight.enemy);
-            if (res.fight.status == "won") await KnockOut(enemy, bud, true);
-            else if (res.fight.status == "lost") await KnockOut(bud, enemy, false);
+            RefreshFighter(budPlate, res.fight.bud);
+            RefreshFighter(enemyPlate, res.fight.enemy);
+            if (res.fight.status == "won") await KnockOut(stage.Enemy, stage.Bud, true);
+            else if (res.fight.status == "lost") await KnockOut(stage.Bud, stage.Enemy, false);
+            else stage.Frame(FightStage.Neutral, 3);
         }
 
         public void ShowResult(FightDto fight, FightRewardDto reward, InfluenceDto influence = null, PvpResultDto rating = null,
@@ -348,14 +400,14 @@ namespace Buds.UI
                     if (item != null)
                     {
                         sb.Append($"\nŁup: <b>{item.name}</b>\n<size=20>{Gear.Describe(content, item)}</size>");
-                        icon = Icon("Items/" + item.id);
+                        icon = UiKit.Picture("Items/" + item.id);
                     }
                     else sb.Append("\nTym razem bez łupu.");
                     var drink = string.IsNullOrEmpty(reward.drink) ? null : content.Item(reward.drink);
                     if (drink != null)
                     {
                         sb.Append($"\n+ <b>{drink.name}</b>");
-                        icon ??= Icon("Items/" + drink.id);
+                        icon ??= UiKit.Picture("Items/" + drink.id);
                     }
                     resultBody.text = sb.ToString();
                     break;
@@ -384,15 +436,18 @@ namespace Buds.UI
 
         async Awaitable PlayEvent(TurnEventDto e)
         {
-            var me = e.actor == "bud" ? bud : enemy;
-            var other = e.actor == "bud" ? enemy : bud;
+            var me = e.actor == "bud" ? stage.Bud : stage.Enemy;
+            var other = e.actor == "bud" ? stage.Enemy : stage.Bud;
+            var otherPlate = e.actor == "bud" ? enemyPlate : budPlate;
             var move = content.Move(e.move);
             var anim = move?.anim ?? "jab";
             var name = move?.name ?? e.move;
-            log.text = $"{(e.actor == "bud" ? "Ty" : me.Name)}: <b>{name}</b>";
+            log.text = $"{(e.actor == "bud" ? "Ty" : StripLevel(enemyPlate.Name.text))}: <b>{name}</b>";
             var hits = e.hits ?? Array.Empty<HitDto>();
             var finalHp = e.actor == "bud" ? e.enemyHp : e.budHp;
 
+            // the camera leans in towards where the blow will land
+            stage.Frame(FightStage.Towards(Math.Sign(other.Home.x), 0.8f, 9, 3), 7);
             switch (anim)
             {
                 case "guard":
@@ -408,33 +463,33 @@ namespace Buds.UI
                     foreach (var h in hits)
                     {
                         await Shoot(me, other);
-                        await React(other, h, anim);
+                        await React(other, otherPlate, h, anim);
                     }
                     break;
                 case "spray":
                     await Spray(me, other);
-                    foreach (var h in hits) await React(other, h, anim);
+                    foreach (var h in hits) await React(other, otherPlate, h, anim);
                     break;
                 case "shout":
                     await Shout(me, other);
-                    foreach (var h in hits) await React(other, h, anim);
+                    foreach (var h in hits) await React(other, otherPlate, h, anim);
                     break;
                 default:
                     // close combat: wind up, strike, take the hit, step back
                     await Strike(me, anim);
-                    foreach (var h in hits) await React(other, h, anim);
+                    foreach (var h in hits) await React(other, otherPlate, h, anim);
                     await Return(me);
                     break;
             }
 
-            if (hits.Length > 0) SetHp(other, finalHp);
+            if (hits.Length > 0) SetHp(otherPlate, finalHp);
             foreach (var h in hits)
             {
                 if (e.actor == "bud") streak = h.hit ? streak + 1 : 0;
                 else if (h.hit) streak = 0;
             }
             if (e.actor == "bud" && hits.Length > 0 && streak >= 2)
-                Popup(bud, $"Seria ×{streak}!", UiKit.Gold400, 30, 110);
+                Popup(stage.Bud, $"Seria ×{streak}!", UiKit.Gold400, 32, 0.6f);
             switch (e.effect)
             {
                 case "guard":
@@ -447,89 +502,36 @@ namespace Buds.UI
                     Popup(me, "Celuje…", UiKit.Gold400, 30);
                     break;
                 case "blind":
-                    Popup(other, "Oślepiony!", UiKit.Alert500, 30, 60);
+                    Popup(other, "Oślepiony!", UiKit.Alert500, 30, 0.4f);
                     break;
                 case "weaken":
-                    Popup(other, "Osłabiony!", UiKit.Alert500, 30, 60);
+                    Popup(other, "Osłabiony!", UiKit.Alert500, 30, 0.4f);
                     break;
             }
             // Drugi oddech: a fighter about to fall gets a third of its health back
             if (e.secondWind != null && !string.IsNullOrEmpty(e.secondWind.who))
             {
-                var saved = e.secondWind.who == "bud" ? bud : enemy;
-                SetHp(saved, e.secondWind.who == "bud" ? e.budHp : e.enemyHp);
-                saved.Body.color = Color.white;
-                Popup(saved, $"Drugi oddech! +{e.secondWind.hp}", UiKit.Buds400, 30, 60);
-                log.text = $"{(e.secondWind.who == "bud" ? "Ty" : saved.Name)}: <b>Drugi oddech!</b>";
+                var saved = e.secondWind.who == "bud" ? stage.Bud : stage.Enemy;
+                SetHp(e.secondWind.who == "bud" ? budPlate : enemyPlate, e.secondWind.who == "bud" ? e.budHp : e.enemyHp);
+                saved.Tint = Color.white;
+                Popup(saved, $"Drugi oddech! +{e.secondWind.hp}", UiKit.Buds400, 30, 0.4f);
+                log.text = $"{(e.secondWind.who == "bud" ? "Ty" : StripLevel(enemyPlate.Name.text))}: <b>Drugi oddech!</b>";
+                stage.Dust(saved.Position, 8, 0.7f);
                 await Wait(0.35f);
             }
-            await Wait(0.18f);
+            await Wait(0.15f);
         }
 
-        // ---------- fighters ----------
-
-        FighterView Fighter(FighterDto data, BudSheet sheet, Vector2 home, int dir, string weaponIcon)
+        static string StripLevel(string plateName)
         {
-            var v = new FighterView { Sheet = sheet, Name = data.name, Home = home, Dir = dir, Hp = data.hp, MaxHp = data.maxHp };
-            v.Root = UiKit.Rect("Fighter", stage);
-            v.Root.anchorMin = v.Root.anchorMax = Vector2.zero;
-            v.Root.pivot = new Vector2(0.5f, 0);
-            v.Root.sizeDelta = new Vector2(FighterW, FighterH);
-            v.Root.anchoredPosition = home;
-            // side frames face left; the bud is mirrored to face the opponent
-            v.Root.localScale = new Vector3(-dir, 1, 1);
-            v.Body = v.Root.gameObject.AddComponent<Image>();
-            v.Body.sprite = sheet.Get(Facing.Side, 0);
-            v.Body.preserveAspect = true;
-            v.Body.raycastTarget = false;
-
-            var sprite = weaponIcon != null ? Icon("Items/" + weaponIcon) : null;
-            v.WeaponRt = UiKit.Rect("Weapon", v.Root);
-            v.WeaponRt.anchorMin = v.WeaponRt.anchorMax = new Vector2(0.5f, 0);
-            // the icons' handles sit at their bottom-left: that's where the hand holds them
-            v.WeaponRt.pivot = new Vector2(0.19f, 0.13f);
-            v.WeaponRt.sizeDelta = new Vector2(96, 96);
-            v.WeaponRt.anchoredPosition = new Vector2(-34, 104);
-            v.Weapon = v.WeaponRt.gameObject.AddComponent<Image>();
-            v.Weapon.sprite = sprite;
-            v.Weapon.enabled = sprite;
-            v.Weapon.raycastTarget = false;
-            v.WeaponRt.localEulerAngles = new Vector3(0, 0, 90 + v.WeaponRest); // held up, pointing at the rival
-            v.WeaponRt.localScale = new Vector3(-1, 1, 1);
-
-            // name, level, health above the head
-            var plate = UiKit.Rect("Plate", stage);
-            plate.anchorMin = plate.anchorMax = Vector2.zero;
-            plate.pivot = new Vector2(0.5f, 0);
-            plate.sizeDelta = new Vector2(320, 90);
-            plate.anchoredPosition = home + new Vector2(0, FighterH - 6);
-            v.NameText = UiKit.Outlined("Name", plate, "", 22);
-            v.NameText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            UiKit.Place(v.NameText.rectTransform, new Vector2(0.5f, 1), Vector2.zero, new Vector2(320, 34), new Vector2(0.5f, 1));
-            v.HpColor = dir > 0 ? UiKit.Buds400 : UiKit.Alert500;
-            v.HpFill = UiKit.Bar("Hp", plate, v.HpColor, out var bar);
-            UiKit.Place(bar, new Vector2(0.5f, 1), new Vector2(0, -36), new Vector2(280, 30), new Vector2(0.5f, 1));
-            v.HpImage = v.HpFill.GetComponent<Image>();
-            // what was just lost stays as a pale trail behind the bar for a moment
-            var ghost = UiKit.Panel("Trail", v.HpFill.parent, new Color(1, 1, 1, 0.7f)).rectTransform;
-            ghost.anchorMin = v.HpFill.anchorMin;
-            ghost.anchorMax = v.HpFill.anchorMax;
-            ghost.pivot = v.HpFill.pivot;
-            ghost.anchoredPosition = Vector2.zero;
-            ghost.SetSiblingIndex(v.HpFill.GetSiblingIndex());
-            v.HpGhost = ghost;
-            v.HpText = UiKit.Outlined("Value", bar, "", 20);
-            UiKit.Stretch(v.HpText.rectTransform, 0, 2, 0, 0);
-            v.StatusText = UiKit.Outlined("Status", plate, "", 18, UiKit.Gold400);
-            UiKit.Place(v.StatusText.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -70), new Vector2(320, 24), new Vector2(0.5f, 1));
-            v.NameText.text = $"{data.name}  ·  poz. {data.level}";
-            return v;
+            var i = plateName.IndexOf("  ·", StringComparison.Ordinal);
+            return i > 0 ? plateName.Substring(0, i) : plateName;
         }
 
-        void RefreshFighter(FighterView v, FighterDto data)
+        void RefreshFighter(Plate p, FighterDto data)
         {
-            v.MaxHp = data.maxHp;
-            SetHp(v, data.hp);
+            p.MaxHp = data.maxHp;
+            SetHp(p, data.hp);
             var s = new List<string>();
             if (data.status != null)
             {
@@ -537,47 +539,43 @@ namespace Buds.UI
                 if (data.status.weaken > 0) s.Add("osłabiony");
                 if (data.status.aim) s.Add("celuje");
             }
-            v.StatusText.text = string.Join(" · ", s);
+            p.Status.text = s.Count > 0 ? $"<color=#ffc93c>{string.Join(" · ", s)}</color>  ·  {p.Stats}" : p.Stats;
         }
 
-        void SetHp(FighterView v, int hp)
+        void SetHp(Plate p, int hp)
         {
-            v.Hp = Mathf.Max(0, hp);
-            v.HpText.text = $"{v.Hp} / {v.MaxHp}";
+            p.Hp = Mathf.Max(0, hp);
+            p.HpText.text = $"{p.Hp} / {p.MaxHp}";
             Canvas.ForceUpdateCanvases();
-            var before = v.HpFill.gameObject.activeSelf ? v.HpFill.sizeDelta.x : 0;
-            UiKit.SetBar(v.HpFill, v.MaxHp > 0 ? v.Hp / (float)v.MaxHp : 0);
-            var after = v.HpFill.gameObject.activeSelf ? v.HpFill.sizeDelta.x : 0;
-            if (v.HpGhost)
-            {
-                // the trail never shrinks below the bar; it catches up a moment after a loss
-                if (after >= v.HpGhost.sizeDelta.x || !IsOpen) v.HpGhost.sizeDelta = new Vector2(after, 0);
-                else _ = Trail(v, Mathf.Max(before, v.HpGhost.sizeDelta.x), after);
-            }
-            if (v.Hp == 0) v.Body.color = new Color(1, 1, 1, 0.55f);
+            var before = p.HpFill.gameObject.activeSelf ? p.HpFill.sizeDelta.x : 0;
+            UiKit.SetBar(p.HpFill, p.MaxHp > 0 ? p.Hp / (float)p.MaxHp : 0);
+            var after = p.HpFill.gameObject.activeSelf ? p.HpFill.sizeDelta.x : 0;
+            // the trail never shrinks below the bar; it catches up a moment after a loss
+            if (after >= p.HpGhost.sizeDelta.x || !IsOpen) p.HpGhost.sizeDelta = new Vector2(after, 0);
+            else _ = Trail(p, Mathf.Max(before, p.HpGhost.sizeDelta.x), after);
         }
 
-        async Awaitable Trail(FighterView v, float from, float to)
+        async Awaitable Trail(Plate p, float from, float to)
         {
-            var token = ++v.TrailToken;
-            v.HpGhost.sizeDelta = new Vector2(from, 0);
+            var token = ++p.TrailToken;
+            p.HpGhost.sizeDelta = new Vector2(from, 0);
             await Wait(0.35f);
             await Tween(0.35f, t =>
             {
-                if (token == v.TrailToken && v.HpGhost) v.HpGhost.sizeDelta = new Vector2(Mathf.Lerp(from, to, Ease(t)), 0);
+                if (token == p.TrailToken && p.HpGhost) p.HpGhost.sizeDelta = new Vector2(Mathf.Lerp(from, to, Ease(t)), 0);
             });
         }
 
-        // ---------- motions ----------
+        // ---------- timing ----------
 
-        static async Awaitable Wait(float seconds)
+        async Awaitable Wait(float seconds)
         {
-            for (var t = 0f; t < seconds; t += Time.unscaledDeltaTime) await Awaitable.NextFrameAsync();
+            for (var t = 0f; t < seconds; t += Time.unscaledDeltaTime * timeScale) await Awaitable.NextFrameAsync();
         }
 
-        static async Awaitable Tween(float seconds, Action<float> step)
+        async Awaitable Tween(float seconds, Action<float> step)
         {
-            for (var t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+            for (var t = 0f; t < seconds; t += Time.unscaledDeltaTime * timeScale)
             {
                 step(Mathf.Clamp01(t / seconds));
                 await Awaitable.NextFrameAsync();
@@ -587,344 +585,428 @@ namespace Buds.UI
 
         static float Ease(float t) => 1 - (1 - t) * (1 - t);
 
+        // ---------- motions on the stage ----------
+
         /// <summary>The close-combat moves: each its own path and pose up to the moment of contact.</summary>
-        async Awaitable Strike(FighterView me, string anim)
+        async Awaitable Strike(StageFighter me, string anim)
         {
-            var d = me.Dir;
-            var from = me.Home;
-            me.Body.sprite = me.Sheet.Get(Facing.Side, 1);
+            me.Frame = 1;
             switch (anim)
             {
                 case "jab": // short and straight
-                    await Tween(0.1f, t => me.Root.anchoredPosition = from + new Vector2(d * 90 * Ease(t), 0));
+                    await Tween(0.11f, t => me.X = 1.15f * Ease(t));
                     break;
                 case "hook": // an arc from the side, the body turning into it
-                    await Tween(0.16f, t =>
+                    await Tween(0.17f, t =>
                     {
-                        me.Root.anchoredPosition = from + new Vector2(d * 110 * Ease(t), Mathf.Sin(t * Mathf.PI) * 24);
-                        me.Root.localEulerAngles = new Vector3(0, 0, -d * 14 * Mathf.Sin(t * Mathf.PI));
+                        me.X = 1.35f * Ease(t);
+                        me.Height = Mathf.Sin(t * Mathf.PI) * 0.2f;
+                        me.Depth = -Mathf.Sin(t * Mathf.PI) * 0.35f; // swings in from the camera's side
+                        me.Lean = -14 * Mathf.Sin(t * Mathf.PI);
                     });
                     break;
                 case "kick": // a hop and a lean back, the leg goes first
-                    me.Body.sprite = me.Sheet.Get(Facing.Side, 2);
-                    await Tween(0.2f, t =>
+                    me.Frame = 2;
+                    stage.Ghost(me);
+                    await Tween(0.21f, t =>
                     {
-                        me.Root.anchoredPosition = from + new Vector2(d * 140 * Ease(t), Mathf.Sin(t * Mathf.PI) * 40);
-                        me.Root.localEulerAngles = new Vector3(0, 0, d * 22 * t);
+                        me.X = 1.6f * Ease(t);
+                        me.Height = Mathf.Sin(t * Mathf.PI) * 0.55f;
+                        me.Lean = 22 * t;
+                        if (t > 0.5f && t < 0.56f) stage.Ghost(me);
                     });
                     break;
                 case "thrust": // the weapon levels out and stabs forward
-                    me.WeaponRt.localEulerAngles = new Vector3(0, 0, 90);
-                    await Tween(0.12f, t => me.Root.anchoredPosition = from + new Vector2(d * 170 * Ease(t), 0));
+                    me.WeaponAngle = StageFighter.LevelAngle;
+                    stage.Ghost(me);
+                    await Tween(0.12f, t => me.X = 1.85f * Ease(t));
                     break;
                 case "swing": // raised high, then a wide arc down onto the rival
-                    await Tween(0.14f, t => me.WeaponRt.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(90 + me.WeaponRest, 170, t)));
+                    await Tween(0.14f, t => me.WeaponAngle = Mathf.Lerp(StageFighter.RestAngle, 45, t));
                     await Tween(0.16f, t =>
                     {
-                        me.Root.anchoredPosition = from + new Vector2(d * 120 * Ease(t), 0);
-                        me.WeaponRt.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(170, -10, Ease(t)));
+                        me.X = 1.3f * Ease(t);
+                        me.WeaponAngle = Mathf.Lerp(45, 180, Ease(t));
                     });
                     break;
                 case "spin": // a full turn with the weapon out
-                    me.WeaponRt.localEulerAngles = new Vector3(0, 0, 90);
+                    me.WeaponAngle = StageFighter.LevelAngle;
                     await Tween(0.36f, t =>
                     {
-                        me.Root.anchoredPosition = from + new Vector2(d * 140 * t, Mathf.Sin(t * Mathf.PI) * 16);
-                        me.Root.localEulerAngles = new Vector3(0, 0, -d * 360 * Ease(t));
+                        me.X = 1.5f * t;
+                        me.Height = Mathf.Sin(t * Mathf.PI) * 0.15f;
+                        me.Lean = -360 * Ease(t);
+                        if (Mathf.Repeat(t, 0.25f) < 0.03f) stage.Ghost(me);
                     });
-                    me.Root.localEulerAngles = Vector3.zero;
+                    me.Lean = 0;
                     break;
                 case "flip": // the board flips up in the air and comes down on the rival
                     await Tween(0.32f, t =>
                     {
-                        me.Root.anchoredPosition = from + new Vector2(d * 130 * t, Mathf.Sin(t * Mathf.PI) * 70);
-                        me.WeaponRt.localEulerAngles = new Vector3(0, 0, 90 + 720 * t);
+                        me.X = 1.4f * t;
+                        me.Height = Mathf.Sin(t * Mathf.PI) * 0.95f;
+                        me.WeaponAngle = StageFighter.RestAngle + 720 * t;
                     });
+                    stage.Dust(me.Position, 5, 0.45f);
                     break;
                 default:
-                    await Tween(0.12f, t => me.Root.anchoredPosition = from + new Vector2(d * 90 * Ease(t), 0));
+                    await Tween(0.12f, t => me.X = 1.1f * Ease(t));
                     break;
             }
         }
 
-        async Awaitable Return(FighterView me)
+        async Awaitable Return(StageFighter me)
         {
-            var at = me.Root.anchoredPosition;
-            var rot = me.Root.localEulerAngles.z;
-            var weapon = me.WeaponRt.localEulerAngles.z;
-            await Tween(0.18f, t =>
-            {
-                me.Root.anchoredPosition = Vector2.Lerp(at, me.Home, Ease(t));
-                me.Root.localEulerAngles = new Vector3(0, 0, Mathf.LerpAngle(rot, 0, t));
-                me.WeaponRt.localEulerAngles = new Vector3(0, 0, Mathf.LerpAngle(weapon, 90 + me.WeaponRest, t));
-            });
-            me.Body.sprite = me.Sheet.Get(Facing.Side, 0);
-        }
-
-        async Awaitable Guard(FighterView me)
-        {
-            var shield = Fx("Shield", UiKit.Rep400, new Vector2(180, 180), Center(me) + new Vector2(me.Dir * 40, 0));
-            shield.color = new Color(UiKit.Rep400.r, UiKit.Rep400.g, UiKit.Rep400.b, 0.45f);
-            await Tween(0.3f, t =>
-            {
-                me.Root.localScale = new Vector3(-me.Dir * (1 - 0.06f * Mathf.Sin(t * Mathf.PI)), 1 - 0.06f * Mathf.Sin(t * Mathf.PI), 1);
-                shield.rectTransform.localScale = Vector3.one * (0.6f + 0.4f * Ease(t));
-            });
-            await Fade(shield, 0.25f);
-        }
-
-        async Awaitable Dodge(FighterView me)
-        {
-            await Tween(0.14f, t => me.Root.anchoredPosition = me.Home + new Vector2(-me.Dir * 70 * Ease(t), 0));
-            await Tween(0.16f, t => me.Root.anchoredPosition = me.Home + new Vector2(-me.Dir * 70 * (1 - t), 0));
-        }
-
-        async Awaitable Aim(FighterView me, FighterView target)
-        {
-            var mark = Fx("Aim", UiKit.Gold400, new Vector2(70, 70), Center(target));
-            await Tween(0.4f, t =>
-            {
-                mark.rectTransform.localScale = Vector3.one * (1.6f - 0.6f * Ease(t));
-                me.Root.localEulerAngles = new Vector3(0, 0, -me.Dir * 6 * t);
-            });
-            me.Root.localEulerAngles = Vector3.zero;
-            await Fade(mark, 0.2f);
-        }
-
-        async Awaitable Shoot(FighterView me, FighterView target)
-        {
-            var from = Hand(me);
-            var to = Center(target);
-            var stone = Fx("Stone", UiKit.Surface700, new Vector2(22, 22), from);
-            // pull back a little, let go
-            await Tween(0.08f, t => me.Root.anchoredPosition = me.Home + new Vector2(-me.Dir * 14 * t, 0));
+            var x = me.X;
+            var h = me.Height;
+            var d = me.Depth;
+            var lean = me.Lean;
+            var weapon = me.WeaponAngle;
             await Tween(0.2f, t =>
             {
-                stone.rectTransform.anchoredPosition = Vector2.Lerp(from, to, t) + new Vector2(0, Mathf.Sin(t * Mathf.PI) * 40);
-                me.Root.anchoredPosition = me.Home + new Vector2(-me.Dir * 14 * (1 - t), 0);
+                var k = Ease(t);
+                me.X = Mathf.Lerp(x, 0, k);
+                me.Height = Mathf.Lerp(h, 0, k);
+                me.Depth = Mathf.Lerp(d, 0, k);
+                me.Lean = Mathf.LerpAngle(lean, 0, k);
+                me.WeaponAngle = Mathf.LerpAngle(weapon, StageFighter.RestAngle, k);
             });
-            UnityEngine.Object.Destroy(stone.gameObject);
+            me.Frame = 0;
         }
 
-        async Awaitable Spray(FighterView me, FighterView target)
+        Vector3 Chest(StageFighter f) => f.Position + new Vector3(0, 0, -1.25f);
+        Vector3 Hand(StageFighter f) => f.Position + new Vector3(f.Dir * 0.5f, -0.1f, -1.15f);
+
+        async Awaitable Guard(StageFighter me)
+        {
+            var shield = stage.Prop(disc, Chest(me) + new Vector3(me.Dir * 0.55f, -0.15f, 0), 2.1f,
+                new Color(UiKit.Rep400.r, UiKit.Rep400.g, UiKit.Rep400.b, 0.42f));
+            await Tween(0.32f, t =>
+            {
+                var k = Mathf.Sin(t * Mathf.PI);
+                me.SquashX = 1 - 0.06f * k;
+                me.SquashY = 1 - 0.07f * k;
+                me.X = -0.15f * k;
+                if (shield) shield.transform.localScale = Vector3.one * (0.6f + 0.4f * Ease(t)) * 2.1f / shield.sprite.bounds.size.x;
+            });
+            me.SquashX = me.SquashY = 1;
+            await FadeProp(shield, 0.25f);
+        }
+
+        async Awaitable Dodge(StageFighter me)
+        {
+            // a real step aside: back and into the depth of the street, then back to the mark
+            stage.Ghost(me);
+            await Tween(0.15f, t =>
+            {
+                me.X = -0.55f * Ease(t);
+                me.Depth = 1.0f * Ease(t);
+            });
+            await Tween(0.17f, t =>
+            {
+                me.X = -0.55f * (1 - t);
+                me.Depth = 1.0f * (1 - t);
+            });
+            stage.Dust(me.Position, 3, 0.35f);
+        }
+
+        async Awaitable Aim(StageFighter me, StageFighter target)
+        {
+            var mark = stage.Prop(ring, Chest(target), 1.4f, UiKit.Gold400);
+            await Tween(0.42f, t =>
+            {
+                if (mark) mark.transform.localScale = Vector3.one * (1.7f - 0.7f * Ease(t)) * 1.4f / ring.bounds.size.x;
+                me.Lean = 6 * t;
+            });
+            me.Lean = 0;
+            await FadeProp(mark, 0.2f);
+        }
+
+        async Awaitable Shoot(StageFighter me, StageFighter target)
         {
             var from = Hand(me);
-            var to = Center(target);
+            var to = Chest(target);
+            var stone = stage.Prop(disc, from, 0.22f, UiKit.Surface700);
+            // pull back a little, let go
+            await Tween(0.08f, t => me.X = -0.15f * t);
+            await Tween(0.22f, t =>
+            {
+                if (stone) stone.transform.localPosition = Vector3.Lerp(from, to, t) + new Vector3(0, 0, -Mathf.Sin(t * Mathf.PI) * 0.6f);
+                me.X = -0.15f * (1 - t);
+            });
+            if (stone) UnityEngine.Object.Destroy(stone.gameObject);
+        }
+
+        async Awaitable Spray(StageFighter me, StageFighter target)
+        {
+            var from = Hand(me);
+            var to = Chest(target);
             Color[] colors = { UiKit.Buds400, UiKit.Rep400, UiKit.XpFill, UiKit.Gold400 };
-            var puffs = new List<Image>();
-            for (var i = 0; i < 9; i++)
-                puffs.Add(Fx("Paint", colors[i % colors.Length], new Vector2(26, 26), from));
-            var offsets = new List<Vector2>();
-            for (var i = 0; i < puffs.Count; i++) offsets.Add(new Vector2(UnityEngine.Random.Range(-40, 40), UnityEngine.Random.Range(-50, 50)));
-            await Tween(0.3f, t =>
+            var puffs = new List<(SpriteRenderer r, Vector3 off)>();
+            for (var i = 0; i < 10; i++)
+                puffs.Add((stage.Prop(disc, from, 0.3f, colors[i % colors.Length]),
+                    new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.4f, 0.4f), UnityEngine.Random.Range(-0.4f, 0.4f))));
+            await Tween(0.32f, t =>
             {
                 for (var i = 0; i < puffs.Count; i++)
                 {
+                    var (r, off) = puffs[i];
+                    if (!r) continue;
                     var k = Mathf.Clamp01(t * 1.3f - i * 0.04f);
-                    puffs[i].rectTransform.anchoredPosition = Vector2.Lerp(from, to + offsets[i], Ease(k));
-                    puffs[i].rectTransform.localScale = Vector3.one * (0.5f + 1.6f * k);
-                    var c = puffs[i].color;
+                    r.transform.localPosition = Vector3.Lerp(from, to + off, Ease(k));
+                    r.transform.localScale = Vector3.one * (0.3f + 1.4f * k) * 0.3f / disc.bounds.size.x;
+                    var c = r.color;
                     c.a = 0.9f * (1 - k * 0.6f);
-                    puffs[i].color = c;
+                    r.color = c;
                 }
             });
-            foreach (var p in puffs) _ = Fade(p, 0.3f);
+            foreach (var (r, _) in puffs) _ = FadeProp(r, 0.3f);
         }
 
-        async Awaitable Shout(FighterView me, FighterView target)
+        async Awaitable Shout(StageFighter me, StageFighter target)
         {
             var from = Hand(me);
-            var to = Center(target);
-            var rings = new List<Image>();
-            for (var i = 0; i < 3; i++)
+            var to = Chest(target);
+            var rings = new List<SpriteRenderer>();
+            for (var i = 0; i < 3; i++) rings.Add(stage.Prop(ring, from, 0.6f, new Color(1, 1, 1, 0)));
+            await Tween(0.38f, t =>
             {
-                var ring = Fx("Ring", UiKit.TextOnDark, new Vector2(60, 60), from);
-                var outline = ring.gameObject.AddComponent<UnityEngine.UI.Outline>();
-                outline.effectColor = UiKit.Outline;
-                ring.color = new Color(1, 1, 1, 0.0f);
-                rings.Add(ring);
-            }
-            await Tween(0.36f, t =>
-            {
-                me.Root.localScale = new Vector3(-me.Dir * (1 + 0.1f * Mathf.Sin(t * Mathf.PI)), 1 + 0.1f * Mathf.Sin(t * Mathf.PI), 1);
+                var k0 = Mathf.Sin(t * Mathf.PI);
+                me.SquashX = 1 + 0.1f * k0;
+                me.SquashY = 1 + 0.1f * k0;
                 for (var i = 0; i < rings.Count; i++)
                 {
+                    var r = rings[i];
+                    if (!r) continue;
                     var k = Mathf.Clamp01(t * 1.6f - i * 0.25f);
-                    rings[i].rectTransform.anchoredPosition = Vector2.Lerp(from, to, k);
-                    rings[i].rectTransform.localScale = Vector3.one * (0.4f + 1.4f * k);
-                    rings[i].color = new Color(1, 1, 1, k > 0 && k < 1 ? 0.55f * (1 - k) + 0.2f : 0);
+                    r.transform.localPosition = Vector3.Lerp(from, to, k);
+                    r.transform.localScale = Vector3.one * (0.4f + 1.6f * k) * 0.6f / ring.bounds.size.x;
+                    r.color = new Color(1, 1, 1, k > 0 && k < 1 ? 0.75f * (1 - k) + 0.2f : 0);
                 }
             });
-            foreach (var r in rings) UnityEngine.Object.Destroy(r.gameObject);
+            me.SquashX = me.SquashY = 1;
+            foreach (var r in rings)
+                if (r) UnityEngine.Object.Destroy(r.gameObject);
         }
 
-        /// <summary>How the target takes a hit (flash, shake, damage) or a miss (a hop aside).</summary>
-        async Awaitable React(FighterView target, HitDto hit, string anim)
+        /// <summary>How the target takes a hit (sound burst, sparks, flash, knockback) or a miss (a step aside).</summary>
+        async Awaitable React(StageFighter target, Plate plate, HitDto hit, string anim)
         {
             if (!hit.hit)
             {
                 Popup(target, "Pudło", UiKit.TextOnDarkMuted, 30);
-                await Tween(0.16f, t => target.Root.anchoredPosition = target.Home + new Vector2(-target.Dir * 30 * Mathf.Sin(t * Mathf.PI), 0));
+                await Tween(0.18f, t =>
+                {
+                    target.Depth = Mathf.Sin(t * Mathf.PI) * 0.6f;
+                    target.X = -Mathf.Sin(t * Mathf.PI) * 0.2f;
+                });
                 return;
             }
-            // where the blow lands: chest high, out towards the attacker (clear of the health bars above the heads)
-            var at = Center(target) + new Vector2(target.Dir * 84 + UnityEngine.Random.Range(-12f, 12f), UnityEngine.Random.Range(-14f, 10f));
+            var chest = Chest(target) + new Vector3(target.Dir * 0.35f, -0.2f, 0);
+            stage.Sparks(chest, hit.crit, UiKit.Gold400, UiKit.TextOnDark);
             if (anim == "spray")
             {
                 Color[] paint = { UiKit.Buds400, UiKit.Rep400, UiKit.Gold400 };
-                _ = Splat(at, paint[UnityEngine.Random.Range(0, paint.Length)]);
+                stage.Paint(chest, paint[UnityEngine.Random.Range(0, paint.Length)]);
             }
-            Sparks(at, hit.crit);
-            _ = Impact(BurstFor(anim, hit.crit), at + new Vector2(0, 12), hit.crit ? 0.44f : 0.4f);
+            // the sound of it, on the side of the blow, kept on the screen
+            _ = Impact(BurstFor(anim, hit.crit), stage.ScreenOf(target, 1.55f), target.Dir, hit.crit ? 0.5f : 0.42f);
             if (hit.crit)
             {
-                _ = Focus(Center(target), UiKit.Gold400);
-                await Wait(0.09f); // a beat of stillness: the hit lands
+                // a snap zoom onto the blow, the world slows down, focus lines and halftone flare, then a shake
+                stage.Cut(FightStage.Towards(Math.Sign(target.Home.x), 0.62f, 14, 9));
+                _ = Focus(UiKit.Gold400);
+                timeScale = 0.25f;
+                await Wait(0.06f);
                 if (Moment != null) await Moment("crit");
-                _ = Shake(0.28f, 14);
+                timeScale = 1;
+                stage.Shake(0.3f, 0.22f);
             }
+            else stage.Shake(0.14f, 0.07f);
             Popup(target, hit.crit ? $"KRYTYK! {hit.damage}" : hit.damage.ToString(), hit.crit ? UiKit.Gold400 : UiKit.TextOnDark,
-                hit.crit ? 46 : 38, 0, -target.Dir * 64);
-            SetHp(target, target.Hp - hit.damage);
-            var strength = hit.crit ? 16f : 9f;
-            await Tween(0.2f, t =>
+                hit.crit ? 46 : 38, 0.15f, -0.9f);
+            SetHp(plate, plate.Hp - hit.damage);
+            var strength = hit.crit ? 0.5f : 0.3f;
+            await Tween(0.22f, t =>
             {
-                target.Body.color = Color.Lerp(new Color(1, 0.45f, 0.45f, 1), Color.white, t);
-                var shake = (1 - t) * strength;
-                target.Root.anchoredPosition = target.Home +
-                                              new Vector2(-target.Dir * 18 * (1 - t) + UnityEngine.Random.Range(-shake, shake), UnityEngine.Random.Range(-shake, shake) * 0.4f);
+                target.Tint = Color.Lerp(new Color(1, 0.45f, 0.45f, 1), Color.white, t);
+                target.X = -strength * (1 - t) * Mathf.Sin((1 - t) * Mathf.PI * 0.5f);
+                target.Lean = 10 * (1 - t);
             });
-            if (target.Hp > 0) target.Body.color = Color.white;
+            target.Tint = Color.white;
+            target.Lean = 0;
+            target.X = 0;
+            if (hit.crit) stage.Frame(FightStage.Towards(Math.Sign(target.Home.x), 0.8f, 9, 3), 4);
         }
 
-        /// <summary>The fighters walk in from the edges under a big "VS", then "Walcz!".</summary>
+        /// <summary>The fighters walk in from the edges while the camera dollies in under a VS sticker, then WALCZ! tape.</summary>
         async Awaitable Intro()
         {
             introPlaying = true;
             SetBusy(busy);
-            var budFrom = bud.Home + new Vector2(-StageW * 0.4f, 0);
-            var enemyFrom = enemy.Home + new Vector2(StageW * 0.4f, 0);
-            bud.Root.anchoredPosition = budFrom;
-            enemy.Root.anchoredPosition = enemyFrom;
-            // focus lines behind the pair and a VS sticker slapped on between them
-            var mid = new Vector2(StageW / 2, StageH * 0.55f);
-            var lines = Art("fx-speed", back, mid, 1, 0, new Color(1, 1, 1, 0));
-            lines.rectTransform.sizeDelta = new Vector2(StageW * 1.2f, StageH * 1.4f);
-            var vs = Art("fx-vs", fx, mid + new Vector2(0, 20), 0.78f, -4);
-            await Tween(0.45f, t =>
+            // wide and from the side, then into the neutral shot
+            var wide = FightStage.Neutral;
+            wide.Distance = 15;
+            wide.Yaw = -28;
+            wide.Pitch = 62;
+            wide.Fov = 38;
+            stage.Cut(wide);
+            stage.Frame(FightStage.Neutral, 2.4f);
+            stage.Bud.X = stage.Enemy.X = -3.4f;
+            var vs = Art("fx-vs", Vector2.zero, 0.78f, -4);
+            await Tween(0.7f, t =>
             {
                 var k = Ease(t);
-                bud.Root.anchoredPosition = Vector2.Lerp(budFrom, bud.Home, k) + new Vector2(0, Mathf.Abs(Mathf.Sin(t * Mathf.PI * 3)) * 10);
-                enemy.Root.anchoredPosition = Vector2.Lerp(enemyFrom, enemy.Home, k) + new Vector2(0, Mathf.Abs(Mathf.Sin(t * Mathf.PI * 3)) * 10);
-                bud.Body.sprite = bud.Sheet.Get(Facing.Side, (int)(t * 6) % 2 == 0 ? 1 : 2);
-                enemy.Body.sprite = enemy.Sheet.Get(Facing.Side, (int)(t * 6) % 2 == 0 ? 2 : 1);
-                if (lines) lines.color = new Color(1, 1, 1, 0.22f * k);
+                foreach (var f in new[] { stage.Bud, stage.Enemy })
+                {
+                    f.X = Mathf.Lerp(-3.4f, 0, k);
+                    f.Height = Mathf.Abs(Mathf.Sin(t * Mathf.PI * 4)) * 0.08f;
+                    f.Frame = (int)(t * 8) % 2 == 0 ? 1 : 2;
+                }
                 if (vs)
                 {
-                    // dropped from above the camera: big, turned, then flat on the wall
+                    // dropped from above the camera: big, turned, then flat on the screen
                     var s = t < 0.7f ? Mathf.Lerp(2.4f, 0.92f, Ease(t / 0.7f)) : Mathf.Lerp(0.92f, 1, (t - 0.7f) / 0.3f);
                     vs.rectTransform.localScale = Vector3.one * s;
                     vs.rectTransform.localEulerAngles = new Vector3(0, 0, Mathf.Lerp(-22, -4, Ease(t)));
                 }
             });
-            bud.Body.sprite = bud.Sheet.Get(Facing.Side, 0);
-            enemy.Body.sprite = enemy.Sheet.Get(Facing.Side, 0);
-            _ = Shake(0.12f, 6); // the sticker lands
-            await Wait(0.3f);
+            foreach (var f in new[] { stage.Bud, stage.Enemy })
+            {
+                f.Frame = 0;
+                f.Height = 0;
+                stage.Dust(f.Position, 3, 0.35f);
+            }
+            stage.Shake(0.12f, 0.06f);
+            await Wait(0.35f);
             _ = FadeArt(vs, 0.18f, 0.85f);
-            _ = FadeArt(lines, 0.3f);
             // a strip of WALCZ! tape, torn off and stuck on
-            var go = Art("fx-walcz", fx, mid + new Vector2(0, 40), 0.62f, 3);
+            var go = Art("fx-walcz", new Vector2(0, 30), 0.62f, 3);
             await Tween(0.14f, t =>
             {
-                if (!go) return;
-                go.rectTransform.localScale = new Vector3(Mathf.Lerp(0.2f, 1, Ease(t)), Mathf.Lerp(1.4f, 1, t), 1);
+                if (go) go.rectTransform.localScale = new Vector3(Mathf.Lerp(0.2f, 1, Ease(t)), Mathf.Lerp(1.4f, 1, t), 1);
             });
             _ = FadeArt(go, 0.35f, 1.1f, 0.35f);
             introPlaying = false;
             SetBusy(busy);
         }
 
-        /// <summary>Both fighters breathe while the bud picks a move; a bar low on health pulses.</summary>
+        /// <summary>Both fighters breathe while the bud picks a move; the camera drifts a little; a low bar pulses.</summary>
         async Awaitable Idle(int token)
         {
             var t = 0f;
-            while (token == idleToken && root && root.activeSelf)
+            while (token == idleToken && root && root.activeSelf && stage)
             {
                 t += Time.unscaledDeltaTime;
                 if (!busy && !introPlaying && !ShowingResult)
-                    foreach (var v in new[] { bud, enemy })
-                    {
-                        if (v == null || v.Hp <= 0) continue;
-                        var b = Mathf.Sin(t * 3.4f + (v.Dir > 0 ? 0 : 1.3f));
-                        v.Root.localScale = new Vector3(-v.Dir * (1 - 0.012f * b), 1 + 0.022f * b, 1);
-                    }
-                foreach (var v in new[] { bud, enemy })
                 {
-                    if (v?.HpImage == null) continue;
-                    var low = v.MaxHp > 0 && v.Hp > 0 && v.Hp / (float)v.MaxHp < 0.3f;
-                    v.HpImage.color = low ? Color.Lerp(v.HpColor, Color.white, 0.5f + 0.5f * Mathf.Sin(t * 9)) : v.HpColor;
+                    foreach (var f in new[] { stage.Bud, stage.Enemy })
+                    {
+                        if (f.Lying > 0) continue;
+                        var b = Mathf.Sin(t * 3.4f + (f.Dir > 0 ? 0 : 1.3f));
+                        f.SquashX = 1 - 0.012f * b;
+                        f.SquashY = 1 + 0.022f * b;
+                    }
+                    var drift = FightStage.Neutral;
+                    drift.Yaw = Mathf.Sin(t * 0.35f) * 3;
+                    drift.Look += new Vector3(Mathf.Sin(t * 0.27f) * 0.15f, 0, 0);
+                    stage.Frame(drift, 1.5f);
+                }
+                foreach (var p in new[] { budPlate, enemyPlate })
+                {
+                    var low = p.MaxHp > 0 && p.Hp > 0 && p.Hp / (float)p.MaxHp < 0.3f;
+                    p.HpImage.color = low ? Color.Lerp(p.HpColor, Color.white, 0.5f + 0.5f * Mathf.Sin(t * 9)) : p.HpColor;
                 }
                 await Awaitable.NextFrameAsync();
             }
         }
 
-        void StandStill()
-        {
-            foreach (var v in new[] { bud, enemy })
-                if (v?.Root && v.Hp > 0)
-                    v.Root.localScale = new Vector3(-v.Dir, 1, 1);
-        }
-
         /// <summary>
-        /// The knockout: a BUM! on the last blow, the loser falls backwards, a K.O. stencil is sprayed over them (the
-        /// paint runs across left to right) and, when the bud wins, its WYGRANA! tag goes up on the wall while it hops.
+        /// The knockout: a BUM!, the loser falls flat onto the asphalt (dust), the camera orbits down onto them, a K.O.
+        /// stencil is sprayed over them and, when the bud wins, its WYGRANA! tag goes up while it hops.
         /// </summary>
-        async Awaitable KnockOut(FighterView loser, FighterView winner, bool budWon)
+        async Awaitable KnockOut(StageFighter loser, StageFighter winner, bool budWon)
         {
-            _ = Impact("fx-bum", Center(loser) + new Vector2(loser.Dir * 30, 70), 0.5f, 0.55f);
-            _ = Focus(Center(loser), budWon ? UiKit.Buds400 : UiKit.Alert500);
-            _ = Shake(0.3f, 10);
-            var from = loser.Root.anchoredPosition;
-            await Tween(0.45f, t =>
+            _ = Impact("fx-bum", stage.ScreenOf(loser, 1.7f), loser.Dir, 0.55f, 0.55f);
+            _ = Focus(budWon ? UiKit.Buds400 : UiKit.Alert500);
+            stage.Shake(0.35f, 0.2f);
+            var orbit = FightStage.Neutral;
+            orbit.Look = loser.Home + new Vector3(-loser.Dir * 0.6f, 0.2f, -0.6f);
+            orbit.Distance = 6.2f;
+            orbit.Yaw = Math.Sign(loser.Home.x) * 26;
+            orbit.Pitch = 66;
+            orbit.Fov = 32;
+            stage.Frame(orbit, 2.2f);
+            timeScale = 0.45f; // the fall in slow motion
+            await Tween(0.5f, t =>
             {
                 var k = Ease(t);
-                // falls backwards, away from the winner
-                loser.Root.localEulerAngles = new Vector3(0, 0, loser.Dir * 82 * k);
-                loser.Root.anchoredPosition = from + new Vector2(-loser.Dir * 40 * k, -12 * k);
+                loser.Lying = k;
+                loser.X = -0.9f * k;
+                loser.Height = Mathf.Sin(t * Mathf.PI) * 0.35f;
             });
-            loser.Body.color = new Color(1, 1, 1, 0.55f);
+            timeScale = 1;
+            loser.Height = 0;
+            loser.Alpha = 0.85f;
+            stage.Dust(loser.Position, 9, 0.7f);
+            stage.Shake(0.18f, 0.1f);
 
-            var ko = Art("fx-ko", fx, loser.Home + new Vector2(-loser.Dir * 30, 96), 0.56f, UnityEngine.Random.Range(-7f, 4f));
+            var ko = Art("fx-ko", Local(stage.ScreenOf(loser, 0.9f)) + new Vector2(0, 40), 0.56f, UnityEngine.Random.Range(-7f, 4f));
+            Clamp(ko);
             await SprayOn(ko, 0.3f);
             if (Moment != null) await Moment("ko");
             if (budWon)
             {
-                winTag = Art("fx-wygrana", fx, new Vector2(StageW / 2, StageH - 78), 0.7f, 0);
+                winTag = Art("fx-wygrana", TopCenter(150), 0.7f, 0);
+                Clamp(winTag);
                 _ = SprayOn(winTag, 0.45f);
             }
             for (var hop = 0; hop < 2; hop++)
-                await Tween(0.28f, t => winner.Root.anchoredPosition = winner.Home + new Vector2(0, Mathf.Sin(t * Mathf.PI) * 46));
+            {
+                await Tween(0.28f, t => winner.Height = Mathf.Sin(t * Mathf.PI) * 0.6f);
+                stage.Dust(winner.Position, 3, 0.3f);
+            }
             await Wait(0.45f);
         }
 
-        // ---------- comic street effects (Resources/Ui/Fx) ----------
+        // ---------- comic street effects on the HUD layer (Resources/Ui/Fx) ----------
 
-        /// <summary>A piece of effect art, centred at <paramref name="at"/> in the arena, at its own size × scale.</summary>
-        static Image Art(string name, RectTransform layer, Vector2 at, float scale, float rotation, Color? tint = null)
+        /// <summary>A screen point (pixels) in the effects layer's own coordinates (centre origin).</summary>
+        Vector2 Local(Vector2 screen)
         {
-            var img = UiKit.Rect(name, layer).gameObject.AddComponent<Image>();
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(fx, screen, null, out var local);
+            return local;
+        }
+
+        Vector2 TopCenter(float fromTop) => new(0, fx.rect.height / 2 - fromTop);
+
+        /// <summary>A piece of effect art, centred at <paramref name="at"/> (effects-layer units), at its own size × scale.</summary>
+        Image Art(string name, Vector2 at, float scale, float rotation, Color? tint = null)
+        {
+            var img = UiKit.Rect(name, fx).gameObject.AddComponent<Image>();
             img.sprite = UiKit.Picture("Ui/Fx/" + name);
             img.raycastTarget = false;
             img.color = tint ?? Color.white;
             img.enabled = img.sprite;
             var rt = img.rectTransform;
-            rt.anchorMin = rt.anchorMax = Vector2.zero;
-            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = img.sprite ? new Vector2(img.sprite.rect.width, img.sprite.rect.height) * scale : new Vector2(100, 100) * scale;
             rt.anchoredPosition = at;
             rt.localEulerAngles = new Vector3(0, 0, rotation);
             return img;
+        }
+
+        /// <summary>Keeps a piece of art fully on the screen (and clear of the HUD bands at the top and bottom).</summary>
+        void Clamp(Image img, float scale = 1)
+        {
+            if (!img) return;
+            var rt = img.rectTransform;
+            var half = rt.sizeDelta * scale / 2 + new Vector2(10, 10);
+            var area = fx.rect;
+            var p = rt.anchoredPosition;
+            p.x = Mathf.Clamp(p.x, area.xMin + half.x, Mathf.Max(area.xMin + half.x, area.xMax - half.x));
+            p.y = Mathf.Clamp(p.y, area.yMin + 120 + half.y, Mathf.Max(area.yMin + 120 + half.y, area.yMax - 130 - half.y));
+            rt.anchoredPosition = p;
         }
 
         /// <summary>The sound of a blow, by its kind: a jab goes PAC!, a hook or kick ŁUP!, a weapon BAM!, a crit TRZASK!</summary>
@@ -937,10 +1019,12 @@ namespace Buds.UI
                 _ => "fx-pac",
             };
 
-        /// <summary>A burst pops out past its size, settles, holds a beat and shrinks away.</summary>
-        async Awaitable Impact(string art, Vector2 at, float scale, float hold = 0.24f)
+        /// <summary>A burst pops out past its size beside the target (towards the attacker), settles, holds and goes.</summary>
+        async Awaitable Impact(string art, Vector2 screen, int targetDir, float scale, float hold = 0.26f)
         {
-            var img = Art(art, fx, at, scale, UnityEngine.Random.Range(-10f, 10f));
+            var at = Local(screen) + new Vector2(targetDir * 120, 20);
+            var img = Art(art, at, scale, UnityEngine.Random.Range(-10f, 10f));
+            Clamp(img, 1.14f);
             var rt = img.rectTransform;
             await Tween(0.09f, t => { if (img) rt.localScale = Vector3.one * Mathf.Lerp(0.25f, 1.14f, Ease(t)); });
             await Tween(0.07f, t => { if (img) rt.localScale = Vector3.one * Mathf.Lerp(1.14f, 1, t); });
@@ -948,29 +1032,32 @@ namespace Buds.UI
             await FadeArt(img, 0.16f, 0.8f);
         }
 
-        /// <summary>A crit or a knockout: focus lines and halftone flare up behind the fighters and fade.</summary>
-        async Awaitable Focus(Vector2 at, Color tone)
+        /// <summary>A crit or a knockout: focus lines and halftone flare up over the whole stage and fade.</summary>
+        async Awaitable Focus(Color tone)
         {
-            var lines = Art("fx-speed", back, at, 1, UnityEngine.Random.Range(-4f, 4f), new Color(1, 1, 1, 0));
-            lines.rectTransform.sizeDelta = new Vector2(StageW * 1.25f, StageH * 1.5f);
-            var dots = Art("fx-halftone", back, new Vector2(StageW / 2, StageH / 2), 1, 0, new Color(tone.r, tone.g, tone.b, 0));
-            dots.rectTransform.sizeDelta = new Vector2(StageW, StageH);
-            await Tween(0.42f, t =>
+            var lines = Art("fx-speed", Vector2.zero, 1, UnityEngine.Random.Range(-4f, 4f), new Color(1, 1, 1, 0));
+            var dots = Art("fx-halftone", Vector2.zero, 1, 0, new Color(tone.r, tone.g, tone.b, 0));
+            lines.rectTransform.SetAsFirstSibling();
+            dots.rectTransform.SetAsFirstSibling();
+            var size = new Vector2(fx.rect.width * 1.2f, fx.rect.height * 1.3f);
+            lines.rectTransform.sizeDelta = size;
+            dots.rectTransform.sizeDelta = size;
+            await Tween(0.45f, t =>
             {
                 var a = t < 0.15f ? t / 0.15f : 1 - (t - 0.15f) / 0.85f;
                 if (lines)
                 {
-                    lines.color = new Color(1, 1, 1, 0.6f * a);
+                    lines.color = new Color(1, 1, 1, 0.5f * a);
                     lines.rectTransform.localScale = Vector3.one * Mathf.Lerp(1.12f, 1, Ease(t));
                 }
-                if (dots) dots.color = new Color(tone.r, tone.g, tone.b, 0.4f * a);
+                if (dots) dots.color = new Color(tone.r, tone.g, tone.b, 0.3f * a);
             });
             if (lines) UnityEngine.Object.Destroy(lines.gameObject);
             if (dots) UnityEngine.Object.Destroy(dots.gameObject);
         }
 
         /// <summary>Sprays a stencil or tag on: the paint runs across, then the piece settles with a tiny kick.</summary>
-        static async Awaitable SprayOn(Image img, float seconds)
+        async Awaitable SprayOn(Image img, float seconds)
         {
             if (!img) return;
             img.type = Image.Type.Filled;
@@ -983,32 +1070,15 @@ namespace Buds.UI
             {
                 if (!img) return;
                 img.fillAmount = Ease(t);
-                // the can's hand shakes a little while spraying
-                rt.anchoredPosition = home + new Vector2(0, Mathf.Sin(t * 40) * 1.5f);
+                rt.anchoredPosition = home + new Vector2(0, Mathf.Sin(t * 40) * 1.5f); // the hand shakes while spraying
             });
             if (!img) return;
             rt.anchoredPosition = home;
             await Tween(0.1f, t => { if (img) rt.localScale = Vector3.one * (1 + 0.05f * Mathf.Sin(t * Mathf.PI)); });
         }
 
-        /// <summary>Paint from a spray hit splashes onto the target and drips away.</summary>
-        async Awaitable Splat(Vector2 at, Color paint)
-        {
-            var img = Art("fx-splat", back, at, 0.55f, UnityEngine.Random.Range(0f, 360f), paint);
-            await Tween(0.08f, t => { if (img) img.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.3f, 1, Ease(t)); });
-            await Wait(0.35f);
-            var from = img ? img.rectTransform.anchoredPosition : Vector2.zero;
-            await Tween(0.3f, t =>
-            {
-                if (!img) return;
-                img.rectTransform.anchoredPosition = from + new Vector2(0, -16 * t);
-                img.color = new Color(paint.r, paint.g, paint.b, 1 - t);
-            });
-            if (img) UnityEngine.Object.Destroy(img.gameObject);
-        }
-
         /// <summary>Fades a piece of art out (optionally growing or shrinking to <paramref name="endScale"/>) after a delay.</summary>
-        static async Awaitable FadeArt(Image img, float seconds, float endScale = 1, float delay = 0)
+        async Awaitable FadeArt(Image img, float seconds, float endScale = 1, float delay = 0)
         {
             if (delay > 0) await Wait(delay);
             if (!img) return;
@@ -1023,61 +1093,35 @@ namespace Buds.UI
             if (img) UnityEngine.Object.Destroy(img.gameObject);
         }
 
-        /// <summary>Four-pointed comic sparkles fly out where the blow lands.</summary>
-        void Sparks(Vector2 at, bool crit)
+        async Awaitable FadeProp(SpriteRenderer r, float seconds)
         {
-            var count = crit ? 9 : 5;
-            for (var i = 0; i < count; i++)
-            {
-                var angle = (i / (float)count) * Mathf.PI * 2 + UnityEngine.Random.Range(-0.3f, 0.3f);
-                var dist = UnityEngine.Random.Range(60f, crit ? 140f : 95f);
-                var size = crit ? 0.5f : 0.38f;
-                var spark = Art("fx-star", fx, at, size, UnityEngine.Random.Range(0f, 45f), i % 2 == 0 ? UiKit.Gold400 : UiKit.TextOnDark);
-                _ = Fly(spark, at, at + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * dist, 0.3f);
-            }
-        }
-
-        static async Awaitable Fly(Image img, Vector2 from, Vector2 to, float seconds)
-        {
+            if (!r) return;
+            var from = r.color;
             await Tween(seconds, t =>
             {
-                if (!img) return;
-                img.rectTransform.anchoredPosition = Vector2.Lerp(from, to, Ease(t));
-                img.rectTransform.localScale = Vector3.one * (1 - t * 0.7f);
-                var c = img.color;
-                c.a = 1 - t;
-                img.color = c;
+                if (r) r.color = new Color(from.r, from.g, from.b, from.a * (1 - t));
             });
-            if (img) UnityEngine.Object.Destroy(img.gameObject);
+            if (r) UnityEngine.Object.Destroy(r.gameObject);
         }
 
-        async Awaitable Shake(float seconds, float strength)
-        {
-            // shakes overlap (a crit, then the knockout): always settle back to the arena's own place
-            var home = arenaHome;
-            await Tween(seconds, t =>
-            {
-                var s = (1 - t) * strength;
-                arenaRt.anchoredPosition = home + new Vector2(UnityEngine.Random.Range(-s, s), UnityEngine.Random.Range(-s, s) * 0.6f);
-            });
-            arenaRt.anchoredPosition = home;
-        }
-
-        /// <summary>Floating text over a fighter; <paramref name="shift"/> moves it sideways (damage goes away from the burst).</summary>
-        void Popup(FighterView over, string text, Color color, int size, float lift = 0, float shift = 0)
+        /// <summary>Floating text over a fighter's head, kept on the screen; <paramref name="shift"/> moves it sideways (in tiles).</summary>
+        void Popup(StageFighter over, string text, Color color, int size, float lift = 0, float shift = 0)
         {
             var label = UiKit.Outlined("Popup", fx, text, size, color);
             label.horizontalOverflow = HorizontalWrapMode.Overflow;
             var rt = label.rectTransform;
-            rt.anchorMin = rt.anchorMax = Vector2.zero;
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = new Vector2(300, 60);
-            // from the chest up, so the numbers never sit on the health bar above the head
-            var start = over.Home + new Vector2(shift, FighterH * 0.5f + lift * 0.6f);
+            var screen = stage.ScreenOf(over.Position + new Vector3(shift * over.Dir, 0, -2.1f - lift));
+            var start = Local(screen);
+            var area = fx.rect;
+            start.x = Mathf.Clamp(start.x, area.xMin + 150, area.xMax - 150);
+            start.y = Mathf.Clamp(start.y, area.yMin + 160, area.yMax - 230);
             rt.anchoredPosition = start;
             _ = Float(label, start);
         }
 
-        static async Awaitable Float(Text label, Vector2 start)
+        async Awaitable Float(Text label, Vector2 start)
         {
             await Tween(0.8f, t =>
             {
@@ -1090,33 +1134,6 @@ namespace Buds.UI
             if (label) UnityEngine.Object.Destroy(label.gameObject);
         }
 
-        Image Fx(string name, Color color, Vector2 size, Vector2 at)
-        {
-            var img = UiKit.Panel(name, fx, color);
-            img.sprite = disc;
-            img.rectTransform.anchorMin = img.rectTransform.anchorMax = Vector2.zero;
-            img.rectTransform.sizeDelta = size;
-            img.rectTransform.anchoredPosition = at;
-            return img;
-        }
-
-        static async Awaitable Fade(Image img, float seconds)
-        {
-            var from = img ? img.color.a : 0;
-            await Tween(seconds, t =>
-            {
-                if (!img) return;
-                var c = img.color;
-                c.a = from * (1 - t);
-                img.color = c;
-            });
-            if (img) UnityEngine.Object.Destroy(img.gameObject);
-        }
-
-        static Vector2 Center(FighterView v) => v.Home + new Vector2(0, FighterH * 0.55f);
-
-        static Vector2 Hand(FighterView v) => v.Root.anchoredPosition + new Vector2(v.Dir * 50, 110);
-
         static string WeaponName(string kind) => kind switch
         {
             "kij" => "kij",
@@ -1127,13 +1144,35 @@ namespace Buds.UI
             _ => "pięści",
         };
 
-        Sprite Icon(string path)
+        static readonly Dictionary<string, Sprite> weaponSprites = new();
+
+        /// <summary>An item icon as a world sprite held at its handle (the icons' handles sit bottom left).</summary>
+        static Sprite WeaponSprite(string itemId)
         {
-            if (icons.TryGetValue(path, out var cached)) return cached;
-            var tex = Resources.Load<Texture2D>(path);
-            var sprite = tex ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100) : null;
-            icons[path] = sprite;
+            if (string.IsNullOrEmpty(itemId)) return null;
+            if (weaponSprites.TryGetValue(itemId, out var cached)) return cached;
+            var tex = Resources.Load<Texture2D>("Items/" + itemId);
+            var sprite = tex ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.19f, 0.13f), tex.width / 0.8f) : null;
+            weaponSprites[itemId] = sprite;
             return sprite;
+        }
+
+        /// <summary>A white ring (sound waves, the aim mark).</summary>
+        static Sprite MakeRing(int size)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear };
+            var px = new Color32[size * size];
+            var c = size / 2f;
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                var d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c));
+                var a = Mathf.Clamp01(c - 1 - d) * Mathf.Clamp01(d - (c - 7));
+                px[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+            }
+            tex.SetPixels32(px);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
         }
     }
 }

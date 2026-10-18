@@ -97,16 +97,26 @@ namespace Buds.Quests
             return Vector2.zero;
         }
 
-        /// <summary>A free spot inside the patch, reachable in a straight line, at least a tile away.</summary>
+        static readonly Vector2[] Axes = { Vector2.left, Vector2.right, Vector2.up, Vector2.down };
+
+        /// <summary>
+        /// A free spot inside the patch, straight up, down, left or right of the NPC (people walk like the player: along
+        /// one axis at a time), reachable in a straight line, at least a tile away. Spots that lead home come first.
+        /// </summary>
         Vector2? PickSpot(Vector2 from)
         {
-            for (var attempt = 0; attempt < 10; attempt++)
+            for (var attempt = 0; attempt < 12; attempt++)
             {
-                var angle = (float)random.NextDouble() * Mathf.PI * 2;
-                var dist = Mathf.Lerp(0.3f, 1f, (float)random.NextDouble()) * Radius;
-                // drift back towards home: spots are picked around home, not around the last spot
-                var spot = Home + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * dist;
-                if (Vector2.Distance(spot, from) < 1f) continue;
+                var dir = Axes[random.Next(Axes.Length)];
+                // far from home: step back towards it
+                if (attempt < 4 && Vector2.Distance(from, Home) > Radius * 0.6f)
+                {
+                    var back = Home - from;
+                    dir = Mathf.Abs(back.x) > Mathf.Abs(back.y) ? new Vector2(Mathf.Sign(back.x), 0) : new Vector2(0, Mathf.Sign(back.y));
+                }
+                var dist = Mathf.Lerp(1f, Radius, (float)random.NextDouble());
+                var spot = from + dir * dist;
+                if (Vector2.Distance(spot, Home) > Radius) continue;
                 if (ClearLine(from, spot)) return spot;
             }
             return null;

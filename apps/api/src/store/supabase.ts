@@ -113,6 +113,17 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       if (error) throw error;
     },
 
+    async updateLook(slug, look) {
+      const { data, error } = await db
+        .from('buds')
+        .update({ look })
+        .eq('slug', slug)
+        .select(COLUMNS)
+        .single();
+      if (error) throw error;
+      return toRecord(data as BudRow);
+    },
+
     async removeToken(tokenHash) {
       const { error } = await db.from('bud_tokens').delete().eq('token_hash', tokenHash);
       if (error) throw error;

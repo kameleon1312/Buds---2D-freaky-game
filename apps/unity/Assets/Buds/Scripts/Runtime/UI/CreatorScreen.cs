@@ -44,6 +44,11 @@ namespace Buds.UI
         };
 
         public bool IsOpen => root.activeSelf;
+        Text titleText;
+        Text nameLabel;
+        Text backLabel;
+        Action<BudLookDto> editSave;
+        Action editCancel;
 
         public CreatorScreen(Transform canvas, Func<BudLookDto, Awaitable<Texture2D>> preview, Action<string, BudLookDto> onCreate,
             Action onBack)
@@ -60,7 +65,7 @@ namespace Buds.UI
             var group = UiKit.Rect("Group", bg.transform);
             UiKit.Place(group, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1180, 820));
             group.gameObject.AddComponent<FitInParent>();
-            var body = UiKit.Window("Window", group, new Vector2(1140, 800), "Stwórz Buda", null, out var window, out _);
+            var body = UiKit.Window("Window", group, new Vector2(1140, 800), "Stwórz Buda", null, out var window, out titleText);
             UiKit.Place(window, new Vector2(0.5f, 0.5f), Vector2.zero, window.sizeDelta);
 
             // the preview
@@ -91,6 +96,7 @@ namespace Buds.UI
             // name and the one gold action
             var nameLabel = UiKit.Label("NameLabel", body, "Imię", 22, UiKit.InkSoft, true, TextAnchor.LowerLeft);
             UiKit.Place(nameLabel.rectTransform, new Vector2(0, 1), new Vector2(404, -516), new Vector2(300, 30), new Vector2(0, 1));
+            this.nameLabel = nameLabel;
             nameField = UiKit.Input("Name", body, new Vector2(360, 76), "np. Zuzia", 34);
             UiKit.Place((RectTransform)nameField.transform.parent, new Vector2(0, 1), new Vector2(404, -550), new Vector2(360, 76), new Vector2(0, 1));
             nameField.characterLimit = 16;
@@ -98,12 +104,45 @@ namespace Buds.UI
             UiKit.Place((RectTransform)createButton.transform, new Vector2(1, 1), new Vector2(0, -548), new Vector2(296, 80), new Vector2(1, 1));
             error = UiKit.Label("Error", body, "", 22, UiKit.Alert700, false, TextAnchor.UpperLeft);
             UiKit.Place(error.rectTransform, new Vector2(0, 1), new Vector2(404, -632), new Vector2(672, 30), new Vector2(0, 1));
-            var back = UiKit.Button("Back", body, "Mam kod ze strony", new Vector2(380, 48), () => onBack(), UiKit.Tone.Rep, 22);
+            var back = UiKit.Button("Back", body, "Mam kod ze strony", new Vector2(380, 48), Back, UiKit.Tone.Rep, 22);
+            backLabel = back.GetComponentInChildren<Text>();
             UiKit.Place((RectTransform)back.transform, new Vector2(0, 0), Vector2.zero, new Vector2(380, 48), Vector2.zero);
             root.SetActive(false);
         }
 
+        /// <summary>The look editor of an existing bud: its look to start from, no name field, "Zapisz wygląd".</summary>
+        public void ShowEdit(LookOptionsDto options, BudLookDto current, Action<BudLookDto> save, Action cancel)
+        {
+            editSave = save;
+            editCancel = cancel;
+            Look = current.Clone();
+            titleText.text = "Zmień wygląd";
+            nameLabel.gameObject.SetActive(false);
+            nameField.transform.parent.gameObject.SetActive(false);
+            backLabel.text = UiKit.Keys("Anuluj");
+            Open(options);
+        }
+
         public void Show(LookOptionsDto options)
+        {
+            editSave = null;
+            editCancel = null;
+            titleText.text = "Stwórz Buda";
+            nameLabel.gameObject.SetActive(true);
+            nameField.transform.parent.gameObject.SetActive(true);
+            backLabel.text = "Mam kod ze strony";
+            Open(options);
+        }
+
+        public bool Editing => editSave != null;
+
+        void Back()
+        {
+            if (Editing) editCancel?.Invoke();
+            else onBack();
+        }
+
+        void Open(LookOptionsDto options)
         {
             data = options;
             root.SetActive(true);
@@ -119,7 +158,7 @@ namespace Buds.UI
         public void SetBusy(bool busy, string message = null)
         {
             createButton.interactable = !busy;
-            createButton.GetComponentInChildren<Text>().text = busy ? "Tworzę…" : "Stwórz Buda";
+            createButton.GetComponentInChildren<Text>().text = Editing ? busy ? "Zapisuję…" : "Zapisz wygląd" : busy ? "Tworzę…" : "Stwórz Buda";
             if (message != null) error.text = message;
         }
 
@@ -212,6 +251,12 @@ namespace Buds.UI
 
         void Create()
         {
+            if (Editing)
+            {
+                error.text = "";
+                editSave(Look.Clone());
+                return;
+            }
             var name = (nameField.text ?? "").Trim();
             if (name.Length < 2)
             {

@@ -59,6 +59,13 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
       tokens.delete(tokenHash);
     },
 
+    async updateLook(slug, look) {
+      const bud = buds.get(slug);
+      if (!bud) throw new Error(`Bud ${slug} not found`);
+      bud.look = { ...look };
+      return copy(bud) as BudRecord;
+    },
+
     async savePairCode(slug, code, expiresAt) {
       pairCodes.set(code, { slug, expiresAt });
     },

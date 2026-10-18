@@ -67,6 +67,12 @@ namespace Buds.Api
     }
 
     [Serializable]
+    public class UpdateLookRequest
+    {
+        public BudLookDto look;
+    }
+
+    [Serializable]
     public class CreateBudResponse
     {
         public BudDto bud;

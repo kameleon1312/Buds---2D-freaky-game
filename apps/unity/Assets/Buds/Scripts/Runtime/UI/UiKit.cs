@@ -105,7 +105,20 @@ namespace Buds.UI
             Screen.autorotateToPortraitUpsideDown = false;
             Screen.autorotateToLandscapeLeft = !portrait;
             Screen.autorotateToLandscapeRight = !portrait;
-            Screen.orientation = portrait ? ScreenOrientation.Portrait : ScreenOrientation.AutoRotation;
+            if (portrait)
+            {
+                Screen.orientation = ScreenOrientation.Portrait;
+                return;
+            }
+            // AutoRotation alone waits for the player to turn the phone: force landscape now, then let the sensor pick a side
+            Screen.orientation = ScreenOrientation.LandscapeLeft;
+            _ = FreeLandscape();
+        }
+
+        static async Awaitable FreeLandscape()
+        {
+            await Awaitable.WaitForSecondsAsync(0.6f);
+            if (Screen.autorotateToLandscapeLeft) Screen.orientation = ScreenOrientation.AutoRotation;
         }
 
         // ---------- canvas ----------

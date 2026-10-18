@@ -66,6 +66,21 @@ namespace Buds.Api
             return Parse<BudResponse>(req).bud;
         }
 
+        /// <summary>Saves a new look for the bud (the server checks it like a new bud's and that it owns what it wears).</summary>
+        public async Awaitable<BudDto> UpdateLook(string token, BudLookDto look)
+        {
+            using var req = new UnityWebRequest($"{baseUrl}/v1/buds/me/look", UnityWebRequest.kHttpVerbPUT)
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(new UpdateLookRequest { look = look }))),
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await Send(req);
+            return Parse<BudResponse>(req).bud;
+        }
+
         /// <summary>Signs this device out on the server: its player token stops working (other devices stay signed in).</summary>
         public async Awaitable Logout(string token)
         {
@@ -386,10 +401,12 @@ namespace Buds.Api
         }
 
         /// <summary>384×576 sheet (128×192 per frame): columns = walk frames 0..2, rows = down, side, up.</summary>
-        public async Awaitable<Texture2D> GetSheet(string slug)
+        public async Awaitable<Texture2D> GetSheet(string slug, bool fresh = false)
         {
             // readable, so BudSheet can build mipmaps from it
-            using var req = UnityWebRequestTexture.GetTexture($"{baseUrl}/v1/buds/{Uri.EscapeDataString(slug)}/sheet.png", false);
+            // right after a look change: skip any cache between here and the server
+            var bust = fresh ? $"?v={DateTime.UtcNow.Ticks}" : "";
+            using var req = UnityWebRequestTexture.GetTexture($"{baseUrl}/v1/buds/{Uri.EscapeDataString(slug)}/sheet.png{bust}", false);
             req.timeout = TimeoutSeconds;
             await Send(req);
             if (req.result != UnityWebRequest.Result.Success) throw ToException(req);

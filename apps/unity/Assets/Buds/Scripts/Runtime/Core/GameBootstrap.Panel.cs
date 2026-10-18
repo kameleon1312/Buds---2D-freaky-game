@@ -25,7 +25,7 @@ namespace Buds.Core
         void SetUpPanel()
         {
             panel ??= new BudPanel(ui.Root, quests.Content, id => _ = UpgradeSkill(id), (slot, id) => _ = Equip(slot, id),
-                id => _ = Buy(id), id => _ = Drink(id), () => _ = LinkAccount(), () => _ = Logout());
+                id => _ = Buy(id), id => _ = Drink(id), () => _ = LinkAccount(), () => _ = Logout(), () => _ = OpenLookEditor());
             ui.ShowBudButton(() => _ = OpenPanel());
         }
 

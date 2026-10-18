@@ -170,3 +170,52 @@ describe('signing a device out', () => {
     expect(((await other.json()) as { bud: { slug: string } }).bud.slug).toBe(bud.slug);
   });
 });
+
+describe('changing the look later', () => {
+  const look = {
+    gender: 'on',
+    mood: 'radosny',
+    skin: 1,
+    hair: 'krotkie',
+    hairColor: 0,
+    outfit: 'bluza',
+    outfitColor: 1,
+    pantsColor: 0,
+  };
+
+  it('saves a valid look for the signed-in bud only', async () => {
+    const app = createApp(
+      loadEnv({ SUPABASE_JWT_SECRET: SECRET, WEB_ORIGIN: ORIGIN, RATE_LIMIT_PER_MINUTE: '100' }),
+      { store: createMemoryStore() },
+    );
+    const created = await app.request('/v1/buds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Zmiennik', look }),
+    });
+    const { token, bud } = (await created.json()) as { token: string; bud: { slug: string } };
+    const put = (body: unknown, auth = true) =>
+      app.request('/v1/buds/me/look', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(auth ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(body),
+      });
+    const before = await (await app.request(`/v1/buds/${bud.slug}/sheet.png`)).arrayBuffer();
+
+    expect((await put({ look: { ...look, skin: 3 } }, false)).status).toBe(401);
+    expect((await put({ look: { ...look, mood: 'nie-ma-takiego' } })).status).toBe(400);
+    expect((await put({})).status).toBe(400);
+    const ok = await put({ look: { ...look, skin: 3, hairColor: 2 } });
+    expect(ok.status).toBe(200);
+    expect(((await ok.json()) as { bud: { look: { skin: number } } }).bud.look.skin).toBe(3);
+    const saved = (await (await app.request(`/v1/buds/${bud.slug}`)).json()) as {
+      bud: { look: { skin: number; hairColor: number } };
+    };
+    expect(saved.bud.look).toMatchObject({ skin: 3, hairColor: 2 });
+    const after = await (await app.request(`/v1/buds/${bud.slug}/sheet.png`)).arrayBuffer();
+    expect(Buffer.from(after).equals(Buffer.from(before))).toBe(false);
+  });
+});

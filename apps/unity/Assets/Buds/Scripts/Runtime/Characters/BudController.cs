@@ -79,6 +79,13 @@ namespace Buds.Characters
             r.flipX = f == Facing.Side && Motor.FacingRight;
         }
 
+        /// <summary>A new look: the same bud, drawn from a new sheet from now on.</summary>
+        public void SetSheet(BudSheet value)
+        {
+            sheet = value;
+            sprite.sprite = sheet.Get(Motor.Facing, 0);
+        }
+
         public static BudController Spawn(BudSheet sheet, Vector3 position)
         {
             var go = new GameObject("Bud");
@@ -118,7 +125,9 @@ namespace Buds.Characters
         void Update()
         {
             Input.Update();
-            var move = Input.Move;
+            // four directions, like a classic top-down RPG; the physics step below uses the same choice
+            fourWay = Motor.FourWay(Input.Move);
+            var move = fourWay;
             var speed = body.linearVelocity.magnitude;
             var moving = move.sqrMagnitude > 0.0001f;
 
@@ -169,9 +178,12 @@ namespace Buds.Characters
             }
         }
 
+        /// <summary>This frame's move, turned into one of four directions (Update picks it, FixedUpdate walks it).</summary>
+        Vector2 fourWay;
+
         void FixedUpdate()
         {
-            var move = Input.Move;
+            var move = fourWay;
             if (Blocked != null)
                 move = BudMotor.AroundCorners(move, (Vector2)transform.position + FeetOffset, FeetSize / 2, Blocked);
             body.linearVelocity = Motor.Step(move, Input.Run, Time.fixedDeltaTime, body.linearVelocity);
