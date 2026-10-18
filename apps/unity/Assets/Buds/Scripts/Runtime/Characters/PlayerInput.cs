@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -40,7 +41,8 @@ namespace Buds.Characters
         public bool FixedStick { get; set; }
         public Vector2 StickCenter { get; set; }
         public float StickRadius { get; set; } = 100;
-        int stickTouch = -1;
+        readonly StickTracker stick = new();
+        readonly List<TouchSample> samples = new(10);
 
         /// <summary>
         /// Stick push → walking strength for the fixed stick (EditMode-testable): a light push walks slowly, a full
@@ -96,21 +98,23 @@ namespace Buds.Characters
             var screen = Touchscreen.current;
             if (screen != null && FixedStick)
             {
+                samples.Clear();
                 foreach (var t in screen.touches)
-                {
-                    var id = t.touchId.ReadValue();
-                    var pos = t.position.ReadValue();
-                    // a finger that lands on the stick (or close to it) takes it over
-                    if (stickTouch < 0 && t.press.wasPressedThisFrame && Vector2.Distance(pos, StickCenter) <= StickRadius * 1.5f)
-                        stickTouch = id;
-                    if (id != stickTouch) continue;
-                    if (!t.press.isPressed)
+                    samples.Add(new TouchSample
                     {
-                        stickTouch = -1;
-                        continue;
-                    }
-                    var drag = pos - StickCenter;
-                    StickOrigin = StickCenter;
+                        Id = t.touchId.ReadValue(),
+                        Pressed = t.press.isPressed,
+                        Began = t.press.wasPressedThisFrame,
+                        Position = t.position.ReadValue(),
+                        Start = t.startPosition.ReadValue(),
+                    });
+                // the stick keeps its finger only while that finger is down this frame (StickTracker)
+                stick.Step(samples, StickCenter, StickRadius);
+                StickActive = stick.Active;
+                StickOrigin = StickCenter;
+                if (StickActive)
+                {
+                    var drag = stick.Position - StickCenter;
                     StickPosition = StickCenter + Vector2.ClampMagnitude(drag, StickRadius);
                     var (strength, run) = FixedStickPush(drag.magnitude, StickRadius);
                     if (drag.magnitude > StickRadius * 0.12f)
@@ -119,9 +123,9 @@ namespace Buds.Characters
                         Run = Run || run;
                     }
                 }
-                StickActive = stickTouch >= 0;
-                if (!StickActive) StickPosition = StickOrigin = StickCenter;
+                else StickPosition = StickCenter;
             }
+            else if (stick.Active) stick.Release();
 
             var touch = screen?.primaryTouch;
             if (touch != null && !FixedStick)
@@ -148,6 +152,12 @@ namespace Buds.Characters
                     if (maxDrag < TapMaxPx) InteractPressed = true;
                     StickActive = false;
                 }
+                // a release this frame never saw (a dropped frame): the finger is up, the stick lets go
+                else if (StickActive && !touch.press.isPressed)
+                {
+                    StickActive = false;
+                    move = Vector2.zero;
+                }
             }
 
             // free movement in every direction, like most RPGs (the facing has its own hysteresis in BudMotor)
@@ -169,6 +179,19 @@ namespace Buds.Characters
         {
             var full = WalkDrag * screenHeight;
             return Mathf.Lerp(0.35f, 1f, Mathf.InverseLerp(DeadZonePx, Mathf.Max(DeadZonePx + 1, full), px));
+        }
+
+        /// <summary>
+        /// Everything let go: the app went to the background (a call, the home button) or the bud stopped listening.
+        /// Fingers held then are not steering any more when the game comes back.
+        /// </summary>
+        public void ReleaseAll()
+        {
+            stick.Release();
+            StickActive = false;
+            StickPosition = StickOrigin = StickCenter;
+            Move = Vector2.zero;
+            Run = false;
         }
 
         /// <summary>Queues an interaction for the next frame (scripted input).</summary>

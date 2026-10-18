@@ -120,6 +120,7 @@ namespace Buds.Characters
             bud.sprite = sprite;
             bud.visual = visual;
             bud.dust = new Dust(go.transform.parent);
+            bud.lastGood = bud.pushedFrom = position;
             return bud;
         }
 
@@ -196,13 +197,77 @@ namespace Buds.Characters
 
         void FixedUpdate()
         {
+            var position = body.position;
+            if (!float.IsFinite(position.x) || !float.IsFinite(position.y))
+            {
+                // the physics lost the bud: back to the last good spot
+                Teleport(lastGood);
+                return;
+            }
             var move = fourWay;
             if (Blocked != null)
-                move = BudMotor.AroundCorners(move, (Vector2)transform.position + FeetOffset, FeetSize / 2, Blocked);
+                move = BudMotor.AroundCorners(move, position + FeetOffset, FeetSize / 2, Blocked);
             body.linearVelocity = Motor.Step(move, Input.Run, Time.fixedDeltaTime, body.linearVelocity);
+            Unwedge(move, position);
+        }
+
+        Vector3 lastGood;
+        Vector2 pushedFrom;
+        float pushedFor;
+
+        /// <summary>
+        /// The bud pushed on for a while without getting anywhere while its feet are inside a wall (spawned or shoved
+        /// into a prop): it steps out onto the nearest free tile. Walking into a wall from outside never triggers this.
+        /// </summary>
+        void Unwedge(Vector2 move, Vector2 position)
+        {
+            if (move.sqrMagnitude < 0.04f || Vector2.Distance(position, pushedFrom) > 0.15f)
+            {
+                pushedFrom = position;
+                pushedFor = 0;
+                if (Blocked == null || !FeetInWall(position)) lastGood = position;
+                return;
+            }
+            pushedFor += Time.fixedDeltaTime;
+            if (pushedFor < UnwedgeSeconds || Blocked == null || !FeetInWall(position)) return;
+            pushedFor = 0;
+            var cx = Mathf.FloorToInt(position.x);
+            var cy = Mathf.FloorToInt(position.y + FeetOffset.y);
+            for (var r = 1; r <= 4; r++)
+            for (var dy = -r; dy <= r; dy++)
+            for (var dx = -r; dx <= r; dx++)
+            {
+                if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) != r || Blocked(cx + dx, cy + dy)) continue;
+                Teleport(new Vector3(cx + dx + 0.5f, cy + dy + 0.3f, 0));
+                return;
+            }
+        }
+
+        /// <summary>How long pushing without moving (feet in a wall) waits before the bud steps out.</summary>
+        public const float UnwedgeSeconds = 1.5f;
+
+        bool FeetInWall(Vector2 position)
+        {
+            var c = position + FeetOffset;
+            return Blocked(Mathf.FloorToInt(c.x), Mathf.FloorToInt(c.y));
         }
 
         void OnDestroy() => dust?.Clear();
+
+        // back from the background: no finger steers any more, and the bud stands still
+        void OnApplicationFocus(bool focused)
+        {
+            if (focused) return;
+            Input.ReleaseAll();
+            fourWay = Vector2.zero;
+        }
+
+        void OnApplicationPause(bool paused)
+        {
+            if (!paused) return;
+            Input.ReleaseAll();
+            fourWay = Vector2.zero;
+        }
 
         public void Teleport(Vector3 position)
         {

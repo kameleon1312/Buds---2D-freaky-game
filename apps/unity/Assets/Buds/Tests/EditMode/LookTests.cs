@@ -60,6 +60,69 @@ namespace Buds.Tests
         }
     }
 
+    public class StickTrackerTests
+    {
+        static readonly Vector2 Centre = new(1300, 200);
+        const float Radius = 100;
+
+        static TouchSample Finger(int id, Vector2 at, bool pressed = true, bool began = false, Vector2? start = null) =>
+            new() { Id = id, Pressed = pressed, Began = began, Position = at, Start = start ?? at };
+
+        [Test]
+        public void AFingerOnTheStickSteersUntilItLifts()
+        {
+            var s = new StickTracker();
+            s.Step(new[] { Finger(3, Centre + Vector2.up * 40, began: true) }, Centre, Radius);
+            Assert.AreEqual(3, s.Finger);
+            s.Step(new[] { Finger(3, Centre + Vector2.up * 80, start: Centre) }, Centre, Radius);
+            Assert.AreEqual(Centre + Vector2.up * 80, s.Position);
+            s.Step(new[] { Finger(3, Centre, pressed: false) }, Centre, Radius);
+            Assert.IsFalse(s.Active);
+        }
+
+        [Test]
+        public void AReleaseThatWasNeverSeenStillFreesTheStick()
+        {
+            // the bug: a quick re-tap reused the touch slot with a new id; the old finger never reported a release
+            var s = new StickTracker();
+            s.Step(new[] { Finger(5, Centre + Vector2.down * 30, began: true) }, Centre, Radius);
+            s.Step(new[] { Finger(6, Centre + Vector2.up * 30, start: Centre + Vector2.up * 20) }, Centre, Radius);
+            Assert.AreEqual(6, s.Finger, "the new finger takes the stick at once");
+            // a frame with no touches at all (dropped frames, a cancelled touch)
+            s.Step(System.Array.Empty<TouchSample>(), Centre, Radius);
+            Assert.IsFalse(s.Active);
+        }
+
+        [Test]
+        public void FingersThatStartedElsewhereNeverTakeTheStick()
+        {
+            var s = new StickTracker();
+            // a finger on a button that slides over the stick
+            s.Step(new[] { Finger(2, Centre, start: new Vector2(200, 600)) }, Centre, Radius);
+            Assert.IsFalse(s.Active);
+            // a second finger tapping a button while the first steers
+            s.Step(new[] { Finger(1, Centre, began: true), Finger(2, new Vector2(200, 600), began: true) }, Centre, Radius);
+            Assert.AreEqual(1, s.Finger);
+            s.Release();
+            Assert.IsFalse(s.Active);
+        }
+    }
+
+    public class MotorSafetyTests
+    {
+        [Test]
+        public void ABrokenNumberNeverStopsTheBudForGood()
+        {
+            var m = new BudMotor();
+            m.Step(Vector2.up, false, 0.02f, new Vector2(float.NaN, float.NaN));
+            m.SpeedMultiplier = float.NaN;
+            var v = Vector2.zero;
+            for (var i = 0; i < 30; i++) v = m.Step(Vector2.up, false, 0.02f, v);
+            Assert.IsTrue(float.IsFinite(v.y));
+            Assert.Greater(v.y, 1f);
+        }
+    }
+
     public class HeldWeaponTests
     {
         [Test]

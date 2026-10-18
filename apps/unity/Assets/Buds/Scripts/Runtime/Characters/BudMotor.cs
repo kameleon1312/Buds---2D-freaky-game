@@ -64,7 +64,10 @@ namespace Buds.Characters
         /// </summary>
         public Vector2 Step(Vector2 input, bool run, float dt, Vector2? actual = null)
         {
-            if (actual.HasValue && actual.Value.sqrMagnitude < Velocity.sqrMagnitude) Velocity = actual.Value;
+            // a broken number from the physics (or a broken speed) never sticks: the bud starts again from rest
+            if (!Finite(Velocity)) Velocity = Vector2.zero;
+            if (actual.HasValue && Finite(actual.Value) && actual.Value.sqrMagnitude < Velocity.sqrMagnitude) Velocity = actual.Value;
+            if (!float.IsFinite(SpeedMultiplier) || SpeedMultiplier <= 0) SpeedMultiplier = 1;
             var target = Vector2.ClampMagnitude(input, 1) * ((run ? RunSpeed : WalkSpeed) * SpeedMultiplier);
             var slowing = target.sqrMagnitude < Velocity.sqrMagnitude || Vector2.Dot(target, Velocity) < 0;
             Velocity = Vector2.MoveTowards(Velocity, target, (slowing ? Braking : Acceleration) * dt);
@@ -72,6 +75,8 @@ namespace Buds.Characters
         }
 
         public void Stop() => Velocity = Vector2.zero;
+
+        static bool Finite(Vector2 v) => float.IsFinite(v.x) && float.IsFinite(v.y);
 
         /// <summary>Turns towards the input; <paramref name="fresh"/> = just started moving (take the main axis at once).</summary>
         public void Face(Vector2 dir, bool fresh)
