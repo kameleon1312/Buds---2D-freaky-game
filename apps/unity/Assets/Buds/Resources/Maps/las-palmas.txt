@@ -112,7 +112,7 @@ water : 0.12 : lily
 102,109 | Przystań Jachtowa | Łodzie, sieci i zapach ryb. Żeglarka Marina zna każdą falę.
 
 [exits]
-62,131,65,131 | miasto-ziomkow
+62,131,65,131 | pustkowie-wydmy
 
 [zones]
 44,50,90,86 | Miasteczko

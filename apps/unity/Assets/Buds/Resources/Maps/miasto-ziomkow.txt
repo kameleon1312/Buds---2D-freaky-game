@@ -179,10 +179,10 @@ water : 0.15 : lily
 30,95 | Plac Ziomków | Scena dla całego miasta. W piątek koncert, jeśli sprzęt dojedzie.
 
 [exits]
-62,0,65,0 | las-palmas
-62,131,65,131 | dwor-carski
-175,46,175,49 | los-karkos
-0,58,0,61 | dzika-puszcza
+62,0,65,0 | pustkowie-wydmy
+62,131,65,131 | pustkowie-gosciniec
+175,46,175,49 | pustkowie-nieuzytki
+0,58,0,61 | pustkowie-ostepy
 
 [zones]
 36,22,97,74 | Śródmieście

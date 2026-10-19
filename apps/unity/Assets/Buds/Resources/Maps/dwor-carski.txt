@@ -100,7 +100,7 @@ water : 0.12 : lily
 152,101 | Oranżeria | Szklany pawilon z roślinami z całego świata. Zielarka Bogna zna każdą z nich.
 
 [exits]
-62,0,65,0 | miasto-ziomkow
+62,0,65,0 | pustkowie-gosciniec
 
 [zones]
 44,0,84,52 | Aleja Carska

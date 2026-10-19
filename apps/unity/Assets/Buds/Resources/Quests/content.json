@@ -637,6 +637,66 @@
       "wander": 0
     },
     {
+      "id": "przewoznik-miasto",
+      "name": "Przewoźnik Staszek",
+      "district": "miasto-ziomkow",
+      "x": 65,
+      "y": 119,
+      "lines": [
+        "Łódka czeka. Za drobną opłatą zawiozę cię do innego portu.",
+        "Woda jest szybsza niż każda droga przez pustkowia."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "przewoznik-puszcza",
+      "name": "Przewoźnik Bronka",
+      "district": "dzika-puszcza",
+      "x": 60,
+      "y": 39,
+      "lines": [
+        "Łódka czeka. Za drobną opłatą zawiozę cię do innego portu.",
+        "Woda jest szybsza niż każda droga przez pustkowia."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "przewoznik-palmas",
+      "name": "Przewoźnik Leo",
+      "district": "las-palmas",
+      "x": 103,
+      "y": 118,
+      "lines": [
+        "Łódka czeka. Za drobną opłatą zawiozę cię do innego portu.",
+        "Woda jest szybsza niż każda droga przez pustkowia."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "przewoznik-dwor",
+      "name": "Przewoźnik Józef",
+      "district": "dwor-carski",
+      "x": 48,
+      "y": 105,
+      "lines": [
+        "Łódka czeka. Za drobną opłatą zawiozę cię do innego portu.",
+        "Woda jest szybsza niż każda droga przez pustkowia."
+      ],
+      "wander": 0
+    },
+    {
+      "id": "przewoznik-karkos",
+      "name": "Przewoźnik Rudy",
+      "district": "los-karkos",
+      "x": 50,
+      "y": 115,
+      "lines": [
+        "Łódka czeka. Za drobną opłatą zawiozę cię do innego portu.",
+        "Woda jest szybsza niż każda droga przez pustkowia."
+      ],
+      "wander": 0
+    },
+    {
       "id": "turystka-gosia",
       "name": "Turystka Gosia",
       "district": "wyspa-startowa",
@@ -6917,7 +6977,7 @@
     },
     {
       "id": "mount",
-      "name": "Wierzchowiec"
+      "name": "Pojazd"
     }
   ],
   "skillGearMax": 2,
@@ -7231,6 +7291,7 @@
       "hp": 24,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "…",
         "Manekin patrzy na ciebie pustym wzrokiem."
@@ -7250,6 +7311,7 @@
       "hp": 34,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Ej, ty! Masz jakiś problem?",
         "To moja brama. Płać albo walcz."
@@ -7273,6 +7335,7 @@
       "hp": 44,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Nasz klub, nasze tory!",
         "Pokaż, co umiesz."
@@ -7296,6 +7359,7 @@
       "hp": 44,
       "weapon": "procarka",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Trafię cię z drugiego końca parku!",
         "Jeden strzał, jedna szansa."
@@ -7319,6 +7383,7 @@
       "hp": 54,
       "weapon": "spray",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Ta ściana jest moja.",
         "Zobaczymy, kto ma lepszy styl."
@@ -7342,6 +7407,7 @@
       "hp": 64,
       "weapon": "mikrofon",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Bitwa? Bitwa!",
         "Mój flow cię zgasi."
@@ -7365,6 +7431,7 @@
       "hp": 54,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Zasłaniasz mi słońce.",
         "Dwieście pompek dziennie. A ty?"
@@ -7388,6 +7455,7 @@
       "hp": 64,
       "weapon": "deska",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Fala jest moja, kolego!",
         "Deska twardsza niż twoja głowa."
@@ -7411,6 +7479,7 @@
       "hp": 74,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Nic nie widziałeś.",
         "Dżungla nie lubi gości."
@@ -7434,6 +7503,7 @@
       "hp": 74,
       "weapon": "procarka",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Arr! Oddawaj muszle!",
         "Moja proca nie pudłuje."
@@ -7457,6 +7527,7 @@
       "hp": 84,
       "weapon": "mikrofon",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Ściszę cię na zawsze.",
         "Głośniej się nie da. Chyba że ja."
@@ -7480,6 +7551,7 @@
       "hp": 74,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Pan hrabia nie przyjmuje.",
         "Proszę opuścić aleję."
@@ -7503,6 +7575,7 @@
       "hp": 84,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Stój! Kto idzie?",
         "Rozkaz to rozkaz."
@@ -7526,6 +7599,7 @@
       "hp": 94,
       "weapon": "procarka",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Polowanie trwa.",
         "Ciii… spłoszysz zwierzynę."
@@ -7549,6 +7623,7 @@
       "hp": 94,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Ma pan zaległą opłatę!",
         "Parasol to też argument."
@@ -7572,6 +7647,7 @@
       "hp": 161,
       "weapon": "kij",
       "boss": true,
+      "ambush": false,
       "lines": [
         "Śmiesz wchodzić do mojego ogrodu?",
         "Ród Pompejuszy nie przegrywa."
@@ -7591,6 +7667,7 @@
       "hp": 94,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Czego tu szukasz?",
         "Tu się nie przechodzi za darmo."
@@ -7614,6 +7691,7 @@
       "hp": 104,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Wejdziesz na ring?",
         "Garda wyżej, bo zaboli."
@@ -7637,6 +7715,7 @@
       "hp": 114,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "To mój złom!",
         "Wszystko tu ma swoją cenę."
@@ -7660,6 +7739,7 @@
       "hp": 124,
       "weapon": "procarka",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Widziałam cię z dachu.",
         "Nie ruszaj się."
@@ -7683,6 +7763,7 @@
       "hp": 134,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Szef nie lubi wścibskich.",
         "Za dużo widziałeś."
@@ -7706,6 +7787,7 @@
       "hp": 200,
       "weapon": "kij",
       "boss": true,
+      "ambush": false,
       "lines": [
         "Wiesz, kim jestem?",
         "Fabryka jest moja. Los Karkos też."
@@ -7725,6 +7807,7 @@
       "hp": 44,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Moje bagno, moje zasady.",
         "Masz coś do jedzenia? Nie? To masz problem."
@@ -7748,6 +7831,7 @@
       "hp": 54,
       "weapon": "procarka",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Nic nie widziałeś. Te sidła same się zastawiły.",
         "Las jest wielki. Starczy dla wszystkich."
@@ -7771,6 +7855,7 @@
       "hp": 64,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Myto za przejście szlakiem! Płacisz albo walczysz.",
         "Herszt mówi, że to nasz las."
@@ -7794,6 +7879,7 @@
       "hp": 74,
       "weapon": "procarka",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Z tej odległości nie pudłuję.",
         "Do ruin nie przejdziesz. Chyba że przeze mnie."
@@ -7817,6 +7903,7 @@
       "hp": 135,
       "weapon": "kij",
       "boss": true,
+      "ambush": false,
       "lines": [
         "Puszcza należy do mnie. Leśniczy może sobie liczyć drzewa.",
         "Kto wchodzi do ruin, ten z nich nie wychodzi. Z moimi monetami."
@@ -7836,6 +7923,7 @@
       "hp": 104,
       "weapon": "kij",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Kopalnia jest niczyja. Więc moja.",
         "Ruda sama się nie wyniesie."
@@ -7859,6 +7947,7 @@
       "hp": 114,
       "weapon": "piesci",
       "boss": false,
+      "ambush": false,
       "lines": [
         "Zakręty są dla mięczaków.",
         "Na moim torze wygrywam ja. Zawsze."
@@ -7871,6 +7960,346 @@
         {
           "x": 160,
           "y": 82
+        }
+      ]
+    },
+    {
+      "id": "lesny-rabus",
+      "name": "Leśny Rabuś",
+      "district": "pustkowie-ostepy",
+      "level": 2,
+      "hp": 44,
+      "weapon": "piesci",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Hop! Zgubiłeś się? Oddawaj kieszonkowe.",
+        "Z krzaków widać więcej, ziomek."
+      ],
+      "spots": [
+        {
+          "x": 24,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "id": "klusownik",
+      "name": "Kłusownik",
+      "district": "pustkowie-ostepy",
+      "level": 3,
+      "hp": 54,
+      "weapon": "procarka",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Myślałem, że to sarna. Ale ty też się nadasz.",
+        "Cicho! Spłoszysz mi zwierzynę."
+      ],
+      "spots": [
+        {
+          "x": 52,
+          "y": 39
+        }
+      ]
+    },
+    {
+      "id": "zboj-z-krzakow",
+      "name": "Zbój z Krzaków",
+      "district": "pustkowie-ostepy",
+      "level": 4,
+      "hp": 64,
+      "weapon": "kij",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Z traktu się nie schodzi. Teraz już za późno.",
+        "Mój krzak, moje zasady."
+      ],
+      "spots": [
+        {
+          "x": 86,
+          "y": 9
+        }
+      ]
+    },
+    {
+      "id": "banita",
+      "name": "Banita",
+      "district": "pustkowie-ostepy",
+      "level": 5,
+      "hp": 74,
+      "weapon": "kij",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Miasto mnie wygnało. Ty zapłacisz za to myto.",
+        "Las mnie ukrywa. Ciebie nie uratuje."
+      ],
+      "spots": [
+        {
+          "x": 118,
+          "y": 38
+        }
+      ]
+    },
+    {
+      "id": "piaskowy-szczur",
+      "name": "Piaskowy Szczur",
+      "district": "pustkowie-wydmy",
+      "level": 3,
+      "hp": 54,
+      "weapon": "piesci",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Piasek w butach? Zaraz będzie w zębach.",
+        "Na wydmach rządzę ja."
+      ],
+      "spots": [
+        {
+          "x": 8,
+          "y": 24
+        }
+      ]
+    },
+    {
+      "id": "surfer-wyrzutek",
+      "name": "Surfer Wyrzutek",
+      "district": "pustkowie-wydmy",
+      "level": 4,
+      "hp": 64,
+      "weapon": "deska",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Wyrzucili mnie z plaży. Ty mi to wynagrodzisz.",
+        "Fala odpłynęła, ja zostałem."
+      ],
+      "spots": [
+        {
+          "x": 39,
+          "y": 52
+        }
+      ]
+    },
+    {
+      "id": "lowca-muszli",
+      "name": "Łowczyni Muszli",
+      "district": "pustkowie-wydmy",
+      "level": 5,
+      "hp": 74,
+      "weapon": "procarka",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Każdy, kto tędy idzie, coś zostawia.",
+        "Muszle zbieram. Ciebie też zbiorę."
+      ],
+      "spots": [
+        {
+          "x": 9,
+          "y": 88
+        }
+      ]
+    },
+    {
+      "id": "krol-wydm",
+      "name": "Król Wydm",
+      "district": "pustkowie-wydmy",
+      "level": 7,
+      "hp": 94,
+      "weapon": "deska",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Każda wydma to moje królestwo. Klękaj.",
+        "Za przejście płaci się koroną."
+      ],
+      "spots": [
+        {
+          "x": 38,
+          "y": 120
+        }
+      ]
+    },
+    {
+      "id": "zebrak-z-goscinca",
+      "name": "Żebrak z Gościńca",
+      "district": "pustkowie-gosciniec",
+      "level": 4,
+      "hp": 64,
+      "weapon": "piesci",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Grosik dla biednego? Nie? To siłą.",
+        "Na gościńcu nic nie jest za darmo."
+      ],
+      "spots": [
+        {
+          "x": 8,
+          "y": 26
+        }
+      ]
+    },
+    {
+      "id": "woznica",
+      "name": "Woźnica bez Konia",
+      "district": "pustkowie-gosciniec",
+      "level": 5,
+      "hp": 74,
+      "weapon": "kij",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Koń uciekł, bat został. Sprawdzimy go na tobie.",
+        "Wio! Znaczy: walczymy."
+      ],
+      "spots": [
+        {
+          "x": 39,
+          "y": 55
+        }
+      ]
+    },
+    {
+      "id": "falszywy-poborca",
+      "name": "Fałszywa Poborczyni",
+      "district": "pustkowie-gosciniec",
+      "level": 6,
+      "hp": 84,
+      "weapon": "mikrofon",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Myto dworskie! Płacisz albo ci odśpiewam.",
+        "Mam pieczątkę. Własnej roboty."
+      ],
+      "spots": [
+        {
+          "x": 9,
+          "y": 90
+        }
+      ]
+    },
+    {
+      "id": "herszt-goscinca",
+      "name": "Herszt Gościńca",
+      "district": "pustkowie-gosciniec",
+      "level": 8,
+      "hp": 104,
+      "weapon": "kij",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Cały gościniec jest mój. Ty też.",
+        "Moi chłopcy już cię widzieli. Teraz ja."
+      ],
+      "spots": [
+        {
+          "x": 38,
+          "y": 122
+        }
+      ]
+    },
+    {
+      "id": "zlomiarz-z-traktu",
+      "name": "Złomiarz z Traktu",
+      "district": "pustkowie-nieuzytki",
+      "level": 6,
+      "hp": 84,
+      "weapon": "kij",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Wszystko tu jest na złom. Ty też.",
+        "Oddaj buty, ładnie by się sprzedały."
+      ],
+      "spots": [
+        {
+          "x": 22,
+          "y": 9
+        }
+      ]
+    },
+    {
+      "id": "szczur-z-nieuzytkow",
+      "name": "Szczur z Nieużytków",
+      "district": "pustkowie-nieuzytki",
+      "level": 7,
+      "hp": 94,
+      "weapon": "piesci",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Kto tu łazi bez pytania?",
+        "Nieużytki nie wybaczają."
+      ],
+      "spots": [
+        {
+          "x": 48,
+          "y": 38
+        }
+      ]
+    },
+    {
+      "id": "wandal-z-hali",
+      "name": "Wandalka z Hali",
+      "district": "pustkowie-nieuzytki",
+      "level": 8,
+      "hp": 104,
+      "weapon": "spray",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Ta ściana jest moja. Ty będziesz następny.",
+        "Pomaluję cię na szaro."
+      ],
+      "spots": [
+        {
+          "x": 76,
+          "y": 8
+        }
+      ]
+    },
+    {
+      "id": "cien-z-ruin",
+      "name": "Cień z Ruin",
+      "district": "pustkowie-nieuzytki",
+      "level": 10,
+      "hp": 124,
+      "weapon": "procarka",
+      "boss": false,
+      "ambush": true,
+      "lines": [
+        "Nie zobaczyłeś mnie. Nikt nie widzi.",
+        "Za tobą. Zawsze za tobą."
+      ],
+      "spots": [
+        {
+          "x": 104,
+          "y": 39
+        }
+      ]
+    },
+    {
+      "id": "wielki-zbyszek",
+      "name": "Wielki Zbyszek",
+      "district": "pustkowie-nieuzytki",
+      "level": 12,
+      "hp": 200,
+      "weapon": "kij",
+      "boss": true,
+      "ambush": true,
+      "lines": [
+        "Na Nieużytkach jest jeden szef. Patrzysz na niego.",
+        "Do Karkos? Najpierw przeze mnie."
+      ],
+      "spots": [
+        {
+          "x": 130,
+          "y": 10
         }
       ]
     }
@@ -8477,6 +8906,87 @@
         "slizg",
         "garda"
       ]
+    }
+  ],
+  "routes": [
+    {
+      "id": "pustkowie-ostepy",
+      "name": "Leśne Ostępy",
+      "a": "dzika-puszcza",
+      "b": "miasto-ziomkow",
+      "minLevel": 2,
+      "maxLevel": 5
+    },
+    {
+      "id": "pustkowie-wydmy",
+      "name": "Wydmy",
+      "a": "las-palmas",
+      "b": "miasto-ziomkow",
+      "minLevel": 3,
+      "maxLevel": 7
+    },
+    {
+      "id": "pustkowie-gosciniec",
+      "name": "Stary Gościniec",
+      "a": "miasto-ziomkow",
+      "b": "dwor-carski",
+      "minLevel": 4,
+      "maxLevel": 8
+    },
+    {
+      "id": "pustkowie-nieuzytki",
+      "name": "Nieużytki",
+      "a": "miasto-ziomkow",
+      "b": "los-karkos",
+      "minLevel": 6,
+      "maxLevel": 12
+    }
+  ],
+  "ports": [
+    {
+      "id": "port-miasto",
+      "district": "miasto-ziomkow",
+      "name": "Port Rzeczny",
+      "x": 65,
+      "y": 119,
+      "fare": 13,
+      "npc": "przewoznik-miasto"
+    },
+    {
+      "id": "port-puszcza",
+      "district": "dzika-puszcza",
+      "name": "Przystań nad Jeziorem",
+      "x": 60,
+      "y": 39,
+      "fare": 16,
+      "npc": "przewoznik-puszcza"
+    },
+    {
+      "id": "port-palmas",
+      "district": "las-palmas",
+      "name": "Przystań Jachtowa",
+      "x": 103,
+      "y": 118,
+      "fare": 19,
+      "npc": "przewoznik-palmas"
+    },
+    {
+      "id": "port-dwor",
+      "district": "dwor-carski",
+      "name": "Przystań Dworska",
+      "x": 48,
+      "y": 105,
+      "fare": 25,
+      "npc": "przewoznik-dwor"
+    },
+    {
+      "id": "port-karkos",
+      "district": "los-karkos",
+      "name": "Port Przemytników",
+      "x": 50,
+      "y": 115,
+      "fare": 31,
+      "npc": "przewoznik-karkos"
     }
   ],
   "moveUpgrades": [

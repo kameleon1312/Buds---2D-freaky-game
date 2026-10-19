@@ -82,7 +82,7 @@ water : 0.12 : lily
 137,98 | Ruiny Strażnicy | Stara wieża straży leśnej. Teraz meldują się tu rozbójnicy.
 
 [exits]
-175,58,175,61 | miasto-ziomkow
+175,58,175,61 | pustkowie-ostepy
 
 [zones]
 152,48,175,72 | Leśna Brama
