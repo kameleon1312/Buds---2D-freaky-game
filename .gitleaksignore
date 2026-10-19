@@ -1,0 +1,2 @@
+# Not a secret: a made-up JWT secret for the ferry API test (replaced with a low-entropy placeholder since).
+4ba1aeac682990429525973870d86aa794bf1c4e:apps/api/test/travel.test.ts:generic-api-key:22

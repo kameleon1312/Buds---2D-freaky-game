@@ -69,7 +69,7 @@ inny wygląd (`docs/ekwipunek.md`).
 Nowe miejsce w ekwipunku: **Pojazd** (`mount`). Każdy dodaje własną szybkość (`mountSpeed`), poza limitem
 szybkości z ubrań:
 
-| Pojazd       | Rzadkość     | Poziom | Szybkość | Skąd                    |
+| Pojazd             | Rzadkość     | Poziom | Szybkość | Skąd                    |
 | ------------------ | ------------ | ------ | -------- | ----------------------- |
 | Deskorolka Cruiser | zwykła       | 1      | +20%     | sklep                   |
 | Hulajnowa Śmigacz  | niepospolita | 3      | +30%     | sklep                   |

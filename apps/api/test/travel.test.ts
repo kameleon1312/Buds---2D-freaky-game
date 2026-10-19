@@ -19,7 +19,7 @@ async function setup() {
   const store = createMemoryStore();
   const app = createApp(
     loadEnv({
-      SUPABASE_JWT_SECRET: 'ferry-test-secret-that-is-long-enough-32',
+      SUPABASE_JWT_SECRET: 'x'.repeat(32),
       RATE_LIMIT_PER_MINUTE: '1000',
     }),
     { store },

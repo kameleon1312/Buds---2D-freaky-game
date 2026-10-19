@@ -165,8 +165,8 @@ Na komputerze: klawiatura (WASD, E, I, M).
 
 <div align="center">
 
-| 5 dzielnic + wyspa | 80 mieszkańców | 54 zadania | 29 przeciwników | 100+ przedmiotów | 6 pojazdów |
-| :----------------: | :------------: | :--------: | :-------------: | :--------------: | :------------: |
+| 5 dzielnic + wyspa + 4 pustkowia | 85 mieszkańców | 54 zadania | 46 przeciwników | 100+ przedmiotów | 6 pojazdów |
+| :------------------------------: | :------------: | :--------: | :-------------: | :--------------: | :--------: |
 
 </div>
 
