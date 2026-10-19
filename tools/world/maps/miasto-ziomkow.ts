@@ -319,12 +319,12 @@ export function miastoZiomkow(): MapCanvas {
   m.road('v', 0, 8, 62, 4, { sidewalk: false });
   m.road('v', H - 9, H - 1, 62, 4, { sidewalk: false });
   m.road('h', W - 12, W - 1, 46, 4, { sidewalk: false });
-  m.exit([62, 0, 65, 0], 'las-palmas');
-  m.exit([62, H - 1, 65, H - 1], 'dwor-carski');
-  m.exit([W - 1, 46, W - 1, 49], 'los-karkos');
+  m.exit([62, 0, 65, 0], 'pustkowie-wydmy'); // north: the dunes to Las Palmas
+  m.exit([62, H - 1, 65, H - 1], 'pustkowie-gosciniec'); // south: the country road to the manor
+  m.exit([W - 1, 46, W - 1, 49], 'pustkowie-nieuzytki'); // east: the scrapland to Los Karkos
   // west: a forest trail from the park into Dzika Puszcza
   m.rect([0, 58, 14, 61], { g: 'path' });
-  m.exit([0, 58, 0, 61], 'dzika-puszcza');
+  m.exit([0, 58, 0, 61], 'pustkowie-ostepy'); // west: the forest edge to Dzika Puszcza
   m.sign(
     12,
     57,

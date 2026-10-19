@@ -118,9 +118,9 @@ const STOPS: TrailStop[] = [
   },
   {
     id: 'sprzet',
-    kicker: 'Przystanek 5 · Sprzęt i wierzchowce',
+    kicker: 'Przystanek 5 · Sprzęt i pojazdy',
     title: 'Od czapki po quada',
-    text: 'Dziewięć miejsc na ekwipunek, ponad sto przedmiotów i wierzchowce: deskorolka, rower, motocykl. Każda rzecz coś daje, a najlepsze zdobywasz w walce. Za prawdziwe pieniądze kupisz tylko wygląd, nigdy przewagę.',
+    text: 'Dziewięć miejsc na ekwipunek, ponad sto przedmiotów i pojazdy: deskorolka, rower, motocykl. Każda rzecz coś daje, a najlepsze zdobywasz w walce. Za prawdziwe pieniądze kupisz tylko wygląd, nigdy przewagę.',
     fact: 'Ryk Motocykla Grzmot podobno słychać w trzech dzielnicach naraz.',
     src: '/screens/ekwipunek.png',
     alt: 'Ekwipunek Buda w grze Buds',

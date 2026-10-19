@@ -85,7 +85,7 @@ export function dzikaPuszcza(): MapCanvas {
 
   // ---------- Leśna Brama (east): the gate from the city ----------
   m.spawn = [166, 60];
-  m.exit([W - 1, 58, W - 1, 61], 'miasto-ziomkow');
+  m.exit([W - 1, 58, W - 1, 61], 'pustkowie-ostepy');
   m.sign(168, 56, 'Leśna Brama', 'Tu kończy się miasto, a zaczyna puszcza. Trzymaj się szlaku.');
   m.sign(158, 63, 'Do Miasta Ziomków', 'Szlakiem na wschód, przez park.');
   for (const [x, y] of [

@@ -31,8 +31,44 @@ namespace Buds.World
         public const string TutorialName = "Wyspa Startowa";
         public const string TutorialFinalQuest = "wyspa-rejs";
 
-        /// <summary>A map's name for labels: a district, the island, or the id.</summary>
-        public static string NameOf(string id) => id == Tutorial ? TutorialName : Get(id)?.Name ?? id;
+        /// <summary>
+        /// The wastelands between the cities (packages/shared travel.ts ROUTES): A is the west or north end, B the east or
+        /// south end. Not districts: no turfs, no level of their own; the road onto one needs the far city's level.
+        /// </summary>
+        public static readonly (string Id, string Name, string A, string B)[] Routes =
+        {
+            ("pustkowie-ostepy", "Leśne Ostępy", "dzika-puszcza", "miasto-ziomkow"),
+            ("pustkowie-wydmy", "Wydmy", "las-palmas", "miasto-ziomkow"),
+            ("pustkowie-gosciniec", "Stary Gościniec", "miasto-ziomkow", "dwor-carski"),
+            ("pustkowie-nieuzytki", "Nieużytki", "miasto-ziomkow", "los-karkos"),
+        };
+
+        public static bool IsRoute(string id) => System.Array.Exists(Routes, r => r.Id == id);
+
+        /// <summary>The city at the other end of a route, seen from <paramref name="from"/> (null if it's not an end).</summary>
+        public static string FarEnd(string routeId, string from)
+        {
+            foreach (var r in Routes)
+                if (r.Id == routeId)
+                    return r.A == from ? r.B : r.B == from ? r.A : null;
+            return null;
+        }
+
+        /// <summary>Stepping onto a route needs the level of the city it leads to (going home is always free).</summary>
+        public static bool CanEnterRoute(string routeId, string from, int level)
+        {
+            var far = FarEnd(routeId, from);
+            return far != null && CanEnter(far, level);
+        }
+
+        /// <summary>A map's name for labels: a district, a route, the island, or the id.</summary>
+        public static string NameOf(string id)
+        {
+            if (id == Tutorial) return TutorialName;
+            foreach (var r in Routes)
+                if (r.Id == id) return r.Name;
+            return Get(id)?.Name ?? id;
+        }
 
         public static District Get(string id)
         {

@@ -25,6 +25,9 @@ import {
   MOVES,
   MOVES_BY_WEAPON,
   MOVE_UPGRADES,
+  PORTS,
+  ROUTES,
+  ferryFare,
   SLOTS,
   STATS,
   WEAPON_KINDS,
@@ -53,6 +56,7 @@ const mapOf = (district: string) => {
 // spawn points come from the [district] section (districts and the rooms caches lie in)
 for (const id of new Set([
   ...DISTRICTS.map((d) => d.id),
+  ...ROUTES.map((r) => r.id),
   TUTORIAL_ISLAND.id,
   ...CONTENT.caches.map(cacheMap),
   ...CONTENT.training.map((t) => t.map ?? t.district),
@@ -298,6 +302,8 @@ const json = {
     hp: en.hp,
     weapon: en.weapon,
     boss: en.boss,
+    // hidden off the road on a route: jumps out and starts the duel on its own
+    ambush: en.ambush,
     lines: en.lines,
     spots: en.spots,
   })),
@@ -315,6 +321,24 @@ const json = {
   })),
   weapons: WEAPON_KINDS.map((kind) => ({ kind, moves: MOVES_BY_WEAPON[kind] })),
   // learned moves: the stronger version of a weapon move, from a level and a skill rank (the server decides in duels)
+  // travel: the wastelands between the cities and the harbours with their fares (travel.ts)
+  routes: ROUTES.map((r) => ({
+    id: r.id,
+    name: r.name,
+    a: r.a,
+    b: r.b,
+    minLevel: r.levels[0],
+    maxLevel: r.levels[1],
+  })),
+  ports: PORTS.map((p) => ({
+    id: p.id,
+    district: p.district,
+    name: p.name,
+    x: p.x,
+    y: p.y,
+    fare: ferryFare(p),
+    npc: `przewoznik-${p.id.replace('port-', '')}`,
+  })),
   moveUpgrades: Object.entries(MOVE_UPGRADES).map(([from, u]) => ({
     from,
     to: u!.to,

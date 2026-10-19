@@ -27,6 +27,9 @@ import {
   type Prop,
   type Tone,
 } from './kit';
+import { graffitiWall } from './graffiti';
+
+export { graffitiWall };
 
 /** Panel housing block, 7×4 footprint, four floors with balconies. */
 function blok(wall: Tone, accent: Tone, seed: number): Prop {
@@ -292,61 +295,6 @@ function hoop(): Prop {
         2,
       ),
   };
-}
-
-/** 3-tile concrete wall covered in graffiti (abstract tags, bubbles and drips). */
-export function graffitiWall(seed: number, palette: string[], grime = false): Prop {
-  const foot: [number, number] = [3, 1];
-  const { w, h, ax, ay, L, R } = frame(foot, 1.9, 0.15);
-  const top = ay - 1.55 * T;
-  const r = rng(seed);
-  const wallTone: Tone = grime ? ['#9c968c', '#7f796f'] : ['#c4c0b8', '#a39f97'];
-  let s = shadow(ax, ay - 2, 1.6 * T, 8, 0.22);
-  s += shaded(rr(L, top, R - L, ay - top, 4), wallTone, LINE, -6, -3);
-  s += shaded(rr(L - 3, top - 4, R - L + 6, 10, 3), [wallTone[1], wallTone[1]], LINE, 0, 0, 2);
-  // big bubble letters: overlapping round blobs with a light outline and a dark drop
-  const id = `gw${seed}`;
-  let blobs = '';
-  const count = 4 + Math.floor(r() * 2);
-  for (let i = 0; i < count; i++) {
-    const cx = L + 26 + (i * (R - L - 52)) / (count - 1);
-    const cy = top + 0.75 * T + (r() - 0.5) * 18;
-    const rx = 18 + r() * 8;
-    const ry = 22 + r() * 8;
-    blobs += `<ellipse cx="${n(cx)}" cy="${n(cy)}" rx="${n(rx)}" ry="${n(ry)}" transform="rotate(${n((r() - 0.5) * 30)} ${n(cx)} ${n(cy)})"/>`;
-  }
-  const c1 = palette[Math.floor(r() * palette.length)]!;
-  const c2 = palette[Math.floor(r() * palette.length)]!;
-  s += `<g fill="#1a1a1f" transform="translate(4 5)">${blobs}</g>`;
-  s += `<g fill="#ffffff" stroke="#ffffff" stroke-width="7">${blobs}</g>`;
-  s += `<clipPath id="${id}">${blobs}</clipPath><g fill="${c1}">${blobs}</g>`;
-  s += `<g clip-path="url(#${id})"><rect x="${L}" y="${n(top + 0.75 * T)}" width="${R - L}" height="${T}" fill="${c2}"/></g>`;
-  s += stroke(
-    `M${n(L + 30)} ${n(top + 0.55 * T)}q${n(0.6 * T)} -14 ${n(1.2 * T)} 0`,
-    '#ffffff',
-    3,
-    0.7,
-  );
-  // drips and a star
-  for (let i = 0; i < 4; i++) {
-    const x = L + 20 + r() * (R - L - 40);
-    s += stroke(`M${n(x)} ${n(top + 1.05 * T)}v${n(8 + r() * 16)}`, c1, 4);
-  }
-  s += flat(
-    poly(
-      Array.from({ length: 10 }, (_, i) => {
-        const a = (Math.PI / 5) * i - Math.PI / 2;
-        const rad = i % 2 ? 5 : 11;
-        return [R - 22 + Math.cos(a) * rad, top + 22 + Math.sin(a) * rad] as [number, number];
-      }),
-    ),
-    '#ffc93c',
-    '#1a1a1f',
-    2,
-  );
-  if (grime)
-    s += stroke(`M${L + 10} ${ay - 16}l18 -10l12 8M${R - 50} ${top + 14}l10 16`, '#5d5853', 3, 0.7);
-  return { w, h, ax, ay, foot, body: s };
 }
 
 function busStop(): Prop {

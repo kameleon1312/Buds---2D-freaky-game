@@ -9,7 +9,7 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
   Gra zgłasza zdarzenia („pokonałem przeciwnika”), serwer je sprawdza. To przygotowanie pod multiplayer
   i ochrona przed oszustwami w sklepie.
 - **Bez pay-to-win.** Za prawdziwe pieniądze sprzedajemy wygląd (postacie, stroje, czapki, emotki), wygodę i
-  unikatowe wierzchowce oraz bronie, które są dokładnie tak mocne jak ich odpowiedniki do zdobycia w grze (`twin`,
+  unikatowe pojazdy oraz bronie, które są dokładnie tak mocne jak ich odpowiedniki do zdobycia w grze (`twin`,
   najwyżej 2 poziomy wcześniej). Pilnuje tego `gearProblems`.
 - **Dwie waluty:** `coins` (zarabiane w grze) i `gems` (kupowane). Ceny w katalogu, nigdy w kliencie.
 - **Katalog jest jeden:** `packages/shared/src/catalog.ts`. Strona, API i gra czytają z niego (gra przez `GET /v1/catalog`).
@@ -27,7 +27,7 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
 
 ## Kolejność prac
 
-1. ~~Mapy 4 dzielnic~~ (`docs/districts.md`) i ~~NPC + questy z XP przyznawanym przez serwer~~ (`docs/questy.md`: 27 NPC i 29 zadań we wszystkich dzielnicach), ~~panel Buda z ekwipunkiem i umiejętnościami~~, ~~wnętrza budynków, skrytki z monetami i mapa z mgłą~~ (`docs/districts.md`, `docs/questy.md`), ~~ekwipunek od stóp do głów ze statystykami, sklep za monety i konta na stronie~~ (`docs/ekwipunek.md`), ~~ponad 100 przedmiotów z poziomami, pojedynki turowe z ruchami zależnymi od broni, 21 przeciwników z łupem~~ (`docs/pojedynki.md`), ~~kreator Buda w grze, Wyspa Startowa z samouczkiem, większe dzielnice z działkami pod nowe treści, nowe części i kolory wyglądu~~ (`docs/wyglad.md`, `docs/districts.md`), ~~trening umiejętności na mapie, wyjątkowe umiejętności, napoje energetyczne i wierzchowce~~ (`docs/umiejetnosci.md`). Teraz: **lista NPC i zadań od autora gry**, potem pierwsza mini-gra (freestyle / graffiti) i potyczki, w których zadziałają umiejętności.
+1. ~~Mapy 4 dzielnic~~ (`docs/districts.md`) i ~~NPC + questy z XP przyznawanym przez serwer~~ (`docs/questy.md`: 27 NPC i 29 zadań we wszystkich dzielnicach), ~~panel Buda z ekwipunkiem i umiejętnościami~~, ~~wnętrza budynków, skrytki z monetami i mapa z mgłą~~ (`docs/districts.md`, `docs/questy.md`), ~~ekwipunek od stóp do głów ze statystykami, sklep za monety i konta na stronie~~ (`docs/ekwipunek.md`), ~~ponad 100 przedmiotów z poziomami, pojedynki turowe z ruchami zależnymi od broni, 21 przeciwników z łupem~~ (`docs/pojedynki.md`), ~~kreator Buda w grze, Wyspa Startowa z samouczkiem, większe dzielnice z działkami pod nowe treści, nowe części i kolory wyglądu~~ (`docs/wyglad.md`, `docs/districts.md`), ~~trening umiejętności na mapie, wyjątkowe umiejętności, napoje energetyczne i pojazdy~~ (`docs/umiejetnosci.md`). Teraz: **lista NPC i zadań od autora gry**, potem pierwsza mini-gra (freestyle / graffiti) i potyczki, w których zadziałają umiejętności.
    NPC z prostymi zadaniami (porozmawiaj, przynieś, zbierz), zgłaszanie zdarzeń do API i **XP przyznawane
    przez serwer** (`POST /v1/buds/me/events`, walidacja + limity). Pierwsza mini-gra.
 2. **Ekwipunek w grze.** Ekran postaci: co mam (`/v1/buds/me/items`), co mogę założyć; zmiana wyglądu
@@ -41,7 +41,7 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
 6. **Konta i sklep z prawdziwymi pieniędzmi.** Logowanie (Supabase Auth: Apple/Google) i łączenie konta gościa
    (`buds.user_id` już jest), bo zakupy muszą przetrwać zmianę telefonu. Potem Unity IAP / RevenueCat,
    weryfikacja paragonów w API (`purchases`, unikalne `transaction_id`), gemy → przedmioty premium
-   (~~sklep premium za gemy: 5 wierzchowców i 6 broni~~, `docs/ekwipunek.md`; zostały płatności i `grant_gems` po weryfikacji).
+   (~~sklep premium za gemy: 5 pojazdów i 6 broni~~, `docs/ekwipunek.md`; zostały płatności i `grant_gems` po weryfikacji).
    Wymogi sklepów: polityka prywatności, regulamin, pokazywanie szans przy losowaniach (najlepiej ich nie mieć).
 7. **Multiplayer** (patrz niżej).
 8. Wydarzenia czasowe, przepustka sezonowa, kolejne dzielnice.

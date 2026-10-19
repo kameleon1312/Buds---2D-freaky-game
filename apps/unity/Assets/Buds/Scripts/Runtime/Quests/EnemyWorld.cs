@@ -17,8 +17,31 @@ namespace Buds.Quests
         BoxCollider2D box;
         float phase;
         float hiddenUntil;
+        /// <summary>A lurker jumped out (until it hides again).</summary>
+        public bool Sprung { get; private set; }
+        float springAt = -99;
+        float calmUntil;
+        Vector3 home;
 
         public bool Available => Time.time >= hiddenUntil;
+        public bool Lurking => Data.ambush && !Sprung;
+        /// <summary>A lurker ready to jump out: hidden, rested and not waiting after the last time.</summary>
+        public bool ReadyToSpring => Data.ambush && !Sprung && Available && Time.time >= calmUntil;
+
+        /// <summary>Out of the nook: it shows itself, hops into the open with a cloud of dust.</summary>
+        public void Spring()
+        {
+            Sprung = true;
+            springAt = Time.time;
+        }
+
+        /// <summary>Back into hiding (after the duel, or when the bud got away), and some peace for a while.</summary>
+        public void Hide(float calm)
+        {
+            Sprung = false;
+            calmUntil = Time.time + calm;
+            transform.position = home;
+        }
 
         public static EnemyView Spawn(EnemyData data, BudSheet sheet, Vector3 feet, Transform parent, Sprite markerSprite, int spot = 0)
         {
@@ -47,6 +70,7 @@ namespace Buds.Quests
             view.marker.sprite = markerSprite;
             view.marker.sortingOrder = 20000;
             view.phase = (feet.x * 0.31f + feet.y * 0.17f) % 1f;
+            view.home = feet;
             if (data.boss) go.transform.localScale = Vector3.one * 1.15f;
             return view;
         }
@@ -55,6 +79,7 @@ namespace Buds.Quests
         public void Rest(float seconds)
         {
             hiddenUntil = Time.time + seconds;
+            if (Data.ambush) Hide(seconds);
         }
 
         public void Face(Vector3 target)
@@ -67,11 +92,23 @@ namespace Buds.Quests
 
         void Update()
         {
-            var shown = Available;
+            // a lurker shows nothing at all (no body, no shadow, no collider) until it jumps out
+            var shown = Available && !Lurking;
             body.enabled = shown;
             marker.enabled = shown;
             box.enabled = shown;
+            foreach (Transform child in transform)
+                if (child.name is "Shadow" or "Cast shadow")
+                    child.gameObject.SetActive(shown);
             if (!shown) return;
+            if (Sprung)
+            {
+                // the hop out of the bushes: up and over in a quarter of a second
+                var k = Mathf.Clamp01((Time.time - springAt) / 0.28f);
+                var visual = body.transform.parent;
+                visual.localPosition = new Vector3(0, 0, -Mathf.Sin(k * Mathf.PI) * 0.6f);
+                marker.transform.localScale = Vector3.one * (k < 1 ? Mathf.Lerp(1.6f, 1, k) : 1);
+            }
             // a restless sway: these ones are looking for trouble
             var t = Time.time + phase * 3;
             marker.transform.localPosition = new Vector3(0, 1.95f + Mathf.Sin(t * 3.4f) * 0.08f, 0);
@@ -113,6 +150,23 @@ namespace Buds.Quests
             return ew;
         }
 
+        /// <summary>A lurker hidden near the bud's feet that is about to jump out, or null.</summary>
+        public EnemyView AmbushNear(Vector2 feet, bool busy)
+        {
+            foreach (var e in enemies)
+                if (Ambush.ShouldSpring(Vector2.Distance(feet, e.transform.position), e.ReadyToSpring, busy))
+                    return e;
+            return null;
+        }
+
+        /// <summary>Lurkers that sprang and were left behind hide again once the bud is far enough away.</summary>
+        public void Settle(Vector2 feet, bool fighting)
+        {
+            if (fighting) return;
+            foreach (var e in enemies)
+                if (e.Sprung && Vector2.Distance(feet, e.transform.position) > Ambush.SpringRadius * 2.5f) e.Hide(Ambush.Cooldown);
+        }
+
         /// <summary>The closest opponent ready for a duel within <paramref name="range"/> of the bud's feet.</summary>
         public EnemyView Nearest(Vector2 feet, float range)
         {
@@ -120,7 +174,7 @@ namespace Buds.Quests
             var bestD = range;
             foreach (var e in enemies)
             {
-                if (!e.Available) continue;
+                if (!e.Available || e.Lurking) continue;
                 var d = Vector2.Distance(feet, e.transform.position);
                 if (d > bestD) continue;
                 best = e;

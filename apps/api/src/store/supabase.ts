@@ -414,6 +414,15 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       if (error) throw error;
     },
 
+    async payFare(slug, price) {
+      const { data, error } = await db.rpc('pay_fare', {
+        p_bud: await idBySlug(slug),
+        p_price: price,
+      });
+      if (error) throw error;
+      return data as { status: 'ok' | 'poor'; coins: number };
+    },
+
     async buyConsumable(slug, itemId, price) {
       const { data, error } = await db.rpc('buy_consumable', {
         p_bud: await idBySlug(slug),

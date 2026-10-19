@@ -322,6 +322,23 @@ namespace Buds.Api
     }
 
     [Serializable]
+    public class FerryRequest
+    {
+        public string from;
+        public string to;
+    }
+
+    /// <summary>A ferry ticket: the coins left, the fare paid and where the boat goes.</summary>
+    [Serializable]
+    public class FerryResponse
+    {
+        public int coins;
+        public int fare;
+        public string to;
+        public string district;
+    }
+
+    [Serializable]
     public class BuyResponse
     {
         public string itemId;

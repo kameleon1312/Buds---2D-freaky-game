@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Buds.Core
 {
     /// <summary>
-    /// Rides, energy drinks and training on the map. The ride worn in the "Wierzchowiec" slot carries the bud outdoors
+    /// Rides, energy drinks and training on the map. The ride worn in the "Pojazd" slot carries the bud outdoors
     /// (R or the HUD button gets on and off); drinks start boosts the server keeps and applies (the game shows the
     /// timers and walks faster with Turbo); training stations open a timing mini-game whose score the server turns
     /// into training XP, ranks and special abilities (perks).
@@ -324,13 +324,13 @@ namespace Buds.Core
             await Buy("napoj-skupienie");
             panel.SelectTab(BudPanel.TabShop);
             panel.SelectShopItem("mount-hulajnowa");
-            await shot("r1-sklep-wierzchowce.png");
+            await shot("r1-sklep-pojazdy.png");
             panel.SelectShopItem("napoj-sila");
             await shot("r1-sklep-napoje.png");
             await Equip("mount", "mount-deskorolka");
             panel.SelectTab(BudPanel.TabGear);
             panel.SelectSlot("mount");
-            await shot("r2-ekwipunek-wierzchowiec.png");
+            await shot("r2-ekwipunek-pojazd.png");
             await Drink("napoj-turbo");
             await Drink("napoj-skupienie");
             panel.SelectTab(BudPanel.TabDrinks);

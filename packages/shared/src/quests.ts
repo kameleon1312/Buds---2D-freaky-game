@@ -11,6 +11,7 @@ import { LOCALS } from './content/locals';
 import { LOS_KARKOS } from './content/los-karkos';
 import { MIASTO_ZIOMKOW } from './content/miasto-ziomkow';
 import { NEW_PLACES } from './content/new-places';
+import { ROUTES_CONTENT } from './content/routes';
 import { WYSPA_STARTOWA } from './content/wyspa-startowa';
 import { TRAINING_SPOTS } from './content/training';
 import { levelFromXp } from './level';
@@ -108,6 +109,7 @@ export const CONTENT: DistrictContent = (() => {
     LOS_KARKOS,
     DZIKA_PUSZCZA,
     NEW_PLACES,
+    ROUTES_CONTENT,
   ];
   return districtContentSchema.parse({
     npcs: [...all.flatMap((c) => c.npcs), ...LOCALS],

@@ -108,8 +108,35 @@ namespace Buds.Quests
         public int hp;
         public string weapon;
         public bool boss;
+        /// <summary>Lies in wait off the road on a route: hidden until the bud comes close, then picks the fight.</summary>
+        public bool ambush;
         public string[] lines;
         public CellData[] spots;
+    }
+
+    /// <summary>A wasteland between two cities (packages/shared travel.ts ROUTES).</summary>
+    [Serializable]
+    public sealed class RouteData
+    {
+        public string id;
+        public string name;
+        public string a;
+        public string b;
+        public int minLevel;
+        public int maxLevel;
+    }
+
+    /// <summary>A city's harbour: the ferryman's cell and the fare to sail here.</summary>
+    [Serializable]
+    public sealed class PortData
+    {
+        public string id;
+        public string district;
+        public string name;
+        public int x;
+        public int y;
+        public int fare;
+        public string npc;
     }
 
     /// <summary>A duel move: the animation the game plays for it (jab, hook, kick, swing, shoot…).</summary>
@@ -244,6 +271,8 @@ namespace Buds.Quests
         public MoveData[] moves;
         public WeaponData[] weapons;
         public MoveUpgradeData[] moveUpgrades;
+        public RouteData[] routes;
+        public PortData[] ports;
         public PerkData[] perks;
         public BuffData[] buffs;
         public TrainingSpotData[] training;
@@ -265,6 +294,8 @@ namespace Buds.Quests
             content.moves ??= Array.Empty<MoveData>();
             content.weapons ??= Array.Empty<WeaponData>();
             content.moveUpgrades ??= Array.Empty<MoveUpgradeData>();
+            content.routes ??= Array.Empty<RouteData>();
+            content.ports ??= Array.Empty<PortData>();
             content.perks ??= Array.Empty<PerkData>();
             content.buffs ??= Array.Empty<BuffData>();
             content.training ??= Array.Empty<TrainingSpotData>();
@@ -321,6 +352,10 @@ namespace Buds.Quests
             var w = Array.Find(weapons, x => x.kind == weapon) ?? Array.Find(weapons, x => x.kind == "piesci");
             return w?.moves ?? Array.Empty<string>();
         }
+
+        public PortData PortOfNpc(string npcId) => Array.Find(ports, p => p.npc == npcId);
+
+        public PortData Port(string id) => Array.Find(ports, p => p.id == id);
 
         public MoveUpgradeData UpgradeOf(string move) => Array.Find(moveUpgrades, u => u.from == move);
 

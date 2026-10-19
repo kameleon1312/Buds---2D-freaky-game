@@ -70,6 +70,7 @@ namespace Buds.Core
         {
             var n = npc.Data;
             npc.Face(player.transform.position);
+            if (OfferFerry(npc)) return; // a ferryman: the timetable
 
             var turnIn = quests.TurnInAt(n.id);
             if (turnIn != null)

@@ -458,7 +458,7 @@ namespace Buds.UI
             // the name sits right under the tile, inside the slot's own box (never under the next row)
             var label = UiKit.Label("Label", root, SlotName(slot), 16, UiKit.InkSoft, true, TextAnchor.UpperCenter);
             UiKit.Place(label.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -Tile - 2), new Vector2(Tile + 60, 22), new Vector2(0.5f, 1));
-            label.horizontalOverflow = HorizontalWrapMode.Overflow; // "Wierzchowiec" stays on one line
+            label.horizontalOverflow = HorizontalWrapMode.Overflow; // "Pojazd" stays on one line
             frame.raycastTarget = true;
             var button = root.gameObject.AddComponent<Button>();
             button.targetGraphic = frame;
@@ -519,7 +519,7 @@ namespace Buds.UI
                     data.Guest
                         ? "Połącz Buda ze strony, żeby zbierać i zakładać przedmioty."
                         : selectedSlot == "mount"
-                            ? "Nie masz jeszcze wierzchowca. Deskorolkę, hulajnowę i rower kupisz w sklepie, a motocykl i quada zdobędziesz w pojedynkach."
+                            ? "Nie masz jeszcze pojazdu. Deskorolkę, hulajnowę i rower kupisz w sklepie, a motocykl i quada zdobędziesz w pojedynkach."
                             : "Nic tu jeszcze nie masz. Przedmioty dają pojedynki, zadania, skrytki i sklep.", 21, UiKit.InkSoft, false,
                     TextAnchor.UpperLeft);
                 UiKit.Stretch(empty.rectTransform);
@@ -882,7 +882,7 @@ namespace Buds.UI
             shopGrid = UiKit.Rect("Grid", page);
             UiKit.Place(shopGrid, new Vector2(0, 1), new Vector2(GridX, 0), new Vector2(ShopCols * ShopStepX, PageH - 56), new Vector2(0, 1));
             var premium = UiKit.Label("Premium", page,
-                "<b>Premium:</b> unikatowe wierzchowce i bronie za gemy. Wyjątkowy wygląd, ta sama moc co przedmioty z gry.", 17,
+                "<b>Premium:</b> unikatowe pojazdy i bronie za gemy. Wyjątkowy wygląd, ta sama moc co przedmioty z gry.", 17,
                 UiKit.InkSoft, false, TextAnchor.LowerLeft);
             UiKit.Place(premium.rectTransform, new Vector2(0, 0), new Vector2(GridX, 0), new Vector2(ShopCols * ShopStepX, 48), Vector2.zero);
 

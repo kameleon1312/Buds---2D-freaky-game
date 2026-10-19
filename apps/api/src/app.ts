@@ -26,6 +26,12 @@ import {
   type SkillsResponse,
   type WalletResponse,
   levelFromXp,
+  districtById,
+  ferryBlocker,
+  ferryFare,
+  ferryRequestSchema,
+  portById,
+  type FerryResponse,
   MAX_BUDS_PER_ACCOUNT,
   REMATCH_SECONDS,
   budFighter,
@@ -384,6 +390,41 @@ export function createApp(
   });
 
   /** Buys gear, rides and drinks for coins earned in the game. */
+  /**
+   * The ferry: from one city's harbour to another's for a small fare. The destination's level gate applies, the fare
+   * is paid atomically (never below zero); the game then sails the bud there.
+   */
+  app.post('/v1/buds/me/ferry', requirePlayer(store), async (c) => {
+    const input = ferryRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success) throw new HTTPException(400, { message: 'Zły kurs' });
+    const bud = c.get('bud');
+    const blocker = ferryBlocker(input.data.from, input.data.to, levelFromXp(bud.xp).level);
+    if (blocker === 'unknown_port' || blocker === 'same_port')
+      throw new HTTPException(404, { message: 'Nie ma takiego kursu' });
+    const to = portById(input.data.to)!;
+    if (blocker === 'level_too_low') {
+      const need = districtById(to.district)?.unlockLevel ?? 1;
+      return c.json<ApiError>(
+        { error: { code: 'level_too_low', message: `Tam pływamy od poziomu ${need}` } },
+        403,
+      );
+    }
+    const fare = ferryFare(to);
+    const paid = await store.payFare(bud.slug, fare);
+    if (paid.status === 'poor') {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'not_enough_coins',
+            message: `Brakuje ci ${fare - paid.coins} monet na bilet`,
+          },
+        },
+        409,
+      );
+    }
+    return c.json<FerryResponse>({ coins: paid.coins, fare, to: to.id, district: to.district });
+  });
+
   app.post('/v1/shop/:itemId/buy', requirePlayer(store), async (c) => {
     const item = catalogItem(c.req.param('itemId'), catalog);
     if (!item?.shop || !item.available || item.price.currency !== 'coins') {

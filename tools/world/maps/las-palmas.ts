@@ -179,7 +179,7 @@ export function lasPalmas(): MapCanvas {
   // exit road south, cutting through the jungle border
   for (let y = 84; y < H; y++) for (let x = 62; x <= 65; x++) m.set(x, y, { g: 'path' });
   m.sign(67, 90, 'Do Miasta Ziomków', 'Droga powrotna do miasta.');
-  m.exit([62, H - 1, 65, H - 1], 'miasto-ziomkow');
+  m.exit([62, H - 1, 65, H - 1], 'pustkowie-wydmy');
 
   m.zone(town, 'Miasteczko');
   m.zone([10, 24, 44, 94], 'Plaża Aloha');

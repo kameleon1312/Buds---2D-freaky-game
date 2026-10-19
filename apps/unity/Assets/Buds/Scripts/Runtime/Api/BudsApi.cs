@@ -133,6 +133,21 @@ namespace Buds.Api
         public Awaitable<WalletResponse> GetWallet(string token) => Get<WalletResponse>("/v1/buds/me/wallet", token);
 
         /// <summary>Spends one skill point; the server checks free points and the maximum rank.</summary>
+        /// <summary>Buys a ferry ticket between two harbours; the server checks the level and takes the fare.</summary>
+        public async Awaitable<FerryResponse> Ferry(string token, string from, string to)
+        {
+            using var req = new UnityWebRequest($"{baseUrl}/v1/buds/me/ferry", UnityWebRequest.kHttpVerbPOST)
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(new FerryRequest { from = from, to = to }))),
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await Send(req);
+            return Parse<FerryResponse>(req);
+        }
+
         public async Awaitable<SkillsResponse> UpgradeSkill(string token, string skillId)
         {
             using var req = new UnityWebRequest($"{baseUrl}/v1/buds/me/skills/{Uri.EscapeDataString(skillId)}/upgrade",

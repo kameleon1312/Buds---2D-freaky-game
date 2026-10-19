@@ -138,6 +138,25 @@ namespace Buds.World
             var cy = new[] { 0, 0, 1, 1 };
             var v = new float[4];
             for (var j = j0; j < j1; j++)
+            {
+                // full cells next to each other in a row become one long quad: far fewer vertices, same shape
+                var run = -1;
+                void Flush(int end)
+                {
+                    if (run < 0) return;
+                    var start = mesh.Vertices.Count;
+                    mesh.Vertices.Add(new Vector3(run / (float)SamplesPerTile, mapHeight - j / (float)SamplesPerTile, 0));
+                    mesh.Vertices.Add(new Vector3(end / (float)SamplesPerTile, mapHeight - j / (float)SamplesPerTile, 0));
+                    mesh.Vertices.Add(new Vector3(end / (float)SamplesPerTile, mapHeight - (j + 1) / (float)SamplesPerTile, 0));
+                    mesh.Vertices.Add(new Vector3(run / (float)SamplesPerTile, mapHeight - (j + 1) / (float)SamplesPerTile, 0));
+                    mesh.Triangles.Add(start);
+                    mesh.Triangles.Add(start + 2);
+                    mesh.Triangles.Add(start + 1);
+                    mesh.Triangles.Add(start);
+                    mesh.Triangles.Add(start + 3);
+                    mesh.Triangles.Add(start + 2);
+                    run = -1;
+                }
             for (var i = i0; i < i1; i++)
             {
                 var inside = 0;
@@ -146,6 +165,12 @@ namespace Buds.World
                     v[k] = field[j + cy[k], i + cx[k]];
                     if (v[k] >= threshold) inside++;
                 }
+                if (inside == 4)
+                {
+                    if (run < 0) run = i;
+                    continue;
+                }
+                Flush(i);
                 if (inside == 0) continue;
 
                 // clip the cell square to the inside of the iso-line (corners in order TL, TR, BR, BL)
@@ -174,6 +199,8 @@ namespace Buds.World
                     mesh.Triangles.Add(start + k + 1);
                     mesh.Triangles.Add(start + k);
                 }
+            }
+                Flush(i1);
             }
             return mesh;
         }

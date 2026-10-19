@@ -1,4 +1,4 @@
-// Rides (wierzchowce), training stations and energy drinks.
+// Rides (pojazdy), training stations and energy drinks.
 //   jazda-<kind>-bok / -przod / -tyl   the ride under a bud: side (facing left, drawn behind the bud), front and
 //                                      back (drawn in front of the bud). Anchor = the ground point under the bud.
 //   trening-<look>                     training stations standing on the map (packages/shared training.ts)

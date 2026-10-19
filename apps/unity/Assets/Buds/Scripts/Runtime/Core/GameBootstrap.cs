@@ -239,14 +239,22 @@ namespace Buds.Core
             if (world) Destroy(world.gameObject);
             if (player) Destroy(player.gameObject);
 
-            var map = MapFormat.Load(districtId);
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            // the map the bud walked towards was worked out ahead on a worker thread (PrepareAhead)
+            var ready = WorldView.TakePrepared(districtId);
+            var map = ready?.map ?? MapFormat.Load(districtId);
+            var parsed = clock.ElapsedMilliseconds;
             EnterMap(map);
-            world = WorldView.Create(map);
+            world = WorldView.Create(map, ready?.ground);
+            var built = clock.ElapsedMilliseconds;
             questWorld = QuestWorld.Create(world, quests);
             cacheWorld = CacheWorld.Create(world, caches);
             enemyWorld = EnemyWorld.Create(world, quests.Content);
+            var people = clock.ElapsedMilliseconds;
             UpdateTracker();
-            var at = fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
+            var at = arriveAt.HasValue ? NearestFree(map, arriveAt.Value)
+                : fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
+            arriveAt = null;
             player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
             player.Blocked = (x, y) => !map.IsWalkable(x, map.Height - 1 - y);
             // strolling NPCs stop for the player and stand still while anyone talks or a screen is open
@@ -268,6 +276,8 @@ namespace Buds.Core
             // what the old map loaded (its prop textures, sheets) goes back to the system
             Resources.UnloadUnusedAssets();
             if (CommandLine.Has("-buds-autoshot"))
+                Debug.Log($"[Load] {map.Id}: parse {parsed} ms, world {built - parsed} ms, people {people - built} ms, total {clock.ElapsedMilliseconds} ms ({WorldView.LastTimings})");
+            if (CommandLine.Has("-buds-autoshot"))
                 Debug.Log($"[Mem] {map.Id}: {UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / (1024 * 1024)} MB allocated, " +
                           $"{UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver() / (1024 * 1024)} MB graphics");
 
@@ -287,12 +297,13 @@ namespace Buds.Core
             var input = player.Input;
             input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
                             (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
-                            (creatorScreen?.IsOpen ?? false);
+                            (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false);
             if (creatorScreen?.IsOpen ?? false) return; // the look editor is open over the world
             if (UpdateFight()) return;
             if (UpdateRidesAndTraining(input)) return;
             ui.UpdateStick(input);
 
+            if (UpdateFerry(input)) return;
             if (UpdateMapScreen(input)) return;
             if (UpdatePanel(input)) return;
             if (UpdateRivalry(input)) return;
@@ -306,6 +317,7 @@ namespace Buds.Core
             }
 
             var cell = player.MapCell(world.Map.Height);
+            PrepareAhead(cell);
             CheckZone(cell);
             if (CheckExit(cell)) return;
             CheckQuestProgress(cell);
@@ -313,6 +325,18 @@ namespace Buds.Core
 
             // what the bud can interact with: a person first, then an opponent, a cache, a door, a sign
             var feet = (Vector2)player.transform.position;
+            // off the road on a route: someone in the bushes may jump out and pick a fight on their own
+            var fighting = fightBusy || (fightScreen?.IsOpen ?? false);
+            enemyWorld.Settle(feet, fighting);
+            if (!ui.DialogOpen)
+            {
+                var lurker = enemyWorld.AmbushNear(feet, fighting);
+                if (lurker)
+                {
+                    _ = SprungOn(lurker);
+                    return;
+                }
+            }
             var (mx, my) = FeetOnMap();
             nearbyNpc = questWorld.NearestNpc(feet, InteractRange);
             nearbyEnemy = nearbyNpc ? null : enemyWorld.Nearest(feet, InteractRange);
@@ -361,6 +385,18 @@ namespace Buds.Core
                 _ = Travel(exit.DistrictId, world.Map.Id);
                 return true;
             }
+            // a road out of the city onto a wasteland: open when the city at its far end is
+            if (Districts.IsRoute(exit.DistrictId))
+            {
+                var far = Districts.Get(Districts.FarEnd(exit.DistrictId, world.Map.Id) ?? "");
+                if (far == null || Districts.CanEnterRoute(exit.DistrictId, world.Map.Id, level) || (Debug.isDebugBuild && far.Open))
+                {
+                    _ = Travel(exit.DistrictId, world.Map.Id);
+                    return true;
+                }
+                ui.ShowDialog(Districts.NameOf(exit.DistrictId), $"Ta droga prowadzi do: {far.Name}.\n{Districts.ClosedReason(far, level)}");
+                return false;
+            }
             var district = Districts.Get(exit.DistrictId);
             if (district == null) return false;
             // development builds skip the level gate so every district can be walked through
@@ -371,6 +407,44 @@ namespace Buds.Core
             }
             ui.ShowDialog(district.Name, Districts.ClosedReason(district, level));
             return false;
+        }
+
+        float nextPrepare;
+
+        /// <summary>
+        /// Walking towards a road out: the map at its end gets worked out ahead on a worker thread, so crossing over is
+        /// quick (one map at a time, the nearest road within PrepareReach tiles; rooms are small anyway).
+        /// </summary>
+        void PrepareAhead(Vector2Int cell)
+        {
+            if (Time.unscaledTime < nextPrepare || world.Map.IsInterior) return;
+            nextPrepare = Time.unscaledTime + 0.5f;
+            Exit best = null;
+            var bestD = PrepareReach;
+            foreach (var e in world.Map.Exits)
+            {
+                var dx = Mathf.Max(e.X0 - cell.x, 0, cell.x - e.X1);
+                var dy = Mathf.Max(e.Y0 - cell.y, 0, cell.y - e.Y1);
+                var d = Mathf.Sqrt(dx * dx + dy * dy);
+                if (d >= bestD) continue;
+                bestD = d;
+                best = e;
+            }
+            if (best != null) WorldView.Prepare(best.DistrictId);
+        }
+
+        /// <summary>How near a road out (tiles) the bud is when the next map starts getting ready.</summary>
+        const float PrepareReach = 26f;
+
+        /// <summary>The walkable cell nearest to (x, y), the cell itself excluded (someone stands there: the ferryman).</summary>
+        static Vector2Int NearestFree(WorldMap map, Vector2Int c)
+        {
+            for (var r = 1; r < 8; r++)
+            for (var dy = -r; dy <= r; dy++)
+            for (var dx = -r; dx <= r; dx++)
+                if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) == r && map.IsWalkable(c.x + dx, c.y + dy))
+                    return new Vector2Int(c.x + dx, c.y + dy);
+            return new Vector2Int(map.SpawnX, map.SpawnY);
         }
 
         /// <summary>Puts the bud on the nearest walkable cell to (x, y) — used by the autopilot tour.</summary>
@@ -556,6 +630,7 @@ namespace Buds.Core
 
                 if (CommandLine.Has("-buds-gear-demo") && session != null) await GearDemo(Shot);
                 if (CommandLine.Has("-buds-ride-demo") && session != null) await RideDemo(Shot);
+                if (CommandLine.Has("-buds-travel-demo") && session != null) await TravelDemo(Shot);
                 if (CommandLine.Has("-buds-rivalry-demo") && session != null)
                 {
                     if (world.Map.Id != Districts.Start) LoadDistrict(Districts.Start, null);

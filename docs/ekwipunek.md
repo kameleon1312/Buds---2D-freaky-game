@@ -32,7 +32,7 @@ W ręku z prawej, Dodatek przy ramieniu.
 - **Pojedynki:** łup o rzadkości zależnej od rywala (bossowie: epickie i legendarne).
 - **Sklep za monety:** monety ze skrytek, kupujesz w grze (panel → Sklep). Serwer sprawdza cenę i portfel
   (`POST /v1/shop/:itemId/buy`, funkcja SQL `buy_item`).
-- **Sklep premium (za gemy):** unikatowe wierzchowce i bronie dostępne tylko za gemy (`packages/shared/src/premium.ts`,
+- **Sklep premium (za gemy):** unikatowe pojazdy i bronie dostępne tylko za gemy (`packages/shared/src/premium.ts`,
   zakładka „Premium” w sklepie, `POST /v1/premium/:itemId/buy`, funkcja SQL `buy_item_gems`). Każdy taki przedmiot
   ma „bliźniaka” (`twin`) do zdobycia w grze i jest **dokładnie tak samo mocny**: ten sam bonus, ta sama broń, ta
   sama prędkość jazdy. Różni się wyglądem (własna grafika, rzadkość „mityczna”, poświata i błysk) i może być założony

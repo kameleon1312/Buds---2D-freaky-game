@@ -129,6 +129,13 @@ TT#TT
             foreach (var d in Districts.All) yield return d.Id;
         }
 
+        /// <summary>Every map you walk on outdoors: the districts and the wastelands between them.</summary>
+        static IEnumerable<string> Outdoors()
+        {
+            foreach (var d in Districts.All) yield return d.Id;
+            foreach (var r in Districts.Routes) yield return r.Id;
+        }
+
         static HashSet<string> knownProps;
 
         static HashSet<string> KnownProps()
@@ -151,7 +158,7 @@ TT#TT
             Assert.IsNotEmpty(map.GroundStyles);
         }
 
-        [TestCaseSource(nameof(Ids))]
+        [TestCaseSource(nameof(Outdoors))]
         public void StandingThingsDrawOverTheGroundEverywhere(string id)
         {
             // characters, props and caches at the north end of a big map used to sort under the ground and road markings
@@ -167,7 +174,7 @@ TT#TT
             }
         }
 
-        [TestCaseSource(nameof(Ids))]
+        [TestCaseSource(nameof(Outdoors))]
         public void UsesOnlyKnownProps(string id)
         {
             var map = MapFormat.Load(id);
@@ -175,14 +182,14 @@ TT#TT
                 Assert.IsTrue(KnownProps().Contains(p.Name), $"{id}: unknown prop '{p.Name}' at ({p.X},{p.Y})");
         }
 
-        [TestCaseSource(nameof(Ids))]
+        [TestCaseSource(nameof(Outdoors))]
         public void ExitsAreAtTheEdgeAndLeadBack(string id)
         {
             var map = MapFormat.Load(id);
             Assert.IsNotEmpty(map.Exits);
             foreach (var exit in map.Exits)
             {
-                Assert.IsNotNull(Districts.Get(exit.DistrictId), exit.DistrictId);
+                Assert.IsTrue(Districts.Get(exit.DistrictId) != null || Districts.IsRoute(exit.DistrictId), exit.DistrictId);
                 Assert.IsTrue(exit.Y0 == 0 || exit.Y1 == map.Height - 1 || exit.X0 == 0 || exit.X1 == map.Width - 1,
                     $"{id} → {exit.DistrictId} is not at the edge");
                 // the other side has a road back, and arriving there puts you on walkable ground
@@ -193,7 +200,7 @@ TT#TT
             }
         }
 
-        [TestCaseSource(nameof(Ids))]
+        [TestCaseSource(nameof(Outdoors))]
         public void ExitsSignsAndZonesAreReachableOnFoot(string id)
         {
             var map = MapFormat.Load(id);
@@ -231,10 +238,11 @@ TT#TT
         [Test]
         public void TheStartDistrictLinksToEveryOtherDistrict()
         {
+            // every road out of the city crosses a wasteland that ends in another district
             var map = MapFormat.Load(Districts.Start);
             foreach (var d in Districts.All)
                 if (d.Id != Districts.Start)
-                    Assert.IsNotNull(map.Exits.Find(e => e.DistrictId == d.Id), d.Id);
+                    Assert.IsNotNull(map.Exits.Find(e => Districts.FarEnd(e.DistrictId, Districts.Start) == d.Id), d.Id);
         }
     }
 

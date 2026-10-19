@@ -158,7 +158,7 @@ namespace Buds.Core
             var back = world ? world.Map.Id : null;
             try
             {
-                await ui.FadeTo(1, 0.16f);
+                await ui.FadeTo(1, 0.12f);
                 LoadDistrict(mapId, from);
                 player.Input.Blocked = true;
             }
@@ -181,7 +181,7 @@ namespace Buds.Core
             }
             finally
             {
-                await ui.FadeTo(0, 0.22f);
+                await ui.FadeTo(0, 0.18f);
                 travelling = false;
             }
         }

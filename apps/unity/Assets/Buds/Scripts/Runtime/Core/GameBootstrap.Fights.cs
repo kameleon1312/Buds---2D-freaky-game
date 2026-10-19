@@ -153,8 +153,32 @@ namespace Buds.Core
             }
         }
 
+        /// <summary>
+        /// A lurker jumped out of its nook on a route: it shows itself, says its line, and a moment later the duel starts
+        /// on its own (running away is the usual "Uciekaj"). Guests can't fight on the server: it just scares them off.
+        /// </summary>
+        async Awaitable SprungOn(EnemyView enemy)
+        {
+            enemy.Spring();
+            enemy.Face(player.transform.position);
+            ui.ShowToast($"Zasadzka! {enemy.Data.name} (poz. {enemy.Data.level})", 2.5f);
+            if (session == null)
+            {
+                ui.ShowDialog(enemy.Data.name, $"„{Ambush.Line(enemy.Data)}”\n<i>Z zasadzki atakują tylko połączonego Buda. Uciekaj, póki możesz!</i>");
+                enemy.Hide(Ambush.Cooldown);
+                return;
+            }
+            await Awaitable.WaitForSecondsAsync(Ambush.WindUp);
+            if (!enemy || !player || fightScreen.IsOpen) return;
+            await StartDuel(enemy);
+            // the duel didn't start (no connection, still resting): back into the bushes for a while
+            if (enemy && !fightScreen.IsOpen) enemy.Hide(Ambush.Cooldown);
+        }
+
         void CloseFight()
         {
+            // a lurker the bud ran from (or lost to) hides in its nook again for a while
+            if (fightingWith && fightingWith.Data.ambush && currentFight?.status != "won") fightingWith.Hide(Ambush.Cooldown);
             fightScreen.Hide();
             if (currentFight?.enemyId != null && currentFight.enemyId.StartsWith("pvp-"))
             {

@@ -75,7 +75,7 @@ to strzał i seria, mikrofon to diss i drop. Wygrane dają łup, od zwykłego po
 <td valign="top">
 
 **Ekwipunek od stóp do głów**
-Ponad 100 przedmiotów w dziewięciu miejscach na postaci, od czapki po wierzchowca. Każdy coś daje: atak, szybkość,
+Ponad 100 przedmiotów w dziewięciu miejscach na postaci, od czapki po pojazd. Każdy coś daje: atak, szybkość,
 pancerz, szczęście albo rangę umiejętności. Zakładasz je na sylwetce Buda i od razu widzisz efekt.
 
 </td>
@@ -91,7 +91,7 @@ specjalne w pojedynkach.
 <tr>
 <td valign="top">
 
-**Wierzchowce**
+**Pojazdy**
 Deskorolka, hulajnowa, rower, e-hulajnowa, motocykl i quad. Każdy kolejny jest szybszy, a te najmocniejsze trzeba
 zdobyć w walce.
 
@@ -165,7 +165,7 @@ Na komputerze: klawiatura (WASD, E, I, M).
 
 <div align="center">
 
-| 5 dzielnic + wyspa | 80 mieszkańców | 54 zadania | 29 przeciwników | 100+ przedmiotów | 6 wierzchowców |
+| 5 dzielnic + wyspa | 80 mieszkańców | 54 zadania | 29 przeciwników | 100+ przedmiotów | 6 pojazdów |
 | :----------------: | :------------: | :--------: | :-------------: | :--------------: | :------------: |
 
 </div>

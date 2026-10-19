@@ -29,6 +29,15 @@ namespace Buds.World
         {
             if (interior)
                 return new Mood { Contrast = 14, Saturation = 4, Highlights = Hex("#ffd6a0"), Shadows = Hex("#4a3a58"), Balance = -15, Vignette = 0.3f };
+            // the wastelands take the light of the land they cross
+            districtId = districtId switch
+            {
+                "pustkowie-ostepy" => "dzika-puszcza",
+                "pustkowie-wydmy" => "las-palmas",
+                "pustkowie-gosciniec" => "dwor-carski",
+                "pustkowie-nieuzytki" => "los-karkos",
+                _ => districtId,
+            };
             return districtId switch
             {
                 "dzika-puszcza" => new Mood

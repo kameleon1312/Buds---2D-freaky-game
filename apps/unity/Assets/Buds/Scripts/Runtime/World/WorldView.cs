@@ -116,17 +116,24 @@ namespace Buds.World
         public static int SortOrderFor(float worldY) =>
             Mathf.Clamp(SortStandZero - Mathf.RoundToInt(worldY * 100), SortStandBottom, SortStandTop);
 
-        public static WorldView Create(WorldMap map)
+        /// <summary>How long the last map took to build, by part (for the autopilot's load log).</summary>
+        public static string LastTimings { get; private set; } = "";
+
+        public static WorldView Create(WorldMap map, List<GroundLayer> ground = null)
         {
             var root = new GameObject("World " + map.Id, typeof(Grid));
             var view = root.AddComponent<WorldView>();
             view.Map = map;
             Sunlit = !map.IsInterior;
 
+            var clock = System.Diagnostics.Stopwatch.StartNew();
             Colliders(root.transform, map);
+            var colliders = clock.ElapsedMilliseconds;
             var material = SpriteMaterial();
-            Ground(root.transform, map, material);
+            Ground(root.transform, map, material, ground);
+            var groundDone = clock.ElapsedMilliseconds;
             Props(view, root.transform, map, material);
+            LastTimings = $"colliders {colliders} ms, ground {groundDone - colliders} ms ({(ground != null ? "ready" : "now")}), props {clock.ElapsedMilliseconds - groundDone} ms";
             return view;
         }
 
@@ -165,7 +172,7 @@ namespace Buds.World
 
         // ---------- ground ----------
 
-        static void Ground(Transform parent, WorldMap map, Material material)
+        static void Ground(Transform parent, WorldMap map, Material material, List<GroundLayer> plan = null)
         {
             var w = map.Width;
             var h = map.Height;
@@ -192,13 +199,39 @@ namespace Buds.World
             var basePattern = map.IsInterior ? GroundLook.Pattern.Grain : GroundLook.Pattern.Grass;
             Layer(root, "Base", baseMesh, map.BaseColor * GroundLook.Gain(basePattern), order++, Surface(basePattern));
 
+            // the layers themselves: worked out ahead (a worker thread, see Prepare) or now
+            foreach (var l in plan ?? PlanGround(map))
+                Layer(root, l.Name, l.Mesh, l.Color * GroundLook.Gain(l.Pattern), order + l.Band, Surface(l.Pattern));
+        }
+
+        /// <summary>One layer of ground, worked out from the map: pure maths, safe on a worker thread.</summary>
+        public sealed class GroundLayer
+        {
+            public string Name;
+            public GroundMesh Mesh;
+            public Color Color;
+            public int Band;
+            public GroundLook.Pattern Pattern;
+        }
+
+        /// <summary>
+        /// The smooth ground layers of a map (blurred masks traced into meshes): the slow part of entering a district,
+        /// so it can run on a worker thread while the bud walks towards the road out (no Unity objects are touched).
+        /// </summary>
+        public static List<GroundLayer> PlanGround(WorldMap map)
+        {
+            var layers = new List<GroundLayer>();
+            var w = map.Width;
+            var h = map.Height;
             var chunk = ChunkTiles * GroundShapes.SamplesPerTile;
             var nx = w * GroundShapes.SamplesPerTile;
             var ny = h * GroundShapes.SamplesPerTile;
+            var band = 0;
             foreach (var style in map.GroundStyles)
             {
                 var kinds = new HashSet<string>(style.Kinds);
                 var field = GroundShapes.Field((x, y) => kinds.Contains(map.GroundAt(x, y)), w, h, style.Radius);
+                var pattern = GroundLook.For(style.Name);
                 foreach (var (threshold, color) in style.Bands)
                 {
                     for (var j0 = 0; j0 < ny; j0 += chunk)
@@ -206,12 +239,66 @@ namespace Buds.World
                     {
                         var mesh = GroundShapes.Contour(field, threshold, h, i0, j0, Mathf.Min(i0 + chunk, nx),
                             Mathf.Min(j0 + chunk, ny));
-                        var pattern = GroundLook.For(style.Name);
-                        Layer(root, $"{style.Name} {threshold:0.00} [{i0 / chunk},{j0 / chunk}]", mesh, color * GroundLook.Gain(pattern), order,
-                            Surface(pattern));
+                        if (mesh.Triangles.Count == 0) continue;
+                        layers.Add(new GroundLayer
+                        {
+                            Name = $"{style.Name} {threshold:0.00} [{i0 / chunk},{j0 / chunk}]",
+                            Mesh = mesh,
+                            Color = color,
+                            Band = band,
+                            Pattern = pattern,
+                        });
                     }
-                    order++;
+                    band++;
                 }
+            }
+            return layers;
+        }
+
+        // ---------- getting the next map ready while the bud walks to it ----------
+
+        static string preparedId;
+        static WorldMap preparedMap;
+        static System.Threading.Tasks.Task<List<GroundLayer>> preparedGround;
+
+        /// <summary>
+        /// Starts working out a map's ground on a worker thread (the file is read here, on the main thread). Entering it
+        /// later then only builds the meshes: no stop on the road from one city to the next.
+        /// </summary>
+        public static void Prepare(string mapId)
+        {
+            if (mapId == preparedId) return;
+            try
+            {
+                var map = MapFormat.Load(mapId);
+                preparedId = mapId;
+                preparedMap = map;
+                preparedGround = System.Threading.Tasks.Task.Run(() => PlanGround(map));
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Could not prepare {mapId}: {e.Message}");
+                preparedId = null;
+            }
+        }
+
+        /// <summary>The prepared map and its ground (waiting for the worker if it is still on it), or null.</summary>
+        public static (WorldMap map, List<GroundLayer> ground)? TakePrepared(string mapId)
+        {
+            if (mapId != preparedId || preparedGround == null) return null;
+            var task = preparedGround;
+            var map = preparedMap;
+            preparedId = null;
+            preparedMap = null;
+            preparedGround = null;
+            try
+            {
+                return (map, task.Result);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Preparing {mapId} failed: {e.Message}");
+                return null;
             }
         }
 

@@ -3,7 +3,7 @@ import { priceOf } from './gear-items';
 import type { BuffId } from './consumables';
 
 /**
- * Mounts (wierzchowce): rides in the "Wierzchowiec" slot that make the bud faster outdoors. Earned in the game only:
+ * Mounts (pojazdy): rides in the "Pojazd" slot that make the bud faster outdoors. Earned in the game only:
  * the cheaper ones in the coin shop, the motorbike and the quad from strong opponents' loot.
  */
 export const MOUNTS: CatalogItem[] = (

@@ -1,7 +1,7 @@
-# Umiejętności, trening, napoje i wierzchowce
+# Umiejętności, trening, napoje i pojazdy
 
 Wszystko, co daje przewagę w grze, przyznaje serwer. Gra pokazuje mini-gry, liczniki i animacje, ale XP treningu,
-rangi, napoje i wierzchowce zapisuje tylko API.
+rangi, napoje i pojazdy zapisuje tylko API.
 
 ## Umiejętności i rangi
 
@@ -60,16 +60,16 @@ Kupuje się je w sklepie za monety, ile razy się chce (`buy_consumable`), a w p
 (`DRINK_DROP_CHANCE`, osobny strumień RNG, nie zmienia łupu). Wypicie (`POST /v1/buds/me/consumables/:id/use`,
 `use_consumable`) zabiera jedną puszkę i uruchamia efekt (ponowne wypicie odnawia czas). Serwer stosuje efekty tam,
 gdzie sam liczy: w pojedynkach (`budFighter`), w skrytkach (Fart), w treningu (Skupienie). Gra pokazuje liczniki pod
-przyciskami HUD i w zakładce „Napoje”. Napoje nigdy nie są za prawdziwe pieniądze (`gearProblems`). Za gemy są za to unikatowe warianty wierzchowców
+przyciskami HUD i w zakładce „Napoje”. Napoje nigdy nie są za prawdziwe pieniądze (`gearProblems`). Za gemy są za to unikatowe warianty pojazdów
 (Deskorolka Holo, Hulajnowa Neon, Rower Chrom, Motocykl Smok, Quad Wulkan): ta sama prędkość co odpowiednik z gry,
 inny wygląd (`docs/ekwipunek.md`).
 
-## Wierzchowce
+## Pojazdy
 
-Nowe miejsce w ekwipunku: **Wierzchowiec** (`mount`). Każdy dodaje własną szybkość (`mountSpeed`), poza limitem
+Nowe miejsce w ekwipunku: **Pojazd** (`mount`). Każdy dodaje własną szybkość (`mountSpeed`), poza limitem
 szybkości z ubrań:
 
-| Wierzchowiec       | Rzadkość     | Poziom | Szybkość | Skąd                    |
+| Pojazd       | Rzadkość     | Poziom | Szybkość | Skąd                    |
 | ------------------ | ------------ | ------ | -------- | ----------------------- |
 | Deskorolka Cruiser | zwykła       | 1      | +20%     | sklep                   |
 | Hulajnowa Śmigacz  | niepospolita | 3      | +30%     | sklep                   |
@@ -78,7 +78,7 @@ szybkości z ubrań:
 | Motocykl Grzmot    | epicka       | 9      | +70%     | łup (silni przeciwnicy) |
 | Quad Bestia        | legendarna   | 12     | +85%     | łup (bossowie)          |
 
-Prędkość chodzenia w grze: `(1 + ubrania) × (1 + wierzchowiec) × (1 + perki + Turbo)` (`Rides.SpeedMultiplier`).
+Prędkość chodzenia w grze: `(1 + ubrania) × (1 + pojazd) × (1 + perki + Turbo)` (`Rides.SpeedMultiplier`).
 Bud jedzie tylko na zewnątrz (we wnętrzach idzie pieszo); `R` albo przycisk „Zsiądź / Wsiądź” w HUD. Grafika:
 `jazda-<rodzaj>-bok / -przod / -tyl` w `tools/world/art/rides.ts` — widok z boku rysowany za Budem, z przodu i z tyłu
 przed nim (kierownica, koła), deskorolka zawsze pod stopami.
@@ -93,7 +93,7 @@ Migracja `20261013130000_training_drinks_mounts.sql`: miejsce `mount` w `bud_equ
 
 ```bash
 pnpm test                              # shared/test/skills.test.ts, api/test/training.test.ts
-# Unity: RideTests (wierzchowce, napoje, stanowiska, mini-gra)
+# Unity: RideTests (pojazdy, napoje, stanowiska, mini-gra)
 # autopilot z połączonym Budem: kupuje deskorolkę i napoje, jeździ, pije Turbo, trenuje
 Buds.exe -buds-pair KOD -buds-api http://localhost:4000 -buds-tour -buds-ride-demo -buds-autoshot <dir>
 ```

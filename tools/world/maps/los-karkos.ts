@@ -171,7 +171,7 @@ export function losKarkos(): MapCanvas {
 
   // west entrance: road through the border, sign
   m.sign(4, 44, 'Do Miasta Ziomków', 'Droga powrotna do miasta.');
-  m.exit([0, 46, 0, 49], 'miasto-ziomkow');
+  m.exit([0, 46, 0, 49], 'pustkowie-nieuzytki');
 
   m.zone(blocks, 'Opuszczone Bloki');
   m.zone(bazaar, 'Bazar');

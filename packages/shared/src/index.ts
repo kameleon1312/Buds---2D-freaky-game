@@ -18,3 +18,4 @@ export * from './combat';
 export * from './account';
 export * from './skills';
 export * from './rivalry';
+export * from './travel';

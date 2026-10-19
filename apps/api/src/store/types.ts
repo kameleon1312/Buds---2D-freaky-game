@@ -124,6 +124,9 @@ export interface BudStore extends RivalryStore {
   consumables(slug: string): Promise<{ itemId: string; qty: number }[]>;
   /** Server-only (loot). Adds drinks to the count. */
   grantConsumable(slug: string, itemId: string, qty: number): Promise<void>;
+  /** Pays a fare (the ferry) atomically: never below zero coins. */
+  payFare(slug: string, price: number): Promise<{ status: 'ok' | 'poor'; coins: number }>;
+
   /** Buys one drink for coins atomically (never below zero coins); drinks can be bought again and again. */
   buyConsumable(slug: string, itemId: string, price: number): Promise<BuyResult>;
   /** Drinks one: takes it from the count and starts its boost. Returns the boost's end, or null if none left. */

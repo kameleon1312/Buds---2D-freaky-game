@@ -20,7 +20,7 @@ export const SLOTS = [
   { id: 'accessory', name: 'Dodatek' },
   { id: 'held', name: 'W ręku' },
   /** Rides: skateboards, scooters, bikes… They add their own speed (see `mountSpeed` in the catalog). */
-  { id: 'mount', name: 'Wierzchowiec' },
+  { id: 'mount', name: 'Pojazd' },
 ] as const;
 export type SlotId = (typeof SLOTS)[number]['id'];
 export const slotIdSchema = z.enum(SLOTS.map((s) => s.id) as [SlotId, ...SlotId[]]);

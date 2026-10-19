@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Buds.Characters
 {
     /// <summary>
-    /// Rides (wierzchowce) as plain data and maths: which sprite a ride shows for a facing (art from
+    /// Rides (pojazdy) as plain data and maths: which sprite a ride shows for a facing (art from
     /// tools/world/art/rides.ts: jazda-&lt;kind&gt;-bok / -przod / -tyl), how high the bud sits on it, and how fast the bud
     /// moves with gear, the ride, perks and the Turbo drink. Rides only work outdoors; the server checks ownership.
     /// </summary>
@@ -47,6 +47,17 @@ namespace Buds.Characters
         /// <summary>The front and back views are drawn over the bud (handlebars, wheels), the side view behind it.
         /// A skateboard is always under the feet.</summary>
         public static bool DrawnOverBud(string kind, Facing facing) => facing != Facing.Side && ShapeOf(kind) != "deskorolka";
+
+        /// <summary>
+        /// How the rider stands for a ride's facing. On a skateboard the bud stands across the board like a real
+        /// skater: rolling sideways it shows its front over the board's profile, rolling towards the camera or away it
+        /// shows its side over the board seen end-on. On anything with handlebars or a seat it faces where it goes.
+        /// </summary>
+        public static Facing RiderFacing(string kind, Facing facing) =>
+            ShapeOf(kind) == "deskorolka" ? facing == Facing.Side ? Facing.Down : Facing.Side : facing;
+
+        /// <summary>Rides steer freely in every direction (on foot the bud walks up/down/left/right).</summary>
+        public static bool FreeSteering(string kind) => kind != null;
 
         /// <summary>Every ride sprite a district needs for these mounts.</summary>
         public static IEnumerable<string> SpriteNames(string kind)

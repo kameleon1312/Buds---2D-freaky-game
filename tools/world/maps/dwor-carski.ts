@@ -202,7 +202,7 @@ export function dworCarski(): MapCanvas {
 
   // exit north
   m.sign(70, 3, 'Do Miasta Ziomków', 'Droga powrotna do miasta.');
-  m.exit([62, 0, 65, 0], 'miasto-ziomkow');
+  m.exit([62, 0, 65, 0], 'pustkowie-gosciniec');
 
   m.zone([44, 0, 84, 52], 'Aleja Carska');
   m.zone([46, 36, 81, 52], 'Dworek');

@@ -501,6 +501,11 @@ export const enemySchema = z.object({
   /** What they say before the duel; one is picked. */
   lines: z.array(z.string().min(1)).min(1),
   boss: z.boolean().default(false),
+  /**
+   * Lies in wait off the road on a route between cities (content/routes.ts): hidden in a nook or a bush until the
+   * bud comes close, then jumps out and starts the duel on its own.
+   */
+  ambush: z.boolean().default(false),
 });
 export type Enemy = z.infer<typeof enemySchema>;
 export type EnemyInput = z.input<typeof enemySchema>;
@@ -967,6 +972,7 @@ export function scaledEnemy(
     'id' | 'name' | 'district' | 'level' | 'weapon' | 'look' | 'lines' | 'spots'
   > & {
     boss?: boolean;
+    ambush?: boolean;
   },
 ): EnemyInput {
   const l = base.level;
@@ -983,5 +989,6 @@ export function scaledEnemy(
     lootTier: boss ? 5 : Math.min(4, Math.ceil(l / 3)),
     lootChance: boss ? 0.9 : Math.min(0.6, 0.3 + 0.025 * l),
     boss: !!base.boss,
+    ambush: !!base.ambush,
   };
 }

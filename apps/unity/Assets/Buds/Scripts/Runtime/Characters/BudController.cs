@@ -127,8 +127,9 @@ namespace Buds.Characters
         void Update()
         {
             Input.Update();
-            // four directions, like a classic top-down RPG; the physics step below uses the same choice
-            fourWay = Motor.FourWay(Input.Move);
+            // on foot: four directions, like a classic top-down RPG; on a ride: free steering all round (360°).
+            // The physics step below uses the same choice
+            fourWay = Ride != null && Rides.FreeSteering(Ride.Kind) ? Input.Move : Motor.FourWay(Input.Move);
             var move = fourWay;
             var speed = body.linearVelocity.magnitude;
             var moving = move.sqrMagnitude > 0.0001f;
@@ -142,9 +143,14 @@ namespace Buds.Characters
                 // riding: the bud stands still on the ride, both bob a little over bumps
                 Walk.Reset();
                 sprite.transform.localScale = Vector3.one;
-                sprite.transform.localRotation = Quaternion.identity;
-                lean = 0;
-                sprite.sprite = sheet.Get(Motor.Facing, 0);
+                // leaning into the turns a little, the way you do on a board or a bike
+                var turn = Motor.Facing == Facing.Side ? 0 : -body.linearVelocity.x * 0.9f;
+                lean = Mathf.Lerp(lean, Mathf.Clamp(turn, -6, 6), 1 - Mathf.Exp(-Time.deltaTime * 8f));
+                sprite.transform.localRotation = Quaternion.Euler(0, 0, lean);
+                var stance = Rides.RiderFacing(Ride.Kind, Motor.Facing);
+                sprite.sprite = sheet.Get(stance, 0);
+                // the skater's side frame looks the way the board last turned (or left by default)
+                if (stance != Motor.Facing) sprite.flipX = stance == Facing.Side && Motor.FacingRight;
                 rideTime += Time.deltaTime * speed;
                 var bob = speed > 0.25f ? Mathf.Abs(Mathf.Sin(rideTime * 2.4f)) * 0.025f : 0;
                 sprite.transform.localPosition = new Vector3(0, Rides.Rise(Ride.Kind) + bob, 0);

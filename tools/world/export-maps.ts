@@ -12,6 +12,7 @@ import { interiors } from './maps/interiors';
 import { lasPalmas } from './maps/las-palmas';
 import { losKarkos } from './maps/los-karkos';
 import { miastoZiomkow } from './maps/miasto-ziomkow';
+import { routes } from './maps/routes';
 import { wyspaStartowa } from './maps/wyspa-startowa';
 
 const districts = [miastoZiomkow, dzikaPuszcza, lasPalmas, dworCarski, losKarkos].map((build) =>
@@ -37,7 +38,16 @@ mkdirSync(dir, { recursive: true });
 // the tutorial island: its pier leads to Miasto Ziomków, one way
 const island = wyspaStartowa();
 
-for (const map of [...districts, island, ...rooms] as MapCanvas[]) {
+// the wastelands between the cities (travel.ts ROUTES): every city's road out leads onto one
+const wastelands = routes();
+for (const w of wastelands)
+  for (const end of [w.exits[0]!, w.exits[1]!]) {
+    const city = districts.find((d) => d.id === end.district);
+    if (!city?.exits.some((e) => e.district === w.id))
+      throw new Error(`${w.id}: ${end.district} has no road out onto it`);
+  }
+
+for (const map of [...districts, island, ...wastelands, ...rooms] as MapCanvas[]) {
   const { reachable, walkable } = map.validate();
   writeFileSync(`${dir}${map.id}.txt`, map.toText());
   console.info(`${map.id}: ${map.w}×${map.h}, ${reachable}/${walkable} walkable cells reachable`);

@@ -258,6 +258,13 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
       addDrinks(slug, itemId, Math.max(0, qty));
     },
 
+    async payFare(slug, price) {
+      const balance = coins.get(slug) ?? 0;
+      if (balance < price) return { status: 'poor', coins: balance };
+      coins.set(slug, balance - price);
+      return { status: 'ok', coins: balance - price };
+    },
+
     async buyConsumable(slug, itemId, price) {
       const balance = coins.get(slug) ?? 0;
       if (balance < price) return { status: 'poor', coins: balance };

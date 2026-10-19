@@ -294,7 +294,7 @@ namespace Buds.Core
                 else if (!panelData.Owned.Contains(itemId)) panelData.Owned.Add(itemId);
                 panelData.Error = null;
                 ui.ShowToast(item is { IsDrink: true } ? $"Kupiono: {item.name}. Wypijesz w zakładce Napoje."
-                    : item is { IsMount: true } ? $"Kupiono: {item.name}. Załóż w Ekwipunku (Wierzchowiec)."
+                    : item is { IsMount: true } ? $"Kupiono: {item.name}. Załóż w Ekwipunku (Pojazd)."
                     : $"Kupiono: {item?.name ?? itemId}. Załóż w Ekwipunku.", 2.8f);
             }
             catch (ApiException e)
