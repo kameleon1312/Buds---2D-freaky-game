@@ -19,3 +19,6 @@ export * from './account';
 export * from './skills';
 export * from './rivalry';
 export * from './travel';
+export * from './chat';
+export * from './live';
+export * from './walk-grids';

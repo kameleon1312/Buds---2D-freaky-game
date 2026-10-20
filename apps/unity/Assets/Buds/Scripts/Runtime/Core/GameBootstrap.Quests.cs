@@ -159,7 +159,9 @@ namespace Buds.Core
         void SetXp(int value)
         {
             xp = value;
+            var was = level;
             level = Progression.Level(xp);
+            if (level != was) LiveRefreshMe(); // the others see the new level over the bud's head
             ui.ShowHud(budName, level, xp, Progression.NextLevelXp(xp));
             quests.Level = level;
             questWorld.Refresh(); // a new level can unlock quests

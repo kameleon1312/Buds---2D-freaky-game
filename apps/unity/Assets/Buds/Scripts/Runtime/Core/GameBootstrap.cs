@@ -225,6 +225,7 @@ namespace Buds.Core
             // new buds start on the tutorial island; -buds-district <id> starts elsewhere (dev/test)
             LoadDistrict(CommandLine.Get("-buds-district") ?? StartMap(), null);
             ui.HideLoading();
+            SetUpLive(); // other players on the same map (paired buds only)
 
             var shots = CommandLine.Get("-buds-autoshot");
             if (shots != null) _ = AutoPilot(shots);
@@ -286,6 +287,7 @@ namespace Buds.Core
             ui.ShowToast(map.IsInterior || atZone == null ? map.Name : $"{map.Name} · {atZone.Name}");
             // who rules the turfs here this week (the zone banner, the tribute dot on the Rewiry button)
             _ = RefreshTurfs();
+            LiveMapChanged(); // the others on the old map go, the room of this one comes
         }
 
         void Update()
@@ -297,9 +299,10 @@ namespace Buds.Core
             var input = player.Input;
             input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
                             (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
-                            (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false);
+                            (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false);
             if (creatorScreen?.IsOpen ?? false) return; // the look editor is open over the world
             if (UpdateFight()) return;
+            if (UpdateChat()) return; // typing: every key is a letter, the world waits
             if (UpdateRidesAndTraining(input)) return;
             ui.UpdateStick(input);
 
@@ -344,12 +347,17 @@ namespace Buds.Core
             nearbyTraining = nearbyNpc || nearbyEnemy || nearbyCache != null ? null : trainingWorld.Nearest(feet, TrainingRange);
             nearbyDoor = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyTraining != null ? null : FindNearbyDoor(feet);
             nearby = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyTraining != null || nearbyDoor != null ? null : FindNearbySign();
+            // another player's bud last: it may stand anywhere, it never hides a door or a person
+            nearbyRemote = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyTraining != null || nearbyDoor != null || nearby != null
+                ? null
+                : NearestRemote(feet);
             ui.SetHint(nearbyNpc ? $"Rozmawiaj: {nearbyNpc.Data.name}  [E]"
                 : nearbyEnemy ? $"Walcz: {nearbyEnemy.Data.name} (poz. {nearbyEnemy.Data.level})  [E]"
                 : nearbyCache != null ? "Przeszukaj  [E]"
                 : nearbyTraining != null ? TrainingHint(nearbyTraining)
                 : nearbyDoor != null ? $"Wejdź: {nearbyDoor.Name}  [E]"
                 : nearby != null ? "Czytaj  [E]"
+                : nearbyRemote ? RemoteHint(nearbyRemote)
                 : null);
             if (!ui.DialogOpen && CheckDoorPush(input, cell)) return;
 
@@ -361,6 +369,7 @@ namespace Buds.Core
             else if (nearbyTraining != null) StartTraining(nearbyTraining);
             else if (nearbyDoor != null) EnterDoor(nearbyDoor);
             else if (nearby != null) ui.ShowDialog(nearby.Title, nearby.Text);
+            else if (nearbyRemote) MeetRemote(nearbyRemote);
         }
 
         void CheckZone(Vector2Int cell)
@@ -563,6 +572,12 @@ namespace Buds.Core
             try
             {
                 await Shot("01-spawn.png");
+                if (CommandLine.Has("-buds-live-demo") && session != null)
+                {
+                    await LiveDemo(Shot); // two clients in step: nothing else runs
+                    Application.Quit();
+                    return;
+                }
                 // the quest log: unfolded by its button, then folded away again
                 ui.SetQuestsOpen(true);
                 await Shot("01b-quests-open.png");

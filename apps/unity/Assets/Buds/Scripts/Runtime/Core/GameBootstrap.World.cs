@@ -94,6 +94,7 @@ namespace Buds.Core
         void OnApplicationPause(bool paused)
         {
             if (paused) SaveFog();
+            LivePause(paused);
         }
 
         void OnApplicationQuit() => SaveFog();

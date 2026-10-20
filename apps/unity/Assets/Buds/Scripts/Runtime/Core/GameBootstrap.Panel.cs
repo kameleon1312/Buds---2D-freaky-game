@@ -53,6 +53,7 @@ namespace Buds.Core
         async Awaitable Logout()
         {
             signedOut = true;
+            StopLive(); // the others see the bud go at once, not when the socket times out
             if (session != null)
             {
                 try

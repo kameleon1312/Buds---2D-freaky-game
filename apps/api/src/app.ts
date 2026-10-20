@@ -107,7 +107,7 @@ import {
   type PlayerVariables,
 } from './middleware/player.js';
 import { rateLimit } from './middleware/rate-limit.js';
-import { budSheetPng } from './png.js';
+import { budSheetPng, budSheetPngCached } from './png.js';
 import { createRivalry } from './rivalry.js';
 import { makePairCode } from './store/slug.js';
 import type { BudStore } from './store/types.js';
@@ -1120,7 +1120,7 @@ export function createApp(
     if (!bud) throw new HTTPException(404, { message: 'Bud not found' });
     // default 8 → 128×192 px per frame; 2..16 accepted
     const scale = Math.min(Math.max(Math.round(Number(c.req.query('scale'))) || 8, 2), 16);
-    return c.body(new Uint8Array(budSheetPng(bud.look, scale)), 200, {
+    return c.body(new Uint8Array(budSheetPngCached(bud.look, scale)), 200, {
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=300',
     });

@@ -435,11 +435,14 @@ namespace Buds.UI
             icon.preserveAspect = true;
             icon.raycastTarget = false;
             Stretch(icon.rectTransform, size * 0.1f);
-            caption = Outlined("Caption", button.transform, Keys(label), 22);
+            // the caption follows the button's size: a small HUD button gets a small one, right under its lip
+            var font = Mathf.RoundToInt(Mathf.Clamp(size * 0.26f, 15, 22));
+            caption = Outlined("Caption", button.transform, Keys(label), font);
+            caption.horizontalOverflow = HorizontalWrapMode.Overflow;
             // small text: the outline alone, the hard drop would read as a second copy
             foreach (var effect in caption.GetComponents<Shadow>())
                 if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
-            Place(caption.rectTransform, new Vector2(0.5f, 0), new Vector2(0, -30), new Vector2(size + 60, 30), new Vector2(0.5f, 0));
+            Place(caption.rectTransform, new Vector2(0.5f, 0), new Vector2(0, -font - 9), new Vector2(size + 60, font + 8), new Vector2(0.5f, 0));
             return button;
         }
 

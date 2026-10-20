@@ -1,0 +1,6 @@
+<!-- Live play (Api/LiveClient.cs) uses ClientWebSocket: keep it whole in IL2CPP builds (Android) whatever the stripping level. -->
+<linker>
+  <assembly fullname="System">
+    <namespace fullname="System.Net.WebSockets" preserve="all" />
+  </assembly>
+</linker>

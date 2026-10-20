@@ -4,3 +4,4 @@ dist
 coverage
 apps/unity
 packages/shared/src/turfs.ts
+packages/shared/src/walk-grids.ts

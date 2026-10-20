@@ -175,6 +175,16 @@ namespace Buds.Core
             if (enemy && !fightScreen.IsOpen) enemy.Hide(Ambush.Cooldown);
         }
 
+        /// <summary>The other player's picture, downloaded for one PvP duel: freed when the duel screen closes.</summary>
+        BudSheet pvpSheet;
+        bool pvpOnStreet;
+
+        void ReleasePvpSheet()
+        {
+            pvpSheet?.Dispose();
+            pvpSheet = null;
+        }
+
         void CloseFight()
         {
             // a lurker the bud ran from (or lost to) hides in its nook again for a while
@@ -190,9 +200,17 @@ namespace Buds.Core
                 }
                 lastPvp = null;
                 lastReward = null;
+                ReleasePvpSheet();
+                // a rival met on the street: back to the street; one picked from the list: back to the list
+                if (pvpOnStreet)
+                {
+                    pvpOnStreet = false;
+                    return;
+                }
                 OpenRivalry(RivalryScreen.TabPvp);
                 return;
             }
+            ReleasePvpSheet();
             var influence = lastInfluence;
             lastInfluence = null;
             if (lastReward == null) return;

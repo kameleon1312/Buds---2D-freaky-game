@@ -479,6 +479,19 @@ ICONS_UI.zadania = {
     stroke('M24 25Q24 18 32 18Q40 18 40 25Q40 29 35 31Q32 32.5 32 36V38', '#ffc93c', 5) +
     flat(circ(32, 44.5, 3.8), '#ffc93c', LINE, 2.5),
 };
+// The call-out button (multiplayer): a comic speech bubble with three dots, a small one answering behind it.
+ICONS_UI.hasla = {
+  body:
+    shaded(rr(30, 6, 28, 20, 9), ['#4cc7ff', '#1b86c9'], LINE, -2, -2, 2.5) +
+    shaded(
+      'M14 20H42Q52 20 52 30V40Q52 50 42 50H28L18 59L20 50H14Q4 50 4 40V30Q4 20 14 20Z',
+      ['#f6f2e9', '#d9d2c3'],
+      LINE,
+      -3,
+      -3,
+    ) +
+    [16, 28, 40].map((x) => flat(circ(x, 35, 3.6), '#a3e635', LINE, 2)).join(''),
+};
 ICONS_UI.korona = {
   body:
     shaded('M8 48L6 18L20 30L32 10L44 30L58 18L56 48Z', ['#ffe27a', '#ffc93c'], LINE, -4, -4) +

@@ -71,6 +71,7 @@ namespace Buds.Core
                 old?.Dispose();
                 creatorScreen.Hide();
                 ui.ShowToast("Nowy wygląd zapisany!", 2.5f);
+                LiveRefreshMe(); // the others download the new look
             }
             catch (ApiException e)
             {

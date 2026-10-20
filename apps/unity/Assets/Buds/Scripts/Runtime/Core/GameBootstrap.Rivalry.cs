@@ -270,18 +270,23 @@ namespace Buds.Core
             if (rivalryBusy || fightBusy || session == null) return;
             rivalryBusy = true;
             fightBusy = true;
+            BudSheet theirs = null;
             try
             {
                 rivalryScreen.SetStatus("Rywal wchodzi na plac…");
-                var theirs = new BudSheet(await api.GetSheet(slug), true);
+                theirs = new BudSheet(await api.GetSheet(slug), true);
                 var res = await api.StartPvp(session.Token, slug);
                 rivalryScreen.Hide();
+                ReleasePvpSheet();
+                pvpSheet = theirs;
+                pvpOnStreet = false;
                 currentFight = res.fight;
                 fightingWith = null;
                 lastReward = null;
                 lastPvp = null;
                 lastInfluence = null;
                 fightScreen.Open(res.fight, sheet, theirs, "Pokaż, co potrafisz.", gear);
+                theirs = null; // the duel owns it now (freed when it closes)
             }
             catch (ApiException e)
             {
@@ -290,6 +295,7 @@ namespace Buds.Core
             }
             finally
             {
+                if (theirs != null && theirs != pvpSheet) theirs.Dispose();
                 rivalryBusy = false;
                 fightBusy = false;
             }

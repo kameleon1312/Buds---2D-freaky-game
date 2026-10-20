@@ -1,3 +1,4 @@
+import type { IncomingMessage } from 'node:http';
 import type { Context } from 'hono';
 import { getConnInfo } from '@hono/node-server/conninfo';
 
@@ -25,4 +26,17 @@ function socketIp(c: Context): string {
   } catch {
     return 'unknown'; // not running on a node socket (tests)
   }
+}
+
+/** The same rule for a raw request (the live server's WebSocket upgrade, which never reaches Hono). */
+export function clientIpOfRequest(req: IncomingMessage, trustedHeader?: string): string {
+  const header = (name: string) => {
+    const v = req.headers[name];
+    return (Array.isArray(v) ? v[0] : v)?.split(',')[0]?.trim();
+  };
+  if (trustedHeader) {
+    const value = header(trustedHeader);
+    if (value) return value;
+  }
+  return header('x-real-ip') || header('x-forwarded-for') || req.socket.remoteAddress || 'unknown';
 }

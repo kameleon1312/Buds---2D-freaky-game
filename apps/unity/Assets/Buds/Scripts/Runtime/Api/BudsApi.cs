@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -423,12 +424,16 @@ namespace Buds.Api
         }
 
         /// <summary>384×576 sheet (128×192 per frame): columns = walk frames 0..2, rows = down, side, up.</summary>
-        public async Awaitable<Texture2D> GetSheet(string slug, bool fresh = false)
+        /// <param name="scale">Pixels per sheet unit (0 = the server's default 8); other players' buds use a lighter one.</param>
+        public async Awaitable<Texture2D> GetSheet(string slug, bool fresh = false, int scale = 0)
         {
             // readable, so BudSheet can build mipmaps from it
             // right after a look change: skip any cache between here and the server
-            var bust = fresh ? $"?v={DateTime.UtcNow.Ticks}" : "";
-            using var req = UnityWebRequestTexture.GetTexture($"{baseUrl}/v1/buds/{Uri.EscapeDataString(slug)}/sheet.png{bust}", false);
+            var query = new List<string>();
+            if (scale > 0) query.Add($"scale={scale}");
+            if (fresh) query.Add($"v={DateTime.UtcNow.Ticks}");
+            var tail = query.Count > 0 ? "?" + string.Join("&", query) : "";
+            using var req = UnityWebRequestTexture.GetTexture($"{baseUrl}/v1/buds/{Uri.EscapeDataString(slug)}/sheet.png{tail}", false);
             req.timeout = TimeoutSeconds;
             await Send(req);
             if (req.result != UnityWebRequest.Result.Success) throw ToException(req);

@@ -43,19 +43,17 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
    weryfikacja paragonów w API (`purchases`, unikalne `transaction_id`), gemy → przedmioty premium
    (~~sklep premium za gemy: 5 pojazdów i 6 broni~~, `docs/ekwipunek.md`; zostały płatności i `grant_gems` po weryfikacji).
    Wymogi sklepów: polityka prywatności, regulamin, pokazywanie szans przy losowaniach (najlepiej ich nie mieć).
-7. **Multiplayer** (patrz niżej).
+7. ~~**Multiplayer**~~ — gracze na wspólnej mapie, w czasie rzeczywistym (`docs/multiplayer.md`). Dalej: wspólne
+   mini-gry, wymiana przedmiotów twarzą w twarz, walki na żywo (obie strony grają naraz).
 8. Wydarzenia czasowe, przepustka sezonowa, kolejne dzielnice.
 
-## Multiplayer — jak się przygotować
+## Multiplayer
 
-- **Model:** dzielnica = pokój na serwerze. Gracze w tej samej dzielnicy widzą się nawzajem, czatują
-  emotkami, później grają razem w mini-gry/walki. Serwer autorytatywny (klient wysyła ruch, serwer decyduje).
-- **Technologia (propozycja):** [Colyseus](https://colyseus.io) — open source (MIT), Node/TypeScript jak reszta
-  backendu, gotowe SDK do Unity, pokoje i synchronizacja stanu, darmowy przy własnym hostingu (np. Railway).
-  Alternatywy: Nakama (open source, więcej gotowych funkcji społecznościowych), Photon (płatny powyżej limitu graczy).
-- **Co robimy już teraz, żeby to było łatwe:** logika gry w zwykłych klasach (testowalna, do przeniesienia na
-  serwer), deterministyczne mapy (`Village.Build()` daje wszystkim to samo), wszystkie zmiany stanu przez API,
-  dzielnice z identyfikatorami, które staną się nazwami pokojów.
+Jest (`docs/multiplayer.md`): mapa = pokój na serwerze (kolejne kopie, gdy pokój się zapełni), jeden WebSocket
+na urządzenie w tym samym procesie co API (`apps/api/src/live.ts`, bez osobnej usługi i bez Colyseusa), ruch
+sprawdzany na serwerze siatką chodzenia z map i limitem prędkości, hasła w dymkach, nazwy nad głowami, wyzwanie
+na pojedynek z ulicy. Nagrody dalej wyłącznie przez REST API. Gdy graczy będzie tylu, że jeden proces nie wystarczy:
+pokoje na kilku instancjach (klucz pokoju = mapa, łatwy podział) i Redis do wspólnego stanu połączeń.
 
 ## Dalsze decyzje do podjęcia
 

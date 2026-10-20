@@ -205,25 +205,27 @@ namespace Buds.UI
             UiKit.Place(rt, new Vector2(0, 1), new Vector2(24, -24), new Vector2(PlateW, PlateH), new Vector2(0, 1));
 
             var badge = UiKit.OutlinedBox("Level", plate.transform, UiKit.Buds400, 999);
-            UiKit.Place((RectTransform)badge.transform.parent, new Vector2(0, 0.5f), new Vector2(10, 0), new Vector2(60, 60),
+            UiKit.Place((RectTransform)badge.transform.parent, new Vector2(0, 0.5f), new Vector2(8, 0), new Vector2(LevelBadge, LevelBadge),
                 new Vector2(0, 0.5f));
-            hudLevel = UiKit.Outlined("Num", badge.transform, "", 32);
-            UiKit.Stretch(hudLevel.rectTransform, 0, 3, 0, 0);
+            hudLevel = UiKit.Outlined("Num", badge.transform, "", 25);
+            UiKit.Stretch(hudLevel.rectTransform, 0, 2, 0, 0);
 
-            hudName = UiKit.Outlined("Name", plate.transform, "", 26, null, TextAnchor.MiddleLeft);
+            const float textX = 8 + LevelBadge + 9;
+            hudName = UiKit.Outlined("Name", plate.transform, "", NameFont, null, TextAnchor.MiddleLeft);
             hudName.horizontalOverflow = HorizontalWrapMode.Overflow;
-            UiKit.Place(hudName.rectTransform, new Vector2(0, 1), new Vector2(80, -6), new Vector2(PlateW - 94, 36), new Vector2(0, 1));
+            UiKit.Place(hudName.rectTransform, new Vector2(0, 1), new Vector2(textX, -4), new Vector2(PlateW - textX - 12, 28), new Vector2(0, 1));
 
             hudXp = UiKit.Bar("Xp", plate.transform, UiKit.XpFill, out var bar);
-            UiKit.Place(bar, Vector2.zero, new Vector2(80, 10), new Vector2(PlateW - 94, 28), Vector2.zero);
-            hudXpText = UiKit.Outlined("Value", bar, "", 16);
+            UiKit.Place(bar, Vector2.zero, new Vector2(textX, 8), new Vector2(PlateW - textX - 12, 21), Vector2.zero);
+            hudXpText = UiKit.Outlined("Value", bar, "", 13);
             UiKit.Stretch(hudXpText.rectTransform, 0, 1, 0, 0);
             hud = rt.gameObject;
             BuildQuestButton(rt);
+            BuildChatButton(rt);
             hud.SetActive(false);
 
             // the action button: what E does right now (talk, fight, search…); tapping it does the same
-            hintText = UiKit.Pill("Hint", Root, "", UiKit.Buds400, UiKit.Mobile ? 36 : 34, new Vector2(300, UiKit.Mobile ? 92 : 72), out var hrt);
+            hintText = UiKit.Pill("Hint", Root, "", UiKit.Buds400, UiKit.Mobile ? 28 : 24, new Vector2(HintMinWidth, UiKit.Mobile ? 72 : 52), out var hrt);
             if (UiKit.Mobile) UiKit.Place(hrt, Vector2.zero, new Vector2(28, 28), hrt.sizeDelta, Vector2.zero);
             else UiKit.Place(hrt, new Vector2(0.5f, 0), new Vector2(0, 40), hrt.sizeDelta);
             var tap = hrt.gameObject.AddComponent<Button>();
@@ -239,13 +241,15 @@ namespace Buds.UI
         {
             // long names shrink to fit the plate instead of running past it
             hudName.text = name;
-            hudName.fontSize = name.Length > 14 ? 20 : 26;
+            hudName.fontSize = name.Length > 12 ? NameFont - 5 : NameFont;
             hudLevel.text = level.ToString();
             hudXpText.text = $"{xp} / {nextXp} XP";
             hud.SetActive(true);
             Canvas.ForceUpdateCanvases(); // the bar's width is known only after layout
             UiKit.SetBar(hudXp, Progression.Progress(xp));
         }
+
+        const float HintMinWidth = 200;
 
         public void SetHint(string text)
         {
@@ -254,7 +258,7 @@ namespace Buds.UI
             if (hintText.text == (text ?? "")) return;
             hintText.text = text ?? "";
             // one line, as wide as the text
-            hintRect.sizeDelta = new Vector2(Mathf.Max(300, hintText.preferredWidth + 72), hintRect.sizeDelta.y);
+            hintRect.sizeDelta = new Vector2(Mathf.Max(HintMinWidth, hintText.preferredWidth + 56), hintRect.sizeDelta.y);
         }
 
         // ---------- dialog ----------
@@ -391,32 +395,54 @@ namespace Buds.UI
 
         // the top-right column of picture buttons, top to bottom: Twój Bud, Mapa, the ride
         const float ButtonH = 66; // the old row height: the toast still sits below it
-        const float IconSize = 92;
-        const float IconStep = IconSize + 44; // button + caption + gap
-        /// <summary>The second button column (Rewiry) sits this far left of the first; captions are wider than buttons.</summary>
-        const float SecondColumn = IconSize + 72;
+        internal const float IconSize = 60;
+        /// <summary>From one button of the top-right row to the next: room for its caption ("Twój Bud [I]").</summary>
+        internal const float RowStep = IconSize + 50;
+        /// <summary>The row's distance from the right edge: the corner button's caption is wider than the button.</summary>
+        const float RowRight = 32;
+        /// <summary>How far down the top-right row reaches, its captions included.</summary>
+        internal const float RowBottom = 20 + IconSize + 26;
         const float BudW = 230, MapW = 180, RideW = 210, Gap = 14;
         /// <summary>Right edge of the left column (player plate, quests) in UI units.</summary>
-        const float PlateW = 270;
-        const float PlateH = 84;
-        const float QuestButton = 72;
-        /// <summary>Right edge of the top-left group (the plate and the quest button).</summary>
-        const float LeftColumn = 24 + PlateW + 12 + QuestButton;
+        const float PlateW = 214;
+        const float PlateH = 64;
+        const float LevelBadge = 46;
+        const int NameFont = 21;
+        const float QuestButton = 52;
+        const float ChatButton = 52;
+        const float SmallGap = 10;
+        /// <summary>Right edge of the top-left group (the plate, the quest log and the chat buttons).</summary>
+        internal const float LeftColumn = 24 + PlateW + 12 + QuestButton + SmallGap + ChatButton;
+        /// <summary>Where the chat window starts: under the plate, at the left edge.</summary>
+        internal const float UnderPlate = 24 + PlateH + 14;
 
-        /// <summary>Puts a picture button into the right column (row 0 at the top).</summary>
-        static void RightColumn(Button button, int row)
+        // the slots of the top-right row, right to left
+        const int SlotBud = 0, SlotMap = 1, SlotRivalry = 2, SlotRide = 3;
+
+        /// <summary>
+        /// Puts a picture button into the top-right row (slot 0 in the corner): one low strip, so the whole right side
+        /// of the screen is left to the world (and to the phone joystick).
+        /// </summary>
+        static void TopRow(Button button, int slot)
         {
-            UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-28, -24 - row * IconStep),
+            UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-RowRight - slot * RowStep, -20),
                 new Vector2(IconSize, IconSize), new Vector2(1, 1));
             button.transform.SetAsFirstSibling(); // under panels opened later
+        }
+
+        /// <summary>How wide the top-right row is now (the toast keeps clear of it).</summary>
+        float RowWidth()
+        {
+            var slots = rideButton && rideButton.activeSelf ? SlotRide + 1 : rivalryButton ? SlotRivalry + 1 : mapButton ? SlotMap + 1 : budButton ? 1 : 0;
+            return slots == 0 ? 0 : RowRight + (slots - 1) * RowStep + IconSize + 22;
         }
 
         /// <summary>"Twój Bud": the bud's head, top right (opens the Bud panel).</summary>
         public void ShowBudButton(Action onClick)
         {
             if (budButton) return;
-            var button = UiKit.IconButton("BudButton", Root, UiKit.Picture("Ui/bud"), "Twój Bud  [I]", IconSize, onClick, out _, out _);
-            RightColumn(button, 0);
+            var button = UiKit.IconButton("BudButton", Root, UiKit.Picture("Ui/bud"), "Twój Bud [I]", IconSize, onClick, out _, out _);
+            TopRow(button, SlotBud);
             budButton = button.gameObject;
         }
 
@@ -424,8 +450,8 @@ namespace Buds.UI
         public void ShowMapButton(Action onClick)
         {
             if (mapButton) return;
-            var button = UiKit.IconButton("MapButton", Root, UiKit.Picture("Ui/mapa"), "Mapa  [M]", IconSize, onClick, out _, out _);
-            RightColumn(button, 1);
+            var button = UiKit.IconButton("MapButton", Root, UiKit.Picture("Ui/mapa"), "Mapa [M]", IconSize, onClick, out _, out _);
+            TopRow(button, SlotMap);
             mapButton = button.gameObject;
         }
 
@@ -433,19 +459,16 @@ namespace Buds.UI
         GameObject rivalryBadge;
 
         /// <summary>
-        /// "Rewiry": the spray can with a crown, left of "Twój Bud" (the column under it ends above the phone joystick).
-        /// A gold dot on it says a tribute is waiting.
+        /// "Rewiry": the spray can with a crown, in the top-right row. A gold dot on it says a tribute is waiting.
         /// </summary>
         public void ShowRivalryButton(Action onClick)
         {
             if (rivalryButton) return;
-            var button = UiKit.IconButton("RivalryButton", Root, UiKit.Picture("Ui/rewiry"), "Rewiry  [G]", IconSize, onClick, out _, out _);
-            UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-28 - SecondColumn, -24),
-                new Vector2(IconSize, IconSize), new Vector2(1, 1));
-            button.transform.SetAsFirstSibling();
-            var badge = UiKit.OutlinedBox("Badge", button.transform, UiKit.Gold400, 14);
+            var button = UiKit.IconButton("RivalryButton", Root, UiKit.Picture("Ui/rewiry"), "Rewiry [G]", IconSize, onClick, out _, out _);
+            TopRow(button, SlotRivalry);
+            var badge = UiKit.OutlinedBox("Badge", button.transform, UiKit.Gold400, 10);
             var badgeRt = (RectTransform)badge.transform.parent;
-            UiKit.Place(badgeRt, Vector2.one, new Vector2(8, 8), new Vector2(28, 28), new Vector2(1, 1));
+            UiKit.Place(badgeRt, Vector2.one, new Vector2(7, 7), new Vector2(20, 20), new Vector2(1, 1));
             rivalryBadge = badgeRt.gameObject;
             rivalryBadge.SetActive(false);
             rivalryButton = button.gameObject;
@@ -516,20 +539,13 @@ namespace Buds.UI
         Image rideIcon;
         Text buffLine;
 
-        /// <summary>The worn ride's picture under the map ("Wsiądź / Zsiądź [R]"), while the bud is outdoors.</summary>
+        /// <summary>The worn ride's picture at the end of the top-right row ("Wsiądź / Zsiądź [R]"), while the bud is outdoors.</summary>
         public void SetRideButton(bool visible, string label, Action onClick, string mountItem = null)
         {
             if (!rideButton && visible)
             {
                 var button = UiKit.IconButton("RideButton", Root, null, label, IconSize, onClick, out rideIcon, out rideLabel);
-                if (UiKit.Mobile)
-                {
-                    // phones: under "Rewiry" in the second column, clear of the joystick in the corner
-                    UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-28 - SecondColumn, -24 - IconStep),
-                        new Vector2(IconSize, IconSize), new Vector2(1, 1));
-                    button.transform.SetAsFirstSibling();
-                }
-                else RightColumn(button, 2);
+                TopRow(button, SlotRide);
                 rideButton = button.gameObject;
             }
             if (!rideButton) return;
@@ -543,10 +559,10 @@ namespace Buds.UI
         {
             if (!buffLine)
             {
-                // left of both button columns, right aligned
-                buffLine = UiKit.Outlined("Buffs", Root, "", 24, UiKit.Gold400);
+                // under the top-right row, right aligned
+                buffLine = UiKit.Outlined("Buffs", Root, "", 19, UiKit.Gold400);
                 buffLine.alignment = TextAnchor.UpperRight;
-                UiKit.Place(buffLine.rectTransform, new Vector2(1, 1), new Vector2(-28 - SecondColumn - IconSize - 24, -30), new Vector2(560, 34),
+                UiKit.Place(buffLine.rectTransform, new Vector2(1, 1), new Vector2(-24, -RowBottom - 4), new Vector2(560, 28),
                     new Vector2(1, 1));
                 buffLine.transform.SetAsFirstSibling();
             }
@@ -625,12 +641,12 @@ namespace Buds.UI
             icon.sprite = UiKit.Picture("Ui/zadania");
             icon.preserveAspect = true;
             icon.raycastTarget = false;
-            UiKit.Stretch(icon.rectTransform, 9);
+            UiKit.Stretch(icon.rectTransform, 7);
 
-            var badge = UiKit.OutlinedBox("Count", button.transform, UiKit.Alert500, 15);
+            var badge = UiKit.OutlinedBox("Count", button.transform, UiKit.Alert500, 14);
             var badgeRt = (RectTransform)badge.transform.parent;
-            UiKit.Place(badgeRt, Vector2.one, new Vector2(10, 10), new Vector2(32, 32), new Vector2(1, 1));
-            questCountText = UiKit.Outlined("Num", badge.transform, "", 18);
+            UiKit.Place(badgeRt, Vector2.one, new Vector2(9, 9), new Vector2(24, 24), new Vector2(1, 1));
+            questCountText = UiKit.Outlined("Num", badge.transform, "", 15);
             foreach (var effect in questCountText.GetComponents<Shadow>())
                 if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
             UiKit.Stretch(questCountText.rectTransform, 0, 1, 0, 0);
@@ -639,6 +655,59 @@ namespace Buds.UI
         }
 
         public void ToggleQuests() => SetQuestsOpen(!questsOpen);
+
+        GameObject chatButton;
+        Image chatIcon;
+        GameObject chatCount;
+        Text chatCountText;
+        Action chatClicked;
+
+        /// <summary>
+        /// The chat button right of the quest log button: a speech bubble with a red count of unread messages. Shown
+        /// only when live play is on (a paired bud).
+        /// </summary>
+        void BuildChatButton(RectTransform plate)
+        {
+            var button = UiKit.Button("ChatButton", plate, "", new Vector2(ChatButton, ChatButton), () => chatClicked?.Invoke(),
+                UiKit.Tone.Rep, 20);
+            UiKit.Place((RectTransform)button.transform, new Vector2(0, 1),
+                new Vector2(PlateW + 12 + QuestButton + SmallGap, -(PlateH - ChatButton) / 2), new Vector2(ChatButton, ChatButton),
+                new Vector2(0, 1));
+            var face = button.transform.Find("Face") ?? button.transform;
+            chatIcon = UiKit.Rect("Icon", face).gameObject.AddComponent<Image>();
+            chatIcon.sprite = UiKit.Picture("Ui/hasla");
+            chatIcon.preserveAspect = true;
+            chatIcon.raycastTarget = false;
+            UiKit.Stretch(chatIcon.rectTransform, 7);
+
+            var badge = UiKit.OutlinedBox("Count", button.transform, UiKit.Alert500, 14);
+            var badgeRt = (RectTransform)badge.transform.parent;
+            UiKit.Place(badgeRt, Vector2.one, new Vector2(9, 9), new Vector2(24, 24), new Vector2(1, 1));
+            chatCountText = UiKit.Outlined("Num", badge.transform, "", 15);
+            foreach (var effect in chatCountText.GetComponents<Shadow>())
+                if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
+            UiKit.Stretch(chatCountText.rectTransform, 0, 1, 0, 0);
+            chatCount = badgeRt.gameObject;
+            chatCount.SetActive(false);
+            chatButton = button.gameObject;
+            chatButton.SetActive(false);
+        }
+
+        /// <summary>Shows the chat button (null hides it).</summary>
+        public void ShowChatButton(Action onClick)
+        {
+            chatClicked = onClick;
+            if (chatButton) chatButton.SetActive(onClick != null);
+        }
+
+        /// <summary>Unread messages on the button; the bubble dims while there is no connection.</summary>
+        public void SetChatBadge(int unread, bool online)
+        {
+            if (!chatButton) return;
+            chatCount.SetActive(unread > 0);
+            chatCountText.text = unread > 9 ? "9+" : unread.ToString();
+            chatIcon.color = online ? Color.white : new Color(1, 1, 1, 0.45f);
+        }
 
         public void SetQuestsOpen(bool open)
         {
@@ -697,9 +766,13 @@ namespace Buds.UI
             toastText.text = UiKit.Keys(text);
             var width = Mathf.Max(160, toastText.preferredWidth + 44);
             toastRect.sizeDelta = new Vector2(width, toastRect.sizeDelta.y);
-            // centred, but never over the player plate and the quests on the left
+            // between the player plate (left) and the button row (right) when it fits there, else just under the row
             var screen = ((RectTransform)Root).rect.width;
-            toastRect.anchoredPosition = new Vector2(Mathf.Max(0, LeftColumn + 16 + width / 2 - screen / 2), toastRect.anchoredPosition.y);
+            var gapLeft = LeftColumn + 12;
+            var gapRight = screen - RowWidth() - 12;
+            if (width <= gapRight - gapLeft)
+                toastRect.anchoredPosition = new Vector2(Mathf.Clamp(0, gapLeft + width / 2 - screen / 2, gapRight - width / 2 - screen / 2), -18);
+            else toastRect.anchoredPosition = new Vector2(Mathf.Max(0, gapLeft + width / 2 - screen / 2), -RowBottom - 6);
             toast.SetActive(true);
             toastUntil = Time.time + seconds;
         }
