@@ -122,6 +122,12 @@ async function connect(url: string) {
   };
 }
 
+/** Waits (up to `ms`) for something the server does on its own time, such as finishing a close handshake. */
+async function until(done: () => boolean, ms = 2000) {
+  const end = Date.now() + ms;
+  while (!done() && Date.now() < end) await new Promise((r) => setTimeout(r, 10));
+}
+
 const hello = (token: string, at = spawn, map = MAP) => ({
   t: 'hello',
   token,
@@ -316,6 +322,8 @@ describe('the live server', () => {
     second.send(hello(t));
     await second.next('welcome');
     expect(await first.closed).toBe(LIVE_CLOSE.replaced);
+    // the client sees the close frame before the server has finished closing its side: wait for that
+    await until(() => live.stats().peers === 1);
     expect(live.stats().peers).toBe(1);
     second.ws.close();
   });
