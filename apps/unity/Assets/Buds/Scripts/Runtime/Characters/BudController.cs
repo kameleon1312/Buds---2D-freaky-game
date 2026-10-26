@@ -275,6 +275,21 @@ namespace Buds.Characters
             fourWay = Vector2.zero;
         }
 
+        /// <summary>
+        /// The whole world moved by <paramref name="by"/> (the bud crossed into the next map, which becomes the origin): the
+        /// bud moves with it and keeps walking as if nothing happened (speed, step, facing and dust stay).
+        /// </summary>
+        public void Shift(Vector3 by)
+        {
+            var velocity = body.linearVelocity;
+            transform.position += by;
+            body.position += (Vector2)by;
+            body.linearVelocity = velocity;
+            lastGood += by;
+            pushedFrom += (Vector2)by;
+            dust?.Shift(by);
+        }
+
         public void Teleport(Vector3 position)
         {
             transform.position = position;
@@ -353,6 +368,12 @@ namespace Buds.Characters
             {
                 foreach (var p in puffs)
                     if (p) Destroy(p.gameObject);
+            }
+
+            public void Shift(Vector3 by)
+            {
+                foreach (var p in puffs)
+                    if (p) p.transform.position += by;
             }
 
             static Sprite MakeCircle()

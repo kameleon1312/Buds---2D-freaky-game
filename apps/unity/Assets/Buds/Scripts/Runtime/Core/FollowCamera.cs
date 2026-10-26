@@ -55,6 +55,13 @@ namespace Buds.Core
             Mathf.Max((compact ? CompactTilesY : TargetTilesY) / 2f,
                 (compact ? CompactTilesX : TargetTilesX) / 2f * screenH / Mathf.Max(1, screenW));
 
+        /// <summary>The world moved by <paramref name="by"/> (a new map became the origin): the view moves with it, unseen.</summary>
+        public void Shift(Vector3 by)
+        {
+            focus += by;
+            Place();
+        }
+
         public void SnapToTarget()
         {
             Resize();

@@ -7,6 +7,7 @@ import {
   type SlotId,
 } from '@buds/shared';
 import { makeSlug } from './slug.js';
+import { createSupabaseLand } from './supabase-land.js';
 import { createSupabaseRivalry } from './supabase-rivalry.js';
 import type { BudStore, BuyResult, GemBuyResult } from './types.js';
 
@@ -65,6 +66,7 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
 
   return {
     ...createSupabaseRivalry(db, idBySlug, budsAround),
+    ...createSupabaseLand(db, idBySlug),
 
     async getBySlug(slug) {
       const row = await rowBySlug(slug);

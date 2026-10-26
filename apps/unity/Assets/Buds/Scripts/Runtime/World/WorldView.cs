@@ -102,39 +102,121 @@ namespace Buds.World
         public static bool Sunlit { get; private set; } = true;
 
         /// <summary>Highest standing sort order; markers above the world use 20000.</summary>
-        const int SortStandTop = 18000;
-        /// <summary>The order at worldY 0: room to spare south of the map (down to y -10) and north of it (up to y 170).</summary>
-        const int SortStandZero = 17000;
+        const int SortStandTop = 19900;
+        /// <summary>
+        /// The order at worldY 0, and how many orders a tile of height takes: a map and the one laid next to it (a city and
+        /// its wasteland, up to 282 rows from the south edge of one to the north edge of the other) fit between y -170 and
+        /// y 320 with a fortieth of a tile between two orders.
+        /// </summary>
+        const int SortStandZero = 13000;
+        public const int SortPerTile = 40;
         /// <summary>Lowest standing sort order: always above the ground (-1000…) and flat decorations (-100…-90).</summary>
         const int SortStandBottom = 0;
 
         /// <summary>
         /// Sprites lower on screen draw in front; shared by props and actors. Kept between SortStandBottom and
-        /// SortStandTop for every map row (districts are 132 rows: 17000…3800), so nothing standing ever slips under
-        /// the ground or a road marking at the north end of a map.
+        /// SortStandTop for every row of the map and of the map next to it, so nothing standing ever slips under the
+        /// ground or a road marking at the far end.
         /// </summary>
         public static int SortOrderFor(float worldY) =>
-            Mathf.Clamp(SortStandZero - Mathf.RoundToInt(worldY * 100), SortStandBottom, SortStandTop);
+            Mathf.Clamp(SortStandZero - Mathf.RoundToInt(worldY * SortPerTile), SortStandBottom, SortStandTop);
 
         /// <summary>How long the last map took to build, by part (for the autopilot's load log).</summary>
         public static string LastTimings { get; private set; } = "";
 
-        public static WorldView Create(WorldMap map, List<GroundLayer> ground = null)
+        /// <summary>Builds a map in one go, its south-west corner at <paramref name="origin"/> (world units).</summary>
+        public static WorldView Create(WorldMap map, List<GroundLayer> ground = null, Vector2 origin = default)
+        {
+            var view = Begin(map, origin);
+            foreach (var _ in view.Build(ground)) { }
+            return view;
+        }
+
+        /// <summary>
+        /// Builds a map a little at a time (about <paramref name="budgetMs"/> of work a frame), so laying the next map down
+        /// while the bud walks towards it never stops the game. Null when the view was destroyed on the way.
+        /// </summary>
+        public static async Awaitable<WorldView> CreateSpread(WorldMap map, List<GroundLayer> ground, Vector2 origin, float budgetMs = 6f)
+        {
+            var view = Begin(map, origin);
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            foreach (var _ in view.Build(ground))
+            {
+                if (clock.Elapsed.TotalMilliseconds < budgetMs) continue;
+                await Awaitable.NextFrameAsync();
+                if (!view) return null;
+                clock.Restart();
+            }
+            return view;
+        }
+
+        static WorldView Begin(WorldMap map, Vector2 origin)
         {
             var root = new GameObject("World " + map.Id, typeof(Grid));
+            root.transform.position = origin;
             var view = root.AddComponent<WorldView>();
             view.Map = map;
-            Sunlit = !map.IsInterior;
+            view.origin = origin;
+            // a map laid next to the current one never changes the light of the one the bud is on
+            if (origin == Vector2.zero) Sunlit = !map.IsInterior;
+            return view;
+        }
 
+        /// <summary>Where the map was built (world units): ground patterns, wind and depth are laid out from here.</summary>
+        Vector2 origin;
+
+        /// <summary>The work of building, in small steps (a step = a few milliseconds).</summary>
+        IEnumerable<int> Build(List<GroundLayer> ground)
+        {
             var clock = System.Diagnostics.Stopwatch.StartNew();
-            Colliders(root.transform, map);
+            Colliders(transform, Map);
+            edge = GetComponent<EdgeCollider2D>();
+            yield return 0;
             var colliders = clock.ElapsedMilliseconds;
             var material = SpriteMaterial();
-            Ground(root.transform, map, material, ground);
+            foreach (var step in Ground(transform, Map, material, ground)) yield return step;
             var groundDone = clock.ElapsedMilliseconds;
-            Props(view, root.transform, map, material);
+            foreach (var step in Props(this, transform, Map, material)) yield return step;
             LastTimings = $"colliders {colliders} ms, ground {groundDone - colliders} ms ({(ground != null ? "ready" : "now")}), props {clock.ElapsedMilliseconds - groundDone} ms";
-            return view;
+        }
+
+        EdgeCollider2D edge;
+        Mesh baseMesh;
+
+        /// <summary>Opens the map's outline where the road leads into the map laid next to it (null closes it again).</summary>
+        public void OpenEdge(Exit exit)
+        {
+            if (edge) edge.points = Seams.Outline(Map, exit);
+        }
+
+        /// <summary>The base ground's extent (local units): its usual margin, or stopped at the edge a neighbour shares.</summary>
+        public void SetBase(Rect r)
+        {
+            if (!baseMesh) return;
+            baseMesh.SetVertices(new List<Vector3>
+            {
+                new(r.xMin, r.yMin), new(r.xMax, r.yMin), new(r.xMax, r.yMax), new(r.xMin, r.yMax),
+            });
+            baseMesh.uv = new[]
+            {
+                (new Vector2(r.xMin, r.yMin) + origin) / GroundLook.Span, (new Vector2(r.xMax, r.yMin) + origin) / GroundLook.Span,
+                (new Vector2(r.xMax, r.yMax) + origin) / GroundLook.Span, (new Vector2(r.xMin, r.yMax) + origin) / GroundLook.Span,
+            };
+            baseMesh.RecalculateBounds();
+        }
+
+        /// <summary>The standing props and their height in the map (local), to sort them again after the world moved.</summary>
+        readonly List<(SpriteRenderer r, float y)> standing = new();
+
+        /// <summary>
+        /// The whole world moved (the bud crossed into the next map, which becomes the origin): standing props take their
+        /// depth from where they are now.
+        /// </summary>
+        public void Resort()
+        {
+            var y0 = transform.position.y;
+            foreach (var (r, y) in standing)
+                if (r) r.sortingOrder = SortOrderFor(y0 + y);
         }
 
         /// <summary>Map row 0 is the north edge; Unity's y grows upward.</summary>
@@ -172,7 +254,7 @@ namespace Buds.World
 
         // ---------- ground ----------
 
-        static void Ground(Transform parent, WorldMap map, Material material, List<GroundLayer> plan = null)
+        IEnumerable<int> Ground(Transform parent, WorldMap map, Material material, List<GroundLayer> plan = null)
         {
             var w = map.Width;
             var h = map.Height;
@@ -180,28 +262,33 @@ namespace Buds.World
             root.SetParent(parent, false);
             var order = SortGround;
 
-            var baseMesh = new GroundMesh();
+            var baseShape = new GroundMesh();
             // the base reaches far beyond the map: the tilted camera sees further towards the horizon
-            baseMesh.Vertices.AddRange(new[]
+            var m = Seams.Margin;
+            baseShape.Vertices.AddRange(new[]
             {
-                new Vector3(-40, -12), new Vector3(w + 40, -12), new Vector3(w + 40, h + 60), new Vector3(-40, h + 60),
+                new Vector3(-m.x, -m.y), new Vector3(w + m.z, -m.y), new Vector3(w + m.z, h + m.w), new Vector3(-m.x, h + m.w),
             });
-            baseMesh.Triangles.AddRange(new[] { 0, 2, 1, 0, 3, 2 });
+            baseShape.Triangles.AddRange(new[] { 0, 2, 1, 0, 3, 2 });
             // every layer gets its material's surface (GroundLook): grass blades, paving slabs, asphalt grain, ripples…
             var surfaces = new Dictionary<GroundLook.Pattern, Material>();
             Material Surface(GroundLook.Pattern pattern)
             {
-                if (surfaces.TryGetValue(pattern, out var m)) return m;
-                m = new Material(material) { name = "Ground " + pattern, mainTexture = GroundLook.Texture(pattern) };
-                if (pattern == GroundLook.Pattern.Water) water.Add(m);
-                return surfaces[pattern] = m;
+                if (surfaces.TryGetValue(pattern, out var mat)) return mat;
+                mat = new Material(material) { name = "Ground " + pattern, mainTexture = GroundLook.Texture(pattern) };
+                if (pattern == GroundLook.Pattern.Water) water.Add(mat);
+                return surfaces[pattern] = mat;
             }
             var basePattern = map.IsInterior ? GroundLook.Pattern.Grain : GroundLook.Pattern.Grass;
-            Layer(root, "Base", baseMesh, map.BaseColor * GroundLook.Gain(basePattern), order++, Surface(basePattern));
+            baseMesh = Layer(root, "Base", baseShape, map.BaseColor * GroundLook.Gain(basePattern), order++, Surface(basePattern), origin);
+            yield return 0;
 
             // the layers themselves: worked out ahead (a worker thread, see Prepare) or now
             foreach (var l in plan ?? PlanGround(map))
-                Layer(root, l.Name, l.Mesh, l.Color * GroundLook.Gain(l.Pattern), order + l.Band, Surface(l.Pattern));
+            {
+                Layer(root, l.Name, l.Mesh, l.Color * GroundLook.Gain(l.Pattern), order + l.Band, Surface(l.Pattern), origin);
+                yield return 0;
+            }
         }
 
         /// <summary>One layer of ground, worked out from the map: pure maths, safe on a worker thread.</summary>
@@ -282,6 +369,12 @@ namespace Buds.World
             }
         }
 
+        /// <summary>Whether a map's ground is worked out and waiting (taking it then never waits for the worker).</summary>
+        public static bool IsPrepared(string mapId) => mapId == preparedId && preparedGround != null && preparedGround.IsCompleted;
+
+        /// <summary>The bud walked across into a map laid next to the last one: its light (sun or none) is the one now.</summary>
+        public static void MakeCurrent(WorldView view) => Sunlit = !view.Map.IsInterior;
+
         /// <summary>The prepared map and its ground (waiting for the worker if it is still on it), or null.</summary>
         public static (WorldMap map, List<GroundLayer> ground)? TakePrepared(string mapId)
         {
@@ -302,15 +395,15 @@ namespace Buds.World
             }
         }
 
-        static void Layer(Transform parent, string name, GroundMesh data, Color color, int order, Material material)
+        static Mesh Layer(Transform parent, string name, GroundMesh data, Color color, int order, Material material, Vector2 origin)
         {
-            if (data.Triangles.Count == 0) return;
+            if (data.Triangles.Count == 0) return null;
             var mesh = new Mesh { name = name, indexFormat = IndexFormat.UInt32 };
             mesh.SetVertices(data.Vertices);
             mesh.SetTriangles(data.Triangles, 0);
             // the surface texture is laid in world space, so neighbouring layers and chunks line up
             var uvs = new Vector2[data.Vertices.Count];
-            for (var i = 0; i < uvs.Length; i++) uvs[i] = (Vector2)data.Vertices[i] / GroundLook.Span;
+            for (var i = 0; i < uvs.Length; i++) uvs[i] = ((Vector2)data.Vertices[i] + origin) / GroundLook.Span;
             mesh.uv = uvs;
             color.a = 1;
             var colors = new Color[data.Vertices.Count];
@@ -325,6 +418,7 @@ namespace Buds.World
             renderer.sharedMaterial = material;
             renderer.sortingOrder = order;
             renderer.shadowCastingMode = ShadowCastingMode.Off;
+            return mesh;
         }
 
         /// <summary>The default sprite material (always in the build) with a white texture: tinted by vertex colour.</summary>
@@ -428,7 +522,9 @@ namespace Buds.World
             if (swaying.Count == 0) return;
             var cam = Camera.main;
             if (!cam) return;
-            var c = (Vector2)cam.transform.position;
+            // plants are kept in map units: where they are now is the map's position on top (it moves when the bud crosses
+            // into the next map); the gusts follow the place the map was built at, so they never jump
+            var c = (Vector2)cam.transform.position - (Vector2)transform.position;
             var time = Time.time;
             foreach (var (t, amp, at) in swaying)
             {
@@ -436,7 +532,7 @@ namespace Buds.World
                 var dx = at.x - c.x;
                 var dy = at.y - c.y;
                 if (dx * dx > 900 || dy < -12 || dy > 40) continue;
-                t.localRotation = Upright * Quaternion.Euler(0, 0, amp * Wind(at.x, at.y, time));
+                t.localRotation = Upright * Quaternion.Euler(0, 0, amp * Wind(at.x + origin.x, at.y + origin.y, time));
             }
         }
 
@@ -461,7 +557,7 @@ namespace Buds.World
             public readonly List<int> Triangles = new();
         }
 
-        static void Props(WorldView view, Transform parent, WorldMap map, Material groundMaterial)
+        static IEnumerable<int> Props(WorldView view, Transform parent, WorldMap map, Material groundMaterial)
         {
             var shadows = new Dictionary<(Texture tex, int cx, int cy), ShadowBatch>();
             var spots = AllProps(map);
@@ -471,8 +567,11 @@ namespace Buds.World
 
             var root = new GameObject("Props").transform;
             root.SetParent(parent, false);
+            yield return 0;
+            var count = 0;
             foreach (var spot in spots)
             {
+                if (++count % 48 == 0) yield return 0;
                 var sprite = art.Get(spot.Name);
                 if (!sprite) continue;
                 var flat = art.IsFlat(spot.Name);
@@ -486,8 +585,9 @@ namespace Buds.World
                 if (!flat) go.transform.localRotation = Upright; // buildings, trees, lamps stand up; flowers and markings lie flat
                 var r = go.AddComponent<SpriteRenderer>();
                 r.sprite = sprite;
-                r.sortingOrder = flat ? SortDecor : SortOrderFor(baseY + 0.1f);
+                r.sortingOrder = flat ? SortDecor : SortOrderFor(view.origin.y + baseY + 0.1f);
                 if (flat) continue;
+                view.standing.Add((r, baseY + 0.1f));
                 var sway = SwayFor(spot.Name);
                 // scattered plants sway a little less and each its own way
                 if (sway > 0) view.swaying.Add((go.transform, sway * (spot.Scattered ? 0.8f : 1f), go.transform.localPosition));
@@ -524,6 +624,7 @@ namespace Buds.World
             var materials = new Dictionary<Texture, Material>();
             foreach (var ((tex, cx, cy), batch) in shadows)
             {
+                yield return 0;
                 if (!materials.TryGetValue(tex, out var material))
                     materials[tex] = material = new Material(groundMaterial) { name = "Cast shadows", mainTexture = tex };
                 var mesh = new Mesh { name = $"Shadows [{cx},{cy}]", indexFormat = IndexFormat.UInt32 };

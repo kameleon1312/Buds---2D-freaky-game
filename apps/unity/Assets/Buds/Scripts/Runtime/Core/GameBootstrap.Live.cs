@@ -154,7 +154,8 @@ namespace Buds.Core
             if (fightScreen?.IsOpen ?? false) return 1;
             if (chatScreen?.IsOpen ?? false) return 3;
             return ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
-                   (trainingScreen?.IsOpen ?? false) || (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false)
+                   (trainingScreen?.IsOpen ?? false) || (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) ||
+                   (landScreen?.IsOpen ?? false)
                 ? 2
                 : 0;
         }
@@ -585,7 +586,7 @@ namespace Buds.Core
         bool OtherScreenOpen() =>
             ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) || (fightScreen?.IsOpen ?? false) ||
             (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) || (creatorScreen?.IsOpen ?? false) ||
-            (ferryScreen?.IsOpen ?? false) || travelling;
+            (ferryScreen?.IsOpen ?? false) || (landScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false) || travelling;
 
         /// <summary>Per frame from Update: T opens the chat; while it is open the world waits (keys are letters now).</summary>
         bool UpdateChat()

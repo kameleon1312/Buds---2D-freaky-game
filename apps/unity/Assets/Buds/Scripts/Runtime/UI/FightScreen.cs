@@ -408,13 +408,38 @@ namespace Buds.UI
         }
 
         public void ShowResult(FightDto fight, FightRewardDto reward, InfluenceDto influence = null, PvpResultDto rating = null,
-            string error = null)
+            string error = null, RaidResultDto raid = null)
         {
             Sprite icon = null;
             if (winTag)
             {
                 _ = FadeArt(winTag, 0.2f, 1.1f);
                 winTag = null;
+            }
+            if (raid != null && raid.Present)
+            {
+                // a raid on another bud's district: its stores, not XP
+                var loot = Quests.Land.LootText(raid.loot);
+                switch (fight.status)
+                {
+                    case "won":
+                        resultTitle.text = "Napad udany!";
+                        resultBody.text = loot != null
+                            ? $"Łup z dystryktu {raid.district}:\n<b>{loot}</b>"
+                            : $"Dystrykt {raid.district} nie miał nic do wzięcia ponad to, co chronione (albo ktoś był szybszy).";
+                        icon = UiKit.Picture("Ui/dzielnica");
+                        break;
+                    case "lost":
+                        resultTitle.text = "Napad odparty";
+                        resultBody.text = $"{fight.enemy.name} obronił(a) dystrykt {raid.district}.\nWiększe imperium to silniejsza obrona.";
+                        break;
+                    default:
+                        resultTitle.text = "Ucieczka";
+                        resultBody.text = $"Odwrót spod dystryktu {raid.district}. Ucieczka w trakcie liczy się jak przegrany napad.";
+                        break;
+                }
+                Finish(icon, error);
+                return;
             }
             if (rating != null && rating.Present)
             {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { influenceSchema, pvpResultSchema } from './influence';
+import { influenceSchema, pvpResultSchema, raidResultSchema } from './influence';
 import { budLookSchema } from './bud/look';
 import { levelOf, type CatalogItem, type Rarity } from './catalog';
 import { coinsWithLuck, weaponKindSchema, type CharacterStats, type WeaponKind } from './gear';
@@ -959,6 +959,8 @@ export const fightResponseSchema = z.object({
   influence: influenceSchema.nullable().default(null),
   /** A finished duel against another bud. */
   pvp: pvpResultSchema.nullable().default(null),
+  /** A finished raid on another bud's district. */
+  raid: raidResultSchema.nullable().default(null),
 });
 export type FightResponse = z.infer<typeof fightResponseSchema>;
 

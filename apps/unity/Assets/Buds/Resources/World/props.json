@@ -3060,6 +3060,166 @@
         1,
         1
       ]
+    },
+    {
+      "name": "dz-ratusz-1",
+      "pivotX": 0.5002,
+      "pivotY": 0.0332,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-ratusz-2",
+      "pivotX": 0.5002,
+      "pivotY": 0.024,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-ratusz-3",
+      "pivotX": 0.4998,
+      "pivotY": 0.0141,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-apartamentowiec",
+      "pivotX": 0.4994,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-szklarnia",
+      "pivotX": 0.4994,
+      "pivotY": 0.0278,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-farma-solarna",
+      "pivotX": 0.4994,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-betoniarnia",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-recykling",
+      "pivotX": 0.5003,
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-magazyn",
+      "pivotX": 0.4994,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-budowa",
+      "pivotX": 0.4994,
+      "pivotY": 0.0262,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-budowa-duza",
+      "pivotX": 0.4996,
+      "pivotY": 0.0216,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-tablica",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-na-sprzedaz",
+      "pivotX": 0.5005,
+      "pivotY": 0.0559,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dzialka-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dzialka-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dzialka-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0556,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
     }
   ]
 }

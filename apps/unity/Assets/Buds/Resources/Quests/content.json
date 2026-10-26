@@ -7979,7 +7979,7 @@
       "spots": [
         {
           "x": 24,
-          "y": 8
+          "y": 32
         }
       ]
     },
@@ -7999,7 +7999,7 @@
       "spots": [
         {
           "x": 52,
-          "y": 39
+          "y": 63
         }
       ]
     },
@@ -8019,7 +8019,7 @@
       "spots": [
         {
           "x": 86,
-          "y": 9
+          "y": 33
         }
       ]
     },
@@ -8039,7 +8039,7 @@
       "spots": [
         {
           "x": 118,
-          "y": 38
+          "y": 62
         }
       ]
     },
@@ -8058,7 +8058,7 @@
       ],
       "spots": [
         {
-          "x": 8,
+          "x": 32,
           "y": 24
         }
       ]
@@ -8078,7 +8078,7 @@
       ],
       "spots": [
         {
-          "x": 39,
+          "x": 63,
           "y": 52
         }
       ]
@@ -8098,7 +8098,7 @@
       ],
       "spots": [
         {
-          "x": 9,
+          "x": 33,
           "y": 88
         }
       ]
@@ -8118,7 +8118,7 @@
       ],
       "spots": [
         {
-          "x": 38,
+          "x": 62,
           "y": 120
         }
       ]
@@ -8138,7 +8138,7 @@
       ],
       "spots": [
         {
-          "x": 8,
+          "x": 32,
           "y": 26
         }
       ]
@@ -8158,7 +8158,7 @@
       ],
       "spots": [
         {
-          "x": 39,
+          "x": 63,
           "y": 55
         }
       ]
@@ -8178,7 +8178,7 @@
       ],
       "spots": [
         {
-          "x": 9,
+          "x": 33,
           "y": 90
         }
       ]
@@ -8198,7 +8198,7 @@
       ],
       "spots": [
         {
-          "x": 38,
+          "x": 62,
           "y": 122
         }
       ]
@@ -8219,7 +8219,7 @@
       "spots": [
         {
           "x": 22,
-          "y": 9
+          "y": 33
         }
       ]
     },
@@ -8239,7 +8239,7 @@
       "spots": [
         {
           "x": 48,
-          "y": 38
+          "y": 62
         }
       ]
     },
@@ -8259,7 +8259,7 @@
       "spots": [
         {
           "x": 76,
-          "y": 8
+          "y": 32
         }
       ]
     },
@@ -8279,7 +8279,7 @@
       "spots": [
         {
           "x": 104,
-          "y": 39
+          "y": 63
         }
       ]
     },
@@ -8299,7 +8299,7 @@
       "spots": [
         {
           "x": 130,
-          "y": 10
+          "y": 34
         }
       ]
     }
@@ -9117,6 +9117,736 @@
       "rank": 3
     }
   ],
+  "land": {
+    "plotSize": 23,
+    "hallX": 11,
+    "hallY": 13,
+    "nameMin": 3,
+    "nameMax": 24,
+    "minLevel": 3,
+    "baseStorage": 300,
+    "producerHours": 8,
+    "bonus": 1.5,
+    "sellBatch": 10,
+    "raidMinLevel": 6,
+    "raidsPerDay": 5,
+    "raidRetryMinutes": 60,
+    "newShieldHours": 48,
+    "resources": [
+      {
+        "id": "beton",
+        "name": "Beton",
+        "price": 4
+      },
+      {
+        "id": "stal",
+        "name": "Stal",
+        "price": 6
+      },
+      {
+        "id": "energia",
+        "name": "Energia",
+        "price": 3
+      },
+      {
+        "id": "zywnosc",
+        "name": "Żywność",
+        "price": 3
+      }
+    ],
+    "routeBonus": [
+      {
+        "route": "pustkowie-ostepy",
+        "resource": "energia"
+      },
+      {
+        "route": "pustkowie-wydmy",
+        "resource": "beton"
+      },
+      {
+        "route": "pustkowie-gosciniec",
+        "resource": "zywnosc"
+      },
+      {
+        "route": "pustkowie-nieuzytki",
+        "resource": "stal"
+      }
+    ],
+    "plots": [
+      {
+        "id": "ostepy-1",
+        "route": "pustkowie-ostepy",
+        "x": 28,
+        "y": 23,
+        "gate": "s",
+        "price": 300
+      },
+      {
+        "id": "ostepy-2",
+        "route": "pustkowie-ostepy",
+        "x": 54,
+        "y": 11,
+        "gate": "s",
+        "price": 300
+      },
+      {
+        "id": "ostepy-3",
+        "route": "pustkowie-ostepy",
+        "x": 90,
+        "y": 16,
+        "gate": "s",
+        "price": 300
+      },
+      {
+        "id": "ostepy-4",
+        "route": "pustkowie-ostepy",
+        "x": 18,
+        "y": 59,
+        "gate": "n",
+        "price": 300
+      },
+      {
+        "id": "ostepy-5",
+        "route": "pustkowie-ostepy",
+        "x": 56,
+        "y": 54,
+        "gate": "n",
+        "price": 300
+      },
+      {
+        "id": "ostepy-6",
+        "route": "pustkowie-ostepy",
+        "x": 82,
+        "y": 53,
+        "gate": "n",
+        "price": 300
+      },
+      {
+        "id": "wydmy-1",
+        "route": "pustkowie-wydmy",
+        "x": 23,
+        "y": 28,
+        "gate": "e",
+        "price": 350
+      },
+      {
+        "id": "wydmy-2",
+        "route": "pustkowie-wydmy",
+        "x": 11,
+        "y": 54,
+        "gate": "e",
+        "price": 350
+      },
+      {
+        "id": "wydmy-3",
+        "route": "pustkowie-wydmy",
+        "x": 17,
+        "y": 92,
+        "gate": "e",
+        "price": 350
+      },
+      {
+        "id": "wydmy-4",
+        "route": "pustkowie-wydmy",
+        "x": 59,
+        "y": 18,
+        "gate": "w",
+        "price": 350
+      },
+      {
+        "id": "wydmy-5",
+        "route": "pustkowie-wydmy",
+        "x": 54,
+        "y": 56,
+        "gate": "w",
+        "price": 350
+      },
+      {
+        "id": "wydmy-6",
+        "route": "pustkowie-wydmy",
+        "x": 53,
+        "y": 82,
+        "gate": "w",
+        "price": 350
+      },
+      {
+        "id": "gosciniec-1",
+        "route": "pustkowie-gosciniec",
+        "x": 22,
+        "y": 30,
+        "gate": "e",
+        "price": 400
+      },
+      {
+        "id": "gosciniec-2",
+        "route": "pustkowie-gosciniec",
+        "x": 11,
+        "y": 56,
+        "gate": "e",
+        "price": 400
+      },
+      {
+        "id": "gosciniec-3",
+        "route": "pustkowie-gosciniec",
+        "x": 17,
+        "y": 94,
+        "gate": "e",
+        "price": 400
+      },
+      {
+        "id": "gosciniec-4",
+        "route": "pustkowie-gosciniec",
+        "x": 59,
+        "y": 18,
+        "gate": "w",
+        "price": 400
+      },
+      {
+        "id": "gosciniec-5",
+        "route": "pustkowie-gosciniec",
+        "x": 51,
+        "y": 60,
+        "gate": "w",
+        "price": 400
+      },
+      {
+        "id": "gosciniec-6",
+        "route": "pustkowie-gosciniec",
+        "x": 53,
+        "y": 86,
+        "gate": "w",
+        "price": 400
+      },
+      {
+        "id": "nieuzytki-1",
+        "route": "pustkowie-nieuzytki",
+        "x": 26,
+        "y": 22,
+        "gate": "s",
+        "price": 500
+      },
+      {
+        "id": "nieuzytki-2",
+        "route": "pustkowie-nieuzytki",
+        "x": 80,
+        "y": 13,
+        "gate": "s",
+        "price": 500
+      },
+      {
+        "id": "nieuzytki-3",
+        "route": "pustkowie-nieuzytki",
+        "x": 18,
+        "y": 59,
+        "gate": "n",
+        "price": 500
+      },
+      {
+        "id": "nieuzytki-4",
+        "route": "pustkowie-nieuzytki",
+        "x": 52,
+        "y": 57,
+        "gate": "n",
+        "price": 500
+      },
+      {
+        "id": "nieuzytki-5",
+        "route": "pustkowie-nieuzytki",
+        "x": 78,
+        "y": 53,
+        "gate": "n",
+        "price": 500
+      },
+      {
+        "id": "nieuzytki-6",
+        "route": "pustkowie-nieuzytki",
+        "x": 108,
+        "y": 62,
+        "gate": "n",
+        "price": 500
+      }
+    ],
+    "stageSides": [
+      9,
+      13,
+      17,
+      21
+    ],
+    "stages": [
+      {
+        "beton": 0,
+        "stal": 0,
+        "energia": 0,
+        "zywnosc": 0,
+        "coins": 0,
+        "level": 3,
+        "hall": 1
+      },
+      {
+        "beton": 150,
+        "stal": 80,
+        "energia": 0,
+        "zywnosc": 0,
+        "coins": 150,
+        "level": 5,
+        "hall": 2
+      },
+      {
+        "beton": 450,
+        "stal": 300,
+        "energia": 120,
+        "zywnosc": 0,
+        "coins": 400,
+        "level": 8,
+        "hall": 3
+      },
+      {
+        "beton": 1000,
+        "stal": 750,
+        "energia": 350,
+        "zywnosc": 250,
+        "coins": 900,
+        "level": 11,
+        "hall": 4
+      }
+    ],
+    "buildings": [
+      {
+        "id": "ratusz",
+        "name": "Ratusz",
+        "w": 5,
+        "h": 4,
+        "produces": "",
+        "limit": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "blurb": "Serce dystryktu. Jego poziom pozwala na więcej budynków, wyższe poziomy i kolejne etapy rozbudowy.",
+        "levels": [
+          {
+            "beton": 0,
+            "stal": 0,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 0,
+            "player": 3,
+            "value": 0
+          },
+          {
+            "beton": 140,
+            "stal": 70,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 120,
+            "player": 3,
+            "value": 0
+          },
+          {
+            "beton": 380,
+            "stal": 260,
+            "energia": 90,
+            "zywnosc": 0,
+            "seconds": 900,
+            "player": 5,
+            "value": 0
+          },
+          {
+            "beton": 850,
+            "stal": 680,
+            "energia": 320,
+            "zywnosc": 200,
+            "seconds": 3600,
+            "player": 8,
+            "value": 0
+          },
+          {
+            "beton": 1700,
+            "stal": 1450,
+            "energia": 750,
+            "zywnosc": 600,
+            "seconds": 10800,
+            "player": 11,
+            "value": 0
+          }
+        ]
+      },
+      {
+        "id": "apartamentowiec",
+        "name": "Apartamentowiec",
+        "w": 3,
+        "h": 3,
+        "produces": "monety",
+        "limit": [
+          1,
+          1,
+          2,
+          2,
+          3
+        ],
+        "blurb": "Mieszkańcy płacą czynsz: monety prosto do portfela.",
+        "levels": [
+          {
+            "beton": 120,
+            "stal": 60,
+            "energia": 30,
+            "zywnosc": 0,
+            "seconds": 180,
+            "player": 3,
+            "value": 4
+          },
+          {
+            "beton": 260,
+            "stal": 140,
+            "energia": 80,
+            "zywnosc": 40,
+            "seconds": 900,
+            "player": 5,
+            "value": 7
+          },
+          {
+            "beton": 560,
+            "stal": 320,
+            "energia": 200,
+            "zywnosc": 120,
+            "seconds": 2400,
+            "player": 7,
+            "value": 11
+          },
+          {
+            "beton": 1100,
+            "stal": 700,
+            "energia": 420,
+            "zywnosc": 260,
+            "seconds": 5400,
+            "player": 9,
+            "value": 16
+          },
+          {
+            "beton": 2000,
+            "stal": 1300,
+            "energia": 800,
+            "zywnosc": 520,
+            "seconds": 10800,
+            "player": 12,
+            "value": 24
+          }
+        ]
+      },
+      {
+        "id": "szklarnia",
+        "name": "Szklarnia pionowa",
+        "w": 3,
+        "h": 3,
+        "produces": "zywnosc",
+        "limit": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "blurb": "Warzywa na regałach pod lampami. Żywność dla mieszkańców i do skupu.",
+        "levels": [
+          {
+            "beton": 40,
+            "stal": 0,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 45,
+            "player": 3,
+            "value": 20
+          },
+          {
+            "beton": 80,
+            "stal": 30,
+            "energia": 20,
+            "zywnosc": 0,
+            "seconds": 300,
+            "player": 3,
+            "value": 34
+          },
+          {
+            "beton": 180,
+            "stal": 90,
+            "energia": 60,
+            "zywnosc": 0,
+            "seconds": 1200,
+            "player": 5,
+            "value": 54
+          },
+          {
+            "beton": 400,
+            "stal": 220,
+            "energia": 150,
+            "zywnosc": 0,
+            "seconds": 3600,
+            "player": 8,
+            "value": 84
+          },
+          {
+            "beton": 820,
+            "stal": 480,
+            "energia": 330,
+            "zywnosc": 0,
+            "seconds": 7200,
+            "player": 11,
+            "value": 126
+          }
+        ]
+      },
+      {
+        "id": "farma-solarna",
+        "name": "Farma solarna",
+        "w": 3,
+        "h": 3,
+        "produces": "energia",
+        "limit": [
+          1,
+          1,
+          2,
+          2,
+          3
+        ],
+        "blurb": "Panele i magazyn energii. Prąd dla nowych budynków.",
+        "levels": [
+          {
+            "beton": 30,
+            "stal": 20,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 60,
+            "player": 3,
+            "value": 20
+          },
+          {
+            "beton": 80,
+            "stal": 50,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 300,
+            "player": 3,
+            "value": 34
+          },
+          {
+            "beton": 200,
+            "stal": 150,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 1200,
+            "player": 5,
+            "value": 54
+          },
+          {
+            "beton": 460,
+            "stal": 360,
+            "energia": 0,
+            "zywnosc": 80,
+            "seconds": 3600,
+            "player": 8,
+            "value": 84
+          },
+          {
+            "beton": 950,
+            "stal": 780,
+            "energia": 0,
+            "zywnosc": 250,
+            "seconds": 7200,
+            "player": 11,
+            "value": 126
+          }
+        ]
+      },
+      {
+        "id": "betoniarnia",
+        "name": "Betoniarnia",
+        "w": 3,
+        "h": 3,
+        "produces": "beton",
+        "limit": [
+          1,
+          1,
+          2,
+          2,
+          3
+        ],
+        "blurb": "Silos, mieszalnik i taśma. Betonu potrzeba do wszystkiego.",
+        "levels": [
+          {
+            "beton": 0,
+            "stal": 20,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 60,
+            "player": 3,
+            "value": 24
+          },
+          {
+            "beton": 60,
+            "stal": 40,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 300,
+            "player": 3,
+            "value": 40
+          },
+          {
+            "beton": 160,
+            "stal": 120,
+            "energia": 40,
+            "zywnosc": 0,
+            "seconds": 1200,
+            "player": 5,
+            "value": 64
+          },
+          {
+            "beton": 380,
+            "stal": 300,
+            "energia": 140,
+            "zywnosc": 0,
+            "seconds": 3600,
+            "player": 8,
+            "value": 100
+          },
+          {
+            "beton": 800,
+            "stal": 650,
+            "energia": 320,
+            "zywnosc": 0,
+            "seconds": 7200,
+            "player": 11,
+            "value": 150
+          }
+        ]
+      },
+      {
+        "id": "recykling",
+        "name": "Recykling stali",
+        "w": 3,
+        "h": 3,
+        "produces": "stal",
+        "limit": [
+          1,
+          1,
+          2,
+          2,
+          3
+        ],
+        "blurb": "Złom z pogranicza wraca jako stal. Najcenniejszy surowiec.",
+        "levels": [
+          {
+            "beton": 50,
+            "stal": 0,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 90,
+            "player": 3,
+            "value": 16
+          },
+          {
+            "beton": 100,
+            "stal": 30,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 300,
+            "player": 3,
+            "value": 26
+          },
+          {
+            "beton": 250,
+            "stal": 100,
+            "energia": 40,
+            "zywnosc": 0,
+            "seconds": 1200,
+            "player": 5,
+            "value": 42
+          },
+          {
+            "beton": 560,
+            "stal": 260,
+            "energia": 140,
+            "zywnosc": 0,
+            "seconds": 3600,
+            "player": 8,
+            "value": 66
+          },
+          {
+            "beton": 1100,
+            "stal": 600,
+            "energia": 320,
+            "zywnosc": 0,
+            "seconds": 7200,
+            "player": 11,
+            "value": 100
+          }
+        ]
+      },
+      {
+        "id": "magazyn",
+        "name": "Centrum logistyczne",
+        "w": 3,
+        "h": 3,
+        "produces": "",
+        "limit": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "blurb": "Więcej miejsca na surowce (każdy poziom +400 każdego).",
+        "levels": [
+          {
+            "beton": 80,
+            "stal": 50,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 180,
+            "player": 3,
+            "value": 400
+          },
+          {
+            "beton": 180,
+            "stal": 140,
+            "energia": 0,
+            "zywnosc": 0,
+            "seconds": 600,
+            "player": 4,
+            "value": 400
+          },
+          {
+            "beton": 420,
+            "stal": 340,
+            "energia": 60,
+            "zywnosc": 0,
+            "seconds": 1800,
+            "player": 6,
+            "value": 400
+          },
+          {
+            "beton": 900,
+            "stal": 780,
+            "energia": 200,
+            "zywnosc": 0,
+            "seconds": 3600,
+            "player": 9,
+            "value": 400
+          },
+          {
+            "beton": 1800,
+            "stal": 1550,
+            "energia": 450,
+            "zywnosc": 0,
+            "seconds": 10800,
+            "player": 12,
+            "value": 400
+          }
+        ]
+      }
+    ]
+  },
   "caches": [
     {
       "id": "wyspa-skrytka",

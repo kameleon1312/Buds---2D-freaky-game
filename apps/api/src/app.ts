@@ -90,6 +90,7 @@ import {
   type MeResponse,
   type PairCodeResponse,
   pvpOpponentOf,
+  raidPlotOf,
   turfAt,
   turfOf,
   type BudRecord,
@@ -108,6 +109,7 @@ import {
 } from './middleware/player.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { budSheetPng, budSheetPngCached } from './png.js';
+import { createLand } from './land.js';
 import { createRivalry } from './rivalry.js';
 import { makePairCode } from './store/slug.js';
 import type { BudStore } from './store/types.js';
@@ -141,6 +143,7 @@ export function createApp(
   };
   const app = new Hono<{ Variables: AuthVariables & PlayerVariables }>();
   const rivalry = createRivalry({ store, now, catalog, content });
+  const land = createLand({ store, now, shieldHours: env.LAND_SHIELD_HOURS });
 
   app.use('*', requestId());
   app.use('*', secureHeaders());
@@ -547,7 +550,7 @@ export function createApp(
     const state: FightState = { ...newFight(enemyId, me, them, randomInt(1, 2 ** 31 - 1)), spot };
     const id = await store.createFight(bud.slug, state);
     return c.json<FightResponse>(
-      { fight: view(id, state), events: [], reward: null, influence: null, pvp: null },
+      { fight: view(id, state), events: [], reward: null, influence: null, pvp: null, raid: null },
       201,
     );
   };
@@ -576,7 +579,14 @@ export function createApp(
     const conflict = () =>
       c.json<ApiError>({ error: { code: 'fight_busy', message: 'Ruch już został wykonany' } }, 409);
 
-    const done = { fight: view(id.data, state), events, reward: null, influence: null, pvp: null };
+    const done = {
+      fight: view(id.data, state),
+      events,
+      reward: null,
+      influence: null,
+      pvp: null,
+      raid: null,
+    };
     if (state.status === 'active') {
       if (!(await store.saveTurn(bud.slug, id.data, before.turn, state))) return conflict();
       return c.json<FightResponse>(done);
@@ -587,6 +597,12 @@ export function createApp(
         return conflict();
       const { pvp, reward } = await rivalry.finishPvp(bud, state);
       return c.json<FightResponse>({ ...done, reward, pvp });
+    }
+    // a raid on another bud's district: loot (or the district's log) instead of XP
+    if (raidPlotOf(state.enemyId)) {
+      if (!(await store.finishFight(bud.slug, id.data, before.turn, state, state.status, 0, 0)))
+        return conflict();
+      return c.json<FightResponse>({ ...done, raid: await land.finishRaid(bud, state) });
     }
     if (state.status === 'lost') {
       if (!(await store.finishFight(bud.slug, id.data, before.turn, state, 'lost', 0, 0)))
@@ -628,6 +644,7 @@ export function createApp(
       events,
       influence,
       pvp: null,
+      raid: null,
       reward: {
         xpGained,
         xp: result.xp,
@@ -650,14 +667,17 @@ export function createApp(
       throw new HTTPException(404, { message: 'Nie ma takiego pojedynku' });
     const opponent = pvpOpponentOf(before.enemyId);
     let pvp: FightResponse['pvp'] = null;
+    let raid: FightResponse['raid'] = null;
     if (
       before.status === 'active' &&
       (await store.finishFight(bud.slug, id.data, before.turn, before, 'fled', 0, 0)) &&
-      opponent &&
       before.turn > 0
     ) {
       // running from another bud after the first exchange counts as a loss (no dodging a bad rating)
-      pvp = await rivalry.finishPvp(bud, { ...before, status: 'lost' }).then((r) => r.pvp);
+      if (opponent)
+        pvp = await rivalry.finishPvp(bud, { ...before, status: 'lost' }).then((r) => r.pvp);
+      if (raidPlotOf(before.enemyId))
+        raid = await land.finishRaid(bud, { ...before, status: 'lost' });
     }
     return c.json<FightResponse>({
       fight: view(id.data, {
@@ -668,6 +688,7 @@ export function createApp(
       reward: null,
       influence: null,
       pvp,
+      raid,
     });
   });
 
@@ -1136,6 +1157,10 @@ export function createApp(
   // ---------- rywalizacja: turfs, rankings, crews, PvP, market ----------
 
   rivalry.routes(app, { fighterOf, startFight });
+
+  // ---------- dystrykty: plots on the wastelands, the districts on them, raids ----------
+
+  land.routes(app, { fighterOf, startFight, abandon: rivalry.abandon });
 
   app.notFound((c) =>
     c.json<ApiError>({ error: { code: 'not_found', message: 'Not found' } }, 404),

@@ -70,9 +70,9 @@ export const routeBetween = (x: string, y: string): Route | undefined =>
 
 /** Map size of a route: long along its axis. */
 export const ROUTE_LENGTH = 150;
-export const ROUTE_WIDTH = 48;
+export const ROUTE_WIDTH = 96;
 /** The road through it is four cells wide, like the cities' roads out, and meets them at these rows/columns. */
-export const ROUTE_ROAD = [22, 25] as const;
+export const ROUTE_ROAD = [46, 49] as const;
 
 /**
  * Walking onto a route from a city needs the level of the city at its far end (the road leads there); walking back

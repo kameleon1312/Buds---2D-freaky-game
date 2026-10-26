@@ -492,6 +492,73 @@ ICONS_UI.hasla = {
     ) +
     [16, 28, 40].map((x) => flat(circ(x, 35, 3.6), '#a3e635', LINE, 2)).join(''),
 };
+// Dzielnice graczy: the four resources of a district, the rent (coins) and the district button (a skyline).
+ICONS_UI['zasob-beton'] = {
+  body:
+    // a stack of concrete blocks
+    shaded(rr(6, 34, 26, 18, 3), ['#d9dce1', '#a9aeb8'], LINE, -2, -2) +
+    shaded(rr(32, 34, 26, 18, 3), ['#d9dce1', '#a9aeb8'], LINE, -2, -2) +
+    shaded(rr(18, 16, 28, 18, 3), ['#e4e7eb', '#b3b8c1'], LINE, -2, -2) +
+    [
+      [12, 40],
+      [24, 46],
+      [40, 42],
+      [50, 47],
+      [26, 22],
+      [37, 27],
+    ]
+      .map(([x, y]) => flat(circ(x!, y!, 1.6), '#8a909a', 'none', 0))
+      .join('') +
+    stroke('M10 37h18M22 19h20', '#ffffff', 2.5, 0.6),
+};
+ICONS_UI['zasob-stal'] = {
+  body:
+    // two steel I-beams, one on the other
+    shaded('M6 40H58V46H52V50H58V56H6V50H12V46H6Z', ['#9aa6b4', '#727f8e'], LINE, -2, -2) +
+    shaded('M10 14H54V20H48V30H54V36H10V30H16V20H10Z', ['#b7c2ce', '#8592a1'], LINE, -2, -2) +
+    stroke('M14 16h36M10 42h44', '#ffffff', 2, 0.6),
+};
+ICONS_UI['zasob-energia'] = {
+  body:
+    // a lightning bolt in a gold ring
+    shaded(circ(32, 32, 26), ['#2f3440', '#1f232c'], LINE, -2, -2) +
+    shaded('M36 6L16 36H30L26 58L48 26H34Z', ['#ffe27a', '#ffc93c'], LINE, -3, -3) +
+    stroke('M34 12L22 32', '#ffffff', 2.5, 0.6),
+};
+ICONS_UI['zasob-zywnosc'] = {
+  body:
+    // a crate of greens and tomatoes
+    shaded(rr(8, 32, 48, 24, 3), ['#c99a6b', '#a07448'], LINE, -2, -2) +
+    stroke('M12 41h40M12 49h40', '#7f522b', 2, 0.6) +
+    shaded(circ(20, 28, 9), ['#86d062', '#4f9e45'], '#2b5a2c', -2, -2) +
+    shaded(circ(44, 27, 10), ['#86d062', '#4f9e45'], '#2b5a2c', -2, -2) +
+    shaded(circ(32, 26, 9), ['#ff7a6b', '#d9564a'], '#7a2a22', -2, -2) +
+    stroke('M30 18l2 -4l3 3', '#2b5a2c', 2.5) +
+    stroke('M28 23a4 4 0 0 1 4 -3', '#ffffff', 2, 0.7),
+};
+ICONS_UI['zasob-monety'] = {
+  body:
+    // a stack of coins with one standing in front
+    shaded(rr(8, 42, 32, 10, 5), ['#ffc93c', '#d98a0b'], LINE, -1, -1) +
+    shaded(rr(10, 34, 32, 10, 5), ['#ffd25c', '#d98a0b'], LINE, -1, -1) +
+    shaded(rr(8, 26, 32, 10, 5), ['#ffc93c', '#d98a0b'], LINE, -1, -1) +
+    shaded(circ(44, 38, 15), ['#ffe27a', '#ffc93c'], LINE, -3, -3) +
+    flat(circ(44, 38, 9), 'none', '#d98a0b', 2.5) +
+    stroke('M37 31a10 10 0 0 1 8 -4', '#ffffff', 2.5, 0.7),
+};
+ICONS_UI.dzielnica = {
+  body:
+    // a little skyline: a glass tower, a block, a hall with a lime flag
+    shaded(rr(24, 8, 16, 48, 3), ['#7cc6ec', '#4a97c8'], LINE, -2, -2) +
+    stroke('M28 14v38M32 14v38M36 14v38', '#e9eef3', 1.6, 0.7) +
+    shaded(rr(6, 26, 20, 30, 3), ['#d9dce1', '#a9aeb8'], LINE, -2, -2) +
+    [30, 38, 46].map((y) => flat(rr(10, y, 12, 5, 1), '#ffe3a1', LINE, 1.2)).join('') +
+    shaded(rr(38, 34, 20, 22, 3), ['#f4f6f8', '#d6dbe1'], LINE, -2, -2) +
+    flat(rr(42, 42, 12, 14, 1), '#7cc6ec', LINE, 1.5) +
+    stroke('M54 34V18', LINE, 2.5) +
+    shaded('M55 18q6 -2 9 1q-3 3 -9 4Z', ['#a3e635', '#5d9a12'], LINE, -1, -1, 1.5) +
+    stroke('M2 57H62', LINE, 3),
+};
 ICONS_UI.korona = {
   body:
     shaded('M8 48L6 18L20 30L32 10L44 30L58 18L56 48Z', ['#ffe27a', '#ffc93c'], LINE, -4, -4) +

@@ -59,14 +59,46 @@ namespace Buds.World
         static Vignette vignette;
         static Bloom bloom;
 
-        /// <summary>Grades the camera's picture with the mood of this map (post-processing switched on).</summary>
-        public static void Apply(Camera cam, WorldMap map)
+        static Mood shown;
+
+        /// <summary>
+        /// Grades the camera's picture with the mood of this map (post-processing switched on). With
+        /// <paramref name="seconds"/> the light drifts over from the last mood (walking across a seam into the next map:
+        /// the land changes under the bud's feet, the sky shouldn't jump).
+        /// </summary>
+        public static void Apply(Camera cam, WorldMap map, float seconds = 0)
         {
             if (!cam) return;
             var data = cam.GetUniversalAdditionalCameraData();
             if (data) data.renderPostProcessing = true;
             Ensure();
             var mood = For(map.DistrictId, map.IsInterior);
+            var runner = volume.GetComponent<Blend>();
+            if (!runner) runner = volume.gameObject.AddComponent<Blend>();
+            if (seconds <= 0 || shown == null)
+            {
+                runner.enabled = false;
+                Show(mood);
+                return;
+            }
+            runner.Begin(shown, mood, seconds);
+        }
+
+        /// <summary>A mood between two others (t = 0…1).</summary>
+        public static Mood Lerp(Mood a, Mood b, float t) => new()
+        {
+            Contrast = Mathf.Lerp(a.Contrast, b.Contrast, t),
+            Saturation = Mathf.Lerp(a.Saturation, b.Saturation, t),
+            Exposure = Mathf.Lerp(a.Exposure, b.Exposure, t),
+            Highlights = Color.Lerp(a.Highlights, b.Highlights, t),
+            Shadows = Color.Lerp(a.Shadows, b.Shadows, t),
+            Balance = Mathf.Lerp(a.Balance, b.Balance, t),
+            Vignette = Mathf.Lerp(a.Vignette, b.Vignette, t),
+        };
+
+        static void Show(Mood mood)
+        {
+            shown = mood;
             adjust.contrast.value = mood.Contrast;
             adjust.saturation.value = mood.Saturation;
             adjust.postExposure.value = mood.Exposure;
@@ -74,6 +106,29 @@ namespace Buds.World
             split.shadows.value = mood.Shadows;
             split.balance.value = mood.Balance;
             vignette.intensity.value = mood.Vignette;
+        }
+
+        /// <summary>Drifts the grade from one mood to the next over a few seconds.</summary>
+        sealed class Blend : MonoBehaviour
+        {
+            Mood from, to;
+            float seconds, t;
+
+            public void Begin(Mood a, Mood b, float duration)
+            {
+                from = a;
+                to = b;
+                seconds = Mathf.Max(0.01f, duration);
+                t = 0;
+                enabled = true;
+            }
+
+            void Update()
+            {
+                t += Time.unscaledDeltaTime / seconds;
+                Show(Lerp(from, to, Mathf.SmoothStep(0, 1, Mathf.Clamp01(t))));
+                if (t >= 1) enabled = false;
+            }
         }
 
         static void Ensure()

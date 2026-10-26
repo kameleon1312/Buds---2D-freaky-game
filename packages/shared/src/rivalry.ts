@@ -312,7 +312,14 @@ export const turfsResponseSchema = z.object({
   turfs: z.array(turfStateSchema),
 });
 
-export { influenceSchema, pvpResultSchema, type Influence, type PvpResult } from './influence';
+export {
+  influenceSchema,
+  pvpResultSchema,
+  raidResultSchema,
+  type Influence,
+  type PvpResult,
+  type RaidResult,
+} from './influence';
 
 export const titleSchema = z.object({ week: z.string(), title: z.string() });
 

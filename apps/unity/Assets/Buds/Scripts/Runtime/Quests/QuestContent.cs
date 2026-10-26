@@ -254,6 +254,105 @@ namespace Buds.Quests
         public string hint;
     }
 
+    /// <summary>A cost in a district's resources (and coins, for land).</summary>
+    [Serializable]
+    public class LandCost
+    {
+        public int beton;
+        public int stal;
+        public int energia;
+        public int zywnosc;
+    }
+
+    [Serializable]
+    public sealed class LandLevelData : LandCost
+    {
+        public int seconds;
+        public int player;
+        public int value;
+    }
+
+    /// <summary>What growing to a stage asks for: materials, coins, the bud's level and the town hall's level.</summary>
+    [Serializable]
+    public sealed class LandStageData : LandCost
+    {
+        public int coins;
+        public int level;
+        public int hall;
+    }
+
+    [Serializable]
+    public sealed class BuildingData
+    {
+        public string id;
+        public string name;
+        public int w;
+        public int h;
+        public string produces;
+        public int[] limit;
+        public string blurb;
+        public LandLevelData[] levels;
+    }
+
+    [Serializable]
+    public sealed class ResourceData
+    {
+        public string id;
+        public string name;
+        public int price;
+    }
+
+    /// <summary>A plot on a wasteland (top-left map cell, the side its gate faces: n, s, e, w) and its price.</summary>
+    [Serializable]
+    public sealed class PlotData
+    {
+        public string id;
+        public string route;
+        public int x;
+        public int y;
+        public string gate;
+        public int price;
+    }
+
+    [Serializable]
+    public sealed class RouteBonusData
+    {
+        public string route;
+        public string resource;
+    }
+
+    /// <summary>Dystrykty (packages/shared land.ts): the plots, the stages, the buildings and what things cost.</summary>
+    [Serializable]
+    public sealed class LandContent
+    {
+        public int plotSize;
+        public int hallX;
+        public int hallY;
+        public int nameMin;
+        public int nameMax;
+        public int minLevel;
+        public int baseStorage;
+        public int producerHours;
+        public float bonus;
+        public int sellBatch;
+        public int raidMinLevel;
+        public int raidsPerDay;
+        public int raidRetryMinutes;
+        public int newShieldHours;
+        public ResourceData[] resources;
+        public RouteBonusData[] routeBonus;
+        public PlotData[] plots;
+        public int[] stageSides;
+        public LandStageData[] stages;
+        public BuildingData[] buildings;
+
+        public BuildingData Building(string id) => Array.Find(buildings ?? Array.Empty<BuildingData>(), b => b.id == id);
+        public PlotData Plot(string id) => Array.Find(plots ?? Array.Empty<PlotData>(), p => p.id == id);
+        public PlotData[] PlotsOn(string route) => Array.FindAll(plots ?? Array.Empty<PlotData>(), p => p.route == route);
+        public string BonusOf(string route) => Array.Find(routeBonus ?? Array.Empty<RouteBonusData>(), b => b.route == route)?.resource;
+        public ResourceData Resource(string id) => Array.Find(resources ?? Array.Empty<ResourceData>(), r => r.id == id);
+    }
+
     /// <summary>All NPCs and quests the game knows (the API validates completions against the same data).</summary>
     [Serializable]
     public sealed class QuestContent
@@ -279,6 +378,7 @@ namespace Buds.Quests
         public int trainingXpPerRank;
         public int trainingCooldown;
         public int trainingMaxScore;
+        public LandContent land;
 
         public static QuestContent Parse(string json)
         {

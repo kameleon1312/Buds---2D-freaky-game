@@ -3,204 +3,243 @@
 id = pustkowie-wydmy
 name = Wydmy
 base = #d8c48a
-spawn = 16,75
+spawn = 40,75
 
 [legend]
+= = asphalt
+h = dzialka
+g = dzialka + dzialka-post !
+k = forest
+s = forest !
+m = forest + bush-b !
+p = forest + drzewo-suche !
+t = forest + palm-a !
+o = forest + palm-b !
+q = forest + palm-c !
+n = forest + rock-a !
+l = forest + rock-b !
+r = forest + sign !
 , = grass2
-N = grass2 + bush-b !
-O = grass2 + drzewo-suche !
-I = grass2 + palm-a !
-M = grass2 + palm-b !
-K = grass2 + rock-a !
-G = grass2 + rock-b !
+f = grass2 + bush-b !
+i = grass2 + drzewo-suche !
+c = grass2 + palm-a !
+Z = grass2 + palm-b !
+j = grass2 + rock-a !
+e = grass2 + rock-b !
+G = jungle
+H = jungle !
+Q = jungle + drzewo-suche !
+U = jungle + palm-a !
+I = jungle + palm-b !
+R = jungle + palm-c !
+K = jungle + rock-a !
+J = jungle + rock-b !
+a = jungle + sign !
+A = ocean !
+W = ocean + drzewo-suche !
+L = ocean + palm-b !
+S = ocean + palm-c !
+M = ocean + rock-a !
+B = ocean + rock-b !
 - = path
-P = path + sign !
 _ = sand
-A = sand !
-L = sand + bush-b !
-F = sand + drzewo-suche !
-H = sand + palm-a !
-E = sand + palm-b !
-C = sand + palm-c !
-D = sand + rock-a !
-B = sand + rock-b !
-J = sand + sign !
+E = sand !
+X = sand + bush-b !
+b = sand + drzewo-suche !
+d = sand + palm-a !
+P = sand + palm-b !
+Y = sand + palm-c !
+F = sand + rock-a !
+T = sand + rock-b !
+D = shallow !
+N = shallow + drzewo-suche !
+V = shallow + palm-b !
+C = shallow + palm-c !
+O = shallow + rock-a !
 
 [ground]
+asphalt : asphalt : 0.8 : 0.45 #3a3e48, 0.5 #4c5160
+forest : forest : 2 : 0.45 #6aae4a, 0.62 #5a9c40
+jungle : jungle : 2 : 0.42 #5aa84a, 0.6 #4a983e
+shallow : shallow : 2 : 0.3 #8ed16a
+ocean : ocean : 2.6 : 0.5 #3aa6dc, 0.85 #2b8bc8
 sand : sand : 2.2 : 0.4 #e6cf98, 0.55 #f3e2b4
 grass2 : grass2 : 2 : 0.32 #b9bf6a, 0.5 #a9b25c
 path : path : 1.3 : 0.36 #cfae76, 0.48 #dcc08e
+lawn-dzialka : dzialka : 1 : 0.45 #6fae4c, 0.5 #84c25c
 
 [scatter]
 sand : 0.05 : muszle|tuft|pebbles
 grass2 : 0.25 : tuft|tuft|hibiskus
 path : 0.04 : pebbles
+jungle : 0.05 : hibiskus|tuft
+asphalt : 0.02 : manhole|kratka|plama-oleju|kratka
 
 [signs]
-20,6 | Do: Las Palmas | Wydmy. Suche trawy i piasek aż po morze. Za wydmami ktoś zawsze czeka. Trzymaj się drogi, a nic ci nie grozi.
-27,143 | Do: Miasto Ziomków | Wydmy. Suche trawy i piasek aż po morze. Za wydmami ktoś zawsze czeka. Trzymaj się drogi, a nic ci nie grozi.
+44,6 | Do: Las Palmas | Wydmy. Suche trawy i piasek aż po morze. Za wydmami ktoś zawsze czeka. Trzymaj się drogi, a nic ci nie grozi.
+51,143 | Do: Miasto Ziomków | Wydmy. Suche trawy i piasek aż po morze. Za wydmami ktoś zawsze czeka. Trzymaj się drogi, a nic ci nie grozi.
 
 [exits]
-22,0,25,0 | las-palmas
-22,149,25,149 | miasto-ziomkow
+46,0,49,0 | las-palmas
+46,149,49,149 | miasto-ziomkow
 
 [zones]
-0,0,47,49 | Plaże Las Palmas
-0,50,47,99 | Wydmy
-0,100,47,149 | Suche Łąki
+0,0,95,49 | Plaże Las Palmas
+0,50,95,99 | Wydmy
+0,100,95,149 | Suche Łąki
 
 [doors]
 
 [plots]
 
 [grid]
-ABCAAD________________----_________________AEBDB
-EDFDAE________________----_________________FDCDC
-CAACB_B_______________----_________________ADEEC
-AADEB______G,,_________----_________H____,,FABAE
-AAFD______I,,,,________----_____________,,,BEBBA
-DFAA_____,,,,,,,_____,_----____________,,,,CAAAE
-DBCD_____,,,,,,,____J,,_----___________,,,,EEDAF
-FAEA_____,,,,,,,_____,,_----____________,,,BBEBF
-BDFA______,,,,,_______,_----___________B,,KCFAFA
-FCAE________E__________,_----______________AAEEB
-ADCD______L____________,_----_____________HAEFDE
-EBAA___________D_________----______________FACBF
-BABF______________________----_____________AEDAA
-BBFF__E_E_________________----_____________DABAC
-AFDB___________________,,_----_____________FDCAD
-DBAA___E_______________,,_----_____________BBECB
-AABA__________________,,,_----_,___________CECCA
-FCDE,,,M,,____________,,,_----_,___________AACAD
-CEBA,,,,,,,___________,,,_----_,___________FAEDB
-AEDF,,K,,,,,__________,,,_----_,___________EBACA
-BECB,,,,,,,,,,__B______,,_----_____________BEFBE
-EDAA,_______,,____________----_____________DCCAA
-EFEDE_DBLDD_,,____________----____________ABCCEF
-FAFFA_B,,,B_,,,_H_________----____________EAAEFF
-DFCAE_L,,,________________----____________AFECBF
-DEAAD_D,,,D_,,,__________----_____L_______CEFACE
-AFDBF_DBLDD_,G,B_________----___________E_BBAADA
-CFAAC_______,,,___________----_____________EFFAA
-EABFA___F_,,N,,________,,_----_____________DABCB
-CECAD_____,,,,,_______,,,_----_____________EAFCA
-AAACE__E__,,,,,_______,,,_----_______L_____EBEFC
-ADFFE_____,,,,,____D__,,,_----_____________CAECA
-AEAAA_____,,,,,_______,,,_----_______E_____DAABF
-BEAA________,,______B__,,_----_____________CCEFF
-AAAA______________________----___H________ADEADE
-DEBC_______________________----___________FDDDDC
-DDFAEB_____________________----___________FBBACB
-FBDB_______________________----________B__AFADBC
-BFBF_______________________----___________CCAAFB
-EEAB________,,________F____----____________ECEDB
-AABF______,,,,,____________----_____________BACD
-FAAF______,,,,G____________----_____________AAEF
-AADD_____,,,,,,____________----________L____DEAC
-FADA_____,,,,,,____________----______L______ADAA
-EFAA______,,,,,____________----___________,ACACC
-FFAA__L___,,,,,____________----________,,,,FFFEA
-CBFA_______,,,________HD___----_______,,,,ADFDEB
-AAAE________,______________----____,,,,,,,ACAAAC
-EAAF______________________----___L_,,,N,,,AAFDCB
-FADB________,_____________----_____,_______EBADB
-CAFE_______,,,,___________----_______DBLDD_DDADA
-BDFE_____B,,,,,,_B_______----_,______B,,,B_FDFBE
-DADC______,,,,,,_________----_________,,,L_BAFCC
-BABA_____,,,,,,,________----_,,,_____D,,,D_CACAF
-EDCA_____,,,,,,,_______----__,,,,____DBLDD_ABFDB
-ACAA____L,,,,,,,_______----__,,,,__________DEFDC
-DFFB______,,,,,,______----___,,,,__________EFEDD
-AABFB______,,,,,_____----___,,,,,__________BCADF
-EADDF____________,,,_----_,,,,,,,___________ADDB
-FFEFD__E________,,,_----_,,,,,,,,___________CDAE
-BEFAA___________,,_----_,,,,,,G,,___________DAAA
-AEFDA____________,_----_,,,,,,,,,____L______ACAC
-ECDAD_____________----_,,,,,,,,,____________FBAB
-CDCAA_D__________----______________,,,_____EDAEB
-ABBFA_______,____----_____________,,,,,,___AFCEA
-FABA_______,,,__----______________,,,,,,___CBABA
-EAEA______,,,,__----______________,,,,,,___DDECA
-FCAC_____B,,,,_----_______________,,,,,,___AACDB
-AEAFC______,,,_----_____FB________,,,,,,___BFACA
-CFBAE______,,,_----_______________,,,,,,___AADAA
-DAADC______,,,_----___,,,,,_______,,,,,____EBFCC
-FFADAD_____,,_----___,,,,,,,_______,M,____CFDDFD
-CACAFA_F___,,_----___,,,,,,,______________AFBFBB
-AAAFAF_____,,_----___,,,,,,,,__F___,,,____AAEFBC
-AABDAF_____,,_----______,,,,,,,,,,,,,,,,,,,AEAAC
-FAFDFA_____,,_----__________,,,,,,,,,,,,,,,,EBCC
-DADABA_____,,,_----_________,,,,,,,,,,,O,,,,EEAA
-FCCAAF_L___,,,_----_________,,,,,,,,,,,,,,,,AACA
-DDBFCA_____,,,_----_________,,,,,,,,,,,,,,,,DDBC
-EFAAEE_____,,,_----_________,,,,,,,,,,,,,,,,FFCF
-BABAEF____,,,,,_----_________,,,,,,,,,,,,,,,EBBF
-CBABA_____,,,,,_----______________,,,,,___B_FEEB
-FDAA______O,,,,_----___,,,__________,_______BAAF
-DDAB_____,,,,,,,_----_,,,,,_________________ADAA
-FFFB_____,,,,,,,_----_,,,,,__F______________EAAC
-CFEA_________,,___----_,,,,__L______________ACED
-FCBBE__DBLDD_,_H__----_,,,,_________________AABB
-DAAE___B,,,B______----_,,,,________________DABCA
-ABDA___L,,,________----_,,________________ABFFDC
-CFCFD__D,,,D_______----_,,___________B____DDDCCA
-FBFCDC_DBLDD____L__----_,,________________AFCBEC
-DBAAFB______________----_,________________CAAFBB
-DAFFCA______________----___L_____________HADFEBF
-AAABCD______________----__________________DFFFBA
-CFCEFB______________----__________________ADCAFE
-ECDBDC______________----________________,,BDCCDC
-DABBAC_______________----_______________,,BFDAFE
-CDADEF_______________----_______________,,DAEACD
-ECADBB_______________----______________,,,BAAFCD
-ACBDA________________----_____________,,,,,ABEDF
-CCEAC________________----___D_____,,,,,,,,,ABEBF
-DAFEB,M,____E_____,__----____B____,,,,,,,,,FCADA
-AEEAB,,,_E_______,,,_----_______H_,,,,,,,,,EBAAA
-ACCBE,,,__________,__----_________,,,,,,,,,EEACB
-EFAEE________________----_____________,,,,,AFBDD
-CABAB_________B______----_______________,,,CEFAE
-CDBFC________________----___D___________,,,CAEDE
-AEAFA________________----_______________,,,FAEAA
-DEBAA___L____________----_______________,,,BFAAB
-BABEA________________----__E____________,,,AABAA
-CAABC________________----____________E___,,CDAFB
-AFEBD___F____________----_______F_________,AAEFA
-AAEBDF_______________----__________________CAEEC
-DDCDAF________________----___E_____________BECBB
-DCDAAA______,___F_____----___H_____________CBDDA
-AADACE________________----_________________AFFAB
-ADACCA_________________----__E_____________DCADA
-BFDAF_____________,____----________________ABABF
-BCAFA__D________,,I,____----________DBLDD__EBDDA
-DAAFE___L_______,,,,,___----________B,,,B__EAAAD
-FEACD___________,,,,,____----________,,,L__CBAFC
-EAFAD___________,,,,,____----_______D,,,D__CEBEF
-CECCFFF__________,,,______----______DBLDD_FFEBAA
-DAAAD_____________________----_____________DEBFA
-CECA__________________,,,,_----___,,,,,____ABBAA
-AAFF_________F________,,,,_----___M,,,,____AEDAE
-CAEE__________________G,,,,_----__,,,,,____BFAAF
-EEAB__________________,,,,,_----__,,,,,____BABDF
-DFBB_____F_____________,,,___----_,,,,,____FFDBF
-DBFD______,,,,_______________----_,,,,,____CFFEE
-DADE_____,,,,,,,______________----_,,,M_F__ACCCA
-DFDD,___,,,,,,,,,,,D__________----_,,,_____CFCDA
-AABAO,__,,,,,,,,,,,,___L______----_,,,_____DACBB
-CBFC____F,,,,,,,,N,B__________----_,,,___L_ABBFC
-AACA_______,,,______B__H______----_,,,,____CAEAB
-DAAB______________H__________----_,,,,,___EEEAAC
-AADE____________F____________----_,,,,,___ADAEBD
-DCCD____________________,___----__,,,,,___AFDCDB
-FDDF___________________,,,__----__,,,,,___EECADB
-EBAB__________________H_,__----___,,,,,___ABFCAE
-DCDA______________________----____,,,,,___ABABAF
-CABB________,_____________----____,,,,,___AABDFE
-BBDAE___,,,,,,,__________----_____,,,,,____FBDCC
-DDECC,,,,,,,,M,,________---P___L___,,,,____CEACA
-ADCBE,,,,,I,,,N,,_______----_______,,,_____BDBDB
-DACAF,,,,,,,,,,,,______----________,,,,____FFEAA
-DBBAA,,,,,,,,,,__L_____----_______,,,,,____EBBDD
-DEBCA,,,,,_____________----_____,,,,,,,____AFCCB
-DFFFC,,,,_____________----_,,,,,,,,,,,,,___BDDAE
-ACDBBD,,,_____________----_,,,,,,,,,,,,,__DBEEFF
+ABCDEF_____GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG----GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGHIJKJ
+LMNOEP_____GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG----GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGQKRKR
+SADCT______GGGGGGGGGGGGGGGGGGGGJGGGGGGGGGGGGGG----GGGGGGUGGGGGGGGGGGGUGGGGGGGGGGGGGGGGGGGGGHKIIR
+AAOVT______GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG----GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGQHJHI
+AANO_______GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG----GGGGJGGKGGGGGGGGIGGGGGGGGGGGGGGGGGGGGGGGGJIJJH
+MWDD___X___GGGGGGGGGGGGGGGGGGGUGGGGGGGGGGGKGGG----GGGGGGGGGGGGGGGGGGGGGG,GGGGGGG,,GGGGGGGGGRHHHI
+MBYF_______GGGGZGIGGGGGGGGG_GGGGGGGGGGGGGGGGaG----G-____GG,,,,,,GGGGGGG,,,GGG,,,,,,GGI___GGIIKHb
+WAPE_______GGG,,GGGGGGGGGG,__GGGGGGG_GGGGGGGGG------_____G,,,,,,GGGIGGG,,,GGG,,,,,,GGG___GGJJIJb
+TFbE_______,,,GGG_____,,,,,__GGGGGGG_GGKGGGGGG------_____GGGGGGGGGGGG,,,,,GGG,,,,,_GGGGGT__YQHQH
+bYEP___________G_______,,,,___GGGGGG__________-------_____GGGGGGG____,,,,GGGc,,,,__GGGGG___EEIIJ
+EFYF___________________,,,____GG________X________----_____TGJGGG______,,,,,,Z,,,,___G______EPbFP
+PTEE____________b___X____________________________----__________________,,,,,,,,,,_P________bEYTb
+TETb____________X___________________F_____________----__________________,,,,,,,,,__P______EPFEET
+TbbF_______________T______________________________----________d________,,,,,,,,,,__________ETEYE
+bFTb_________PT________,,,,_______________________----_________________,,,,,,e,,,__________FYEFF
+TEET___________________,,,,,,___________b_________----________________,,,,,,,,,,,,_______,,TPYTE
+ETEY___________T______,,,,,,,,,,_______________,,_----________________,f,,,,,,,,,,,___,,,,,PYYEb
+YFPE,,,,,,___X________,,,,,,,,,,______________,,,_----_,,,,__X________,,,,,,,,,,,,,,,,,,,,,EYEFY
+PTEb,,,,,,,_________dF,,,,,,,,,,______________,,,_----_,,,,ggggggggggggggggggggggg,,,,,,,,,EPFTE
+PFbP,,,,,,,,__________,,,f,,,,f,______________,,,_----_,,,,ghhhhhhhhhhhhhhhhhhhhhg,,,,,,,,,TEYET
+PYTT,,,,,,,,,,_________,,,,,__T_______T___________----___,,ghhhhhhhhhhhhhhhhhhhhhg,,,,,,,,,PbTPP
+FEEF,,,,,,,,,,____________________________________----____,ghhhhhhhhhhhhhhhhhhhhhg,,,,,,,,,YYEEP
+bPFPE,,,,,,,,,_____X__________FTXFF_______________----____,ghhhhhhhhhhhhhhhhhhhhhg,,,,,,,,,TYYPb
+bEbbEb,,,,,,,,,_______________T,,,T_______________----____,ghhhhhhhhhhhhhhhhhhhhhg,,,,,,__PEEPbb
+FbYEPP,,,,,,,,,_______________X,,,___________P____----____,ghhhhhhhhhhhhhhhhhhhhhg,,,,,,__EbPYTb
+FPEEFE,,,,,,,,,_______________F,,,F_________T____----_____,ghhhhhhhhhhhhhhhhhhhhhg,,,,,,__YPbEYP
+EbFTbF__,,,,,,,_______________FTXFF_X____________----______ghhhhhhhhhhhhhhhhhhhhhg_,,,,,,__TTEEF
+EYbEEY___,,,,,,______F____________________________----_____ghhhhhhhhhhhhhhhhhhhhhg__,,,,,,,EPbbE
+EPETb_____,,,,,________ggggggggggggggggggggggg____----------hhhhhhhhhhhhhhhhhhhhhg_____,,,,,EFET
+YTYPY_____,,,,,_______,ghhhhhhhhhhhhhhhhhhhhhg____----------hhhhhhhhhhhhhhhhhhhhhg_____,,,,,EFPE
+bYEEE_____,,,,,_______,ghhhhhhhhhhhhhhhhhhhhhg____----------hhhhhhhhhhhhhhhhhhhhhg_____,,,,,EYPP
+TPbYE____T,,,,,_______,ghhhhhhhhhhhhhhhhhhhhhg____----_____ghhhhhhhhhhhhhhhhhhhhhg_____,,,,,FbbP
+YEPYE_____,,ie,_______,ghhhhhhhhhhhhhhhhhhhhhg____----_____ghhhhhhhhhhhhhhhhhhhhhg______,,,EPEEE
+FEET________,,_________ghhhhhhhhhhhhhhhhhhhhhg____----_____ghhhhhhhhhhhhhhhhhhhhhg_________bTPEE
+YYPb___________________ghhhhhhhhhhhhhhhhhhhhhg____----_____ghhhhhhhhhhhhhhhhhhhhhg_________bEEEE
+EFPE__________P______b_ghhhhhhhhhhhhhhhhhhhhhg_____----____ghhhhhhhhhhhhhhhhhhhhhg________FPFPTY
+bFFF___________________ghhhhhhhhhhhhhhhhhhhhhg_____----____ghhhhhhhhhhhhhhhhhhhhhg_____b__FYFFbE
+bTTE___________________ghhhhhhhhhhhhhhhhhhhhhg_____----____ghhhhhhhhhhhhhhhhhhhhhg________YTbTFT
+EbEF___________________ghhhhhhhhhhhhhhhhhhhhh----------____ghhhhhhhhhhhhhhhhhhhhhg________TYTbTb
+YYEE________,,_________ghhhhhhhhhhhhhhhhhhhhh----------____ghhhhhhhhhhhhhhhhhhhhhg________bTPPET
+PYPF__b___,,f,,________ghhhhhhhhhhhhhhhhhhhhh----------____ggggggggggggggggggggggg________TEETbT
+EYFb______,,,,,________ghhhhhhhhhhhhhhhhhhhhhg_____----_,,,,_,,,,,,,,,,,,,,,______________EEbEEP
+bEEF_____,,,,,,________ghhhhhhhhhhhhhhhhhhhhhg_____----_,,,,,,,,,,,,,,,,,,,,________,_____FFPEYb
+EFEE_____,,,,,,____T___ghhhhhhhhhhhhhhhhhhhhhg_____----_,,,i_,,,,,,,,,,,,,,,______,,,,____FEEPbE
+EEYE______,,,,,________ghhhhhhhhhhhhhhhhhhhhhg_____----_,,____,,,,,,,,,,,,,,,b__,,,,,,____YYbbEE
+bbbP______,,,,,X_______ghhhhhhhhhhhhhhhhhhhhhg_____----_______P___d_________,,,,,,,,,,,___EYTbEE
+FbFP_______,,,_________ghhhhhhhhhhhhhhhhhhhhhg,____----_____________________,,,,,,,,,,,,___TEEEP
+EYEE__T_____,_X________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----_____________________,,,,,,,,,,,,___EYPEE
+bEEb____X_____________dghhhhhhhhhhhhhhhhhhhhhg,,,_----______________________,,,,,,,,,,,,____FYTb
+EFTE________,__________ghhhhhhhhhhhhhhhhhhhhhg,,,_----_______________________,,,,,,,,,,,___PTEFT
+YEbP_______,,,,________ggggggggggggggggggggggg,,,_----_______FTXFF___________,,,,,,,,,,,___PFFEF
+ETFb______,,,,,,______________,________,,,,,,,,,_----________T,,,T______________,,,,,,,___PYbFbT
+PFEF__F___,,,,,,______P_____P,,,____T_________,,_----_________,,,X____P___________,,c,,___YETEbY
+YTET_____,,,,,,,_____________,,,________________----_,,,,____F,,,F_________________,,,____EbYEYE
+bPFY__T__,,ggggggggggggggggggggggg_____________----_,,,,,____FTXFF_____________F___,,,____EFETbF
+TEYE_____,,ghhhhhhhhhhhhhhhhhhhhhg_____________----_,,,,,______________________X____,_____EFPbFY
+FbbT______,ghhhhhhhhhhhhhhhhhhhhhg____________----_,,,ggggggggggggggggggggggg__________P__PbPFFE
+ETbTT______ghhhhhhhhhhhhhhhhhhhhhg___________----_,,,,ghhhhhhhhhhhhhhhhhhhhhg______________YEFbP
+EFFbE_____Pghhhhhhhhhhhhhhhhhhhhhg___________----_,i,,ghhhhhhhhhhhhhhhhhhhhhg____________b,FFTbb
+PbFYF______ghhhhhhhhhhhhhhhhhhhhhg__________----_,,,,,ghhhhhhhhhhhhhhhhhhhhhg____________,,,EPTP
+bEEFE______ghhhhhhhhhhhhhhhhhhhhhg_________----_,,,,,,ghhhhhhhhhhhhhhhhhhhhhg__P_________,,,EEEP
+bFEEY______ghhhhhhhhhhhhhhhhhhhhhg_____b___----_,,,,c,ghhhhhhhhhhhhhhhhhhhhhg____________,,,EYPY
+FEFbT______ghhhhhhhhhhhhhhhhhhhhhg________----_,,,,,,,ghhhhhhhhhhhhhhhhhhhhhg_____________,_ETYF
+YEEPF______ghhhhhhhhhhhhhhhhhhhhhg_Z,,___----_,,,,,,__ghhhhhhhhhhhhhhhhhhhhhg_______________EPTE
+TTbEE______ghhhhhhhhhhhhhhhhhhhhh-------_----_,,,,,___ghhhhhhhhhhhhhhhhhhhhhgF__________d__bYPEb
+ETEY_______ghhhhhhhhhhhhhhhhhhhhh-----------__,,,f,___ghhhhhhhhhhhhhhhhhhhhhg______________TETEP
+EPEF______,ghhhhhhhhhhhhhhhhhhhhh----------------------hhhhhhhhhhhhhhhhhhhhhg______________FPYEb
+YEYE______,ghhhhhhhhhhhhhhhhhhhhhg,,,,_----------------hhhhhhhhhhhhhhhhhhhhhg_____________bEYFTE
+PEbYTb_____ghhhhhhhhhhhhhhhhhhhhhg,,,,_----------------hhhhhhhhhhhhhhhhhhhhhg___________b__bEYEY
+bTEPE______ghhhhhhhhhhhhhhhhhhhhhg,,,,_----___________ghhhhhhhhhhhhhhhhhhhhhg______,,,_____EFEEF
+EEFYP______ghhhhhhhhhhhhhhhhhhhhhg,,,,_----___________ghhhhhhhhhhhhhhhhhhhhhg_____,,,,,_b__TbYYb
+bEFEFY_____ghhhhhhhhhhhhhhhhhhhhhg_,,_----_____P______ghhhhhhhhhhhhhhhhhhhhhg_____,,,,,____bFFbF
+YEYEbE_____ghhhhhhhhhhhhhhhhhhhhhg_T__----____________ghhhhhhhhhhhhhhhhhhhhhg_____,,,,,____EbTbT
+TEEEbE_____ghhhhhhhhhhhhhhhhhhhhhg_,,_----____________ghhhhhhhhhhhhhhhhhhhhhg_____,,i,,____bEEPb
+TYEETF_____ghhhhhhhhhhhhhhhhhhhhhg,,,_----_,__________ghhhhhhhhhhhhhhhhhhhhhg_____,,,,,____EbEPE
+EYbEbF_____ghhhhhhhhhhhhhhhhhhhhhg,,,_----_,,,________ghhhhhhhhhhhhhhhhhhhhhg_______,,_____bEPTY
+YFEFET_____ggggggggggggggggggggggg,,,,_----_,,,____P,ighhhhhhhhhhhhhhhhhhhhhg______________EPPEE
+bYYEEb___F_,,,,_________b___,,,,,,,,,,_----_,,,,,,,,f,ghhhhhhhhhhhhhhhhhhhhhg_____________bEEYEF
+FTbYEF_____,,,f_T___________,f,,,,,,,,_----_,,,,,,,,,,ggggggggggggggggggggggg__T__d________FTYPb
+EEPPbb_____,,,,_______d_____,,,,,,,,,,_----_,,,,,,,,,,,,,,i,,,,,______________,____________YbTET
+EPbPTT____,,,,,______________,,,,,,,,,,_----_,,,,,,,,,,,,,,,,,,,___________d,,,,___________bYTET
+EbPPT_____,,,,,___________________,,,,,_----___,,,,,,,,,,,______,,,,,______,,,,,,__________bFEET
+EEbF______,,,,,__P_____,,,X_________,___----___,,,,,cggggggggggggggggggggggg,,,f,__________FETEF
+EEbb_____,,,,,,,______,,,,,______________----__,,,,,,ghhhhhhhhhhhhhhhhhhhhhg,,,,,____X_____bTPEE
+YYbP_____,,,,,,,______,,,,,______________----__,,,,,,ghhhhhhhhhhhhhhhhhhhhhg,,,,,__________EEYPF
+bYTT_____,,,,,,_______,,,,,_______________----_,,,,,,ghhhhhhhhhhhhhhhhhhhhhg,,,,,__________EETTF
+EEPF______j,,,________,,,,,____FTXFF______----__,,,,,ghhhhhhhhhhhhhhhhhhhhhgj,,,,__________ETYEE
+TFEE_________PX________,,,,____T,,,T______----_______ghhhhhhhhhhhhhhhhhhhhhg,,,,,___________TbbF
+YYbY__________________F,,,_____X,,,________----______ghhhhhhhhhhhhhhhhhhhhhg_,,,____________bFFF
+FYYEb__________________,,,_____F,,,F_______----______ghhhhhhhhhhhhhhhhhhhhhg________________TbYF
+YEbYTP_______________F__,,_____FTXFF__b____----______ghhhhhhhhhhhhhhhhhhhhhg________________YFTE
+EbTYEE__________________,,__________________----_____ghhhhhhhhhhhhhhhhhhhhhg________________bTTF
+EbbYEE___________ggggggggggggggggggggggg____----------hhhhhhhhhhhhhhhhhhhhhg________________FbPT
+bEEETY___________ghhhhhhhhhhhhhhhhhhhhhg____----------hhhhhhhhhhhhhhhhhhhhhg_,,,_________T__FFbb
+bTEYbY___________ghhhhhhhhhhhhhhhhhhhhhg__,_----------hhhhhhhhhhhhhhhhhhhhhg_,,,____________PbTE
+FYEbPP___b_______ghhhhhhhhhhhhhhhhhhhhhg,,,_----_____ghhhhhhhhhhhhhhhhhhhhhg,,,,___________YFTFY
+TFYYFY___________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----____ghhhhhhhhhhhhhhhhhhhhhg,,,,,____d_____FETTE
+YTbFEb_____T_____ghhhhhhhhhhhhhhhhhhhhhg,,,,_----____ghhhhhhhhhhhhhhhhhhhhhg_,,,___________PYFEF
+PbFEPE___________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----____ghhhhhhhhhhhhhhhhhhhhhg_______________YFPYE
+FTTTE____________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----____ghhhhhhhhhhhhhhhhhhhhhg______________EbYFEY
+TFEET____________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----____ghhhhhhhhhhhhhhhhhhhhhg______________PFbYYP
+EYETP,,,_________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----____ghhhhhhhhhhhhhhhhhhhhhg_____________dTbFEbP
+TbYEF,,,____X____ghhhhhhhhhhhhhhhhhhhhh----------____ghhhhhhhhhhhhhhhhhhhhhg_____________TEEPPET
+PTEEE,,,T_X______ghhhhhhhhhhhhhhhhhhhhh----------____ghhhhhhhhhhhhhhhhhhhhhg______________EYYTPP
+PEYTP____________ghhhhhhhhhhhhhhhhhhhhh----------____ggggggggggggggggggggggg________,,__X_bEPPEb
+TFFYE_d__________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----_____________________,,,,,________,,,,___TETYPb
+EPYFT_____d______ghhhhhhhhhhhhhhhhhhhhhg,,,,_----___,,,,,___________,,,,,,,_______,,,,,,,,bYYEPF
+PEPEb____________ghhhhhhhhhhhhhhhhhhhhhg,e,,_----__,,,,,,_d______,,,j,,,f,,_______,,,,,,,,,EbEPE
+EFPTE____________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----__,,,,,,_______,,,,,,,e,,,_______,,,,,,,,,ETbEE
+TTETP_X__________ghhhhhhhhhhhhhhhhhhhhhg,,,,_----__,j,,,,________,,,,,,,,,,_______,,,,,,,,,EEETE
+EYEET_X__T_______ghhhhhhhhhhhhhhhhhhhhhg_,,,_----___,,,,,_________d_,,,,,,,_______,,,,,,,,,YYFEb
+TEbPT___P__X_____ghhhhhhhhhhhhhhhhhhhhhg__,__----_____________________,,,,,_______,,,,,,,,FEEPbE
+EEPTFb___________ghhhhhhhhhhhhhhhhhhhhhg_____----_____________________,i,,,______,,,,,,,,,YEPPYF
+FYFEbT___________ghhhhhhhhhhhhhhhhhhhhhg______----___________X______P__,,,,,_____,,,,,,,,_PYTTFY
+FEEEYT______,____ggggggggggggggggggggggg______----__________,____P_d___,,,,,_____,,,,,,,,_FFEEEF
+EYPEbb_____X___________________F_________P____----____b____,,__________,,,,,_____,,,,,,,__ETEFEY
+YEFYEF________________________________P_b______----_______,,,,_P__F____,,,,_____P,,,,,,___ETbFEb
+ETETb____b________,_______P____________________----______,,_____________,,________,,,,,_b__TYEbE
+PTFFE________T__,,,,______________F_____d____,,_----____,,,_FTXFF_________________,f,,____XFEEbP
+PEEEF___________,,,f,__b____________________,,,_----_,,,,,,_T,,,T_________________,,,,_____bPEYF
+YTEbY___d_______,,,,,______________________b,,,,_----________,,,X_b________________,,,____dPEbEF
+YPTPb__________P,,,,,___________X________dF_,,,,_----_,,,,,_F,,,F__________________,i,_d___YPYYb
+bPTEE____________,,,________T________________,,,,_----_,,,,_FTXFF____________F_____________FEEEF
+FPTbE_______b________________________________,,,,_----_,,,______________,__________________YPYEE
+TTEE__________________,,,,________,,,,,______,,,,,_----__F_____________,,,_______d______,,,EEbbE
+PFEP__________________,,,,,_T_____f,,,,______,,Z,,_----_______________,,,,______________,,,YEPPT
+bEEb____________F_____,,,,,_______,,,,,_______,,i,,_----______d_______,,,,T_____________,,,PPETT
+ETFb__________________,,,,,_______,,,,,_______,,,,,_----___________d__,,,,______________,,,FbTTb
+bFTb_______________F___,,,_______,,,,,,_______,,,,,,_----___________T___________________P,FTbFYb
+bPPF______,c,,___________________,,,,,,_______,,,,,,_----_________________________________EFPEYY
+YEFb_____,,,,,,e_______________,,,,,,,,_______,,,,,,,_----_______,,,______________________FFYbYF
+EEET,___,,,,,,,,,,,________b_,,,,,,,,,________,,,,,,,_----______F,,,______________________EFEYTT
+YTbY,,__,,,,,,,,,,f,_________,,,,i,,,,________,,,,,,,_----______,,,,______________________ETTbYE
+EYEY_____,,,,e,,,,,__________j,,c,,,,,_____b__,,j,,,,_----_______,,,____________________P_EPETFE
+ETPP_______,,,________________,,,c,,,,,_______,,,,,,,_----________________________________PEEYEE
+FPEF__________X__________________,,,,,,_______,,,,,,_----__________________________________EPTFF
+YYFE_____________________________,,,,e,_______,c,,,,_----__________________________,,j_____bFYFT
+bFFb________________P___,_________,,,,,_______,,,,,_----_,__________P_______P_____,,,,,_____PPYE
+FTPT___________________,,,_______kk,,,,_______,,,,,_----_k______________k_________,,,,,_____ETET
+bYEP______________k_____,_________,kkk,_______,,,,_k---_,k_______kkk______________,,,,,_X_b_FYFE
+ETET_____k_______kkk______________,kklm__kk____===kkk-_,,,,,,_kkkkkkkk__,__k__T___,,,,,___kEbYET
+TEElkkkkkkk_,F_kkkkk________kkkk__,kkkkkkkkk__====kkkkk___,kkkkkkkkkkkk,,,_kk_____,,,,c__kknbPTT
+FEoplkkkkkk,,,okkkkkk__kkkkkkkkkT_,lkkkkkkkk__====kkkkk___,kkkkkkkkkkkk,,,kkk_____,kk,,__kknqYFF
+oqqqomkkkkkk,kkkkkkkk_kkkkkkkpkkkkkk,kkkkkkkk_====krkk____kkkpkkkkkkk_,,,,kkk____kkkkkk_kksqssnY
+lolnlkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk,,kkkkkkkk====kkkk__kkkkkkkpkkkk__,,,kkkk___kkkkkkkkkknlnsqs
+ppposkkkkokkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkksnllss
+ollnnkkkkkkkkkkkkkkkkkkkkkkpkktkkkkklkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkokkkkkkkkkkkkkkknolqss
+pqqlnkkkkkkkkknkkkkkkmkkkkkkkkkklkkkkkkkkkkkkk====kkktkkkkkkkkkkkkkkkkknkkkkkkkkklkkkkkkkkkpppql
+nnsoskkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkqnlln
+nlooppkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk====kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkllplp

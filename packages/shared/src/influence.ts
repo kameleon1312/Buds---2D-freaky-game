@@ -25,3 +25,17 @@ export const pvpResultSchema = z.object({
   paidLeft: z.number().int(),
 });
 export type PvpResult = z.infer<typeof pvpResultSchema>;
+
+/** How a raid on a district ended for the raider (dystrykty, land.ts). */
+export const raidResultSchema = z.object({
+  plot: z.string(),
+  district: z.string(),
+  won: z.boolean(),
+  loot: z.object({
+    beton: z.number().int(),
+    stal: z.number().int(),
+    energia: z.number().int(),
+    zywnosc: z.number().int(),
+  }),
+});
+export type RaidResult = z.infer<typeof raidResultSchema>;

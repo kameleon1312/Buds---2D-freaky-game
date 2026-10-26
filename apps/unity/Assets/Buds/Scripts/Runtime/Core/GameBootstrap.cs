@@ -221,6 +221,7 @@ namespace Buds.Core
             SetUpMap();
             SetUpFights();
             SetUpRivalry();
+            SetUpLand();
             // dev/test: start in another district (-buds-district las-palmas)
             // new buds start on the tutorial island; -buds-district <id> starts elsewhere (dev/test)
             LoadDistrict(CommandLine.Get("-buds-district") ?? StartMap(), null);
@@ -237,42 +238,70 @@ namespace Buds.Core
         /// </summary>
         void LoadDistrict(string districtId, string fromDistrict)
         {
-            if (world) Destroy(world.gameObject);
+            DropNeighbour(); // the map laid next to this one goes with it
+            if (world)
+            {
+                // into one of this district's rooms: the district waits, switched off, for the bud to come back out
+                // (building a city again takes over a second; switching it back on takes nothing)
+                var room = world.Map.Doors.Exists(d => d.Target == districtId);
+                if (room && !world.Map.IsInterior)
+                {
+                    ClearMapPeople();
+                    if (parkedWorld) Destroy(parkedWorld.gameObject);
+                    parkedWorld = world;
+                    parkedWorld.gameObject.SetActive(false);
+                }
+                else Destroy(world.gameObject);
+                world = null;
+            }
+            // a district left for good (not its own room, not back to it): its parked copy goes
+            if (parkedWorld && parkedWorld.Map.Id != districtId && !parkedWorld.Map.Doors.Exists(d => d.Target == districtId))
+            {
+                Destroy(parkedWorld.gameObject);
+                parkedWorld = null;
+            }
             if (player) Destroy(player.gameObject);
+            // a wasteland entered from a city: that city's end is the seamless one (World/Seams)
+            seamFrom = Districts.IsRoute(districtId) && fromDistrict != null && !Districts.IsRoute(fromDistrict) ? fromDistrict : null;
 
             var clock = System.Diagnostics.Stopwatch.StartNew();
-            // the map the bud walked towards was worked out ahead on a worker thread (PrepareAhead)
-            var ready = WorldView.TakePrepared(districtId);
-            var map = ready?.map ?? MapFormat.Load(districtId);
-            var parsed = clock.ElapsedMilliseconds;
-            EnterMap(map);
-            world = WorldView.Create(map, ready?.ground);
+            WorldMap map;
+            long parsed;
+            if (parkedWorld && parkedWorld.Map.Id == districtId)
+            {
+                // back out of a room: the district is still there, just switched off
+                world = parkedWorld;
+                parkedWorld = null;
+                world.gameObject.SetActive(true);
+                WorldView.MakeCurrent(world);
+                map = world.Map;
+                parsed = 0;
+                EnterMap(map);
+            }
+            else
+            {
+                // the map the bud walked towards was worked out ahead on a worker thread (PrepareAhead)
+                var ready = WorldView.TakePrepared(districtId);
+                map = ready?.map ?? MapFormat.Load(districtId);
+                parsed = clock.ElapsedMilliseconds;
+                EnterMap(map);
+                world = WorldView.Create(map, ready?.ground);
+            }
             var built = clock.ElapsedMilliseconds;
-            questWorld = QuestWorld.Create(world, quests);
-            cacheWorld = CacheWorld.Create(world, caches);
-            enemyWorld = EnemyWorld.Create(world, quests.Content);
-            var people = clock.ElapsedMilliseconds;
-            UpdateTracker();
             var at = arriveAt.HasValue ? NearestFree(map, arriveAt.Value)
                 : fromDistrict != null ? map.ArrivalFrom(fromDistrict) : new Vector2Int(map.SpawnX, map.SpawnY);
             arriveAt = null;
             player = BudController.Spawn(sheet, world.CellCenter(at.x, at.y) + new Vector3(0, -0.3f, 0));
-            player.Blocked = (x, y) => !map.IsWalkable(x, map.Height - 1 - y);
-            // strolling NPCs stop for the player and stand still while anyone talks or a screen is open
-            questWorld.PlayerFeet = () => player ? (Vector2?)player.transform.position : null;
-            questWorld.Busy = () => ui.DialogOpen || (fightScreen?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
-                                    (rivalryScreen?.IsOpen ?? false);
+            player.Blocked = WalkBlocked;
+            SetUpMapPeople();
+            var people = clock.ElapsedMilliseconds;
             // walking into a room you face into it; stepping out of one you face the street
             if (map.IsInterior) player.Look(Vector2.up);
             else if (map.Doors.Exists(d => d.Target == fromDistrict)) player.Look(Vector2.down);
-            SetUpMapExtras(); // training stations, the ride and the walking speed
 
             var cam = Camera.main!.GetComponent<FollowCamera>();
             cam.target = player.transform;
-            // rooms: a little room above the map so the whole back wall shows; around them, the map's dark base
-            cam.bounds = new Rect(0, 0, map.Width, map.Height + (map.IsInterior ? 1.6f : 0));
-            Camera.main.backgroundColor = map.BaseColor;
-            WorldGrade.Apply(Camera.main, map); // the district's light (World/WorldGrade)
+            UpdateCameraBounds();
             cam.SnapToTarget();
             // what the old map loaded (its prop textures, sheets) goes back to the system
             Resources.UnloadUnusedAssets();
@@ -281,10 +310,42 @@ namespace Buds.Core
             if (CommandLine.Has("-buds-autoshot"))
                 Debug.Log($"[Mem] {map.Id}: {UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / (1024 * 1024)} MB allocated, " +
                           $"{UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver() / (1024 * 1024)} MB graphics");
+            AnnounceMap(at);
+        }
 
+        /// <summary>The district the bud stepped out of into one of its rooms, switched off until it comes back out.</summary>
+        WorldView parkedWorld;
+
+        /// <summary>
+        /// The map's own people and places (quest NPCs, caches, opponents, training stations), the camera's limits and the
+        /// district's light: everything that belongs to the map the bud is on now. Also run when the bud walks across a
+        /// seam into the map laid next to it.
+        /// </summary>
+        void SetUpMapPeople(float gradeSeconds = 0)
+        {
+            var map = world.Map;
+            questWorld = QuestWorld.Create(world, quests);
+            cacheWorld = CacheWorld.Create(world, caches);
+            enemyWorld = EnemyWorld.Create(world, quests.Content);
+            UpdateTracker();
+            // strolling NPCs stop for the player and stand still while anyone talks or a screen is open
+            questWorld.PlayerFeet = () => player ? (Vector2?)player.transform.position : null;
+            questWorld.Busy = () => ui.DialogOpen || (fightScreen?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
+                                    (rivalryScreen?.IsOpen ?? false);
+            SetUpMapExtras(); // training stations, the ride and the walking speed
+            UpdateCameraBounds();
+            Camera.main!.backgroundColor = map.BaseColor;
+            WorldGrade.Apply(Camera.main, map, gradeSeconds); // the district's light (World/WorldGrade)
+            LandMapChanged(); // a wasteland's plots: everyone's districts
+        }
+
+        /// <summary>The name of the place on the banner, the turfs' rulers, the room of the others on this map.</summary>
+        void AnnounceMap(Vector2Int at)
+        {
+            var map = world.Map;
             atExit = map.ExitAt(at.x, at.y);
             atZone = map.ZoneAt(at.x, at.y);
-            ui.ShowToast(map.IsInterior || atZone == null ? map.Name : $"{map.Name} · {atZone.Name}");
+            ui.ShowToast(map.IsInterior || atZone == null || atZone.Name == map.Name ? map.Name : $"{map.Name} · {atZone.Name}");
             // who rules the turfs here this week (the zone banner, the tribute dot on the Rewiry button)
             _ = RefreshTurfs();
             LiveMapChanged(); // the others on the old map go, the room of this one comes
@@ -299,10 +360,12 @@ namespace Buds.Core
             var input = player.Input;
             input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
                             (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
-                            (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false);
+                            (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false) ||
+                            (landScreen?.IsOpen ?? false);
             if (creatorScreen?.IsOpen ?? false) return; // the look editor is open over the world
             if (UpdateFight()) return;
             if (UpdateChat()) return; // typing: every key is a letter, the world waits
+            if (UpdateLandScreen(input)) return;
             if (UpdateRidesAndTraining(input)) return;
             ui.UpdateStick(input);
 
@@ -320,6 +383,7 @@ namespace Buds.Core
             }
 
             var cell = player.MapCell(world.Map.Height);
+            if (UpdateSeam(cell)) return; // walked across into the map laid next to this one
             PrepareAhead(cell);
             CheckZone(cell);
             if (CheckExit(cell)) return;
@@ -340,6 +404,8 @@ namespace Buds.Core
                     return;
                 }
             }
+            // the districts on a wasteland: plots' gates, the own buildings and the building being placed come first
+            if (UpdateLandWorld(input, cell, feet)) return;
             var (mx, my) = FeetOnMap();
             nearbyNpc = questWorld.NearestNpc(feet, InteractRange);
             nearbyEnemy = nearbyNpc ? null : enemyWorld.Nearest(feet, InteractRange);
@@ -388,6 +454,8 @@ namespace Buds.Core
             atExit = exit;
             if (exit == null) return false;
             if (TutorialExitBlocked()) return false;
+            // a road laid seamless: the bud just walks on into the next map (UpdateSeam), no fade
+            if (IsSeamExit(exit)) return false;
             if (world.Map.IsInterior)
             {
                 // the doormat: back out to the street
@@ -432,6 +500,7 @@ namespace Buds.Core
             var bestD = PrepareReach;
             foreach (var e in world.Map.Exits)
             {
+                if (IsSeamExit(e)) continue; // laid next to this map by UpdateSeam, never prepared twice
                 var dx = Mathf.Max(e.X0 - cell.x, 0, cell.x - e.X1);
                 var dy = Mathf.Max(e.Y0 - cell.y, 0, cell.y - e.Y1);
                 var d = Mathf.Sqrt(dx * dx + dy * dy);
@@ -572,6 +641,12 @@ namespace Buds.Core
             try
             {
                 await Shot("01-spawn.png");
+                if (CommandLine.Has("-buds-land-demo") && session != null)
+                {
+                    await LandDemo(Shot);
+                    Application.Quit();
+                    return;
+                }
                 if (CommandLine.Has("-buds-live-demo") && session != null)
                 {
                     await LiveDemo(Shot); // two clients in step: nothing else runs

@@ -433,6 +433,19 @@ namespace Buds.Api
         public FightRewardDto reward;
         public InfluenceDto influence;
         public PvpResultDto pvp;
+        public RaidResultDto raid;
+    }
+
+    /// <summary>How a raid on a district ended for the raider (empty <c>plot</c>: not a raid).</summary>
+    [Serializable]
+    public class RaidResultDto
+    {
+        public string plot;
+        public string district;
+        public bool won;
+        public Quests.LandResourcesDto loot;
+
+        public bool Present => !string.IsNullOrEmpty(plot);
     }
 
     [Serializable]

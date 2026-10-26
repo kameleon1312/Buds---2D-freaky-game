@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { BudRecord, FightState, OwnedItem, SlotId } from '@buds/shared';
 import { makeSlug } from './slug.js';
 import { createMemoryRivalry } from './memory-rivalry.js';
+import { createMemoryLand } from './memory-land.js';
 import type { BudStore } from './types.js';
 
 /** In-process store for tests and for local dev without Supabase. Data is lost on restart. */
@@ -31,6 +32,7 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
 
   return {
     ...createMemoryRivalry({ now, buds, coins, owned, gear }),
+    ...createMemoryLand({ buds, coins }),
 
     async create(input, tokenHash, userId) {
       let slug = makeSlug(input.name);

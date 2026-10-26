@@ -76,6 +76,8 @@ export class MapCanvas {
    */
   readonly plots: { r: Rect; id: string; kind: PlotKind; name: string }[] = [];
   readonly scatter: { ground: string; chance: number; props: string }[] = [];
+  /** Działki on a wasteland: fenced plots players buy (top-left cell, the side the gate faces). */
+  readonly lots: { id: string; x: number; y: number; gate: 'n' | 's' | 'e' | 'w' }[] = [];
   readonly ground: { name: string; kinds: string; radius: number; bands: [number, string][] }[] =
     [];
   base = '#86c95a';
@@ -365,7 +367,7 @@ export class MapCanvas {
       if (!open) errors.push(`plot ${p.id} is not clear`);
       if (!reached) errors.push(`plot ${p.id} can't be reached`);
     }
-    if (this.kind === 'interior' && !this.exits.some((e) => e.district === this.outside))
+    if (this.kind !== 'district' && !this.exits.some((e) => e.district === this.outside))
       errors.push(`interior has no way out to ${this.outside}`);
     if (errors.length) throw new Error(`${this.id}:\n  ${errors.join('\n  ')}`);
     let walk = 0;
@@ -402,7 +404,7 @@ export class MapCanvas {
       `name = ${this.name}`,
       `base = ${this.base}`,
       `spawn = ${this.spawn[0]},${this.spawn[1]}`,
-      ...(this.kind === 'interior' ? ['kind = interior', `outside = ${this.outside}`] : []),
+      ...(this.kind !== 'district' ? [`kind = ${this.kind}`, `outside = ${this.outside}`] : []),
       '',
       '[legend]',
       ...legend,

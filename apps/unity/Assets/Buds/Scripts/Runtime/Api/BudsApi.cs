@@ -134,6 +134,44 @@ namespace Buds.Api
         public Awaitable<WalletResponse> GetWallet(string token) => Get<WalletResponse>("/v1/buds/me/wallet", token);
 
         /// <summary>Spends one skill point; the server checks free points and the maximum rank.</summary>
+        // ---------- dystrykty (packages/shared land.ts; the server works everything out) ----------
+
+        /// <summary>The bud's district worked out to the server's clock (none yet: <c>HasLand</c> is false).</summary>
+        public Awaitable<Quests.LandResponse> GetLand(string token) => Get<Quests.LandResponse>("/v1/land", token);
+
+        /// <summary>Every district on a wasteland as anyone passing by sees it (public).</summary>
+        public Awaitable<Quests.DistrictsResponse> GetDistricts(string route) =>
+            Get<Quests.DistrictsResponse>($"/v1/districts/{route}", null);
+
+        /// <summary>Buys a free plot and founds the bud's district on it under its own name (one per bud).</summary>
+        public Awaitable<Quests.LandResponse> BuyPlot(string token, string plot, string name) =>
+            Post<Quests.LandResponse>("/v1/land", token, JsonUtility.ToJson(new Quests.BuyPlotRequest { plot = plot, name = name }));
+
+        /// <summary>Gives the district a new name (the server checks it like a chat line).</summary>
+        public Awaitable<Quests.LandResponse> RenameLand(string token, string name) =>
+            Post<Quests.LandResponse>("/v1/land/name", token, JsonUtility.ToJson(new Quests.RenameLandRequest { name = name }));
+
+        /// <summary>The next stage: the district spreads over more of its plot.</summary>
+        public Awaitable<Quests.LandResponse> GrowLand(string token) => Post<Quests.LandResponse>("/v1/land/grow", token, "{}");
+
+        /// <summary>Raids the district on a plot: a duel against its owner, fortified by the district.</summary>
+        public Awaitable<FightResponse> StartRaid(string token, string plot) =>
+            Post<FightResponse>("/v1/land/raids", token, JsonUtility.ToJson(new Quests.RaidRequest { plot = plot }));
+
+        public Awaitable<Quests.LandResponse> Build(string token, string kind, int x, int y) =>
+            Post<Quests.LandResponse>("/v1/land/build", token, JsonUtility.ToJson(new Quests.BuildRequest { kind = kind, x = x, y = y }));
+
+        public Awaitable<Quests.LandResponse> UpgradeBuilding(string token, int id) =>
+            Post<Quests.LandResponse>($"/v1/land/buildings/{id}/upgrade", token, "{}");
+
+        /// <summary>Gathers what a producer made (or every producer, id &lt; 0) into the district's storage (rent into the wallet).</summary>
+        public Awaitable<Quests.LandResponse> Collect(string token, int id = -1) =>
+            Post<Quests.LandResponse>("/v1/land/collect", token, id >= 0 ? $"{{\"id\":{id}}}" : "{}");
+
+        public Awaitable<Quests.LandResponse> SellResource(string token, string resource, int amount) =>
+            Post<Quests.LandResponse>("/v1/land/sell", token,
+                JsonUtility.ToJson(new Quests.SellResourceRequest { resource = resource, amount = amount }));
+
         /// <summary>Buys a ferry ticket between two harbours; the server checks the level and takes the fare.</summary>
         public async Awaitable<FerryResponse> Ferry(string token, string from, string to)
         {
@@ -418,7 +456,8 @@ namespace Buds.Api
         {
             using var req = UnityWebRequest.Get(baseUrl + path);
             req.timeout = TimeoutSeconds;
-            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            // public reads go without a token
+            if (!string.IsNullOrEmpty(token)) req.SetRequestHeader("Authorization", $"Bearer {token}");
             await Send(req);
             return Parse<T>(req);
         }

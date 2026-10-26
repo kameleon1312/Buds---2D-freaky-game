@@ -16,7 +16,59 @@ export type ClaimResult = 'ok' | 'mine' | 'taken';
 /**
  * A bud can have several player tokens (web browser, phone app…). Only sha256 hashes are stored.
  */
-export interface BudStore extends RivalryStore {
+/** A row of the districts' ranking. */
+export type LandTopRow = {
+  slug: string;
+  name: string;
+  xp: number;
+  /** The district's own name (chosen by the bud). */
+  district: string;
+  /** The wasteland its plot is on. */
+  route: string;
+  power: number;
+};
+
+/** One side of a raid to save: whose district, the version it was worked out from, the new state and might. */
+export type LandSave = { slug: string; version: number; state: unknown; power: number };
+
+/** Dystrykty: one document per bud on a plot of a wasteland, saved by compare-and-swap on its version. */
+export interface LandStore {
+  /** The bud's district and its version, or null when it has none. */
+  getLand(slug: string): Promise<{ state: unknown; version: number } | null>;
+  /** The district on a plot (its owner's slug, state and version), or null when the plot is free. */
+  landOnPlot(plot: string): Promise<{ slug: string; state: unknown; version: number } | null>;
+  /** Every district on a wasteland, with its owner's name and XP. */
+  landsOn(route: string): Promise<{ slug: string; name: string; xp: number; state: unknown }[]>;
+  /**
+   * Buys a plot and makes the bud's district on it, paying `price` coins in the same transaction. `has_land`: the
+   * bud already has one; `taken`: someone owns the plot; `poor`: not enough coins (`coins` is the balance).
+   */
+  createLand(
+    slug: string,
+    plot: string,
+    route: string,
+    state: unknown,
+    power: number,
+    price: number,
+  ): Promise<{ status: 'ok' | 'has_land' | 'taken' | 'poor'; coins: number }>;
+  /**
+   * Saves a district worked out from `version`, moving `coinDelta` coins with it (never below zero). `conflict`: it
+   * was saved by someone else meanwhile (work it out again from the new version).
+   */
+  saveLand(
+    slug: string,
+    version: number,
+    state: unknown,
+    power: number,
+    coinDelta: number,
+  ): Promise<{ status: 'ok' | 'conflict' | 'poor'; version?: number; coins: number }>;
+  /** Saves both districts of a raid at once, or neither (`conflict` when either changed meanwhile). */
+  saveRaid(raider: LandSave, defender: LandSave): Promise<'ok' | 'conflict'>;
+  /** The mightiest districts. */
+  topLands(limit: number): Promise<LandTopRow[]>;
+}
+
+export interface BudStore extends RivalryStore, LandStore {
   /** `userId`: the account creating it (signed in on the website), if any. */
   create(input: CreateBudInput, tokenHash: string, userId?: string): Promise<BudRecord>;
   getBySlug(slug: string): Promise<BudRecord | null>;

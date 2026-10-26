@@ -3,40 +3,56 @@
 id = pustkowie-nieuzytki
 name = Nieużytki
 base = #9c9779
-spawn = 75,16
+spawn = 75,40
 
 [legend]
 = = asphalt
-X = asphalt + sign !
 ' = dirt
-B = dirt !
-H = dirt + beczka-ogien !
-F = dirt + drzewo-suche !
-C = dirt + opony !
-D = dirt + rock-dark !
-K = dirt + rock-dark-b !
-E = dirt + siatka-post !
-V = dirt + sign !
-A = dirt + smieci !
-P = dirt + wrak-a !
-W = dirt + wrak-b !
-L = dirt + zlom !
-G = rubble
-N = rubble !
-J = rubble + beczka-ogien !
-U = rubble + drzewo-suche !
-R = rubble + opony !
-S = rubble + rock-dark !
-T = rubble + rock-dark-b !
-I = rubble + smieci !
-O = rubble + wrak-a !
-M = rubble + wrak-b !
-Q = rubble + zlom !
+G = dirt !
+S = dirt + beczka-ogien !
+J = dirt + drzewo-suche !
+K = dirt + opony !
+L = dirt + rock-dark !
+U = dirt + rock-dark-b !
+H = dirt + siatka-post !
+I = dirt + smieci !
+X = dirt + wrak-a !
+h = dirt + wrak-b !
+c = dirt + zlom !
+g = dzialka
+f = dzialka + dzialka-post !
+V = forest
+B = forest !
+i = forest + beczka-ogien !
+F = forest + drzewo-suche !
+C = forest + opony !
+D = forest + rock-dark !
+e = forest + rock-dark-b !
+E = forest + siatka-post !
+j = forest + sign !
+A = forest + smieci !
+l = forest + wrak-a !
+d = forest + zlom !
+T = rubble
+M = rubble !
+Y = rubble + beczka-ogien !
+R = rubble + drzewo-suche !
+P = rubble + opony !
+O = rubble + rock-dark !
+Z = rubble + rock-dark-b !
+N = rubble + siatka-post !
+k = rubble + sign !
+Q = rubble + smieci !
+b = rubble + wrak-a !
+W = rubble + wrak-b !
+a = rubble + zlom !
 
 [ground]
+forest : forest : 2 : 0.45 #6aae4a, 0.62 #5a9c40
 dirt : dirt : 1.8 : 0.4 #8f7a5a, 0.52 #a68d68
 rubble : rubble : 1.8 : 0.4 #857e74, 0.55 #9a9286
 asphalt : asphalt : 0.8 : 0.45 #3a3e48, 0.5 #4c5160
+lawn-dzialka : dzialka : 1 : 0.45 #6fae4c, 0.5 #84c25c
 
 [scatter]
 dirt : 0.05 : gruz|tuft|pebbles|chwast
@@ -44,68 +60,116 @@ rubble : 0.1 : gruz|gruz|pekniecie
 asphalt : 0.06 : pekniecie|kaluza|plama-oleju
 
 [signs]
-6,20 | Do: Miasto Ziomków | Nieużytki. Gruz, złom i martwe drzewa. Najgroźniejsza droga w okolicy. Trzymaj się drogi, a nic ci nie grozi.
-143,27 | Do: Los Karkos | Nieużytki. Gruz, złom i martwe drzewa. Najgroźniejsza droga w okolicy. Trzymaj się drogi, a nic ci nie grozi.
+6,44 | Do: Miasto Ziomków | Nieużytki. Gruz, złom i martwe drzewa. Najgroźniejsza droga w okolicy. Trzymaj się drogi, a nic ci nie grozi.
+143,51 | Do: Los Karkos | Nieużytki. Gruz, złom i martwe drzewa. Najgroźniejsza droga w okolicy. Trzymaj się drogi, a nic ci nie grozi.
 
 [exits]
-0,22,0,25 | miasto-ziomkow
-149,22,149,25 | los-karkos
+0,46,0,49 | miasto-ziomkow
+149,46,149,49 | los-karkos
 
 [zones]
-0,0,49,47 | Przedmieścia
-50,0,99,47 | Nieużytki
-100,0,149,47 | Rogatki Karkos
+0,0,49,95 | Przedmieścia
+50,0,99,95 | Nieużytki
+100,0,149,95 | Rogatki Karkos
 
 [doors]
 
 [plots]
 
 [grid]
-ABBACDAEBDBCBBADEDDBBBABACACBFBBBCBDDBBFBBEBECBEDAFEACCACABFDBEEBBDADECDBDCACBCEAEBFCBBAAFEEECCBBCFAEABEAEACCABFFDCBBBCBBABCDDBBABBFCBCFDBBCBEFFBEEBDD
-AAFACAFEEFBBCDBDEBCFCBBAADEBBCEBCDACDBCADBDBFBDACBBDCBBBEBBFAAEEEDDCCCABBAFBABBEFBEDBBBEFBCBABDFBCDCEBDBBEBAAFCFFDEFCFEBABADEDBFBFFABBBECAEEBFAFBDACBA
-ADCBBFAFFCFDBDCBBCDBCAFFCCBBAAEAADAECBEAFDDBCCFBEDBEABCBFBBAFEDCACBCBDECFABABBBBFCCFCDBADEABDBFBCBBAEDDFABEBFCFBABFCDBDCEBCEFECFBBEBDBFBCDBBCBEABABEAD
-ABEBFFEBEDEFBDCFADFBBEEABEBBBACFEEFAEEBBDBABABBFBBEFBCCEEDAAFBADACCDDBFBCCEDBCCDFAFEAEEBABBDDEEEEDECDBAACFCECDBBBCDABCFEAECEDBFEBACAADBAFBEDBCABBFDADF
-EACBEE'CABBFAEDBDFADDABBEDDCBCBBAEB'''''''''FCBCEABE'''''''ACBBFABCECCBDFDCCEBEEBDGGGGGBEBABDBADACDFCBGGECEACBBBAFFDBBB''''GGGGGGG'''''BBBAEA'''''''''
-''''''''''CBBDBFB'''''''''''BDFCDC'''''''''''''''''''''''''GGGG'''''''''B''''''''GGGGGGG'BCCBDCBCBBFGGGGGGG'''GGGGGGGG'''''GGGGGGG''''''''''''''''''''
-''''''''''''''''''''''''''''D''''''''H'''''''''''D''D''''''GGGG'''''''''''CADCC'GGGGGGGG''''''''''GGGGGGGGG'''GGGGGGGGF''''GGGGGGI''''''''''''''''''''
-''''''''''''''''''G'CADCC''''''''BBB''H''''''''''''''''''''GGGG'''''''''''AGGGA'GGGGGGGG''''''''F'JGGGGGGGGG'GGGGGGGGG'''''GGGG'''''''''''''''''''''''
-'''''''''''''K'''GG'AGGGA''''''''BLB'''''''''''''''''''''BMNGNNN''''''''''DGGGD'GGGGGGGG'''''''''GNONGGGGGGGGGGGGGGGGGGG''GGGGG'CADCC'''''''''''''''''
-''BPB''''''''''GGGG'DGGGD'''''''''''''''''''''''''''F'''''GGGNQNGGGGGJGGG'CGGGC'GGGGGNMN''''''GGGGGGGG'GGGGGGGGGGGGGGGGGGGGGGGG'AGGGA'''''''''''''''''
-'''H'''''''GGGGGGGG'CGGGC'GGGG''GGGGGGGG''''GGGGGG''''''''GGGGGGGGNONGGGG'CA'CC'GGGGGGGG''''F'GGGGG''''''GGGGGGGGGGGGGGGGGGG''''DGGGD''''''''''''''A''
-'''''F''''GGGGGGGGG'CA'CC'GGGG'GGGGGGNONGGGGGGGGGGG'''''A'GGGGGGGGGGGGGGG'''''''GGGGGGG''''''GGGGGG''''''GGGGGGGGGGGGNNNGGGG''''CGGGC'''''F''''GGGGGGG
-''''''''''GGGGGGGGG'''''''GGGG'GGGGGGGGGGGGGGGGGGGG'''''''GGGGGGGGGGGGGGGGGG'GGGGGGGGGG''''''GGGGRG''''''GGGGGIGGGSGGNQNGGGG''''CA'CC'''''''''GGGGGGGG
-''''''''''GGGGGGGGGGGG'GGGGGGGGGGGGGGGGGGGGGGGGGGGG'''''''GGGGGGGTGGGGG''''''GGGGGGGGGGG''''BONGGGG''''''GGGGGGGGGGGGGGGGUGG''''''''''''''''''NONGGGGG
-''''''''''GGSGRNONGGGG'GGGGGGGGGGGGGGGGGGGGGNONGNMN'''BPB'GGGGGGGGG''''=====''''GGGGGGGGGG'''''''''''''''GGGGGGGGGGGGGGGGGG''''''''''''''''''''GGGG'''
-'BPB'''''''GGGGGGGGGGG''''''GGGGGGGGGGGGGGGGGGGGGGG'''''''NNNGGGG''============='''GGGGGGGGGJ'''''''''''''GGGGGGGGGGGGGGGGF'''''''''K'''''''''''G'''''
-'''''''''''GGGGGGGGGG''''''''GGGGGGGGGGGGGGGGGGGGGGG'''''GNQNGG''==================''GGGGGGGG''''''''GGGG''''''GGGGGGGGG''BPB'''''''''''''''''''''''''
-''C'''''''''GGGGGGGG'''''''''GGGGGGGGGGGGG''GGRGGGGGG'''GGGGGG'======================'''GGGGG''''''''GGGG'''''''GGGNMN''F''''''''''GGGGBBB''''''''''''
-''''''''''''''GGGGGG'''''''''GGGGGGGGGGGG'''GGGGGGGGG'''GGGG''========='''''============'''GG''''''''GGGG''''''''GGGG''''''''''''''GGGGBLB'''''A''''''
-''''''''''''K''''GG''BPB''''''GGGGGGGGGGGG'GGJGGGGGGG'''GGG'=======''''GG'''''''===========''''''''''GGGG'''''''GGGGG''''''''''''''GUGG'''''''''''''''
-''''''V'''''''''''''''''''BWB''''GGGGGGGGRGGGGGGGGGGG''''''======''GGGG''''''''''''============='''''''''''''''''GGGGG'''''''''''''GGGG'''''''''''''''
-'''''''''''''''''''''''''''''''''''GGGGGGGSGGGGGGGGG'''''======''''''''''''''''''''''============================'''GGGGG''''''''''GGGGG''''''''''''''
-===''''''''H''''''BPB'''''''''''''''''GGGGGGGGGGGG''''''======''''H'BPB'''''''''F'''''''============================''GGGG'''''''''GGGGGG'''''''''''==
-======'''GG''''''''''''''''''''''''''''GGGGGGGNWB'''''======'''''C'''''''''''''''''''''''''===========================''GG'''''''''GGGGGGGGG'''''=====
-=========''''''''''''''''''''''''''''''GGGGGGGG''''''======'''''''''''''''''''''''''''''''''''''========================'''''''''''GGGGGGGGG'''=======
-============'''''''''''''==''''''''''''GGGGGGGG''''======''''''''''''''''''''''''''''''''''''''G'''''''''''''''''========='''''''''GGGGGGGG'''========
-'''================================'''''''''''''========'''''''''''''BWB'''''''''''''''''F''''GGGGGGGGGG'GGG''GGG'''========'''''''GGGGG''''========''
-''''''================================================'''''''''''''''''''''''''''''K'''''''''FGGGGGGGGRG'GGRGGGGGGGG''========'''''''''''''====X='''''
-'''''''''============================================'''''''''''''''''HGGGGG'''''''''F''''''''GGGGGGGGGG'GGGGGG''''''G''========'''''''''======'''''''
-''C'''''''''=============''========================'''''''''''''''''''GGGGGGGGGG''''''''''''''GGGGGGGGUG'GGGGGG'''BBB'GG''========'''''=======''''''''
-'''''''''GGG'''''''''''''GG''''''''=============''''''''''''''''''''''GGGGUGGGGG''''''''''''''GGGGGGGGGG'GGGGGG'''BLB'GGGG''================'''''BBB''
-''''C''''GGGGGGGGGGGGGGGGGG'''''''G''''''''''''''''''BBB''''''''''''''GGGGGGGGGG''''''''''''''GGGGGGGGJG'GGGGGG'''''''GGGGGG''=============''''''BLB''
-'''''''''''GGGGGGGGGGGGGGGG'''''''GGGGG''''''''''''''BLB'''''''BPB'''''GGGGGG'''''''''BPB'''''GGGGGJGGGGBMNGGG'''''''GGGGGGG''''=========''''F'D''''''
-''''''''''''''GGGGGGGNMNGG''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''GGGGGGGGGG'G''''''''''GGGGGGGG''''''====='''''''''''''''
-''''''''BBB''''GGGGGGGG''''''''''''''''F''''''''''''C'''''''''''GGGGG'''''''''''H''''''''C''''GGGGGGG'''''CK'''''GGGGGGGGGGG'''''''''''''''''''''C''''
-''''''''BLB'H'''GGGGGG'H''''''''''''''''''''''''''''''GG'''''''GGGGNOB'''''''''''''GGG''''''''GGGGNNB'''''''''''GGGGGGGGGGGG'''''''GGGGG''''''''''''''
-'''''''''''''''HGGGGGG'''''''''BBB''''''''''''CA'CC''GGGG''''''GGGGGG'''''''''''''GGGG''''''''GGIGNQB'''''''''''GGGGGGGGGGGG''''''GGGNON''''''D'''''''
-''''''''''''''''GNONGG'''''''''BLB''''''''''''AGGGA'''GGG'''''GGJGGRG''BWB'''''''''GGG'''''''HGGGGGNPBCA'CC'''''GGGGGGGTGGGG'''''''GGGG'''''''''''''''
-''''''''''''''''GGGGGG'''''''''''''''BPB''''''DGGGD'''''GGGGGGGGIGGGGG'''''''''BWB'''''D'H''''GGGGG'''AGGGA'''''GGGGGGGGGGGI''''''''''''''''F'''''''''
-''''''''''''''''GGGGGG'''''''''''''''''''GGG''CGGGC''''''GGGGGGGGGGGGGGGGGG''''''''''''''''''''D''''''DGGGD'''''GGGGNNNGGGG'''''''''''''''''''''''''''
-'''''''''''''''''GGGGG''''''GGGG''''''''GGGGG'CADCC''''''GGTNONGG''''GGGGGGGGGGGG'''''''''''''''''''''CGGGC'''''SGGGNQNGGGG'''''''''''''''''''''''''''
-''''''''''BBB''''KGGG'K'''GGGGGG''''''''GGGGG''''''''''''GGGGGGG'''''GGGGGGGGGGRG''''''''GGG''''''''''CADCC'''''GSGGGGGGGGGD'''''''''''''''''''''K''''
-'''CAFECA'BLB''''''''''''GGGGGGG''''''''GGGGGG''''''''K''GGGBGGG'''K'GGGGGGGGGGGS''''''''GGG'''''''''''''''''H''GGGGGGGGGGG''FEAD'''''''EBABBABABFBBEA
-EDADCDFBFBE''''BBDEDDBCCBBBBEABEBBACFBFBGGGGGG''''CEEECADEDBBBDBBCBBDEEDDBDDGGGGGFCAFEDAGGGGG'''''''''''''FBBCBBBBBEBCBGGGFBCBEDBDAEEBDFDFABCDDFCCFABA
-ABDBEBCBFCBBACCABAFBEBBBCCBCEADFDBBBCBEAACEADAEAABBBCFEFCBBDFEBAAFBEAFABFEFEBCBCEFDBACFECFBEBADABBCEDFFFFBCDFDDDFCBFBCCBFBCBDBABAFBDCBEBFFFBCDBFEDDBBD
-CABFCBEBCEAEFCCBCBBABACBBCEBCEAFDBFFCBBBDCFAECDFDBBEBFDFFADCBCEBEFECEBBCFBBABEDDBEBAEFBDEEBAEFCECFBEBBFDEDABBCCCABEDCDDAFCDBCBBBBFEBBBFBBCEBFFFFFBBFEA
-DFDEBEABBEDDACFFFBCCBDEBBBCBAEDAADDBBFBBACEBADCBABDFBFAEFADFCBABBEBEFEDCCAFFDECBBCBCBBDAFBFBDDADDAFCBCDACEADABDAEBEFBDECFFEBBAFCFCBDBAAAFBBABBEBEBCDBA
-FCBBDBDBEEAFCBCCEBBEDFBACCFECCFEBBBEBBECEEDDABADECDECCBDDCDCBBEBDDFFBAFCFEDFCCDCEABBCBBBAECDAABDAADCEBEFCDCABEDBFFBCBEBEBAAFBEEABDEDABFCECCDBBEBADBBDE
+ABBABCDEFBGHIHJKKIGLHLLGGGGGKHKKJHGLJJKGGGGLIIGGHGLHKKIKIGJKKGIGGHGJHKLGJHIKGGLGJLIHJGLHHJHGIIKILHLJJHGKIGHLKJGJLGGGGJIHKGHLGJHLIKJKGJIGGHJJMNOPJMQMOQ
+AAFACBBEBHHHLLIKJGGIJGHGKGKKJGJGGGKGLGGJGKGIIILJIGLIGGGHGGJLGGHGLLJLKIGGLKGIGKHHJGKGGLIJGKIHKHLIIHGJIHHIKIGLIIKGHGKGIGKGLGIGIJGLGGHLJJILKJIJMONMONOMNM
+ADCBCDGJKJLGIJKGKJKGGIGIHIKIKGKHGKLGGHGGHGLHGKJKLKHKGKGJGGIIGHHGGLIKLHKJIJIGKHKGHGGKGGGIHHLGLLIJKHGLGGKGIJKJGHGGJGKKKIKGKGGGGKHKGJGKHKIHGGHIMQQMMMQRRM
+ABEBBLHKKHJGKGGILKJGKKGLGILHGIIHIILILLGGJLGJLGGIIJLIKKHHLIIJIHHHLLKGGJGKIGLGGGLGKGKGGIIJHGLLKLKLILJHIJHHJKJJJJGHLKLLHGJGGIJKJLJGGGIKGGJGIKIGMRMPOOQMRR
+EACBFA'HGIKJGKLGLHHGGHLJGIKGGGIKJHH'''''''''HKGJHGHG'S'''''JHLKIKGKLKGLJKHKHKLGHIJTTTTTGKGLIIGKGKKGHKKTTKLGGJLJHJGLHGGK''''TTTTTTT'U'''GGIGIMTTTTTTTTT
+VVVVVV''''LHLGLKG'''''''''''GGKGGI'''''''''U'''''''''''K'''TTTT'''''''''LK'''''''TTTTTTT'LGJGGGHJLKGTTTTTTT'''TTTTTTTT'''''TTTTTTT'''''''''''TTTTTTTTT
+VVVVVV'''''''''''''''''''''''''K'''''''''''''''''''''''''''TTTT'''''''''''''''''TTTTTTTT''''''''''TTTTTMWMT'U'TTTTTTTT'''''TTTTTTT''''GXG''''ITTTTYTTT
+VVVVVV''''''''S'''T''''''''''''''''''''''''''''''''''''''''TTTT'''''''''''''I'''TTTTTTTT''''L'''''TTTTTTZTTT'TTTTTTTTT'''''TTTTTTQ'''''''''''''TMMMTTT
+VVVVVD'''''''''''TTT'''''''''''''''''''''K'''''''J''''''''TTTTTT''''''''''''''TPTTTTTTTT'''''''''TTTTTTTTTTTTTTTMMMTTTQT''TTTTTTT'''''''''''''''MaMTTT
+VVVVVV'''''''''TTMWMTZ''''''''''''''''''''''''''''L'''''''TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT''''''TTTTTTTT'TTTTTTTTTMaMTTTTTTTTTTTTT''''''''''''''S'TTTTTT
+VVVVVV'''''TTTTTTTTTTTMWMTTTTT''TTTTMWMT''''TTTTTT'GXG''''TTTTTTTTTTTTTTTRTTTTTTTTTTTTTT''''J'TTTTT'''''GbMTTTTTTTTTTTTTYTTT''''''''''''''''''''TTPTTT
+VVVVVVVV'GWMTMbMTTTTTTTTTTTTTT'ZTTTTTTTTTTTTTTTTTTT'''''''TTTTTTTTTTTTTTTMbMTTTTTTTTTTT''''''TTTTTR'''J''TPTTTTPTTTTTTTTTTTT''''''''''GGG'''U''TTTTTTT
+VVBBBVVV''TTTTTTTTTTTTTTTTTTTT'TTTTTTTTTTTTTTTTTTTT''''U''TTTTTTQTTTTTTTTTTTTTTTTRTTTTT''I'''TTTTTT''''''TTTTTTTTTTQTTTTTTTT'''''''K''GcG'T''ITTTTTTTT
+VVBdBeVVV'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTRTTTTTT'''''''TTTTTRTTTTTTTTTTTTTTTTfffffffffffffffffffffff''TYTTTTTTTTTTTTTTTTT''''''''''''''''''TTTTTTTT
+VVVBBBVeVVTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'''''''MMMTTTTTTTTTTTTTTTTTTTfgggggggggggggggggggggf''TTTTTTTTTTTTTTTTTT''''''''''''''''''TTTTTTTTT
+VVVBdBVVVVVTTTTTTTTTTT''''''ZMbMYTTTTTTTTTTTTTTTTTR'''''''MaMTTTOTTTTTTTTTTTMGG'fgggggggggggggggggggggf'''TTTTTTTTTTTTTTTT'''''''''''''''GGG'TTTTTTTTT
+VVVVVVVVVV'TTTTTTTTOT'''U'''KYTTTTTTTTTTTTTTTTTTTTTT'''''TTTTTTTTTTTTTTTTTQ'GcG'fgggggggggggggggggggggfTT''''''TZTTTTTTT''''''''''''''GXGGcG'TTTTTTTTT
+VVVVVVVVVV''TTTTTTTT'''''''''TTTTTTTTTTTTT''TTTTRTTTT'''YTTTTTTTTTTTTTTRTT''''''fgggggggggggggggggggggfTT'''''''TTTTTT'''''''''''''TTTTGXG''I''''TTTTT
+VVVVVVVVVV''''TTTTTT'''''''''TTTTTTTTTTTT'''TTTTTYTTT'''TTTTTTTTTTTTZTTTT'''''''fgggggggggggggggggggggfTT''''''''TTTT''''''''''''''TTTT''''''''''TTTTT
+VVVVVVVVVV'''''''TTJ''''''''''TMbMTTTTTTTR'TTTTTTTTTT'''TTTTTTTTTTTTTTTTT'''''''fgggggggggggggggggggggfTT'''''''TTTTT''''''''K'GXGUTTTTJ''GXG''''TTTTT
+VVVVVVVVVV'''''''K''GXG''''''''''TTTTTTTTTTTTTTTTTTTT''''TTTTTTTTTTTTTT'''''''''fgggggggggggggggggggggfTTT''''''TTTTTMXG'''''''''''TTTT''''''''TTTTTTT
+VVVVVVVVVV'''''''''''''''''''''''''TTTTTTTTTTTTTTTTT'GhG''''''''''''''''''L''K''fgggggggggggggggggggggfTTT'''''YTTTTTTTTT''''''''''TTTTT''''''TTTTTTTT
+VVCVViVVV'''''''''''''''''fffffffffffffffffffffffT''''''''L'''''''''JGGG''''''''fgggggggggggggggggggggfTTT'''''TTTTTTTTTTT''''''''TTTTTTT''''GGMTTTTTT
+VVVVVVVVTTT'''''''''''''''fgggggggggggggggggggggf''''''''''''''''''''GcG''''''''fgggggggggggggggggggggfTTTT'''TTTTTTTTTTTT''''''''TTTTTTTTTT'GcMTTTTTT
+VVVVVVVVTTT'''''''''''''''fgggggggggggggggggggggf'''''''''''''J'''''''''''''''''fgggggggggggggggggggggfTTTT''ITTTTTTTTTTTT''''''''TTTTTTTTTT'''TTTTTTT
+VVVVVVVVTTO'''''''''''''''fgggggggggggggggggggggf'''''''I'''''''''''''''''''''''fgggggggggggggggggggggfTTTT'''TTTTTTQTTTTT''''''''TTTTTTTTT''''TTTTTTT
+VVVVVVVVVTTTTT''''''''''''fgggggggggggggggggggggf'''''''''''''''''''''''''''''''fgggggggggggggggggggggfTTTTT''TTTTTTTTTTTT''J'GhG''OTTMWG'''''MbMTTTTT
+VVVVVVVVVVTTTTTT''''''TTTTfgggggggggggggggggggggf''''''''''GGG''''''''''''''''''fgggggggggggggggggggggfTTTTTTTTTTTTTTTTTTTT'''''L'''''L''''''TTTTTTTTT
+VVVVVVVVVVVTTTTTTTTTTTTTTTfgggggggggggggggggggggf''''''''''GcG'''''''''TTTTT'U'JfgggggggggggggggggggggfTTTTTTTT''''''TTTTTT'''K'''''''''''GhGTTTTTTTTT
+VVVVVVVVVVVTTMbMTTTTTTTTTTfgggggggggggggggggggggf''''''''''''U''''''GXMTT'''''''fgggggggggggggggggggggfTTTTTTTT'''''''TTTTTMGG'''''''''K''''''''TTTTTT
+VVVVVVVVVVVTTTTTTTT'''''''fgggggggggggggggggggggf'''''''''''''''''''''TTT'KILKK'fgggggggggggggggggggggfTTTTTTTT'''''''MbMTTMcG''''''''''GhMT'''''TTTTT
+VVVVVeiVVVVTTTTTTTT'KILKK'fgggggggggggggggggggggf'''''''''L'''''''''''TTT'ITTTI'fgggggggggggggggggggggfTTTTTMMM'''''''TTTTTT'GhG''''''''''GXG''TTTTTTT
+VVVVVVVVVVVTTTTTTTT'ITTTI'fgggggggggggggggggggggf'''''''''''J''''''''''TT'LTTTL'fgggggggggggggggggggggfTTMWMMaG''''''TTYTTTT''''KILKK''''''''TTTTTTTTT
+VVVVVVVVVVV'''TTTTT'LTTTL'fgggggggggggggggggggggf'''''''''''''''''''''''''KTTTK'fgggggggggggggggggggggfTTT''''''S'GXMTTTTTTT''''ITTTI''''''''TTMWMTTTT
+VVVVVVVVVV'''''PTTT'KTTTK'fgggggggggggggggggggggf'GXG'''''''GGG'TTTTT'''''KI'KK'fgggggggggggggggggggggf''''''''''TTTTTTTTTTT''''LTTTL''''''''TTMWMTTTT
+VVVVVV''VV''''''TTT'KI'KK'fgggggggggggggggggggggf'I'''TT''''GcGTTTTTT'''''''''''ffffffffff===ffffffffff''''GXG''TTTTTTTTTRTT''''KTTTK'TT''''''TTTTTTTT
+VVVVVV''VV''''''TTT'''''''fgggggggggggggggggggggf''''TTTT''''''TTTTTT'''''''''''''TTTT''''==='TTTTTT''''''''''''TTTTTTTTTTTT''''KI'KK'TT'''''''''TTTTT
+VVVVVV''''''''''TTTTTT''''fgggggggggggggggggggggf'''''TTT''GGGTTTTTTT''''''''''''''TTT''''==='TTTTTT'''''''U''I'TTTTTTTTTPTQ''''''''''T'''''''''TTTTTT
+VVVVV'''''''''''TTTTTT''''fgggggggggggggggggggggf'''''''TTTMaMTTTTT''''=====''''''''''''''==='TTTTT'''''''''''''TTTTTTTTTTTT''''''''''''''''''TTTTTTTT
+VVFVV'GXG''GGG''TTTTTT''''fgggggggggggggggggggggf''''''''TTTTTTTT''=============''''''''''==='''''''''''''''''''TTTTTTTTTTT''''''''S'''''''''TTTTTTTTT
+VVVVVV'GXG'GcG'''TTTTT''''fgggggggggggggggggggggf''''''''TMWMTT''=================='''''''==='''''''''''''''''''TTTMbMTTTTTK'''''''''''S'''''TTTTOTZTT
+VVVVVVVV''''''''''TTT'''''fgggggggggggggggggggggf''''''''TTTTT'======================''''T==='''''''''''''''''''TTTTTTTTTTT''''''''''''''GGGTTTTTTTTTT
+VVVVVVVV'''''''''''K'''''Tfgggggggggggggggggggggf''''''''TTT''========='''''============''==='''''''''''''''''''TTTRTTTTTTT''''GGG'''''''GcMTTTTTTTTTT
+VVVVVVVV''''''''''''''''''fgggggggggggggggggggggf''''''''TT'=======''''TTTTT''''============='''''''''''''''''''TTTTTTTRTT'''''GcG''''''''''''TTTTTTTT
+VVVVVVj'''''''''''''''''''ffffffffff===ffffffffff''''''''''======''''TTTTTTTTTTT'''============='''''''''''''''''TTTTTT'''''''''''''''''''''''''TTTTTT
+VVVVVVVGhG''''''''''''''''''''''GhG'===TTTTTMbM'S''''TTT'========''''TTTTTTTT''''''''============================'''TT'''I'''K''''''''''''''''''''TTTT
+========''''''''''''''''''''''''''''===TTTTTTTTTTTTTTT''=========''''TTTTTT''''''''TT'''============================''''''J''''''''''''''U''''T=======
+========'''''''''''''''''''''''''S''===TTTTTTTTTTTTTT'======''===''''TTTTTT'''''''TTTTTT==============================''''GhG''''''''''''''''T========
+========='''''''''''''''''''''''''''===TTTTTTTTTTTT''======'''==='''''TTTTT'''''''TTTTTT==='''''========================'''''''''''''''''''''T========
+============'''''''''''''=='''''''''===TTTTTTTTT'''======'''''==='''''TTRTT'''''''TTTTTT===TTTTT'''''''''''''''''=========''''''''''''''''''''========
+VVVVVVV============================'==='''''''''========''''''==='''''TTTTTK'''''UTTTTTT===TQTTTTTTTTTTT'T'''''TT'''========''''''''''''''''===TTTTTTT
+VVVVVV================================================''TT''''===''''''TTT''''''''TTTTTT===TTTTRRTTTTTTT'TTT''TTTTTT''========''''''''''T''====kTTTTTT
+VVVVV''''V==========================================='TTTTTTTT==='''''''T''''''''TTTRTTT===TT'''''TTTTMbGTTTTTTTTTTTT'=========='''TTTT''======TTTTTTT
+VVVVV'''VV''=============''========================''TTTTTTTTT==='''''''''''''ffffffffff===ffffffffffTTT'TTOTTTTTMbMT'==='========'''''======='''TTTTT
+VVVV''''VV''''''''''''''''''===''''============='''''TPTTTTTTT==='''''''''''''fgggggggggggggggggggggfTTT'TTTTTTTTTTTTI==='''================'''''TTTTT
+VVVVVGXGVVV'''''''''''''''''===T'''''''''''''''''''''TTTTTTTTT==='''''''''''''fgggggggggggggggggggggfTTT'TTTTTTTTT''''==='''''============='T''''TTTTT
+VVVVVV''VVV'''''''''''''''''===T'''''''''''''''''''''TTTTOTTTT==='''''''''''''fgggggggggggggggggggggfTTT'TTTTTTT''''''==='''''''=========''TT'TTTTTTTT
+VVVVVV''VVVV''''''''''''''''===TT'''''''''''''''''''ffffffffff===ffffffffffUTTfgggggggggggggggggggggf''''TTTTTT'''I'''==='''''''''=====''TTTTTTTTTMMMT
+VVVVVVVVVVV'''''GhG'''''''''===TT''''''''TTT''''''KSfgggggggggggggggggggggf'TTfgggggggggggggggggggggf''''''QT'''''''''===''''''''''''''''''''TTTTTMaMT
+VVVVVVVVVV''''''''ffffffffff===ffffffffffTTTT'''''''fgggggggggggggggggggggf'YTfgggggggggggggggggggggf'''''''''''''GhG'===''''TT''''''''''''''TTTTTTTTT
+VVVVVVVVVV''''''''fgggggggggggggggggggggfTTTT'KI'KK'fgggggggggggggggggggggf'TTfgggggggggggggggggggggf'''''''''''''''''==='''TTTT''''''''''TT'TTTTTTTTT
+VVVVVVVVV'''''''''fgggggggggggggggggggggfTTTT'ITTTI'fgggggggggggggggggggggf'TTfgggggggggggggggggggggf'KI'KK'''''''''''===''''TT''''''''''''''TTTTTTTTT
+VVVVVVVVU''''S''''fgggggggggggggggggggggfTTTT'LTTTL'fgggggggggggggggggggggf'TTfgggggggggggggggggggggf'ITTTI'ffffffffff===ffffffffff'''''''''''TTTOTTTT
+VVVVVVVV''''''J'''fgggggggggggggggggggggfS''''KTTTK'fgggggggggggggggggggggf'''fgggggggggggggggggggggf'LTTTL'fgggggggggggggggggggggf''''''''''TTTTTTTTT
+VVVVVVVV''''''''''fgggggggggggggggggggggf'''''KILKK'fgggggggggggggggggggggf'''fgggggggggggggggggggggf'KTTTK'fgggggggggggggggggggggf'''''''''''TTTTTTTT
+VVVVVVBlB'''''''''fgggggggggggggggggggggf''GhG''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggf'KILKK'fgggggggggggggggggggggfTTT''''''''TTTTTTTT
+VVVVVVVVVV''''''''fgggggggggggggggggggggf'''''''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggf'''''''fgggggggggggggggggggggfTTTGGG'''GXMTTTTTTT
+VVVVVVVVV'''''''''fgggggggggggggggggggggf''''L''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggf''''TTTfgggggggggggggggggggggfTTTGcG'''''TTOTTTTT
+VVVVVV''''''''''''fgggggggggggggggggggggf'''''J'''''fgggggggggggggggggggggf'''fgggggggggggggggggggggf'''TTTTfgggggggggggggggggggggfTTT''''''''TMMMTTTT
+VVVVVV''''''''''''fgggggggggggggggggggggf'''''''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggfTTTTTTTfgggggggggggggggggggggfTTT''''''GXMMaMTTTT
+VVVVVVTTT'''''''TTfgggggggggggggggggggggfTTT''''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggfTTTTMWMfgggggggggggggggggggggfTTT'''''''''TTTTTTT
+VVVVVVVVTT'''''TTTfgggggggggggggggggggggfOTTT'''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggfTTTTTTTfgggggggggggggggggggggfTTTL''''''''MbMTTTT
+VVVVVVVVVT'''''TTTfgggggggggggggggggggggfTTTTI''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggfTTTTTTTfgggggggggggggggggggggfTTT'''J'''''TTTTTTT
+VVVVVVVVVV'''''TTTfgggggggggggggggggggggfTTT''''''''fgggggggggggggggggggggf'''fgggggggggggggggggggggfTTQTZTTfgggggggggggggggggggggf'TT'''''''''TTTTTTT
+VVVViVVVVV'''''TTTfgggggggggggggggggggggfTT'''''''''fgggggggggggggggggggggf''TfgggggggggggggggggggggfTTTTTTTfgggggggggggggggggggggf''''''''''''TTTTTTT
+VVVVVCVVVVV''''OTTfgggggggggggggggggggggf'''''''''''fgggggggggggggggggggggfTTTfffffffffffffffffffffffTTTTTTTfgggggggggggggggggggggf'''''TTTTTTTTTTTTTT
+VVVVVVVVVVVTTTTT''fgggggggggggggggggggggf'''''K'''''fgggggggggggggggggggggfTTTTTTTTTTTT'''''GXG'''''TTTTTTT'fgggggggggggggggggggggf'GhG'TTTTTTTTTTTTTT
+VVVVVVTTiTTTTTT'''fgggggggggggggggggggggf'''''''''''fgggggggggggggggggggggfTTTTTTTTTTT''''''''''''''TTTTMbG'fgggggggggggggggggggggf''''TTTTTTTTTTTTTTT
+VVVVVVTTTTTTTTT'''fgggggggggggggggggggggf'''''''''''fgggggggggggggggggggggfTTTTTTTTTTT''''GhG''''''GWMTTTT''fgggggggggggggggggggggfI'''TTTTTTTTTTTTTTT
+VVVVVVVTTTTTTTT'''fgggggggggggggggggggggf'''''''''''fffffffffffffffffffffffTTTTTTTTTTTJ'''''''''''''TTTTTT''fgggggggggggggggggggggf''''TTTTTTTZTTTTTTT
+VVVVVVVVT'''''''''fgggggggggggggggggggggf'''''S'''''''''''''TTTTTTTTTT'''''TTTTTTTTTT''''''''''''''''TTT''''fgggggggggggggggggggggfI''''MWMTZTTTTTTTTT
+VVVVVVVV''''''''''fffffffffffffffffffffff'''''''''''''''''''''TTTTTTTT'''''TTTQTTT''''''''''''''''''''''''''fgggggggggggggggggggggf'T'''''''TTTT'TTTTT
+VVVVVVVV'''''''GXG''''''''''''''''MWMTT'''''''''''''''''''''''''TTTTT''''L'''''''I''''''''''''''''''''''''''fgggggggggggggggggggggfTTTT''''''TTTTTTTTT
+VVVVVVVV''''''''''T'''''''''''''''TTTTTT'''''''''''''TTTT''''J'''TTT'''''''''''''''''''L''''''''''''''''''''fgggggggggggggggggggggfTTTT''U''''TPTTTTTT
+VVVBBBVT''''''''''TGGGGGG'''''''''TTTTTT'''''''''''''TTTT''''''''TTT''''''''''''''''''''''''''''''''''''''''fffffffffffffffffffffffTTTT''''''''TTTTTTT
+VVVBdBTT''''''''''TGcGGcG'''''''''TTTTTT'''''''''''''TTTT'''''GXG'I'''''''''L'''''''''''''''''''''''''''GXG'''''TTTTT''''''''''''''TTTT'''''''TTTTTTTT
+VVVVVTTT'''''''''''''I'''''S''''''TTTTTT'''''''''''''TTTT''''''''''''''''''''''''''''U'''''''''L''''''''''''''''''''S''''''''''''''TTT'''''UTTTTTTPTTT
+VVVVTTTTT'''''''SL'''''''''I'''''''TTTT'''''''''''''KTTTT''''''''''''''''''''TTTTTT'''''''''U'''''''''K''''I'''''''''''''''''''''''''''''''TTTTTTTTTTT
+VVVVVTTTTTTTTTT'''''''''''''''GXG'''T''''''''''GXG'''TTT''''''''''''''''''''TTTTTTTTTTTTTTTT'''''''''''''''''GXG'''''''''''''''''''''''''''TTTTTTTTTTT
+VVVVVVVVTTTTTTTT'''''''''''''''''''''''''''''''TTTYTR'''''''''''''''''''''''TTTTTMbMTTTTTTTT'''U'''''''''''I'''''''''''''''''''''''''''''''ZTTTTTTTTTT
+VVVVVVVVTTMMMTTT'''''''IIK''''''''''J'''IJKHJGHGIGJTT'''''''''''''LK''''''''TTTTTTTTTTTTIGGLG''''''''''''''UT''''''''HLGGHHIGGILL''''''''''TTTTTTTTTTT
+EDACVVVVTTMaMTTTTHLLGGGGJGHGKGLJKLHIKLGKILKLKKLLGHHHHKILHLIKGILIKKHLHHLGILLGHKKHGLGGGHJHGKHIJKLLJGGJHGJIKG'''''GKGHGIGHJLGGIGJGIGLGJIKHGKLLJPROHGONONT
+ABDDEFBAGIGGJGLKJGGKJKGJIHLLGHIGHGKJHKGHGIKGIIKLLGHKJHJKGGGGGGJIGKGIJIGLGJHGHLIGHJKLGILGIHLKGHKGHGGIJLKGGKGGILKGGGKGHKILLGJGJHIHGHJGLGGGKLGJHPMQQQMRMO
+CABBAFADGJGKJIHLGIKLGKIHGGGGKHILJLGGIHHGGLHGJKIKGKGGJLJJILLGGLGGKGHHGGKJHGILKHJKKHIHHGIGKIILHIGKHHLJHHILJLGGGGHJKJHGIJKHHKJGGKHKGJGHGHKIJJJJJORMOONQRP
+DFDFCEFEGJKHGGLGJLLJGGHGKKKGGKHIJLGIKJGJIIHGLLHHIGHGJIHJILKJHGIIJGKJHLKJGJJKKHJIJIJHLGHGGGKJLKGGKILLKLIGGKLGIKJKLGLKJILJGJHGIILGIIGLGGKLGGHGHMOQNRMOMO
+FCBEEFAEGKHGGIKKGGJILLIKGGKHGIHLIIGGGKGHGHLGHGIGGGJKKGLLKLJGKHGHJHHGIJKKILJGGGJLKGIKJHKJGLGHGGJJKGIIKIKLIGKLGJLIGKJHJGHLJHILLGGGGJIJGHHGGGHGIMMMMQNMMO

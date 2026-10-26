@@ -100,6 +100,7 @@ namespace Buds.Core
                     return;
                 }
                 lastPvp = res.pvp != null && res.pvp.Present ? res.pvp : null;
+                lastRaid = res.raid != null && res.raid.Present ? res.raid : null;
                 lastInfluence = res.influence != null && res.influence.Present ? res.influence : null;
                 if (res.fight.status == "won")
                 {
@@ -112,7 +113,7 @@ namespace Buds.Core
                         if (quests.Duel(fightingWith.Data.id)) ui.ShowToast("Cel zadania osiągnięty!", 2.5f);
                     }
                 }
-                fightScreen.ShowResult(res.fight, res.reward, lastInfluence, lastPvp);
+                fightScreen.ShowResult(res.fight, res.reward, lastInfluence, lastPvp, null, lastRaid);
             }
             catch (ApiException e)
             {
@@ -141,7 +142,10 @@ namespace Buds.Core
                 var res = await api.Flee(session.Token, currentFight.id);
                 currentFight = res.fight;
                 lastPvp = res.pvp != null && res.pvp.Present ? res.pvp : null;
-                fightScreen.ShowResult(res.fight, res.reward, null, lastPvp);
+                lastRaid = res.raid != null && res.raid.Present ? res.raid : null;
+                // a raid fled before the first blow is no raid at all: say so like any other flight
+                var raid = lastRaid ?? (currentFight.enemyId.StartsWith("raid-") ? new RaidResultDto { plot = currentFight.enemyId.Substring(5), district = raidingName } : null);
+                fightScreen.ShowResult(res.fight, res.reward, null, lastPvp, null, raid);
             }
             catch (ApiException e)
             {
@@ -190,6 +194,18 @@ namespace Buds.Core
             // a lurker the bud ran from (or lost to) hides in its nook again for a while
             if (fightingWith && fightingWith.Data.ambush && currentFight?.status != "won") fightingWith.Hide(Ambush.Cooldown);
             fightScreen.Hide();
+            if (currentFight?.enemyId != null && currentFight.enemyId.StartsWith("raid-"))
+            {
+                // back on the wasteland: the loot in the bar, the districts as they stand now
+                var raid = lastRaid;
+                lastRaid = null;
+                lastReward = null;
+                ReleasePvpSheet();
+                pvpOnStreet = false;
+                if (raid != null && raid.won && Land.LootText(raid.loot) is { } loot) ui.ShowToast($"Łup: {loot}", 3.5f);
+                _ = RefreshDistricts(true);
+                return;
+            }
             if (currentFight?.enemyId != null && currentFight.enemyId.StartsWith("pvp-"))
             {
                 // back to the list of rivals, with the rating as it stands now (no change when fled before a blow)

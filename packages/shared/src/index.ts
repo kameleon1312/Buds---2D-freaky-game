@@ -20,5 +20,7 @@ export * from './skills';
 export * from './rivalry';
 export * from './travel';
 export * from './chat';
+export * from './land';
+export * from './plots';
 export * from './live';
 export * from './walk-grids';
