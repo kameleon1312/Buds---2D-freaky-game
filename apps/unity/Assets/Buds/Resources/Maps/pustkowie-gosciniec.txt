@@ -8,9 +8,9 @@ spawn = 40,75
 [legend]
 = = asphalt
 ; = cobble
-c = cobble + sign !
-Z = dzialka
-Y = dzialka + dzialka-post !
+c = cobble + pien !
+a = cobble + sign !
+b = cobble + tree-c !
 E = forest
 A = forest !
 F = forest + bush-a !
@@ -24,7 +24,7 @@ D = forest + tree-c !
 . = grass
 K = grass !
 T = grass + bush-a !
-a = grass + bush-b !
+Z = grass + bush-b !
 U = grass + pien !
 R = grass + rock-a !
 N = grass + siano !
@@ -35,7 +35,7 @@ S = gravel
 J = soil
 V = soil + bush-a !
 W = soil + pien !
-b = soil + rock-a !
+Y = soil + rock-a !
 X = soil + siano !
 M = soil + tree-c !
 
@@ -45,7 +45,6 @@ asphalt : asphalt : 0.8 : 0.45 #3a3e48, 0.5 #4c5160
 forest : forest : 2 : 0.45 #6aae4a, 0.62 #5a9c40
 soil : soil : 1.2 : 0.45 #7a5236, 0.55 #9c6b45
 gravel : gravel : 1 : 0.45 #9f9483, 0.5 #b7ac9b
-lawn-dzialka : dzialka : 1 : 0.45 #6fae4c, 0.5 #84c25c
 
 [scatter]
 grass : 0.05 : flowers-a|flowers-c|tuft|tuft
@@ -89,135 +88,135 @@ QTLK...........................U....J.............SSSS................JJM.......
 TKLL..........T...JV..........RR..JJJJ........U...SSSS............JJJJJJJJ........JJJJ......KKTL
 KTTKL.........R..JJJJJJ.........JJJJJJJ...........SSSS.J.........WJJJJJJJJJ.......JJJJJ.U...PPKL
 PLLQL...........JJJVJJJJJJJJJJJJXJJJJJJJ..........SSSS.JJ..L.....JJJJJJJJJJ.......JJJJJ.....LTLP
-LLLLK...........JJJJJJJJJJJJJJJJJJJJJJJJ..........SSSS.JJ..YYYYYYYYYYYYYYYYYYYYYYYJJJJJ.....TLTT
-LQQKK...........JJJJJJJJJJJJJJJJJJJJJJJJ..........SSSS.JJ..YZZZZZZZZZZZZZZZZZZZZZYJJJJJ.....TTPL
-PKLKQ...........JJJJJJJJJJJJJ...JJJJJJJ...........SSSS.JJ..YZZZZZZZZZZZZZZZZZZZZZY.JJJ.....LPTKK
-LPQT.JJJJ....R..JXJJJJJJJJJJ......JJJJ............SSSS.JJJ.YZZZZZZZZZZZZZZZZZZZZZY........QTKTQK
-LKQKJJJJJJJJWJX.....JJJJJJJJ...........N..........SSSS.JJJJYZZZZZZZZZZZZZZZZZZZZZYR..N....QTPQLK
-PPLKJJJJJJJJJJJJ....JJJJJJJJ......................SSSS.JJJJYZZZZZZZZZZZZZZZZZZZZZY.......JKQKLKK
-LPLTJWJJJJWJJJJJ....JJJJJJJJ..TTaNT...............SSSS.JJJJYZZZZZZZZZZZZZZZZZZZZZY......JJLLTKQL
-LPQKJJJJJJJJJJJJ.....JJJJJJ...T...T..............SSSS.JJJJJYZZZZZZZZZZZZZZZZZZZZZY......JJKQTKPP
-KTTLJJJJXJJJJJJJ......JJJJJ...a..................SSSS.JJJJJYZZZZZZZZZZZZZZZZZZZZZY...L.LJJKQKTQT
-TQKKMJJJJJJJJJJ...............N...N...........JJJ.SSSS.JJJ.YZZZZZZZZZZZZZZZZZZZZZY.....JJJJPTLKQ
-KPPLMJJJJJJJJJJ...............TTaNT.........RJJJJ.SSSSSSSSSSZZZZZZZZZZZZZZZZZZZZZYJJJJJJJJJKTPPT
-KKLKJJJJJJJJJJJ.............................JJMJJ.SSSSSSSSSSZZZZZZZZZZZZZZZZZZZZZYJJJJWJJJJQKKTK
-PLPKJJJJJJJJJJJ.......YYYYYYYYYYYYYYYYYYYYYYYJJJJ.SSSSSSSSSSZZZZZZZZZZZZZZZZZZZZZYJJJJXJJJJPTKTP
-PKQQJJJJJXJJJJJN..L...YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.JJ..YZZZZZZZZZZZZZZZZZZZZZYJJJJJJJJJPTKPT
-LKLPJJJJJJJJJJJ.......YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.J...YZZZZZZZZZZZZZZZZZZZZZYJJJJbJJJJTKQLQ
-LLTTQ....JJJJJ........YZZZZZZZZZZZZZZZZZZZZZY.....SSSS.....YZZZZZZZZZZZZZZZZZZZZZYJJJJJJMJJLKQQK
-QLQKK......JJJ........YZZZZZZZZZZZZZZZZZZZZZY.....SSSS.....YZZZZZZZZZZZZZZZZZZZZZYJJJJWJJ..PKKKP
-KKKPTK................YZZZZZZZZZZZZZZZZZZZZZY......SSSS....YZZZZZZZZZZZZZZZZZZZZZYJJJJJJT..KQKKK
-TLKLPL................YZZZZZZZZZZZZZZZZZZZZZY......SSSS....YZZZZZZZZZZZZZZZZZZZZZYJJJJJJ...QKPTL
-KKQQKT................YZZZZZZZZZZZZZZZZZZZZZY......SSSS....YZZZZZZZZZZZZZZZZZZZZZYJJJJJJ...TPTKP
-TQLTQ.................YZZZZZZZZZZZZZZZZZZZZZY......SSSS...UYZZZZZZZZZZZZZZZZZZZZZYJJJJMJ...KQKQT
-TQQKQ.................YZZZZZZZZZZZZZZZZZZZZZY......SSSS....YZZZZZZZZZZZZZZZZZZZZZYJJJJJ....PKLLQ
-PTQPR..........JJJJJJJYZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSSS....YYYYYYYYYYYYYYYYYYYYYYYJbJ.....LQQPKQ
-PKKKJJMJ..N....JJJJJJJYZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSSS....................JJJJJJJ........PKKLKL
-QKKLJJJJJ......JJJJJJJYZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSSS.................R.JJJJJJJJ........PLKTLK
-QLTKbJJJ.N.....JJJJJJJYZZZZZZZZZZZZZZZZZZZZZY......SSSS.......T..R........JJJJJJJ.........KLLTTP
-KKLL...........JJJJJJJYZZZZZZZZZZZZZZZZZZZZZY......SSSS....................JJJJJJ.........KQKKKT
-KPKLQ...........JJJJJJYZZZZZZZZZZZZZZZZZZZZZY......SSSS...........J........JJJJJJ.N.......QQTKLP
-KTLKL...........JJJJJ.YZZZZZZZZZZZZZZZZZZZZZY......SSSS........T.XJJJ.......JJJJ..........QTLTKT
-LPLQQ...U.......JJJJJ.YZZZZZZZZZZZZZZZZZZZZZY......SSSS.....U....JJJJ.......JJJJ.........JKLKKPQ
-KTLLPT..........JJJJJ.YZZZZZZZZZZZZZZZZZZZZZY.....SSSS.J.........JJJX.......MXJJ.........JTPTKTP
-TKPKK............JJJJ.YZZZZZZZZZZZZZZZZZZZZZY.....SSSS.J....L....JJJJ........JXJ..........PKTKLQ
-LPTTQ...N......L.XJW..YZZZZZZZZZZZZZZZZZZZZZY.....SSSS.J....L....JJJJJ..................L.KLTTQQ
-PPKLQ.............J...YZZZZZZZZZZZZZZZZZZZZZY....SSSS.JJ.L.......JJJMJ...............L....QLQQKL
-QPLKK.............L...YYYYYYYYYYYYYYYYYYYYYYY....SSSS.J............JJJJbMJ.....U...........PKLTQ
-KKQQT...................................JMJJ....SSSS..JRL....TTaNT..JJJJJJ.................KQPQT
-TKKKP...................................JJJJ...SSSS...J......T...T..JJJJJJ..............U..QPQPL
-PTLKQ........L.............L..N.........JJJJ...SSSS..............a..JJJJJJ.................PKQLK
-KKLP.......YYYYYYYYYYYYYYYYYYYYYYY..U...JJJJ..SSSS.....L.....N...N..JJJJMJ........N........LQKTK
-KLQQ.......YZZZZZZZZZZZZZZZZZZZZZY.......JJJ.SSSS............TTaNT.JJJJJJJJ...........L....PLKLP
-LTKL......JYZZZZZZZZZZZZZZZZZZZZZY.......JJJ.SSSS.......N..........JJJJJJJb.............JJJKKTLP
-QPLKL.....JYZZZZZZZZZZZZZZZZZZZZZY.......JJ.SSSS......R......R....JJMJJJJJJ...U........JJJJTPTTL
-KKKK.....JJYZZZZZZZZZZZZZZZZZZZZZY.......J.SSSS....YYYYYYYYYYYYYYYYYYYYYYYJ.......L....JJJJQKKKT
-LTTK.....JJYZZZZZZZZZZZZZZZZZZZZZY.......J.SSSS....YZZZZZZZZZZZZZZZZZZZZZYJ............JJJJQTLTP
-KTKL.....JJYZZZZZZZZZZZZZZZZZZZZZY........SSSS.....YZZZZZZZZZZZZZZZZZZZZZY............JJJJJPLPTT
-KQKL....JJJYZZZZZZZZZZZZZZZZZZZZZY.......SSSS......YZZZZZZZZZZZZZZZZZZZZZY........JJJJJJJJJKLKQK
-QLQPKJJJJJJYZZZZZZZZZZZZZZZZZZZZZY.......SSSS......YZZZZZZZZZZZZZZZZZZZZZY....JJJJJJJJJJJMJQKKKT
-LKLPLJJJJJJYZZZZZZZZZZZZZZZZZZZZZY......SSSS....N..YZZZZZZZZZZZZZZZZZZZZZY...JJJJJJJJJJJJJJPTQQL
-PPTQPJJJJJJYZZZZZZZZZZZZZZZZZZZZZSSSSSS.SSSS.......YZZZZZZZZZZZZZZZZZZZZZY...JJJbJJJJJJJJJJQLKTQ
-TQKKKJJJJJJYZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSS........YZZZZZZZZZZZZZZZZZZZZZY...JJJJJJJJJJJJJJTKKLK
-PLQTLJJJJJJYZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSS....RL..YZZZZZZZZZZZZZZZZZZZZZY...JJJJMJJJJJJJ..LQKQL
-QPLPK.N.TJJYZZZZZZZZZZZZZZZZZZZZZY.....SSSS........YZZZZZZZZZZZZZZZZZZZZZY......JJJJJJJJ..LKPPPQ
-KQQKLK....JYZZZZZZZZZZZZZZZZZZZZZY.....SSSSSSSSSSSSSZZZZZZZZZZZZZZZZZZZZZY.....L.JJJJJJ...PQTPQP
-PQLLQK.R...YZZZZZZZZZZZZZZZZZZZZZY....SSSSSSSSSSSSSSZZZZZZZZZZZZZZZZZZZZZY.......JJJMJJ...KTKPLQ
-TLQPKP.....YZZZZZZZZZZZZZZZZZZZZZY.N..SSSSSSSSSSSSSSZZZZZZZZZZZZZZZZZZZZZY.....T..JJJJ....KPPPTK
-LQPLT......YZZZZZZZZZZZZZZZZZZZZZY....SSSS.........YZZZZZZZZZZZZZZZZZZZZZY........JJJJJL..TPKTKL
-LLKLL.....MYZZZZZZZZZZZZZZZZZZZZZY....SSSS.........YZZZZZZZZZZZZZZZZZZZZZY........JJJJJ....QKLTP
-LKKTT....JJYZZZZZZZZZZZZZZZZZZZZZY.JJ.SSSS.........YZZZZZZZZZZZZZZZZZZZZZY........JJWJJ....KKLKL
-QQKLP....JJYZZZZZZZZZZZZZZZZZZZZZYVJJJ.SSSS........YZZZZZZZZZZZZZZZZZZZZZY........JJJJJ....TKKPQ
-KKLPJ...JJJYZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS........YZZZZZZZZZZZZZZZZZZZZZY...L....VJJJJ...N.LQKT
-QLPLJ...JJJYYYYYYYYYYYYYYYYYYYYYYYJJJJ.SSSS........YZZZZZZZZZZZZZZZZZZZZZY........JJJJJL....PKQK
-KKQPJJ.JJJJJJJJ.......R........JJJJJJJ.SSSS........YZZZZZZZZZZZZZZZZZZZZZY........JJJMJ....PKLTT
-PTKQLJJJJJJJJJJ.......U..........JJJJJJ.SSSS.......YZZZZZZZZZZZZZZZZZZZZZY........JJJJJJ...KKPKK
-KKPQPJJJJJJU.......L..........N..JJJJJJ.SSSS.......YZZZZZZZZZZZZZZZZZZZZZYJ....R.XJJJJJJJJJKPKLK
-PQKQQJJJJJ..U.............R.U.....JJJJJ.SSSS.......YYYYYYYYYYYYYYYYYYYYYYYJJJJJJJJJJJJJJJJJKKKQQ
-KQLPKLJJJJ.......JJMJJJJJJ........JJJJJJ.SSSS..R...............JMJJJJMJMJJJJJJJJJJJJJJJJJJKKKPKL
-KPQTKLXJJJ.......JJJMJJJJJ........JJJJJJ.SSSS.........L........JJJJJJJJJJJJJJJJJbJJJJJJJJJPKPKTK
-KKQQTTJJJJU......JJJJJJJJJ........JJJJJJ..SSSS......N.N........JJJJJJJJJJJJJJJJJJJJJJJJJJJQLTKPL
-QKPPTJWJJJ..........JJJJJJJ..N...JJJJWJJ..SSSS.......YYYYYYYYYYYYYYYYYYYYYYYJJJJJJJ..JJJJJQKLKQQ
-TQPKQJJJJJ...........JJVJJJJ.........JJM..SSSS....R..YZZZZZZZZZZZZZZZZZZZZZYJJ........JJJJJKQKLK
-KQTLJJJJJJ...........JJJJMJJJJ.TTaNT.JJJJ..SSSS.JJ...YZZZZZZZZZZZZZZZZZZZZZY...........JJJJLPKPT
-KPQTJJJJJJ...L....L...JJJJJMJJ.T...T.JJJJ..SSSS.JJJ..YZZZZZZZZZZZZZZZZZZZZZY............JJJKLKQQ
-LLKQJJJJJJ............JJJJJJJJ.a...........SSSS.JJJ..YZZZZZZZZZZZZZZZZZZZZZY............JJJLPKTQ
-LLPQJJJJJJ............JJJJJJJJ.N...N.JJJJ...SSSS.JJ..YZZZZZZZZZZZZZZZZZZZZZY............JJJKPPQP
-KKKP.JJJJJ...........JJJJJJJJJ.TTaNT.JVJJJJ.SSSS.....YZZZZZZZZZZZZZZZZZZZZZY.......N.....JVQKPKK
-KPLKL.JJJJJJJJ.......JJJJJJJJJ.......JJJJJJ.SSSS.....YZZZZZZZZZZZZZZZZZZZZZY..............TLKLPT
-KKPPKK...JMJJJJJJYYYYYYYYYYYYYYYYYYYYYYYJJJ.SSSS....JYZZZZZZZZZZZZZZZZZZZZZY......JJJJX...PQPPQK
-PTLKLK...JJJJJJJJYZZZZZZZZZZZZZZZZZZZZZYJJJ.SSSS....JYZZZZZZZZZZZZZZZZZZZZZY......JJJJJJ..QKQQTQ
-QLQLTK...JJMJJJJJYZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSSSSSSSZZZZZZZZZZZZZZZZZZZZZY.....JJJJJJJ..TTKQQK
-KKLKTK....MJJJJJJYZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSSSSSSSZZZZZZZZZZZZZZZZZZZZZY......JJJJJ...QQPKTL
-TQKPPP.....JJMJJJYZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSSSSSSSZZZZZZZZZZZZZZZZZZZZZY..............QTLTPK
-KTPPP..........JJYZZZZZZZZZZZZZZZZZZZZZY.....SSSS....YZZZZZZZZZZZZZZZZZZZZZY...............KLQLL
-QTQTP...........JYZZZZZZZZZZZZZZZZZZZZZY.....SSSS....YZZZZZZZZZZZZZZZZZZZZZY................PPQK
-TKLQL...........JYZZZZZZZZZZZZZZZZZZZZZY.....SSSS....YZZZZZZZZZZZZZZZZZZZZZY.....R..........KLLK
-TKQTK............YZZZZZZZZZZZZZZZZZZZZZY.....SSSS....YZZZZZZZZZZZZZZZZZZZZZY............U...PTQL
-LTTKP..N.........YZZZZZZZZZZZZZZZZZZZZZY.....SSSS....YZZZZZZZZZZZZZZZZZZZZZY................KKKQ
-KKQT.......N.....YZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSS...LYZZZZZZZZZZZZZZZZZZZZZY....L...........KKKT
-QKQL.....T.......YZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSS....YZZZZZZZZZZZZZZZZZZZZZY...............LQLLL
-LTQL.JJ..........YZZZZZZZZZZZZZZZZZZZZZSSSSSSSSSS.JJ.YZZZZZZZZZZZZZZZZZZZZZYT.............QQTKKQ
-LKKLJJJJJ........YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.JJJYZZZZZZZZZZZZZZZZZZZZZYJJJJJJ........KPKLLL
-TTKPJJJJJ........YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.JJJYYYYYYYYYYYYYYYYYYYYYYYJJJJJJJ.......KPLQQK
-QKKKJJJJJ.N.R.T..YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.JJJJJJ...................JJJJJJJJM......LQTLLK
-PLKPJJJJJ........YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.JJJJJMJ..........R..........JJJJJJJJ....KKTTKK
-KLLQ......U......YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.JJXJJJbJJJJ........T............JJJJ....TPQKLQ
-QQPK......JJJJJJ.YZZZZZZZZZZZZZZZZZZZZZYJJJJ.SSSS.JJJJJJJJJJJJ....................JJJJJ...KKKTPP
-LTPQN.....JXJJJJJYZZZZZZZZZZZZZZZZZZZZZYJJJJJ.SSSS.JJJJJJJJJJJJ..........L......U.JJJJJJ..KPKKKT
-TKTL....L.JJJJbJJYZZZZZZZZZZZZZZZZZZZZZYJJJJJ.SSSS.JJJJJXJJJJJJ...................JJJJJJ..TQPPLT
-TKKL......JJJJJJbYZZZZZZZZZZZZZZZZZZZZZYJJJJJ.SSSS.JJJJJJJJJJJJ...................JJJJJJ..QPKLKQ
-TTLK.....T.JJJJJXYYYYYYYYYYYYYYYYYYYYYYYJJJJJJ.SSSS.JJJJJJJJJJJ...................JJJJJ...TQKLPK
-TLQK..........JJJJJJJ..R.......R...JJJJJJJJJJJ.SSSS.JJJJJJJJJJJ.............U.LL..JMJJJ...PKPLKQ
-KLLK...........JJJJJJJ...............JJJJJJJJJJ.SSSS.JJJJJJJJJJJ..................JJJJJ...TKLKKK
-TPQL...........JJJJJJJJ.............L..JJJJJJJJ.SSSS......J.......JJJ..N..........JJJJJ...KLKLTQ
-PQTL............JJJJJJJ...........L....JJJJJJJJ..SSSS.......TTaNT.JJbJ.R..........JJJV....QKKQQP
-KPKQ...........JJJJJJJJJ...............JJJJJMJJ..SSSS....L..T...T.JJJX.....T......JJJJ....PLKLKL
-PQQL...........JJJJJMJJJJJJ..U.........JJMJJJJJ...SSSS....L.....a.JJJJJ.....T......JJJ....LPTPLK
-PQTQ.U........JJJJJJJJJJJJJL...........JJJJJJJJJJ.SSSS....J.N...N.JJJJJ..........N.....N...KQTPP
-LPLP.....TJJJJJJJJJJJJJJJJJ............JJJJJJJJJJJ.SSSS...J.TTaNT.JMJJJMJJ.................QTLLP
-KQLP......JJJJJJJJJJJJJJJJJJ...L.......JJJJJJJJJJJ.SSSS...J.......JJJJJJJV.....T............KTTT
-PQKT.....JJJJJJJJJJJJJJVJJJJ..R........JJJJJJJJJJJ..SSSS..JJJJJJWJJXJJJJJJ.U....L...........KLKT
-KTQL......JJJJJJJJJJJJJJJMJ............JJJJJJJJJJ...SSSS...JJJJJJJJMJJJJJJ......T...........KPKT
-KTTP..T...JJJJJX....XJJbJJJ.........N..JJJJJJJJ......SSSS.......MJJJJJJ....................KTKLP
-PPKK.......JJJ..........J.....UN...R..JJJJJJJ.....L..SSSS........................L.......JMTTKPL
-KPTQU................R............JJJJJJJJJJJU...N....SSSS...........................T..JJJLKKKQ
-TLLK.........................JJJJJJJJJJJJWJJ.....L....SSSS..............................JJJTKQLK
-PLLP...R......L..............JJJJJJJJJJJJJJJ..........SSSS..............................JJJQPLKP
-PLLP.........................JJJJVJJJJJJJJJJ..........SSSS.....L........................JJJLQKLK
-QQKLR........................JJMJJJJJJJJJJ.....N......SSSS....L..R.........U....U........JJLKQKK
-TQPK..........N.............JJJJJJJJJJJJ..........U..SSSS..................................QLKKT
-PLLL.......................JJJJJJJJJJJJJ.............SSSS........JJJ........................QLPL
-KQTP.......................JJJJJJJJJJJJJ.........R..SSSS........JJJJJ.U..U................NRPKTP
-KTKF......................JJJJJJJJJJJJJRL......JJ...SSSS.......TJJJJJ..........L........T.EETTLK
-PPPP...........L....T.....JJJJJJJJJJJJVJ.......JJJ.SSSS.......U.JJJJJ....................EEELLPQ
-TPTL..E.........T.E.R..JJJJJJJJJJJJJJJJJ......JJJ.SSSS........RJXJJJEEEL............EE...EEEABQP
-KTKT.EEE...EEE...EIEJJJJJJJJ.DEEJJJJJJJJR....JJJJ.S;SS......JJJJJJJEEEEE......E....EEGEEEEEECBBP
-TLKLNEEEL..EEE..JEEEJJJJJJEEEEEEEEEJJJJE.....J;J.;S;S.....JJJJJEFEEEEEEEE.T..EEE...EEEEEEEEEFCBA
-BFFDE....EEEEEEJJEEEEJJJJEEEEEEEEEEEJJEEE...;;;;;;;c.....JJJJJEEEEEEEEEEHE...EEEEEEE.EEEEEEEADBA
-FAFDE...EEEEEEEJEEEEEEEEEEEEEEEEEEEEJEIEE...;;;;;;;;E...JEIEEEIEEEEEEEEEEE..EEIEIEEE..EEEGEEBAAB
-BAAFEEEEIEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE.E;;;;;;;;EE..EEEEEEEEEEEEEEEEEEE.EEEEEEIEEEEEEEEEBADC
-BCFAEEEEEEEEEFEEEEEIEEEEEEEEEEEEEEEEEEEEEFEE;;;;;;;;EEEEEEEEEEEDEEEEEEEEEEEEEEEEEEEEEGEEEEEEAFDB
-ADAAEEEEEEEEDGEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEDFACD
+LLLLK...........JJJJJJJJJJJJJJJJJJJJJJJJ..........SSSS.JJ........JJJJJJJJJJ.......JJJJJ.....TLTT
+LQQKK...........JJJJJJJJJJJJJJJJJJJJJJJJ..........SSSS.JJ........JJJJJJJJJJ.......JJJJJ.....TTPL
+PKLKQ........L..JJJJJJJYJJJXJ...JJJJJJJ...........SSSS.JJ..............JJ..........JJW.N....PTKK
+LPQT.JJJJ.......JJJJJJJJXJJJ......JYJJN...........SSSS.JJJ................................QTKTQK
+LKQKJJJJJJJJJJW....UJJJJJJJJ......................SSSS.JJJJJJ................JJJJ.........QTPQLK
+PPLKJJJJJJJJJJJJ....JJJJJJJJ.............N........SSSS.JJJJJJJ..............JJJJJ.......LJKQKLKK
+LPLTMJJMJJJJJJJJ....JJJJJJJJ..TTZNT...............SSSS.JJJJJJJJ........L....JJJJJ.......JJLLTKQL
+LPQKJJJJJJJJJJJJ..R..JJJJJJ...T...T..............SSSS.JJJJJJJJ..............JJJJJL....U.JJKQTKPP
+KTTLJJJJJJJJJJJJ......JJJJJ...Z.....N.........N..SSSS.JJJJJJJX..L...........JJJJJJ......JJKQKTQT
+TQKKJJJJJJJJJJJ........R......N...N...........JJJ.SSSS.JJJ..............L...JJJJJJ.....JJJJPTLKQ
+KPPLJJJJJJJJJJW...............TTZNT..........JJJJ.SSSS.JJ.....T.............JJJJJJJJJJJJJJJKTPPT
+KKLKJJJJJJJJJJJ.............................JJJJJ.SSSS.JJ...................JJJJJJJJJJJJJJJQKKTK
+PLPKJJJJWJJJJMJ...........................JJJJJJJ.SSSS.JJ...................JJJJJJJJJYJJJJJPTKTP
+PKQQJJJJJJJJJJJ............................JJYJJJ.SSSS.JJ......L...N........JJJJJJJJJJJJJJJPTKPT
+LKLPJJJJJJJJJJJ..............................JJJJ.SSSS.J....................JJJJJJJJJJJJJJJTKQLQ
+LLTTQ.R..JJJJJ....................................SSSS......R....N...........JJJJJJJJJVJJYJLKQQK
+QLQKK......JJJ....................................SSSS.......................JJJJJJJJJJJJ..PKKKP
+KKKPTK.............................................SSSS..........JJ...........JJJJJJJJJJ...KQKKK
+TLKLPL.............................................SSSS..........XJ...........JJJJJJJJJJ...QKPTL
+KKQQKT........T............................N.......SSSS..........JJ...........JJWJJJJJJJ...TPTKP
+TQLTQ.........U....................................SSSS......................JJJVJJJJJJJ...KQKQT
+TQQKQ..............................................SSSS......N.......LN......JJJJJJJJJJ....PKLLQ
+PTQP..........................................L....SSSS..................N..JJJJJJJJJ...N.LQQPKQ
+PKKKJJJJ.L.N.U...........................SSSSSSSSSSSSSS..........L.........JJJJJJJ........PKKLKL
+QKKLJJJMJ................................SSSSSSSSSSSSSS.................L.JJJJJJJJ.L......PLKTLK
+QLTKJJJJ......L..........................SSSSSSSSSSSSSS...................JMJJJJJ........RKLLTTP
+KKLLL......U.......................................SSSS....................JJJJJJ.........KQKKKT
+KPKLQ.....L...............................RL.......SSSS...........J........JJJJJJ.........QQTKLP
+KTLKL..............................................SSSS..........JJJJ.......JJJJ..........QTLTKT
+LPLQQ........U.....................................SSSS.....L....JJJJ.....L.JXJJ.........JKLKKPQ
+KTLLP.............................................SSSS.J.........JJJJ.......JJJJ..U......JTPTKTP
+TKPKK..L....................................L.....SSSS.J.......N.JJJJ........JJJ..........PKTKLQ
+LPTTQ.............................................SSSS.J.........JMJJJ....................KLTTQQ
+PPKLQ.N...................................JJR....SSSS.JJ.........JJJJJL.................R.QLQQKL
+QPLKK.....R...............................JJL....SSSS.J............JJJWJJJ.................PKLTQ
+KKQQT.....................................JJ....SSSS..J.L....TTZNT..JJJJJJ.................KQPQT
+TKKKP.....................................JJ...SSSS...J......T...T..JJJJJJ.................QPQPL
+PTLKQ.....................................JJ...SSSS..............Z..JJJJJJ.................PKQLK
+KKLP....................L............N..JJJJ..SSSS...........N...N..JJJJJJ................RLQKTK
+KLQQ.......JJJJ..........................JJJ.SSSS.........RL.TTZNT.JJJJJJJJ.L..........N.T.PLKLP
+LTKL......JJJJJJ.........................MJJ.SSSS.......................................JYJKKTLP
+QPLK......JJJJJJ..L...........N.....T....JJ.SSSS.......................................JJJJTPTTL
+KKKK.....JJJJJJJ.......L.......L.........J.SSSS........................................JJJJQKKKT
+LTTK.....JJJJJJJ..............U..........J.SSSS.....T..................................JJJJQTLTP
+KTKL.....JJJJJJJ...................L......SSSS...T..................................N.JJJJJPLPTT
+KQKL....JJJJJJJJ...........L.............SSSS.....................................JJJJYJJJJKLKQK
+QLQPKJJJJJJJJJJ..............JJM.........SSSS...................................JJJJJJJJJJWQKKKT
+LKLPLJJJJJJJJJJ..............JJJ........SSSS....................................JJJWJJJJJJJPTQQL
+PPTQPMJJJJJJJJJ.N............JJJ.R.N....SSSS....................................JJJJJJJJWJJQLKTQ
+TQKKKJJJJJJJJJJ.R.U..........JJJ.......SSSS.....................................JJJJJJJJJJJTKKLK
+PLQTLJJJJJJJMJJ................R.......SSSS.....................................JJJJMJJJJL.LQKQL
+QPLPKL...JJJJJJJ........N..............SSSS....L................................JJJJJJJJ..LKPPPQ
+KQQKLK....JJJJJMJJJJJ..................SSSSSSSSSSSSSSS...........................JJJJYJ...PQTPQP
+PQLLQK.....JJJJWJJJJJJJJJJ............SSSSSSSSSSSSSSSS...........................JJJJJJ...KTKPLQ
+TLQPKP..N.NJJJJJJJJJJJJJJJ............SSSSSSSSSSSSSSSS............................JJJJ....KPPPTK
+LQPLT.U....JJJJJJJJJJJJJJJ...N........SSSS....U...................................JJJJJ...TPKTKL
+LLKLL.....JJJJJJJJJJJ......T..........SSSS...L.R..................................JJJJJ....QKLTP
+LKKTT....JJJJJJJ...........L.......JJ.SSSS........................................JJJJJ....KKLKL
+QQKLP....JJJJMJJ..L........L.....JJJJJ.SSSS.......................................JJJJJ....TKKPQ
+KKLPJ...JJJJJJJ.................JJJJJJ.SSSS.......................................JJJJJ.....LQKT
+QLPLJ...JJJJJJJ...............JJJJJJJJ.SSSS.......................................JJJJJ.....PKQK
+KKQPJJ.JJJJJJJJ.....T..........JJXJJJJ.SSSS......T................................JJJJJ....PKLTT
+PTKQLJJJJJJJJJJ..................JJJJJJ.SSSS......L...............................JJJJJJ...KKPKK
+KKPQPJJJJJJ.N....................JJJJJJ.SSSS.....................................JJJJJMJJJJKPKLK
+PQKQQ.............................JJJJJ.SSSS....................................JJJJJJJJMJJKKKQQ
+KQLPK.............................JJJJJJ.SSSS...................................JJJJJJJJJJKKKPKL
+KPQTK.............................JMJJJJ.SSSS...................................JJJJJJJJJJPKPKTK
+KKQQT.............................JJJJJJ..SSSS.................JJJJJJJJJJJJJJJJJJJJJJJJJJJQLTKPL
+QKPPT............................JJJJJJJ..SSSS.................JJJJJJJJJJJJYJJJJJJJ..JJJJJQKLKQQ
+TQPKQ................................JJJ..SSSS..................JJJJJJWJJJJJXJ........JJJJJKQKLK
+KQTL...........................TTZNT.JJJJ..SSSS.JJ..............JJJJXJJJJJJM....L......JJJJLPKPT
+KPQT...........................T...T.JJJJ..SSSS.JJJ.T............JJJJJJJJJJJ............JJJKLKQQ
+LLKQ...........................Z......T....SSSS.JJJ..............JJJJJJJJJJJ............JJJLPKTQ
+LLPQ...........................N...N.JJJJ...SSSS.JJ..............JJJJJJJJJJJ........N.R.VJJKPPQP
+KKKP...........................TTZNT.JJJJJJ.SSSS..................JJJJJJJJJJ....L........JJQKPKK
+KPLKL................................JJJJJJ.SSSS.....JJJ.....L......JJJJJYJJ..............TLKLPT
+KKPPK.........................SSSSSSSSSSSSSSSSSS....JJJJJ......U.....JJJJXJJ.R....JJJJJ...PQPPQK
+PTLKL.........................SSSSSSSSSSSSSSSSSS...TJJJJJ............JJJJJJJ......JJJJJJ..QKQQTQ
+QLQLT.........................SSSSSSSSSSSSSS.SSSS...JJJJJJ...........JJJJJJJ.....JJJJJJX..TTKQQK
+KKLKT..............................N...JJJJJ.SSSS...JJJJJ............JJJJJMJ.....UJJJJJ...QQPKTL
+TQKPP...............................L..JJJJJ.SSSS..R.JJJJ....N.......JJJJJJ...............QTLTPK
+KTPPP........................................SSSS........R..........JJJJJJ.................KLQLL
+QTQTP........................................SSSS....T......N..JJJJJJJ......................PPQK
+TKLQL........................................SSSS............JJJJJJJJR.......R..............KLLK
+TKQTK........................................SSSS...........JWJMMJJJM.......................PTQL
+LTTKP........................................SSSS...........JJJJJ...........................KKKQ
+KKQT.........................................SSSS...........................................KKKT
+QKQL.........................................SSSS..........................................LQLLL
+LTQL................................JJJJJ..J.SSSS.JJ.....L.................................QTKKQ
+LKKL...............................JJJJJJJJJ.SSSS.JXJJ.....................................PKLLL
+TTKP...............................JJJJJJJJJ.SSSS.JJJJJ....................................PLQQK
+QKKKJJJJJ.....L.................R..YJJJJJJJJ.SSSS.JJJJJJ..T................................QTLLK
+PLKPJJJJJ..........................JJJJJJJMJ.SSSS.JJJJJMJ...N..............................KTTKK
+KLLQ.T............................JJMJJJJJJJ.SSSS.JJJJWJJJJJJ..............................PQKLQ
+QQPK.L....JJJMJJ........T.........JJJJJWJJJJ.SSSS.JJJJJJJJJJJJ.............................KKTPP
+LTPQ.....LJJJJJJJ.................JJJJJJJJJJJ.SSSS.JJJJJXJJJJJX............................PKKKT
+TKTL......VJJJJJJJJ...............JJJJJJJJJJJ.SSSS.JJJJJJJJJJMJ............................QPPLT
+TKKLL.....JJJJJJJJJ...............JJJJJJJJJJJ.SSSS.SSSSSSSSSSSSSSS.........................PKLKQ
+TTLK.......MJJJJJJJJ..............JJJVJJJJJVJJ.SSSSSSSSSSSSSSSSSSS.........................QKLPK
+TLQK..........JJJJJJJ..............VJJJJJJYJJJ.SSSSSSSSSSSSSSSSSSS.........................KPLKQ
+KLLK...........JJJJJJJ....U..N.......WJJJJMJJJJ.SSSS.JJJJJJJJJJJ...........................KLKKK
+TPQL...........JJJJJJJJL...............JJJJJJJJ.SSSS......J................................LKLTQ
+PQTL......L.....JJJJJJJT.............T.JJJJJJJJ..SSSS..N....TTZNT..........................KKQQP
+KPKQ.N..R......JJJJJJXJJ...............JMJJJJJJ..SSSS.......T...T..........................LKLKL
+PQQL...........JJJJJJJJJJJJ............JJJJJJJJ...SSSS..UN......Z..........................PTPLK
+PQTQ..R.......JJJJJJJMJJJJJ............JJJJMJJJJJ.SSSS....J.N...N..........................KQTPP
+LPLP..LU..JJJJJJJJJJJJJJYJJ............JJJJJJJJJJJ.SSSS..UJ.TTZNT..........................QTLLP
+KQLP..N...JJJJJJJJJJJJJJJJJJ.....T.....JJJJJJJJJJJ.SSSS...J.................................KTTT
+PQKT.....JJJJJJJJJJJJJJJJJJJ..U.......LJJJJJJJJJJJ..SSSS..JJJJJJJ...........................KLKT
+KTQL......JJJJJJJJJJJJYJJJJ..L.........JJJJJJJJJJ...SSSS...JJJJJJ...........................KPKT
+KTTP......JJJJJJ....JJJJJJJ............JJJJJJJJ......SSSS.......J..........................KTKLP
+PPKK.......JJJ........T.J.............JJJJJMJ........SSSS..................................TTKPL
+KPTQ...............R..............JJJJJJJJJJJ.L.......SSSS.............N.....L..R.......JJWLKKKQ
+TLLK....U....................XJJJJJJJJJJJJJJ..........SSSS................U.............JJJTKQLK
+PLLP.........................JJJJJJJJJJJJJJJ..........SSSS..............................JJJQPLKP
+PLLP.........................JJJJJJJJJJJJJJJ..........SSSS................R...........U.JWJLQKLK
+QQKL...............NR........JJJJJJJJJJJJJ............SSSS.......RL.............T........JJLKQKK
+TQPK.....L........T.........JJJJJMJJJJVJ.............SSSS........T..............U..........QLKKT
+PLLL.......................JJJJJJJJVJJJY.............SSSS........JJJ.............R.N......L.QLPL
+KQTP.......................JJJJJJJJJJWJJ........L...SSSS........JJJJY.......................PKTP
+KTKF............N......N..JMJJJJJJJJJJJ........JJ...SSSS........JJJJJ..............T......EETTLK
+PPPP.T....................JJJJJJJJJJJJJJ.......JJJ.SSSS.........JJJJJ....................EEHLLPQ
+TPTL..E...........E....JJJJJJJJJJJJJJJJJ......JJJ.SSSS.........JJJWJEEE......U...U..EE...EEEABQP
+KTKT.EEE.U.IEE...EEEXJJJJJJW.EEEJJJJJJJJ.....JJJJ.S;SS......JJJJJJJEEEEE......E....EEEEEEEEECBBP
+TLKL.EEE...EEI..JEEEJJJJJJEEEEEEFEEJJJWE.....J;J.;S;S.....JJJJJEEEEEEFEEE....EEE..LEEEEEEEEEFCBA
+BFFDE....EEEEEEJXEEEEJJJJEEEEEEDGEEEJJEEE...;;;;;;;a.....JJJJJEEEEEEEEEEEE...EEEEEEE.EEEEEEEADBA
+FAFDE...EEEEEEEJEEEEEEEEEEEEEEEEEEEEJEEEE...b;;;;;;;E...JEEEEEEDEEEEEEEEEE..EEEEEEEE..EEEEEEBAAB
+BAAFEEEEFDEEEEEGEEEEEEEEEEEFEEIEEEEEEEEEEE.Ec;;;;;;;EE..EEEEEEEEEEEEEEEEEEE.EEEEEEEIEEEEEEEEBADC
+BCFAEEEEFEEEEEEEEEGEEEEEEEEDEEEEEEEEEEEEEEIE;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEDEEFEEEEEEEEEEEAFDB
+ADAAEEEEEEEEEEEEEEEEEEEEEEEEEEEEIEEEEEEIHEEE;;;;;;;;EEEEEEEEDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEDFACD
 DABBEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEBACAB
 FADDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEAACFA

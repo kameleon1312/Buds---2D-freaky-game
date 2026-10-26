@@ -6,15 +6,13 @@ base = #86c95a
 spawn = 75,40
 
 [legend]
-d = dzialka
-b = dzialka + dzialka-post !
-N = forest
+M = forest
 C = forest !
 A = forest + bush-a !
-e = forest + bush-b !
-W = forest + krzak-jagody !
-c = forest + pien !
-a = forest + rock-a !
+Y = forest + bush-b !
+e = forest + krzak-jagody !
+Z = forest + pien !
+W = forest + rock-a !
 L = forest + sosna !
 K = forest + swierk !
 D = forest + tree-a !
@@ -22,32 +20,31 @@ B = forest + tree-b !
 . = grass
 F = grass !
 I = grass + bush-a !
-R = grass + bush-b !
-P = grass + krzak-jagody !
-Q = grass + pien !
-V = grass + rock-a !
-f = grass + sign !
+V = grass + bush-b !
+R = grass + krzak-jagody !
+T = grass + pien !
+N = grass + rock-a !
+c = grass + sign !
 E = grass + sosna !
 H = grass + swierk !
 J = grass + tree-a !
 G = grass + tree-b !
 , = grass2
-O = grass2 + bush-a !
-X = grass2 + bush-b !
-S = grass2 + krzak-jagody !
-Y = grass2 + pien !
-T = grass2 + rock-a !
-M = grass2 + sosna !
-Z = grass2 + tree-a !
-U = grass2 + tree-b !
+P = grass2 + bush-a !
+O = grass2 + bush-b !
+Q = grass2 + krzak-jagody !
+X = grass2 + pien !
+S = grass2 + rock-a !
+b = grass2 + sosna !
+U = grass2 + tree-a !
+a = grass2 + tree-b !
 - = path
-g = path + sign !
+d = path + sign !
 
 [ground]
 forest : forest : 2 : 0.45 #4f9a44, 0.62 #3f8a3a
 grass2 : grass2 : 2.2 : 0.3 #74b94f
 path : path : 1.3 : 0.36 #d1b07a, 0.48 #e3c896
-lawn-dzialka : dzialka : 1 : 0.45 #6fae4c, 0.5 #84c25c
 
 [scatter]
 grass : 0.06 : flowers-a|flowers-b|tuft|tuft|liscie-a
@@ -77,93 +74,93 @@ AAABCDCBEFGEFHEIEGEHIEFHJFJJFFFIJIFFJFFFEGHFGGHIHFJFJIGIFFEHFHEFIFIEIIEFHIJFEHFH
 CBDDACLDHFGGEIEGJEHFIJFFHGGEFFHIEFHIEJIIEIHIHFEGFEFEEEGGHEIJIIFEGGFJIFFHHFEGHHHFHHJFEGFEFGJHFFFEGGEJFFFIEFFJFGGIIHFFFEGHGIEFGJFGHGIFEJJJFJGFKKDGJCDCLC
 KDCAACAKAGGFFIHHJJEEIGJFFFHJFGJJIEGEEGEJGFFFJGFEFIFHHHGHFHFGGFHJFJGJHFIEJFGIFFHEFFFFHGFFHHEIJIHGIEIEGJGGJHIFGFGIFGJFFGFHGIJJEHFFEGGFFJHIIFFEBDDEELCKBC
 CCACLCKLLKIFIEFGHFIGIHJGEIIFJHIFGJIFHGGHJIEJFHHIFHFJGFIFEIIFHFJGEJFFFHEJGEFJFGFJGIIFFHEJEEGFGGHJGJIHEGFFIHEEEFFFGHIEHFHGGIFHHIFFFGHFEFFIGEFKABCEIHBLAL
-CBBDBLLCLHFFHEFF,,,,M,JIHEH,,,,,,,.....HEGHJHFHGFIHFI,,.FGJFGFJEFGEIFFGJHJEFFE..........,,,JFIFIJGIFI.....IFGJHEFFFGF......,FIIEEIIHEHFIFIIJKBAKFKKCCD
-NNNNCLBBEFG...,,,,,,,O.....,,,,,,,......,,,,,,,,,M,.......P....J.,,,,,,,,,,,..........,,,,,,,,,O,,,....................P....,,,,,.........E..LADBLCCKN
-NNNNNNNNJ.....,,,,,,,,P....,,,O,,,Q..I..,,,,,,,,,,..........J.....,,,,,,,,,,..........,,,,,,,,,,,,,...............G....R....,,,S,...........ENLNNNNNNN
-NNNNNNNN......,,,,,T,S.....M,,,,,,......,,,U,,,...................,T,,,,,,,..........,,,,,,,,,,,,,,V........................,M,,,.....Q.......NWNNNNNN
-NNNNANN.......X,,,,,,.......,,,,,,.......,,,........................,,YZ,,....J....,,,,,,,,,,,,,,,,,,.......................,,,,,........V.....NNNNNNN
-NNNNNN...E.I.Z,,,,,,,...P...,,,,,,,,,,,........Q.............Q..G..................,,,,,Z,,,,,,,,X,,,Y,,.....P................I....V.......I.R.NNNNNNN
-NNNNNN.....,,,,,,,,,,....IP.,,,,,,,,,,,,.........J.................................,,,,,,,,,,,,,,,,,Z,,,,........J.R...,,,,.......,,,,,,,,,,,,,NNNNNNN
-NNaNNNN....S,,X,,,,,.........,,,,,X,,,,,..............bbbbbbbbbbbbbbbbbbbbbbb......,,,,,,,,,,,,,,,,,,,,,,.......J.....,,U,,.......,,,,,,,,,,,,NNcNNNNN
-NNNNNNN....,,,,,,..............,,,,,,,,,.I..R.........bdddddddddddddddddddddb....V.,,,,,,,,,,,,,,,,,,,,,,R............,,,,,.......,,,,,,,,,,,,NNNNNaNN
-NNNNNNN.....,,,........Q........,,,,,,,,..............bdddddddddddddddddddddb......,,,M,,,,,,,,,,,,,,,,,,Q............,,,,,....V.E,,,,,,,,,,,,NNNNNNNN
-NNNNNNNN..E....................R.,,,,,,............GV.bdddddddddddddddddddddb.E..R.,,,,,,T,,,,,,,,,,,,,,,.G............,,,..J.....,,,,,TU,,,,,,NNNNNNN
-NNNNNNNN.PJ............,,,........,,,,,........G......bdddddddddddddddddddddb..V..V.,,,,,,,,,S,,,,,O,,O,...........J.....J.......,,,,,,,,,,,,,,..NNNNN
-NNNNNNaN........J.....,,,,,...I....,,,................bdddddddddddddddddddddb......V.....Gbbbbbbbbbbbbbbbbbbbbbbb............,,,,,,O,,,,,,,,,,.NNNNNNN
-NNNNNNNNNN.....Q.G....,,,,,........,,,.........,,,....bdddddddddddddddddddddb.E...........bdddddddddddddddddddddb..Q........,,,Y,,,...,,,,,,,NNNNNNNNN
-NNNNNNNNNN............,,,,,......G..,..........,,,....bdddddddddddddddddddddb.............bdddddddddddddddddddddb...........,,,,,,,....,,,,,,NNNWNNaNN
-NNNNNNNNNN............,,,,,........,U,..E......,,,....bdddddddddddddddddddddb.............bdddddddddddddddddddddb...........,,O,,,..R..,,,M,NNNNNNNNNN
-NNNNNNN,N.............,,,,..V.....P,,,..........,.....bdddddddddddddddddddddb........R.QV.bdddddddddddddddddddddb...Q.......,,,,,O.....S,,,,NaNNNNNaNN
-NNNNNN,,,..............,,..........,,,................bdddddddddddddddddddddb.............bdddddddddddddddddddddb..Q........U,,,,.......,,,,NNNNNNNNNN
-NNNNNN,,,,........................,,,,,...............bdddddddddddddddddddddb......,,.....bdddddddddddddddddddddb...........,,,,,.......,,,,WNNNNNNNNN
-NNNNNNN,,,..J...,,,,,....R..bbbbbbbbbbbbbbbbbbbbbbb..,bdddddddddddddddddddddbX,,,,,,,,....bdddddddddddddddddddddb............,,,,......V,,,,,,NNNNNNNN
-NNNNNNNO,,..R..T,,,S,.......bdddddddddddddddddddddb..,bdddddddddddddddddddddb,,,,,,,,,....bdddddddddddddddddddddb............,,,.......Q,,,,,,JNNNBNNN
-NNNNNNN,,,.....,,M,,,,I.....bdddddddddddddddddddddb..,bdddddddddddddddddddddb,,,Y,,,,.....bdddddddddddddddddddddb......I.....,,,......I.,,,,,,.NNeNNNN
-NNNNNDNNZ,.V....,,T,,,......bdddddddddddddddddddddb...bdddddddddddddddddddddb.....RE......bdddddddddddddddddddddb,,.........R,,,........,,,,,...NNNNNN
-NNNNNNNN,.......,,X,,,......bdddddddddddddddddddddb...bdddddddddddddddddddddb............,bdddddddddddddddddddddb,X,...R.....,,,..........N......NNNNN
-NNNNNNNN,.......,,,,,,......bdddddddddddddddddddddb...bdddddddddddddddddddddb...........,,bdddddddddddddddddddddb,,,X..E........................NNNNNN
-NNNNNNNN,.......,,,,,.......bdddddddddddddddddddddb...bdddddddddddddddddddddbR..........,,bdddddddddddddddddddddb,,S,O................I......NNNNNNNNN
-NNNNNNNN,...G...,,,,,.IRPII.bdddddddddddddddddddddb...bdddddddddddddddddddddb.............bdddddddddddddddddddddb,,,,,.......................NNNNNNNNN
-NNeeNNNL........,,,,,.R,,,R.bdddddddddddddddddddddb,..bdddddddddddddddddddddb.......IRPII.bdddddddddddddddddddddb,,,,,,......Q..V....G.......WNNLNNNNN
-NNNNNNNNN....P....,,..P,,,P.bdddddddddddddddddddddb,..bdddddddddddddddddddddb.......R,,,R.bdddddddddddddddddddddb,,,,,,,,,.I...G..E.............NNNNNN
-NNNNNNNNNN....V.......I,,,I.bdddddddddddddddddddddb,,,bbbbbbbbbb---bbbbbbbbbb.......P,,,P.bdddddddddddddddddddddb,,,,,,,,,,,,,,,.........,,......NNNNN
-NNNNNNNNNN............IR.II.bdddddddddddddddddddddb,,,,,Z,,.....---.................I,,,I.bdddddddddddddddddddddb,,,,,,,,,,,,,,,,......,,,M,,...NNaNNN
-NNNNNNNNN...................bdddddddddddddddddddddb,,,,,,,,,,,..---.................IR.II.bdddddddddddddddddddddb,,,O,,,,,,,,,,T,,,...,,,,,,,..LNNNNNN
-NNNNNNNN.R.....E.J....R...I.bdddddddddddddddddddddb,,,,,,,,,,,..---.............P.........bdddddddddddddddddddddb,,,,,,,,,,,,,,,,,,...,,,,,,,.RNNANcNN
-NNNNLNN.Q...................bdddddddddddddddddddddb,,,,,,,,,,,I.---......................,bdddddddddddddddddddddb,,,,,,,,,,,,,,,,,....Z,,,,,,.NNNNNNNN
-NNNNNN.......E.......P......bdddddddddddddddddddddb,,X,,,,M,,,S.---....-----.............,bbbbbbbbbb---bbbbbbbbbb,,,,,,XO,,,,,..J.....R,,,,,NNLNNNANNN
-NNNNNN.......R..P...J...P...bdddddddddddddddddddddb,,,,,UXU,,,,,----------------.........,,,...V....---..................................,NNNNNNNNNNNN
-NNNNNN........E..........I..bdddddddddddddddddddddb.M,,,,,,,U,,..------------------.....,,,O,.......---.........................I...........DBNNNNNNNN
-NNNNN......,,M.......P......bdddddddddddddddddddddb.,,,,,,,,,,.----------------------...,,,,,.......---P.......................................,NNNNNN
-NNNNN......,,,..............bdddddddddddddddddddddb.,,,M,,,,..---------.....------------...,,.......---....,,...GQ....P.G.....................,,NNNNNN
-NNNNN......,,,..E...........bdddddddddddddddddddddb.,,,,O,,.---------...........-----------.........---.................................Q......MNNNNNN
-NNNNN.f.NNN,,......P........bdddddddddddddddddddddb.,,,,,..------.---,.............-------------....---.................................E......WNNNNNN
-NNNNN...NNNN..........P....,bbbbbbbbbb---bbbbbbbbbb..,,,.------...---..,,,...........----------------------------..........RG.............J....NNNNNNN
------------......J.......,,,,,,,,...I.---,,,,R..........------....---..,,,U,............----------------------------......................R...--------
------------............,.,,,,,,,,.....---,,,X....J....------......---..,,,,,,,,............---------------------------.........EP.............--------
------------............,...,,,,,,.....---,,,,........------.......---..,,,,,,,,.............---.------------------------.......................-------
-------------.............--...........---,,,,......------.........---..,,T,,,,.....P........---..................---------.......G....V.......--------
-NNNNNNNN---------------------------...---.......--------..........---.........I.......P.P...---.................,...--------................--N-NNNNNN
-NNNNNNN-----------------------------------------------....V.......---....J..................---....P............,,,,..--------.............-NNNg-NNNNN
-NNNNNNNNN--------------------------------------------.............---..................,,,,U---................G,,,,,...--------.........-----NNNNNNNN
-NNNaNNNNNNN.-------------..------------------------.....E.........---E........V...bbbbbbbbbb---bbbbbbbbbb.......,,,,,.....--------.....-------.NNNNNNN
-NNNNNNWNNNNN.............,,.---....-------------...,....bbbbbbbbbb---bbbbbbbbbb...bdddddddddddddddddddddb.......,,,,,.......----------------...NNNNNNN
-NNNNNNNNNNN.....,,,,,,,,,,,,---,,,,.............,,,.....bdddddddddddddddddddddb...bdddddddddddddddddddddb.......,,,,,.........-------------.,..NNNANNN
-NNNNNNN,....R....,,,,,,,,,,,---,,,,,,,........,,,,,.....bdddddddddddddddddddddb...bdddddddddddddddddddddb..R.....,X,.........,..---------..,.P.NNNNNNN
-NNNNNN..........R........V.,---,,,,,,,........,,,,,.P...bdddddddddddddddddddddb...bdddddddddddddddddddddb.....V.........Q.....,,..-----........NNNNNNN
-NNNNN............P..........---........G.....,,,,M,.....bdddddddddddddddddddddb...bdddddddddddddddddddddb.....................E..............J.NNNNNNN
-NNNNN.............bbbbbbbbbb---bbbbbbbbbb.P..,,,,,,.....bdddddddddddddddddddddb...bdddddddddddddddddddddb.....J.................................NNNNNN
-NNNNN...E.......R.bdddddddddddddddddddddbG...,,,,.......bdddddddddddddddddddddb...bdddddddddddddddddddddb.....V.....IR.II....G...................NNNNN
-NNNNNNN.P.........bdddddddddddddddddddddb....,,,,.IR.II.bdddddddddddddddddddddb...bdddddddddddddddddddddb....J.V....R,,,R.........Q...........N.NWNNNN
-NNNNNNNN....,.....bdddddddddddddddddddddb.....,,,.R,,,R.bdddddddddddddddddddddb...bdddddddddddddddddddddb...........P,,,P....................NNNNNBNNN
-NNNNNNNN....,.....bdddddddddddddddddddddbP....,,,.P,,,P.bdddddddddddddddddddddb...bdddddddddddddddddddddb.J.........I,,,I...,,,,,............NNWNNNNNN
-NNNNNNNN....,....Jbdddddddddddddddddddddb.....,,,.I,,,I.bdddddddddddddddddddddb...bdddddddddddddddddddddb...........IRPII..,,,,,,,,........P.NNNNNNNNN
-NNNNNNN....,,.G...bdddddddddddddddddddddbI....,,,.IRPII.bdddddddddddddddddddddb...bdddddddddddddddddddddb.................,,,,,,,,,,,..Q.....NNNNNNANN
-NNNNNN.....,,.....bdddddddddddddddddddddb.....,,,.......bdddddddddddddddddddddb...bdddddddddddddddddddddb..............,,,,,,,,T,,,,,,....P...NNNNNNNN
-NNNNNNN...R,,,....bdddddddddddddddddddddb.....,,,,,,,,,,bdddddddddddddddddddddb...bdddddddddddddddddddddb..............,,,,,,,,,,,,,,,V..P.....NNNNNNN
-NNNNNNDN...,,,....bdddddddddddddddddddddb......,,,S,,,,,bdddddddddddddddddddddb...bdddddddddddddddddddddb.......J.....,,,,,,,,,,,,,,,,..........NNNcNN
-NNNNNNNN..,,YY,...bdddddddddddddddddddddb..........,,,,,bdddddddddddddddddddddbR..bdddddddddddddddddddddb.............,,,,,,,,,,,,,,,,...........NNNNN
-NNNNNNNNQ.,,,,,...bdddddddddddddddddddddb.V.I.......,,,,bdddddddddddddddddddddb.P.bdddddddddddddddddddddb,,,T,,......,,,,,,,,,,,,Y,,,,...........NNNNN
-NNNNNNNN..,,,,,...bdddddddddddddddddddddb,,,........,,,,bdddddddddddddddddddddb.E.bdddddddddddddddddddddb,,,,,,,.....,,,,,,,,,,Z,,,,,,,..V......,NNNNN
-NNNNaNNN..,,,,,...bdddddddddddddddddddddb,,,,.......,,,,bdddddddddddddddddddddb...bdddddddddddddddddddddb,,,,,,,.....,,UZ,,,,,,,,,,,,,Z........,,,NNNN
-NNNNNNNN..,,,,,...bdddddddddddddddddddddb,,,..E.....,,,,bdddddddddddddddddddddb...bdddddddddddddddddddddbM,,,,,T.....,,,,,,,,,,,,,S,,,,........,,NNNNN
-NNNNNNNN..,,,,,G..bdddddddddddddddddddddb.,.........,,,,bdddddddddddddddddddddb.EGbdddddddddddddddddddddb,,,,,,T....,,,,,,,,,,,,,,,,X,.......NBN,NNNNN
-NNNNNNBN...,,,....bdddddddddddddddddddddb...............bdddddddddddddddddddddb...bbbbbbbbbbbbbbbbbbbbbbb.....V.,SM,,,,,,,,,,,..RG,,M.......NNNNNNNNNN
-NNNNNNNN..........bdddddddddddddddddddddb..E.E..,,......bbbbbbbbbbbbbbbbbbbbbbb.I.......,,,,,R...........QI.....,,,,,,,,,,,,................NNNNNNNaNN
-NNNNNNN.........,,bdddddddddddddddddddddb......,,,,.............,,,,,,,,,,..............,,,,,........I..........,,,,,,,,,,,...I.............NNNN,NNLNN
-NNLNNNI.........,,bdddddddddddddddddddddb.....,,,,,...G.........,,,,,,,,,,,...........JI,X,Z,,...............VI.,,,,T,,,,,,...V.............NNN,,NNNNN
-NNNNNN...........,bdddddddddddddddddddddb.....,,,,,..........R..,,,,,,,,,,,.............,,,,,..P..G.........P...T,,,,,,,,,...J.........J.....NNNNNNNNN
-NNNNNN.........R..bdddddddddddddddddddddb.R...,,,,Y,............,,,,,,,,,,,.............,S,,,...I.........I......,,,,,,,....P.........Q.......,NNNNeNN
-NNNNNN..........G.bbbbbbbbbbbbbbbbbbbbbbb....,,,,,,,,,,,........,,O,,,,,,,,,J..........,,,,,,....R...I.............G...........................NNNNNNN
-NNNBNNN.Q.......E....,,,,,,,.......,,,,,,TS,,,,,,,,,,X,,,...V...,,,,,,,,,,,,......E.E.,,M,,,,........P.........................................NNNNNNN
-NNNNNNNNN.............,,,,,.......,,,,,,,,,,Y,,,.,,,,,,,,,......,,,,,,,,,,,,.....R.,,,,,,,M,,.................................................NNNNNNNN
-NNcNNLNNNN............,,,,,.......,,,,,,,,,,,,,...,,,,,,,,.....,,,,,,,,,,,,,......,,,,,,,,,,,......................J.R.......................VNcNNNNNN
-NNNNNNNNcNN.....J....,,,M,,,P.J...,,,X,Y,,,,,,,...,,X,,,,,..JE..,,,,,O,,,,,,......,,,,,,,,,,,.V................G........E..............P......NNNNNNNN
-NNNNNN.GNWN..........,,,,,,,......,,,,,,,S,,,,.....U,,,,,,E......,,,O,,,,,,,.......,,,,,,,,,,.P.......Q.....Q..................................NNNNNNN
-NNNNN...NNNN.....G,,,,,,,,,,,........,,,,,,,,,.....,,,,,,............,,,,,,,,.....V....,,,X,..........Q..P.....G.EG..J.........................NNNNNNN
-NNNcNN..JNRE....,,,,,,,,,,,,,,,,.......,X,,,,.......,,,,,.............,,,,,Y,,,,........,,,,...J..............G.,,,O...........................NNNNNNN
-NNNNWNN...P.....,,,X,,,,,,U,,,,,,......,,,,,,.......,,X,,...G.........Z,,,,,,,O,,.........,.....................,,,,U.J.......Q...............NNNNNNNN
-NNNABDCI..G....,,EHJJGGGIEI,,,,,,FHIFFE,,,,,,.......,,,,,..J....HEEJEHFHHGJH,,,,GGIHJJII.............EF.J.......,,,,,.JJHIG.............I.....NNNNNNNN
+CBBDBLLCLHFFHEFF,,,,,,JIHEH,,,,,,,.....HEGHJHFHGFIHFI,,.FGJFGFJEFGEIFFGJHJEFFE.............JFIFIJGIFI.....IFGJHEFFFGF..G...,FIIEEIIHEHFIFIIJKBAKFKKCCD
+MMMMCLBBEFG...,,,,,,,,.....,,,,,,,......,,,,,,,,,,,..............,,,,,,,,,,,..............................................N.,,,,,............LADBLCCKM
+MMMMMMMMJ.....,,,,,,,O.....,,P,,QQ......,,Q,,,,,,,................,,,,,,,,,,..........................................E..I..,,,,,............MMMMMMMMM
+MMMMMMMM......,,,,,,,,...R.,,,,,,,......,,,,S,,...................,,,,,,,,,..G...........................................N..,,,,,.....N.......MMMMMMMM
+MMMMAMM.......O,,,,,,...E...,,,,P,.......,,,......E.T.........E.....,,,,,,..................................................,,,,,..J.......G...MMMMMMM
+MMMMMM...E.I.U,,,,,,,.R.....,,,,,,,,,,,...........G.............V...NN.........................................................R...............MWMMMMM
+MMMMMM.....,,,,,,,,,,..I...G,,,,,,,,,,,,...............................E.....J.........................................,,,,.V....V,,,,,,,,,,,,,MLMMMMM
+MMWMMMM....Q,,O,,,,,.........,,,,,,,,,,,.....V.........N....T.E.......................................................,,,,,......E,,,,,,,,,,,,MMMMMMMM
+MMMMMMM....,,,,,,.........V....,,,,,,,,,..........N......J.G.V........................................................,,,,,.......,,,,,,,,,,,,MMMMMMMM
+MMMMMMM.....,,,.....I...........,,,O,,X,..............G..............................................................G,,,,,.......,,,,,,,,,,,,MMYMMMMM
+MMMMMMMM..E......................,,,,,,........................N.R.................................................I...,,,........,,,,,,,,,,,,,MMMMMMM
+MMMMMMMM.RJ.........RR.,,,........,,,,,............J...........................................................J.................,,,U,,,,,,,,,,..MMMMM
+MMMMMMWM........J.....,,,,,........,,,...................J.,,,.........,,................................N..J................,,,,,,X,,,,,,,,,,.MMMMMMM
+MMMMMMMMMM.....T.G....,,,,,...............................,,,,,.......,,,,J...............................................E.,,,,,,,...,,,,,,XMMMMMMMMM
+MMMMMMMMMM............,S,,,...............................,,,O,...N...,,,,,.................................RG...........T..,,,,,,,....,,,,,,MMMMMMZMM
+MMMMMMMMMM............,,,,,.............................E.,,,,,.......,,,,,.................................V.I.............,a,,,,.....,,,S,MMMMMMMMMM
+MMMMMMM,M.............,,,,................................,,,,,...V.V.,,,,,.................................................,,,,,,.....,,,,,MMMMMMMMMM
+MMMMMM,,,..........R...,,................................,,,,,,........,,,,N................................................,,,,,...R...,,,,MMMMMMMMMM
+MMMMMM,,,,..............................................,,,,,,,....G...,,,,,..............................,,,,,,.........R..,,,,,.......,,,,MMMMMMMMMM
+MMMMMMM,,,..J...,,,,,.................................,,,,,,,,,........,,,,a,,............................,,,,a,,......J.....,,,,.......,,,,,,MMMMMMMM
+MMMMMMMP,,..V..S,,,,,.................................,,,,,,,,,......N..,,,,,,............................,,,,,,,............,,,........,,,,,,.MMMMMMM
+MMMMMMM,,,.....,,b,,,,................................,,,,,,,,,........,b,,,,,............................,,,,,,,............,,,........,,,,,,.MMMMMMM
+MMMMMDMMU,.N....,,S,,,.....................................,,..........,,,,,...............................,,,,,,,,........N.,,,.....I..,,bQ,...MMMMMM
+MMMMMMMM,.......,,O,,,...............................................,,,,,,..............................G.....,,,,O......N..,,,......E...M......MMMMM
+MMMMMMMM,.......,,,,,,..................................I........,,,,,,,,,S.....................................,,,,U.........E.........E.......MMMMMM
+MMMMMMMM,.......,,,,,...........................................,,,,,,,,,,,...................................T.,,,,,,...N........T.........TMMMDAMMMM
+MMMMMMMM,...G...,,,,,.IVRII.....................................,,,,,,,,,X,...............---...................,,,,,,T..............N...V...MMWMMMMMM
+MMYYMMML........,,,,,.V,,,V.....................................,,,O,,,,,,,.....N...IVRII.---,...N..............,,,,,,,......T.N.......I.....MMMMMMMMM
+MMMMMMMMM....R....,,..R,,,R......................................,,,,,,,,,......R...V,,,V.---,.......T..........,,,,,,,,,,J.....................MMMMMM
+MMMMMMMMMM....N.......I,,,I......................................................R..R,,,R.---..........I........,,,,,,,,bX,U,,,,.........,,......MMMMM
+MMMMMMMMMM.........V..IV.II...........................,,,,,.J........E.V....E.......I,,,I.---...........V.......,,,,,,,,,,,,b,,,,......,,,,,,...MMMMMM
+MMMMMMMMM..........E..................................,,,,S,,,I.....................IV.II.---...G...............,,,,a,,,,,,P,,,,,,,...,,,,,,,..MMMMMMM
+MMMMMMMM.V.....E.J....................................,,X,,,,,............................---..G...........R....,,,,,,,,,,,,,a,,,,,NG.,,,,,,Q..WMMMMMM
+MMMMLMM.T.............................................,,,,U,,,...........................,---R..G...G.........J.,,,,,,,,,,,,,,,,,,....,,,,,,,.MMMMMMMM
+MMMMMM.......E........................................,,,,,,,,S........-----.............,---......V........I....,,,,,,,,,,,,,.I.......,,,,,MMMWMMMMMM
+MMMMMM.......V..R...R.R...............................,,,,,,,,,,...-------------.........,---........................R.I.................,MMMMMMMMMMMM
+MMMMMM........E........R..............................,,,,,,,,,..------------------.....,,---........R......V.......V.......................MMMMMMMMMM
+MMMMM......,,b........................................,,,,,,,,.----------------------...,,---...........I...E...............I...V.....E..N.....,MMMMMM
+MMMMM......,,,......R.................................,,,,,,..---------.....------------..---..............,,..............R.......R..........a,MMMMMM
+MMMMM......,,,..E....T.................---............,,,,,.----------..........-------------................................................V.,ZMMMMM
+MMMMM.c.MMM,,...............,,,b,S,,O,,---,,.......J,,,,,..------..---.............-------------........................................R.J....MMMMMMM
+MMMMM...MMMM...............,,,,,,,.....---X,.........,,,.------....---.,,,...........----------------------------..................N...........MMMMMMM
+-----------......J.......,,,,,,,,.....G---,,,...........------.....---.,,,,,..R.I.......----------------------------...............T..........--------
+-----------............,.,,,,,,,,......---,,,.........------.......---.,,,,,O,,............---------------------------............I...........--------
+-----------............,...,,,,,,......---,,,........------......R.---.,,,,,,,,.................------------------------......T................-------
+------------.............--............---,,,......------........E.---.,,,,,,,...................................---------....................--------
+MMMMMMMM---------------------------....---......--------...........---........V.....I....R......................---.--------................--M-MMMMMM
+MMMMMMM-----------------------------------------------.............---....R......J....I...................V.....---,..--------.............-MMMd-MMMMM
+MMMMMMMMM--------------------------------------------............E.---............I....,O,P,,................G..---,,...--------.........-----MMMMMMMM
+MMMWMMMMMMM.-------------..------------------------................---...............,,,X,,,,,..................---,,.....--------.....-------.MMMMeMM
+MMMMMMeMMMMM.............,,........-------------...,.............I.---.............,Q,,,,,,,,,,...........J.....---,,.......----------------...MMMMMMM
+MMMMMMMMMMM.....,,,,,,,,,,,,,,,,,,,.............,,,................---.............,,,,,,,,,,,......V...........---,,.........-------------.,..MMMMMMM
+MMMMMMM,....V....,,,,,,,,,,,,P,,,,,,,,........,,,,,................................,,,,,,,P,,...J.....,.........---,.........,..---------..,...MMMMMMM
+MMMMMM..........V..........,,,,,,,,,,,........,a,,,...............................,,,,,..........J..,,,,........---......G....,,..-----........MMMMMMM
+MMMMM............R............,..............,,,,O,..J............................,,,,.............,,,,,........---....I....................E..MMMMMMM
+MMMMM........................................,,,,,,.V.............................,,,,.............,,,,,,.....E.---.............................MMBMMM
+MMMMM...E.......V........I...................,,,,.................................,,,,.............,U,aX,...V...---.IV.II.........I..............MMMMM
+MMMMMMM.R.......................N............,,,,.IV.II............................,,X............R,,,,,,.......---.V,,,V................R....W.MMMMMM
+MMMMMMMM....,.........E.......................,,,.V,,,V.............................................X,,,........---.R,,,R........G...........MMMMMMMMM
+MMMMMMMM....,....................V.I..........,,,.R,,,R..................................G.....G.....,U,.I......---.I,,,I...,,,,,..........E.AMZMMMMMM
+MMMMMMMM....,....J.............V..E.,.........O,,.I,,,I...............................T.........G...............---.IVRII..,,,,,,,,..........MMMMMMeMM
+MMMMMMM....,,.G............T....RR..,.........,,,.IVRII...............................T.......N.................---............,,,,,,.E...V..MAMMMMMMM
+MMMMMM.....,,......................,,,..E.....,,,.........................................,..J.................................,,,,,,,........MMMMMMMM
+MMMMMMM...V,,,......................,.........,,,,b,,,,...................................,...J....V...........................,,,,,,,....E....MMMMMMM
+MMMMMMDM...,,,.........I.......................O,,,,,,,...........................V.......,...N................................,,,U,,,..........MMMMMM
+MMMMMMMM..,,XX,.....R.......................E......,,,,...................................,....................................,,,O,,,...........MMMMM
+MMMMMMMMT.,,,,,...N......I.V........................,,,...................................,....................................,,,,,,,...G.......eMMMM
+MMMMMMMM..,,,,,.........................J,,,.......G,,,............................G.I.........................................,,,,,,,,.J..E....,MMMMM
+MMMMWMMM..,,,,,.......I..................,,,,.......b,,.....................................N..N...............................,,,,,,,,....R...,,,MMMM
+MMMMMMMM..,,,,,..........................,,,....J...,,,..................................,,.......E............................,,,,,,,,.......I,,MMLMM
+MMMMMMMM..,,,,,G...............I....E.....,.........,,,..................................,,,...................................,,,,,X,.......MMM,MMMMM
+MMMMMMBM...,,,............................G..........................................I..,,,,......................................,,b.......MMMMMMMMMM
+MMMMMMMM...............,,,,,,,,....T.E..........,,...................................R..,,,,,.........................................J.....MMMMMMMMMM
+MMMMMMM.........,,,,,,,,,,,,,,,,.G..........R..,,,,.................................J...,,,,,.........................................V..R..MMMM,MMMMM
+MMLMMMI.........,,,,,,,,,,,,,,,,..............,,a,,.....................................,,,,,,....G.........................................MMM,,MAMMM
+MMMMMM...........,,U,,,,,,,Q,,,,..............,,,,,.....................................,,,,,............................................J...eMMMMMMMM
+MMMMMM.........V..,,,,,,,,,,,OG............G..,,,,,,....................................,U,,,.....................................N...........aMMMMMMM
+MMMMMM..........G....,,,,U,,.................,,,,,,S,,,................................,b,,,Q...J..............................................MMMMMMM
+MMMBMMM.T.......E....,,,,,,,.......,,,,,,,,,,,,,P,,,,,,,,.......,,,,,,,,Q,,O..........Q,,,,,,..............................................R...MMMMMMM
+MMMMMMMMM.............,,,,,.......,,,,,,,,,,,,,,E,,,,,,,,,......,,,,,,,,,,,,.......,,,,,,,,,,NN...............................................MAMMMMMM
+MMZMMLMMMM............,,,,,...T...,,,,,,,,,,,,,...,U,,,,,,.....,,,,,,,,,,,,Q....N.,,,,,,X,,,,..N..............................................MMMMMYMM
+MMMMMMMMZMM.....J....,O,S,,,......,,,,,,U,,,,,,E.R,,,,,P,,......,,,,,,,,,P,,......O,,,,,,,,,,..N..............................................MMMMMMMM
+MMMMMM.GMeM..........,,,,,,,......,,,,,,,,,,,,.....,,,,,,,.......,,,,,,,,,,,.......S,,,,,,O,,.I....E...................................R.......ZMMMMMM
+MMMMM...MMMM.....GQ,,,,,,,,,,.....V..,,,b,,,,O.....,P,P,,.....I......Q,,U,b,,..........U,,,,.......................................T...........MMBMMMM
+MMMZMM..JMVE....,,,,P,,,,,,,,,,,.......,,,,,,......GQ,,,,....J..T.....,,,,,,,,,,........,,,,T.........................................R........MMMMMMM
+MMMMeMM...R.....,,,,,,,a,,,,a,,,,......,,,,,,.......,,,,,...........E.,,,,,,,,,,,.........,......T................................N..R........MMMMMMMM
+MMMABDCI..G....,,EHJJGGGIEI,,,,a,FHIFFE,,,,,,.......,,,,,.......HEEJEHFHHGJHP,,,GGIHJJII......................................................MMMMMMMM
 CDCDKDDIFJFIHFGHGGHFGHJJEJEHGGJFGFIIJJFFI,,,,......JJGHFJFHGHJFEJFJEFHIJFGIIEFJFEFFIHFIFHHFEIFG.....FIJFGEFJEGFFEIEFFJFEEGJFHG.GJEJGGHHEEJFFFILABADKCC
 CDACKCBAIFEHFHEIFFGGGEFFFIJHFHEJFHFHFJFEJFFIHFGFHJEIFEJHFIIHIGHEHIJFFFJFFFEFIJFFJGEFFGEGHFIFJGEFFEJIFJJIIFFFGHEFHFJIFFIHIJGEIIFGIIIGHEFIFFFHFFLBAKCKCK
 KKCDACCKLFFIGGFHGHFJGEEJIFIGIFJFGHFGFFFFFJJJJHGGIFIFIJGJFIJGEHJFIFIHFGFEFGJGIEJIHFFHIEFFJFIJFGHGFHJFFFGJIIEFEJFJFEEFGFIFHFJIJEHFHJIHEFIIEFIEGIKDCBBBDB

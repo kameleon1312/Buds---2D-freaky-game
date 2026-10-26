@@ -5,17 +5,20 @@ import { PLOTS } from './plots';
 import { ROUTES } from './travel';
 
 /**
- * Dystrykty (docs/dystrykty.md): on the wastelands between the cities the frontier is cut into fenced plots along the
- * road. A bud buys one for coins, names its district and builds it up: a town hall at its heart, apartment blocks
- * (rent in coins), vertical farms, solar farms, a concrete plant, steel recycling and a logistics centre. The district
- * grows over the plot in four stages as the bud gains levels and gathers materials. Everyone on the wasteland sees
- * every district; from RAID_MIN_LEVEL buds raid each other's districts (a duel against the owner's fighter, made
- * stronger by the district's defence, which grows with the empire), taking a share of the unprotected materials.
- * Buildings are never destroyed and a district never changes hands.
+ * Dystrykty (docs/dystrykty.md): on the wastelands between the cities a few plots lie off the road, overgrown with
+ * the land around them (forest, palms and dunes, orchards, scrap). A bud buys one for coins, names its district and
+ * starts small: a little clearing by the gate with a town hall. The district grows by clearing the plot sector by
+ * sector (coins and materials, the bud's level, the town hall's level; a crew works for a while), and by putting up
+ * apartment blocks (rent in coins), vertical farms, solar farms, a concrete plant, steel recycling and a logistics
+ * centre, and the pieces that make a district admired: squares, fountains, a statue of its bud and the Iglica tower.
+ * Its might sets its rank (Osada … Legenda Pogranicza) and its defence. Everyone on the wasteland sees every
+ * district; from RAID_MIN_LEVEL buds raid each other's districts (a duel against the owner's fighter, made stronger
+ * by the district's defence), taking a share of the unprotected materials. Buildings are never destroyed and a
+ * district never changes hands.
  *
- * Production runs in real time and is worked out lazily on the server (never trusted from the game); every change is
- * a compare-and-swap on the district's version, so two devices can't spend the same concrete twice. Mirrored in
- * Unity `Quests/Land.cs`.
+ * Production and clearing run in real time and are worked out lazily on the server (never trusted from the game);
+ * every change is a compare-and-swap on the district's version, so two devices can't spend the same concrete twice.
+ * Mirrored in Unity `Quests/Land.cs`.
  */
 
 // ---------- resources ----------
@@ -48,9 +51,11 @@ export const ROUTE_BONUS: Record<string, ResourceId> = {
 };
 export const BIOME_BONUS = 1.5;
 
-/** A plot is PLOT_SIZE×PLOT_SIZE cells: a fence round the edge with a gate in the middle of the side facing the road. */
-export const PLOT_SIZE = 23;
-/** The middle cell of a plot (the district grows round it). */
+/** A plot is PLOT_SIZE×PLOT_SIZE cells, SECTORS×SECTORS sectors of SECTOR cells; its gate is in the middle of the side facing the road. */
+export const PLOT_SIZE = 25;
+export const SECTOR = 5;
+export const SECTORS = PLOT_SIZE / SECTOR;
+/** The middle cell of a plot's side (the gate's middle). */
 export const PLOT_CENTRE = (PLOT_SIZE - 1) / 2;
 export type GateSide = 'n' | 's' | 'e' | 'w';
 
@@ -73,6 +78,15 @@ export function plotPrice(route: string): number {
   return 200 + 50 * (r?.levels[0] ?? 2);
 }
 export const LAND_MIN_LEVEL = 3;
+
+export type DistrictStyle = 'las' | 'tropik' | 'dwor' | 'zlom';
+/** The look of the districts on each wasteland, after the land around them (art: tools/world/art/district.ts). */
+export const ROUTE_STYLE: Record<string, DistrictStyle> = {
+  'pustkowie-ostepy': 'las',
+  'pustkowie-wydmy': 'tropik',
+  'pustkowie-gosciniec': 'dwor',
+  'pustkowie-nieuzytki': 'zlom',
+};
 
 /** The three cells of the gate (plot-local) and the cell just inside it, where the way in starts. */
 export function gateCells(gate: GateSide): { cells: [number, number][]; inside: [number, number] } {
@@ -117,39 +131,101 @@ export function inGateClear(gate: GateSide, x: number, y: number): boolean {
   }
 }
 
-// ---------- growing: four stages over the plot ----------
+// ---------- sectors: the district starts small and clears its plot ----------
 
-/** The side of the built-up square at each stage (centred on the plot; the fence and a lawn round it). */
-export const STAGE_SIDES = [9, 13, 17, 21] as const;
-export const MAX_STAGE = STAGE_SIDES.length;
+export const sectorIndex = (sx: number, sy: number) => sy * SECTORS + sx;
+export const sectorOf = (x: number, y: number) =>
+  sectorIndex(Math.floor(x / SECTOR), Math.floor(y / SECTOR));
 
-/** The built-up square of a stage, plot-local and inclusive. */
-export function stageArea(stage: number) {
-  const side = STAGE_SIDES[Math.min(Math.max(stage, 1), MAX_STAGE) - 1]!;
-  const half = (side - 1) / 2;
-  return {
-    x0: PLOT_CENTRE - half,
-    x1: PLOT_CENTRE + half,
-    y0: PLOT_CENTRE - half,
-    y1: PLOT_CENTRE + half,
-  };
+/**
+ * The sectors a new district starts with: the one the gate opens into, its two neighbours along the road and the one
+ * behind it, where the town hall stands (a T of 4 sectors out of 25).
+ */
+export function startSectors(gate: GateSide): number[] {
+  const m = (SECTORS - 1) / 2;
+  const last = SECTORS - 1;
+  switch (gate) {
+    case 'n':
+      return [sectorIndex(m - 1, 0), sectorIndex(m, 0), sectorIndex(m + 1, 0), sectorIndex(m, 1)];
+    case 's':
+      return [
+        sectorIndex(m - 1, last),
+        sectorIndex(m, last),
+        sectorIndex(m + 1, last),
+        sectorIndex(m, last - 1),
+      ];
+    case 'w':
+      return [sectorIndex(0, m - 1), sectorIndex(0, m), sectorIndex(0, m + 1), sectorIndex(1, m)];
+    default:
+      return [
+        sectorIndex(last, m - 1),
+        sectorIndex(last, m),
+        sectorIndex(last, m + 1),
+        sectorIndex(last - 1, m),
+      ];
+  }
+}
+export const START_SECTORS = 4;
+
+/** Where the town hall stands (its anchor, plot-local): the middle of the sector behind the gate's, its door at that sector's front row. */
+export function hallSpot(gate: GateSide): { x: number; y: number } {
+  const behind = startSectors(gate)[3]!;
+  const sx = behind % SECTORS;
+  const sy = Math.floor(behind / SECTORS);
+  return { x: sx * SECTOR + 2, y: sy * SECTOR + 3 };
 }
 
-/** What the next stage asks for: materials and coins, the bud's level and the town hall's level. */
-export const STAGES: readonly {
+/** How many sectors a district may hold by its town hall's level (index = hall level - 1). */
+export const SECTOR_LIMIT = [6, 9, 13, 18, 25] as const;
+
+/** What clearing the next sector asks for, by how many have been cleared already (k = 0 for the first). */
+export function clearingCost(k: number): {
   cost: Partial<Resources>;
   coins: number;
   level: number;
-  hall: number;
-}[] = [
-  { cost: {}, coins: 0, level: LAND_MIN_LEVEL, hall: 1 },
-  { cost: { beton: 150, stal: 80 }, coins: 150, level: 5, hall: 2 },
-  { cost: { beton: 450, stal: 300, energia: 120 }, coins: 400, level: 8, hall: 3 },
-  { cost: { beton: 1000, stal: 750, energia: 350, zywnosc: 250 }, coins: 900, level: 11, hall: 4 },
-];
+  seconds: number;
+  /** Units of the wasteland's own resource the work turns up. */
+  yields: number;
+} {
+  const cost: Partial<Resources> = { beton: 20 + 12 * k };
+  if (k >= 1) cost.stal = 8 * k;
+  if (k >= 4) cost.energia = 10 * k;
+  if (k >= 8) cost.zywnosc = 8 * k;
+  return {
+    cost,
+    coins: 60 + 35 * k + 5 * k * k,
+    level: LAND_MIN_LEVEL + Math.floor(k / 2),
+    seconds: 60 + 150 * k,
+    yields: 20 + 6 * k,
+  };
+}
+/** How many sectors can ever be cleared (the costs the game needs). */
+export const CLEARINGS = SECTORS * SECTORS - START_SECTORS;
 
-/** The town hall's spot: the middle of the plot, its door just below. */
-export const HALL = { x: PLOT_CENTRE, y: PLOT_CENTRE + 2 } as const;
+/** The district's ranks by might: from a settlement to the legend of the frontier. */
+export const RANKS = [
+  { min: 0, name: 'Osada' },
+  { min: 120, name: 'Osiedle' },
+  { min: 400, name: 'Dzielnica' },
+  { min: 1000, name: 'Dystrykt' },
+  { min: 2200, name: 'Metropolia' },
+  { min: 3800, name: 'Legenda Pogranicza' },
+] as const;
+
+export function rankOf(power: number): {
+  index: number;
+  name: string;
+  next: { min: number; name: string } | null;
+} {
+  let index = 0;
+  for (let i = 0; i < RANKS.length; i++) if (power >= RANKS[i]!.min) index = i;
+  const next = RANKS[index + 1];
+  return {
+    index,
+    name: RANKS[index]!.name,
+    next: next ? { min: next.min, name: next.name } : null,
+  };
+}
 
 // ---------- the name ----------
 
@@ -211,6 +287,10 @@ export type BuildingKind = {
   limit: readonly number[];
   levels: readonly BuildingLevel[];
   blurb: string;
+  /** Might one adds by itself (the squares, fountains, statue and tower; the rest count by level). */
+  prestige?: number;
+  /** Per cent more rent from every apartment block while it stands. */
+  rentBoost?: number;
 };
 
 const L = (
@@ -224,8 +304,8 @@ export const BUILDINGS = [
   {
     id: 'ratusz',
     name: 'Ratusz',
-    w: 5,
-    h: 4,
+    w: 3,
+    h: 3,
     produces: null,
     limit: [1, 1, 1, 1, 1],
     levels: [
@@ -334,12 +414,63 @@ export const BUILDINGS = [
     ],
     blurb: 'Więcej miejsca na surowce (każdy poziom +400 każdego).',
   },
+  {
+    id: 'skwer',
+    name: 'Skwer',
+    w: 3,
+    h: 3,
+    produces: null,
+    limit: [1, 1, 2, 3, 4],
+    levels: [L({ beton: 30, zywnosc: 20 }, 60, LAND_MIN_LEVEL, 0)],
+    prestige: 30,
+    rentBoost: 5,
+    blurb: 'Drzewa, ławki i latarnia. Mieszkańcy płacą chętniej: +5% czynszu.',
+  },
+  {
+    id: 'fontanna',
+    name: 'Fontanna',
+    w: 3,
+    h: 3,
+    produces: null,
+    limit: [0, 1, 1, 2, 2],
+    levels: [L({ beton: 120, stal: 60, energia: 40 }, 600, 5, 0)],
+    prestige: 70,
+    rentBoost: 8,
+    blurb: 'Woda tryska, przechodnie się zatrzymują. +8% czynszu i sporo prestiżu.',
+  },
+  {
+    id: 'pomnik',
+    name: 'Pomnik Buda',
+    w: 3,
+    h: 3,
+    produces: null,
+    limit: [0, 0, 1, 1, 1],
+    levels: [L({ beton: 300, stal: 260, energia: 120 }, 1800, 8, 0)],
+    prestige: 180,
+    rentBoost: 12,
+    blurb: 'Brązowy Bud na cokole: każdy przechodzień wie, czyj to dystrykt. +12% czynszu.',
+  },
+  {
+    id: 'iglica',
+    name: 'Iglica',
+    w: 5,
+    h: 4,
+    produces: null,
+    limit: [0, 0, 0, 0, 1],
+    levels: [L({ beton: 1600, stal: 1400, energia: 700, zywnosc: 400 }, 4 * 3600, 12, 0)],
+    prestige: 600,
+    rentBoost: 25,
+    blurb: 'Wieżowiec widoczny z całego pustkowia, znak największych dystryktów. +25% czynszu.',
+  },
 ] as const satisfies readonly BuildingKind[];
+
+/** The most rent the squares, fountains, statue and tower add together (per cent). */
+export const MAX_RENT_BOOST = 50;
 
 export type BuildingId = (typeof BUILDINGS)[number]['id'];
 export const buildingIds = BUILDINGS.map((b) => b.id) as [BuildingId, ...BuildingId[]];
 export const buildingById = (id: string): BuildingKind | undefined =>
-  BUILDINGS.find((b) => b.id === id);
+  (BUILDINGS as readonly BuildingKind[]).find((b) => b.id === id);
 
 /** Storage of each resource with no warehouse. */
 export const BASE_STORAGE = 300;
@@ -383,7 +514,16 @@ export type RaidRecord = z.infer<typeof raidRecordSchema>;
 export const landStateSchema = z.object({
   plot: z.string(),
   name: z.string().min(1).max(DISTRICT_NAME_MAX),
-  stage: z.number().int().min(1).max(MAX_STAGE),
+  /** Cleared sectors (index sy·SECTORS + sx). */
+  sectors: z.array(
+    z
+      .number()
+      .int()
+      .min(0)
+      .max(SECTORS * SECTORS - 1),
+  ),
+  /** The sector being cleared and when the crew is done (ms), or null. */
+  clearing: z.object({ sector: z.number().int(), readyAt: z.number() }).nullable().default(null),
   resources: resourcesSchema,
   buildings: z.array(landBuildingSchema),
   nextId: z.number().int().nonnegative(),
@@ -398,25 +538,39 @@ export const landStateSchema = z.object({
 });
 export type LandState = z.infer<typeof landStateSchema>;
 
-/** A new district on a bought plot: a finished town hall in the middle, some materials to start, a shield. */
+/** A new district on a bought plot: a finished town hall behind the gate, a small clearing, some materials, a shield. */
 export function newLand(
   plot: string,
   name: string,
   now: number,
   shieldHours: number = NEW_SHIELD_HOURS,
 ): LandState {
+  const gate = plotById(plot)?.gate ?? 's';
+  const hall = hallSpot(gate);
   return {
     plot,
     name,
-    stage: 1,
+    sectors: startSectors(gate),
+    clearing: null,
     resources: { beton: 100, stal: 40, energia: 0, zywnosc: 0 },
     buildings: [
-      { id: 1, kind: 'ratusz', x: HALL.x, y: HALL.y, level: 1, readyAt: now, collectedAt: now },
+      { id: 1, kind: 'ratusz', x: hall.x, y: hall.y, level: 1, readyAt: now, collectedAt: now },
     ],
     nextId: 2,
     shieldUntil: now + shieldHours * 3_600_000,
     raids: [],
     raiding: { day: '', count: 0, tried: {} },
+  };
+}
+
+/** The district at `now`: a sector whose crew has finished is cleared. */
+export function settle(land: LandState, now: number): LandState {
+  if (!land.clearing || land.clearing.readyAt > now) return land;
+  const sector = land.clearing.sector;
+  return {
+    ...land,
+    sectors: land.sectors.includes(sector) ? land.sectors : [...land.sectors, sector],
+    clearing: null,
   };
 }
 
@@ -440,11 +594,19 @@ export const bonusOf = (land: LandState): ResourceId | undefined => {
   return plot ? ROUTE_BONUS[plot.route] : undefined;
 };
 
+/** Per cent more rent from the squares, fountains, statue and tower standing in the district. */
+export function rentBoost(land: LandState): number {
+  let boost = 0;
+  for (const b of land.buildings) boost += buildingById(b.kind)?.rentBoost ?? 0;
+  return Math.min(MAX_RENT_BOOST, boost);
+}
+
 /** Units (or coins) an hour a producer makes at its level on this wasteland. */
 export function hourly(land: LandState, b: LandBuilding): number {
   const kind = buildingById(b.kind)!;
   if (!kind.produces) return 0;
   const base = kind.levels[b.level - 1]?.value ?? 0;
+  if (kind.produces === 'monety') return Math.round((base * (100 + rentBoost(land))) / 100);
   return Math.round(base * (bonusOf(land) === kind.produces ? BIOME_BONUS : 1));
 }
 
@@ -516,19 +678,19 @@ function blockedCells(land: LandState, except?: number): Set<number> {
 /** Inside the fence. */
 const inside = (x: number, y: number) => x >= 1 && y >= 1 && x < PLOT_SIZE - 1 && y < PLOT_SIZE - 1;
 
-/** Whether a plot-local cell is in the built-up square of the district's stage. */
-export function inStage(land: LandState, x: number, y: number) {
-  const a = stageArea(land.stage);
-  return x >= a.x0 && x <= a.x1 && y >= a.y0 && y <= a.y1;
+/** Whether a plot-local cell lies in a cleared sector of the district. */
+export function claimed(land: LandState, x: number, y: number) {
+  if (x < 0 || y < 0 || x >= PLOT_SIZE || y >= PLOT_SIZE) return false;
+  return land.sectors.includes(sectorOf(x, y));
 }
 
 /** The gate side of the district's plot ('s' for an unknown plot). */
 const gateOf = (land: LandState): GateSide => plotById(land.plot)?.gate ?? 's';
 
-/** Whether a plot-local cell can be walked on: inside the fence (or in the gate), not under a building. */
+/** Whether a plot-local cell can be walked on: cleared and inside the fence (or in the gate), not under a building. */
 export function walkable(land: LandState, x: number, y: number, blocked = blockedCells(land)) {
   const inGate = gateCells(gateOf(land)).cells.some(([gx, gy]) => gx === x && gy === y);
-  if (!inside(x, y) && !inGate) return false;
+  if (!inGate && !(inside(x, y) && claimed(land, x, y))) return false;
   return !blocked.has(y * PLOT_SIZE + x);
 }
 
@@ -570,7 +732,10 @@ export type LandProblem =
   | 'level_too_low'
   | 'hall_too_low'
   | 'max_level'
-  | 'max_stage'
+  | 'max_sectors'
+  | 'not_next'
+  | 'cleared'
+  | 'clearing'
   | 'busy'
   | 'poor'
   | 'not_found';
@@ -585,7 +750,7 @@ const pay = (have: Resources, cost: Partial<Resources>): Resources => {
   return out;
 };
 
-/** Why a building can't be put here (or null): the stage's square, the gate, other buildings, limits, levels, cost. */
+/** Why a building can't be put here (or null): cleared land, the gate, other buildings, limits, levels, cost. */
 export function placementProblem(
   land: LandState,
   kindId: string,
@@ -601,14 +766,13 @@ export function placementProblem(
   const first = kind.levels[0]!;
   if (budLevel < first.player) return 'level_too_low';
   const f = footprint(kind, x, y);
-  // the building on the stage's square, the cell in front of its door inside the fence
-  if (
-    !Number.isInteger(f.x0) ||
-    !inStage(land, f.x0, f.y0) ||
-    !inStage(land, f.x1, f.y1) ||
-    !inside(x, f.y1 + 1)
-  )
-    return 'outside';
+  // the whole building on cleared land inside the fence, and the cell in front of its door too
+  if (!Number.isInteger(f.x0)) return 'outside';
+  for (let cy = f.y0; cy <= f.y1 + 1; cy++)
+    for (let cx = f.x0; cx <= f.x1; cx++) {
+      if (cy === f.y1 + 1 && cx !== x) continue;
+      if (!inside(cx, cy) || !claimed(land, cx, cy)) return 'outside';
+    }
   const blocked = blockedCells(land);
   const gate = gateOf(land);
   for (let cy = f.y0; cy <= f.y1 + 1; cy++)
@@ -688,30 +852,72 @@ export function upgrade(
   };
 }
 
-/** Why the district can't grow to its next stage now (or null), and what that stage asks for. */
-export function growProblem(
+/** Whether a sector touches (side by side) one the district already holds. */
+export function nextToClaimed(land: LandState, sector: number): boolean {
+  const sx = sector % SECTORS;
+  const sy = Math.floor(sector / SECTORS);
+  const around: [number, number][] = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+  return around.some(([dx, dy]) => {
+    const nx = sx + dx;
+    const ny = sy + dy;
+    return (
+      nx >= 0 &&
+      ny >= 0 &&
+      nx < SECTORS &&
+      ny < SECTORS &&
+      land.sectors.includes(sectorIndex(nx, ny))
+    );
+  });
+}
+
+/** How many sectors the district may hold with its town hall now. */
+export const sectorLimit = (land: LandState) =>
+  SECTOR_LIMIT[Math.min(SECTOR_LIMIT.length, Math.max(1, hallLevel(land))) - 1]!;
+
+/** What clearing the district's next sector asks for. */
+export const nextClearing = (land: LandState) =>
+  clearingCost(Math.max(0, land.sectors.length - START_SECTORS));
+
+/** Why that sector can't be cleared now (or null; on a settled district), and what clearing it asks for. */
+export function clearProblem(
   land: LandState,
+  sector: number,
   budLevel: number,
   coins: number,
-): {
-  problem: LandProblem | null;
-  cost: Partial<Resources>;
-  coins: number;
-  level: number;
-  hall: number;
-} {
-  const next = STAGES[land.stage];
-  if (!next) return { problem: 'max_stage', cost: {}, coins: 0, level: 0, hall: 0 };
+  now: number,
+): { problem: LandProblem | null } & ReturnType<typeof clearingCost> {
+  const next = nextClearing(land);
   const out = (problem: LandProblem | null) => ({ problem, ...next });
+  if (!Number.isInteger(sector) || sector < 0 || sector >= SECTORS * SECTORS) return out('outside');
+  if (land.sectors.includes(sector)) return out('cleared');
+  if (land.clearing && land.clearing.readyAt > now) return out('clearing');
+  if (land.sectors.length >= SECTORS * SECTORS) return out('max_sectors');
+  if (land.sectors.length >= sectorLimit(land)) return out('hall_too_low');
+  if (!nextToClaimed(land, sector)) return out('not_next');
   if (budLevel < next.level) return out('level_too_low');
-  if (hallLevel(land) < next.hall) return out('hall_too_low');
   if (!canAfford(land.resources, next.cost) || coins < next.coins) return out('poor');
   return out(null);
 }
 
-export function grow(land: LandState): LandState {
-  const next = STAGES[land.stage]!;
-  return { ...land, stage: land.stage + 1, resources: pay(land.resources, next.cost) };
+/**
+ * Starts clearing a sector (after clearProblem returned null, on a settled district): the materials are paid, what
+ * the work turns up goes into storage (as much as fits), the crew is done after `seconds`. The caller takes the coins.
+ */
+export function startClearing(land: LandState, sector: number, now: number): LandState {
+  const next = nextClearing(land);
+  const resources = pay(land.resources, next.cost);
+  const bonus = bonusOf(land);
+  if (bonus)
+    resources[bonus] = Math.max(
+      resources[bonus],
+      Math.min(storage(land, now), resources[bonus] + next.yields),
+    );
+  return { ...land, resources, clearing: { sector, readyAt: now + next.seconds * 1000 } };
 }
 
 /** The duel opponent id of a raid on a plot's district, and back. */
@@ -719,17 +925,20 @@ export const raidEnemyId = (plot: string) => `raid-${plot}`;
 export const raidPlotOf = (enemyId: string) =>
   enemyId.startsWith('raid-') ? enemyId.slice(5) : null;
 
-/** A district's might on the rankings: its stage and its buildings (level² by weight). */
+/** A district's might: its cleared land, its buildings (level² by weight), its squares, fountains, statue and tower. */
 export function landPower(land: LandState): number {
   const weight: Record<string, number> = { ratusz: 30, apartamentowiec: 12, magazyn: 8 };
-  let p = land.stage * 15;
-  for (const b of land.buildings) p += b.level * b.level * (weight[b.kind] ?? 6);
+  let p = land.sectors.length * 8;
+  for (const b of land.buildings) {
+    const prestige = buildingById(b.kind)?.prestige;
+    p += prestige ?? b.level * b.level * (weight[b.kind] ?? 6);
+  }
   return p;
 }
 
 /** The district's defence in a raid (per cent of the defender's health added): the bigger the empire, the harder. */
 export const landDefence = (power: number) =>
-  Math.min(MAX_DEFENCE, Math.floor(Math.sqrt(Math.max(0, power)) * 1.5));
+  Math.min(MAX_DEFENCE, Math.floor(Math.sqrt(Math.max(0, power))));
 
 /** The owner's fighter defending its district: more health and armour by the district's defence. */
 export function fortify(fighter: Fighter, defence: number): Fighter {
@@ -848,6 +1057,13 @@ export const buyPlotRequestSchema = z.object({
   name: districtNameSchema,
 });
 export const renameLandRequestSchema = z.object({ name: districtNameSchema });
+export const clearRequestSchema = z.object({
+  sector: z
+    .number()
+    .int()
+    .min(0)
+    .max(SECTORS * SECTORS - 1),
+});
 export const buildRequestSchema = z.object({
   kind: z.enum(buildingIds),
   x: z.number().int().min(0).max(PLOT_SIZE),
@@ -867,6 +1083,10 @@ export type LandView = {
   storage: number;
   power: number;
   defence: number;
+  /** The rank its might gives it (Osada … Legenda Pogranicza). */
+  rank: string;
+  /** Per cent more rent from the squares, fountains, statue and tower. */
+  rentBoost: number;
   /** Of every material this much is safe from raids. */
   protected: number;
   /** Units waiting in each producer that has any. */
@@ -881,7 +1101,8 @@ export type LandResponse = {
   rent?: number;
 };
 
-export function landView(land: LandState, now: number): LandView {
+export function landView(stored: LandState, now: number): LandView {
+  const land = settle(stored, now);
   const waiting: { id: number; amount: number }[] = [];
   for (const b of land.buildings) {
     const n = pending(land, b, now);
@@ -894,6 +1115,8 @@ export function landView(land: LandState, now: number): LandView {
     storage: storage(land, now),
     power,
     defence: landDefence(power),
+    rank: rankOf(power).name,
+    rentBoost: rentBoost(land),
     protected: protectedAmount(land, now),
     pending: waiting,
   };
@@ -904,25 +1127,30 @@ export type DistrictView = {
   plot: string;
   owner: { slug: string; name: string; level: number };
   name: string;
-  stage: number;
+  sectors: number[];
+  clearing: { sector: number; readyAt: number } | null;
   buildings: { id: number; kind: string; x: number; y: number; level: number; readyAt: number }[];
   power: number;
   defence: number;
+  rank: string;
   shieldUntil: number;
 };
 
 export type DistrictsResponse = { route: string; now: number; districts: DistrictView[] };
 
 export function districtView(
-  land: LandState,
+  stored: LandState,
   owner: { slug: string; name: string; level: number },
+  now: number,
 ): DistrictView {
+  const land = settle(stored, now);
   const power = landPower(land);
   return {
     plot: land.plot,
     owner,
     name: land.name,
-    stage: land.stage,
+    sectors: [...land.sectors],
+    clearing: land.clearing,
     buildings: land.buildings.map(({ id, kind, x, y, level, readyAt }) => ({
       id,
       kind,
@@ -933,6 +1161,7 @@ export function districtView(
     })),
     power,
     defence: landDefence(power),
+    rank: rankOf(power).name,
     shieldUntil: land.shieldUntil,
   };
 }
@@ -941,14 +1170,17 @@ export function districtView(
 export const LAND_PROBLEM_TEXT: Record<LandProblem, string> = {
   unknown_building: 'Nie ma takiego budynku.',
   too_many: 'Masz już tyle takich budynków, ile pozwala ratusz. Ulepsz ratusz.',
-  outside: 'Tu jeszcze nie da się budować. Rozbuduj dystrykt.',
+  outside: 'Tu jeszcze nie da się budować: najpierw oczyść ten teren.',
   occupied: 'To miejsce jest zajęte.',
   gate: 'Przy bramie musi zostać wolne przejście.',
   walls_in: 'Tak postawiony budynek zamknąłby drogę do innych.',
   level_too_low: 'Na to potrzebujesz wyższego poziomu.',
   hall_too_low: 'Najpierw ulepsz ratusz.',
   max_level: 'To już najwyższy poziom.',
-  max_stage: 'Dystrykt zajmuje już całą działkę.',
+  max_sectors: 'Dystrykt zajmuje już całą działkę.',
+  not_next: 'Oczyszczać można tylko teren przy tym, co już masz.',
+  cleared: 'Ten teren jest już oczyszczony.',
+  clearing: 'Ekipa jeszcze pracuje. Jeden teren naraz.',
   busy: 'Trwa budowa.',
   poor: 'Brakuje surowców.',
   not_found: 'Nie ma tu takiego budynku.',

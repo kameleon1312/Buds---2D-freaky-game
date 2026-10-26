@@ -388,26 +388,27 @@ namespace Buds.UI
             ["mount"] = new Vector2Int(2, 4),
         };
 
-        const float Tile = 70;
-        const float RowH = 106;
+        /// <summary>A paper-doll tile: big enough that the item in it reads as worn on that part of the body.</summary>
+        const float Tile = 96;
+        const float RowH = 108;
 
         void BuildGear(RectTransform page)
         {
             // the bud's silhouette behind the tiles, so every tile sits on its part of the body
             var card = UiKit.OutlinedBox("Doll", page, UiKit.Paper300, UiKit.RadiusL);
-            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), Vector2.zero, new Vector2(470, 540), new Vector2(0, 1));
+            UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), Vector2.zero, new Vector2(470, 552), new Vector2(0, 1));
             dollPortrait = UiKit.Rect("Portrait", card.transform).gameObject.AddComponent<Image>();
             dollPortrait.preserveAspect = true;
             dollPortrait.raycastTarget = false;
             dollPortrait.color = new Color(1, 1, 1, 0.32f);
-            UiKit.Place(dollPortrait.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -6), new Vector2(360, 540));
-            float[] columns = { 54, 200, 346 };
+            UiKit.Place(dollPortrait.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -2), new Vector2(368, 552));
+            float[] columns = { 27, 187, 347 };
             foreach (var (slot, at) in BodyLayout)
-                DollSlot(page, slot, new Vector2(columns[at.x], -8 - at.y * RowH));
+                DollSlot(page, slot, new Vector2(columns[at.x], -6 - at.y * RowH));
 
             // stats
             var stats = UiKit.OutlinedBox("Stats", page, UiKit.Paper300, UiKit.RadiusM);
-            UiKit.Place((RectTransform)stats.transform.parent, new Vector2(0, 1), new Vector2(500, 0), new Vector2(576, 238), new Vector2(0, 1));
+            UiKit.Place((RectTransform)stats.transform.parent, new Vector2(0, 1), new Vector2(500, 0), new Vector2(576, 230), new Vector2(0, 1));
             var title = UiKit.Label("Title", stats.transform, "Statystyki", 26, UiKit.Ink, true, TextAnchor.UpperLeft);
             UiKit.Place(title.rectTransform, new Vector2(0, 1), new Vector2(18, -8), new Vector2(300, 34), new Vector2(0, 1));
             for (var i = 0; i < content.stats.Length; i++)
@@ -428,12 +429,12 @@ namespace Buds.UI
 
             // what can go into the selected slot
             pickerTitle = UiKit.Label("PickerTitle", page, "", 26, UiKit.Ink, true, TextAnchor.UpperLeft);
-            UiKit.Place(pickerTitle.rectTransform, new Vector2(0, 1), new Vector2(500, -246), new Vector2(576, 34), new Vector2(0, 1));
+            UiKit.Place(pickerTitle.rectTransform, new Vector2(0, 1), new Vector2(500, -236), new Vector2(576, 34), new Vector2(0, 1));
             pickerGrid = UiKit.Rect("Picker", page);
-            UiKit.Place(pickerGrid, new Vector2(0, 1), new Vector2(500, -280), new Vector2(576, 172), new Vector2(0, 1));
+            UiKit.Place(pickerGrid, new Vector2(0, 1), new Vector2(500, -268), new Vector2(576, 190), new Vector2(0, 1));
 
             var details = UiKit.OutlinedBox("Details", page, UiKit.Paper300, UiKit.RadiusM);
-            UiKit.Place((RectTransform)details.transform.parent, new Vector2(0, 1), new Vector2(500, -458), new Vector2(576, 92),
+            UiKit.Place((RectTransform)details.transform.parent, new Vector2(0, 1), new Vector2(500, -460), new Vector2(576, 92),
                 new Vector2(0, 1));
             gearDetails = UiKit.Label("Text", details.transform, "", 20, UiKit.Ink, false, TextAnchor.MiddleLeft);
             UiKit.Stretch(gearDetails.rectTransform, 16, 4, 206, 4);
@@ -446,18 +447,22 @@ namespace Buds.UI
         void DollSlot(RectTransform page, string slot, Vector2 at)
         {
             var root = UiKit.Rect("Slot " + slot, page);
-            UiKit.Place(root, new Vector2(0, 1), at, new Vector2(Tile, Tile + 24), new Vector2(0, 1));
+            UiKit.Place(root, new Vector2(0, 1), at, new Vector2(Tile, Tile + 10), new Vector2(0, 1));
             var frame = UiKit.OutlinedBox("Frame", root, UiKit.Surface700, UiKit.RadiusM);
             UiKit.Place((RectTransform)frame.transform.parent, new Vector2(0.5f, 1), Vector2.zero, new Vector2(Tile, Tile), new Vector2(0.5f, 1));
             var inner = UiKit.Shape("Inner", frame.transform, UiKit.Surface800, UiKit.RadiusM - 6);
-            UiKit.Stretch(inner.rectTransform, 5);
+            UiKit.Stretch(inner.rectTransform, 4);
+            // the item fills its tile (the icons carry their own margin), so a cap reads as a cap on the head
             var icon = UiKit.Rect("Icon", inner.transform).gameObject.AddComponent<Image>();
             icon.preserveAspect = true;
             icon.raycastTarget = false;
-            UiKit.Stretch(icon.rectTransform, 7);
-            // the name sits right under the tile, inside the slot's own box (never under the next row)
-            var label = UiKit.Label("Label", root, SlotName(slot), 16, UiKit.InkSoft, true, TextAnchor.UpperCenter);
-            UiKit.Place(label.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -Tile - 2), new Vector2(Tile + 60, 22), new Vector2(0.5f, 1));
+            UiKit.Stretch(icon.rectTransform, 0, 9, 0, -3);
+            // the name on a small plate across the tile's bottom edge (in the gap between rows, never under the next one)
+            var plate = UiKit.Shape("Plate", root, UiKit.Surface900, UiKit.RadiusS);
+            plate.raycastTarget = false;
+            UiKit.Place(plate.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -Tile + 13), new Vector2(Tile - 14, 24), new Vector2(0.5f, 1));
+            var label = UiKit.Label("Label", plate.transform, SlotName(slot), 15, UiKit.TextOnDarkMuted, true, TextAnchor.MiddleCenter);
+            UiKit.Stretch(label.rectTransform);
             label.horizontalOverflow = HorizontalWrapMode.Overflow; // "Pojazd" stays on one line
             frame.raycastTarget = true;
             var button = root.gameObject.AddComponent<Button>();
@@ -476,7 +481,7 @@ namespace Buds.UI
                 frame.color = slot == selectedSlot ? UiKit.Buds400 : worn != null ? RarityOf(worn).color : UiKit.Surface700;
                 icon.sprite = worn != null ? Icon("Items/" + worn.id) : null;
                 icon.enabled = icon.sprite;
-                label.color = slot == selectedSlot ? UiKit.Ink : UiKit.InkSoft;
+                label.color = slot == selectedSlot ? UiKit.Buds400 : UiKit.TextOnDarkMuted;
             }
 
             var stats = Stats;
@@ -507,7 +512,7 @@ namespace Buds.UI
             {
                 var item = fits[i];
                 var worn = data.Equipped.TryGetValue(selectedSlot, out var w) && w == item.id;
-                ItemBox(pickerGrid, item, new Vector2((i % 6) * 96, -(i / 6) * 92), 84, item.id == selectedGear, worn, () =>
+                ItemBox(pickerGrid, item, new Vector2((i % 6) * 96.8f, -(i / 6) * 98), 92, item.id == selectedGear, worn, () =>
                 {
                     selectedGear = item.id;
                     RefreshGear();
@@ -572,7 +577,7 @@ namespace Buds.UI
             icon.preserveAspect = true;
             icon.raycastTarget = false;
             if (locked) icon.color = new Color(1, 1, 1, 0.35f);
-            UiKit.Stretch(icon.rectTransform, 7);
+            UiKit.Stretch(icon.rectTransform, size >= 90 ? 0 : 4);
             if (worn)
             {
                 var tag = UiKit.Shape("Worn", inner.transform, UiKit.Buds400, 4);

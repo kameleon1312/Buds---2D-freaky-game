@@ -50,13 +50,23 @@ namespace Buds.Quests
         public LandResourcesDto loot;
     }
 
+    /// <summary>The sector a crew is clearing and when it is done (readyAt 0: none; JsonUtility fills a missing one so).</summary>
+    [Serializable]
+    public sealed class LandClearingDto
+    {
+        public int sector;
+        public double readyAt;
+    }
+
     [Serializable]
     public sealed class LandStateDto
     {
         public string plot;
         /// <summary>The name the bud gave its district.</summary>
         public string name;
-        public int stage;
+        /// <summary>Cleared sectors (index sy·sectors + sx).</summary>
+        public int[] sectors;
+        public LandClearingDto clearing;
         public LandResourcesDto resources;
         public LandBuildingDto[] buildings;
         public int nextId;
@@ -79,6 +89,8 @@ namespace Buds.Quests
         public int storage;
         public int power;
         public int defence;
+        public string rank;
+        public int rentBoost;
         public int @protected;
         public LandPendingDto[] pending;
     }
@@ -111,10 +123,12 @@ namespace Buds.Quests
         public string plot;
         public DistrictOwnerDto owner;
         public string name;
-        public int stage;
+        public int[] sectors;
+        public LandClearingDto clearing;
         public LandBuildingDto[] buildings;
         public int power;
         public int defence;
+        public string rank;
         public double shieldUntil;
     }
 
@@ -140,6 +154,12 @@ namespace Buds.Quests
     }
 
     [Serializable]
+    sealed class ClearRequest
+    {
+        public int sector;
+    }
+
+    [Serializable]
     sealed class BuildRequest
     {
         public string kind;
@@ -162,9 +182,9 @@ namespace Buds.Quests
 
     /// <summary>
     /// The bud's own district as the game sees it (EditMode-testable): the server's last word plus the rules of land.ts
-    /// the game needs to draw it and to say up front whether something can be built here (the server decides; this only
-    /// spares a pointless request). Cells are plot-local; <see cref="ToMap"/> and <see cref="ToLocal"/> convert. Production
-    /// ticks on the server's clock, kept by the offset of the last answer.
+    /// the game needs to draw it and to say up front whether something can be built or cleared here (the server decides;
+    /// this only spares a pointless request). Cells are plot-local; <see cref="ToMap"/> and <see cref="ToLocal"/> convert.
+    /// Production and clearing tick on the server's clock, kept by the offset of the last answer.
     /// </summary>
     public sealed class Land
     {
@@ -178,6 +198,8 @@ namespace Buds.Quests
         public int Power { get; private set; }
         public int Defence { get; private set; }
         public int Protected { get; private set; }
+        public string Rank { get; private set; }
+        public int RentBoost { get; private set; }
         double clockOffset;
 
         public Land(LandContent rules)
@@ -188,6 +210,8 @@ namespace Buds.Quests
         public bool Has => State != null && !string.IsNullOrEmpty(State.plot) && Plot != null;
         int Size => Rules.plotSize;
         int Centre => (Rules.plotSize - 1) / 2;
+        int SectorSize => Mathf.Max(1, Rules.sector);
+        int SectorsPerSide => Mathf.Max(1, Rules.sectors);
 
         /// <summary>The server's clock now (ms), as worked out from the last answer.</summary>
         public double Now => LocalMs + clockOffset;
@@ -208,10 +232,13 @@ namespace Buds.Quests
             State.buildings ??= Array.Empty<LandBuildingDto>();
             State.resources ??= new LandResourcesDto();
             State.raids ??= Array.Empty<RaidRecordDto>();
-            if (State.stage < 1) State.stage = 1;
+            State.sectors ??= Array.Empty<int>();
+            State.clearing ??= new LandClearingDto();
             Power = view.power;
             Defence = view.defence;
             Protected = view.@protected;
+            Rank = string.IsNullOrEmpty(view.rank) ? Rules.RankName(view.power) : view.rank;
+            RentBoost = view.rentBoost;
             clockOffset = view.now - (localMs >= 0 ? localMs : LocalMs);
         }
 
@@ -226,33 +253,106 @@ namespace Buds.Quests
         public static bool OnPlot(PlotData plot, int size, Vector2Int map) =>
             map.x >= plot.x && map.y >= plot.y && map.x < plot.x + size && map.y < plot.y + size;
 
-        // ---------- stages ----------
+        // ---------- sectors ----------
 
-        /// <summary>The built-up square of a stage, plot-local (xMin/yMin inclusive, xMax/yMax exclusive).</summary>
-        public RectInt StageArea(int stage) => StageArea(Rules, stage);
+        public static int SectorOf(int x, int y, int sector, int sectors) => y / sector * sectors + x / sector;
 
-        public static RectInt StageArea(LandContent rules, int stage)
+        /// <summary>The sectors a new district starts with: the gate's, its two neighbours along the road, the one behind it (land.ts startSectors).</summary>
+        public static int[] StartSectors(string gate, int sectors)
         {
-            var side = rules.stageSides[Mathf.Clamp(stage, 1, rules.stageSides.Length) - 1];
-            var c = (rules.plotSize - 1) / 2;
-            var half = (side - 1) / 2;
-            return new RectInt(c - half, c - half, side, side);
+            var m = (sectors - 1) / 2;
+            var last = sectors - 1;
+            int I(int sx, int sy) => sy * sectors + sx;
+            return gate switch
+            {
+                "n" => new[] { I(m - 1, 0), I(m, 0), I(m + 1, 0), I(m, 1) },
+                "s" => new[] { I(m - 1, last), I(m, last), I(m + 1, last), I(m, last - 1) },
+                "w" => new[] { I(0, m - 1), I(0, m), I(0, m + 1), I(1, m) },
+                _ => new[] { I(last, m - 1), I(last, m), I(last, m + 1), I(last - 1, m) },
+            };
         }
 
-        public bool InStage(int x, int y) => StageArea(State.stage).Contains(new Vector2Int(x, y));
-
-        /// <summary>What the next stage asks for, or null when the district fills its plot.</summary>
-        public LandStageData NextStage => Has && State.stage < Rules.stages.Length ? Rules.stages[State.stage] : null;
-
-        /// <summary>Why the district can't grow now (a land.ts problem code), or null.</summary>
-        public string GrowProblem(int budLevel, int coins)
+        /// <summary>The town hall's anchor (plot-local): the middle of the sector behind the gate's (land.ts hallSpot).</summary>
+        public static Vector2Int HallSpot(string gate, int sector, int sectors)
         {
-            var next = NextStage;
-            if (next == null) return "max_stage";
+            var behind = StartSectors(gate, sectors)[3];
+            return new Vector2Int(behind % sectors * sector + 2, behind / sectors * sector + 3);
+        }
+
+        /// <summary>Whether a sector is cleared at the server's time <paramref name="now"/> (a finished crew counts: land.ts settle).</summary>
+        public static bool SectorCleared(int[] sectors, LandClearingDto clearing, int sector, double now) =>
+            Array.IndexOf(sectors ?? Array.Empty<int>(), sector) >= 0 ||
+            (clearing != null && clearing.readyAt > 0 && clearing.readyAt <= now && clearing.sector == sector);
+
+        /// <summary>The sector a crew is working on now, or -1.</summary>
+        public static int SectorInWork(LandClearingDto clearing, double now) =>
+            clearing != null && clearing.readyAt > now ? clearing.sector : -1;
+
+        public bool Cleared(int sector) => Has && SectorCleared(State.sectors, State.clearing, sector, Now);
+        public int InWork => Has ? SectorInWork(State.clearing, Now) : -1;
+
+        /// <summary>How many sectors the district holds now (a finished crew's included).</summary>
+        public int ClearedCount
+        {
+            get
+            {
+                if (!Has) return 0;
+                var n = State.sectors.Length;
+                var c = State.clearing;
+                if (c != null && c.readyAt > 0 && c.readyAt <= Now && Array.IndexOf(State.sectors, c.sector) < 0) n++;
+                return n;
+            }
+        }
+
+        /// <summary>Whether a plot-local cell lies in a cleared sector.</summary>
+        public bool Claimed(int x, int y) =>
+            x >= 0 && y >= 0 && x < Size && y < Size && Cleared(SectorOf(x, y, SectorSize, SectorsPerSide));
+
+        public int SectorLimit => Rules.sectorLimit == null || Rules.sectorLimit.Length == 0
+            ? SectorsPerSide * SectorsPerSide
+            : Rules.sectorLimit[Mathf.Clamp(HallLevel - 1, 0, Rules.sectorLimit.Length - 1)];
+
+        /// <summary>What clearing the next sector asks for, or null when the whole plot is the district's.</summary>
+        public LandClearData NextClearing
+        {
+            get
+            {
+                var k = ClearedCount - 4;
+                return Has && Rules.clearings != null && k >= 0 && k < Rules.clearings.Length ? Rules.clearings[k] : null;
+            }
+        }
+
+        /// <summary>Whether a sector touches one the district holds.</summary>
+        public bool NextToCleared(int sector)
+        {
+            var n = SectorsPerSide;
+            int sx = sector % n, sy = sector / n;
+            return (sx > 0 && Cleared(sector - 1)) || (sx < n - 1 && Cleared(sector + 1)) ||
+                   (sy > 0 && Cleared(sector - n)) || (sy < n - 1 && Cleared(sector + n));
+        }
+
+        /// <summary>Why that sector can't be cleared now (a land.ts problem code), or null; <paramref name="coins"/> −1 = unknown.</summary>
+        public string ClearProblem(int sector, int budLevel, int coins)
+        {
+            var n = SectorsPerSide;
+            if (!Has || sector < 0 || sector >= n * n) return "outside";
+            if (Cleared(sector)) return "cleared";
+            if (InWork >= 0) return "clearing";
+            var next = NextClearing;
+            if (next == null) return "max_sectors";
+            if (ClearedCount >= SectorLimit) return "hall_too_low";
+            if (!NextToCleared(sector)) return "not_next";
             if (budLevel < next.level) return "level_too_low";
-            if (HallLevel < next.hall) return "hall_too_low";
             if (!CanAfford(next) || (coins >= 0 && coins < next.coins)) return "poor";
             return null;
+        }
+
+        /// <summary>The wild sector next to the district a point on the plot (plot-local cell) is in or beside, or -1.</summary>
+        public int WildSectorAt(Vector2Int local)
+        {
+            if (!Has || local.x < 0 || local.y < 0 || local.x >= Size || local.y >= Size) return -1;
+            var s = SectorOf(local.x, local.y, SectorSize, SectorsPerSide);
+            return Cleared(s) ? -1 : s;
         }
 
         // ---------- cells ----------
@@ -375,7 +475,12 @@ namespace Buds.Quests
             var first = kind.levels[0];
             if (budLevel < first.player) return "level_too_low";
             var f = Footprint(kind, x, y);
-            if (!InStage(f.xMin, f.yMin) || !InStage(f.xMax - 1, f.yMax - 1) || !Inside(x, f.yMax)) return "outside";
+            for (var cy = f.yMin; cy <= f.yMax; cy++)
+            for (var cx = f.xMin; cx < f.xMax; cx++)
+            {
+                if (cy == f.yMax && cx != x) continue; // the cell in front of the door too
+                if (!Inside(cx, cy) || !Claimed(cx, cy)) return "outside";
+            }
             var blocked = Blocked();
             for (var cy = f.yMin; cy <= f.yMax; cy++)
             for (var cx = f.xMin; cx < f.xMax; cx++)
@@ -395,6 +500,7 @@ namespace Buds.Quests
             var kind = Rules.Building(b.kind);
             if (kind == null || string.IsNullOrEmpty(kind.produces) || b.level < 1 || b.level > kind.levels.Length) return 0;
             var rate = (float)kind.levels[b.level - 1].value;
+            if (kind.produces == Rent) return Mathf.RoundToInt(rate * (100 + RentBoostOf(State.buildings)) / 100f);
             if (Plot != null && Rules.BonusOf(Plot.route) == kind.produces) rate *= Rules.bonus;
             return Mathf.RoundToInt(rate);
         }
@@ -434,17 +540,29 @@ namespace Buds.Quests
 
         public bool Shielded(double now) => Has && State.shieldUntil > now;
 
+        /// <summary>Per cent more rent from the squares, fountains, statue and tower among these buildings (land.ts rentBoost).</summary>
+        public int RentBoostOf(LandBuildingDto[] buildings)
+        {
+            var boost = 0;
+            foreach (var b in buildings ?? Array.Empty<LandBuildingDto>()) boost += Rules.Building(b.kind)?.rentBoost ?? 0;
+            return Mathf.Min(Rules.maxRentBoost > 0 ? Rules.maxRentBoost : 50, boost);
+        }
+
+        /// <summary>The style of the districts on the bud's wasteland.</summary>
+        public string Style => Has ? Rules.StyleOf(Plot.route) : "las";
+
         // ---------- how it looks ----------
 
         /// <summary>
-        /// The prop drawn for a building: the town hall grows from a pavilion to an office block to a tower; a building
-        /// site with a crane while something new goes up (an upgrade keeps the building standing).
+        /// The prop drawn for a building in a style (las, tropik, dwor, zlom): the town hall grows from a pavilion to an
+        /// office block to a tower; a building site with a crane while something new goes up (an upgrade keeps the
+        /// building standing; the 5×4 tower gets the big site).
         /// </summary>
-        public static string SpriteFor(LandBuildingDto b, double now)
+        public static string SpriteFor(LandBuildingDto b, double now, string style, BuildingData kind = null)
         {
-            if (b.readyAt > now && b.level <= 1) return b.kind == Hall ? "dz-budowa-duza" : "dz-budowa";
-            if (b.kind == Hall) return b.level >= 4 ? "dz-ratusz-3" : b.level >= 2 ? "dz-ratusz-2" : "dz-ratusz-1";
-            return "dz-" + b.kind;
+            if (b.readyAt > now && b.level <= 1) return kind != null && kind.w >= 5 ? "dz-budowa-duza" : "dz-budowa";
+            if (b.kind == Hall) return $"dz-{style}-ratusz-" + (b.level >= 4 ? 3 : b.level >= 2 ? 2 : 1);
+            return $"dz-{style}-{b.kind}";
         }
 
         /// <summary>A district name as the server will take it (trimmed, spaces collapsed), or null when it can't be.</summary>
@@ -465,14 +583,17 @@ namespace Buds.Quests
         {
             "unknown_building" => "Nie ma takiego budynku.",
             "too_many" => "Masz już tyle takich budynków, ile pozwala ratusz. Ulepsz ratusz.",
-            "outside" => "Tu jeszcze nie da się budować. Rozbuduj dystrykt.",
+            "outside" => "Tu jeszcze nie da się budować: najpierw oczyść ten teren.",
             "occupied" => "To miejsce jest zajęte.",
             "gate" => "Przy bramie musi zostać wolne przejście.",
             "walls_in" => "Tak postawiony budynek zamknąłby drogę do innych.",
             "level_too_low" => "Na to potrzebujesz wyższego poziomu.",
             "hall_too_low" => "Najpierw ulepsz ratusz.",
             "max_level" => "To już najwyższy poziom.",
-            "max_stage" => "Dystrykt zajmuje już całą działkę.",
+            "max_sectors" => "Dystrykt zajmuje już całą działkę.",
+            "not_next" => "Oczyszczać można tylko teren przy tym, co już masz.",
+            "cleared" => "Ten teren jest już oczyszczony.",
+            "clearing" => "Ekipa jeszcze pracuje. Jeden teren naraz.",
             "busy" => "Trwa budowa.",
             "poor" => "Brakuje surowców.",
             "not_found" => "Nie ma tu takiego budynku.",

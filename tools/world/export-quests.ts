@@ -13,7 +13,6 @@ import {
   BUILDINGS,
   DISTRICT_NAME_MAX,
   DISTRICT_NAME_MIN,
-  HALL,
   LAND_MIN_LEVEL,
   NEW_SHIELD_HOURS,
   PLOTS,
@@ -25,8 +24,14 @@ import {
   RESOURCES,
   ROUTE_BONUS,
   SELL_BATCH,
-  STAGES,
-  STAGE_SIDES,
+  SECTOR,
+  SECTORS,
+  SECTOR_LIMIT,
+  CLEARINGS,
+  RANKS,
+  ROUTE_STYLE,
+  MAX_RENT_BOOST,
+  clearingCost,
   noResources,
   plotPrice,
   CATALOG,
@@ -371,8 +376,9 @@ const json = {
   // done (the server decides)
   land: {
     plotSize: PLOT_SIZE,
-    hallX: HALL.x,
-    hallY: HALL.y,
+    sector: SECTOR,
+    sectors: SECTORS,
+    sectorLimit: [...SECTOR_LIMIT],
     nameMin: DISTRICT_NAME_MIN,
     nameMax: DISTRICT_NAME_MAX,
     minLevel: LAND_MIN_LEVEL,
@@ -387,14 +393,21 @@ const json = {
     resources: RESOURCES.map((r) => ({ id: r.id, name: r.name, price: r.price })),
     routeBonus: Object.entries(ROUTE_BONUS).map(([route, resource]) => ({ route, resource })),
     plots: PLOTS.map((p) => ({ ...p, price: plotPrice(p.route) })),
-    stageSides: [...STAGE_SIDES],
-    stages: STAGES.map((st) => ({
-      ...noResources(),
-      ...st.cost,
-      coins: st.coins,
-      level: st.level,
-      hall: st.hall,
-    })),
+    // what clearing the k-th sector asks for (k = 0 for the first one past the start)
+    clearings: Array.from({ length: CLEARINGS }, (_, k) => {
+      const c = clearingCost(k);
+      return {
+        ...noResources(),
+        ...c.cost,
+        coins: c.coins,
+        level: c.level,
+        seconds: c.seconds,
+        yields: c.yields,
+      };
+    }),
+    ranks: RANKS.map((r) => ({ min: r.min, name: r.name })),
+    styles: Object.entries(ROUTE_STYLE).map(([route, style]) => ({ route, style })),
+    maxRentBoost: MAX_RENT_BOOST,
     buildings: BUILDINGS.map((b) => ({
       id: b.id,
       name: b.name,
@@ -403,6 +416,8 @@ const json = {
       produces: b.produces ?? '',
       limit: [...b.limit],
       blurb: b.blurb,
+      prestige: 'prestige' in b ? b.prestige : 0,
+      rentBoost: 'rentBoost' in b ? b.rentBoost : 0,
       levels: b.levels.map((l) => ({
         ...noResources(),
         ...l.cost,

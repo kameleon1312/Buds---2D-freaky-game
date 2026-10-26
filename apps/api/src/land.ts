@@ -8,13 +8,13 @@ import {
   build,
   buildRequestSchema,
   buyPlotRequestSchema,
+  clearProblem,
+  clearRequestSchema,
   collect,
   collectRequestSchema,
   dayKey,
   districtView,
   fortify,
-  grow,
-  growProblem,
   landDefence,
   landPower,
   landStateSchema,
@@ -33,6 +33,8 @@ import {
   renameLandRequestSchema,
   sellResourceRequestSchema,
   sellValue,
+  settle,
+  startClearing,
   startRaid,
   upgrade,
   upgradeProblem,
@@ -104,7 +106,7 @@ export function createLand({
           404,
         );
       const at = now().getTime();
-      const out = work(row.land, at);
+      const out = work(settle(row.land, at), at);
       if (typeof out === 'string') return problem(c, out);
       const saved = await store.saveLand(
         bud.slug,
@@ -220,13 +222,18 @@ export function createLand({
       return c.json<DistrictsResponse>({
         route,
         now: now().getTime(),
-        districts: rows.map((r) =>
-          districtView(parse(r.state), {
-            slug: r.slug,
-            name: r.name,
-            level: levelFromXp(r.xp).level,
-          }),
-        ),
+        // a document the rules can't read (one from an older plan) is left out, never the whole list
+        districts: rows.flatMap((r) => {
+          const state = landStateSchema.safeParse(r.state);
+          if (!state.success) return [];
+          return [
+            districtView(
+              state.data,
+              { slug: r.slug, name: r.name, level: levelFromXp(r.xp).level },
+              now().getTime(),
+            ),
+          ];
+        }),
       });
     });
 
@@ -308,15 +315,19 @@ export function createLand({
       });
     });
 
-    /** The next stage: the district spreads over more of its plot (materials, coins, the bud's and the hall's level). */
-    app.post('/v1/land/grow', player, async (c) => {
+    /**
+     * Clears a sector of the plot next to the district (coins and materials, the bud's and the town hall's level, one
+     * at a time): a crew works on it for a while, then it is the district's to build on.
+     */
+    app.post('/v1/land/clear', player, async (c) => {
+      const input = await body<{ sector: number }>(c, clearRequestSchema);
       const bud = c.get('bud');
       const lvl = level(bud);
       const { coins } = await store.wallet(bud.slug);
-      return change(c, (land) => {
-        const check = growProblem(land, lvl, coins);
+      return change(c, (land, at) => {
+        const check = clearProblem(land, input.sector, lvl, coins, at);
         if (check.problem) return check.problem;
-        return { land: grow(land), coins: -check.coins };
+        return { land: startClearing(land, input.sector, at), coins: -check.coins };
       });
     });
 
@@ -374,7 +385,7 @@ export function createLand({
           deps.fighterOf(bud, true),
           deps.fighterOf(theirs.owner, false),
         ]);
-        const defence = landDefence(landPower(theirs.land));
+        const defence = landDefence(landPower(settle(theirs.land, at)));
         return deps.startFight(c, bud, raidEnemyId(input.plot), me, fortify(owner, defence));
       }
       throw new HTTPException(409, { message: 'Spróbuj jeszcze raz.' });

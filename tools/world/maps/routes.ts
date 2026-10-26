@@ -3,9 +3,10 @@
 // country road through orchards, a scrapland), thick margins along the long sides, and hiding places off the road
 // where the people of content/routes.ts lie in wait. Each hiding place is a ring of bushes (or rocks, or junk) with
 // one way in, carved around the spot the content names, so a bud that leaves the road finds trouble there. Further
-// out on both sides the frontier is cut into fenced plots (działki, packages/shared land.ts): a bud buys one and its
-// district grows there, for everyone passing by to see. Each plot is a lawn inside a low modern fence with a gate in
-// the side facing the road and a path from the gate to the road.
+// out, a few plots (działki, packages/shared land.ts) lie off the road, far apart and staggered so no two face each
+// other: a bud buys one and its district grows there, for everyone passing by to see. On the map a plot is plain
+// land of the wasteland with a drive from the road to the middle of its side; the game draws the rest (the wild
+// growth over sectors not cleared yet, the fence round what is, the buildings), since it changes as the district grows.
 import { ROUTES_CONTENT } from '../../../packages/shared/src/content/routes';
 import {
   ROUTE_LENGTH as LEN,
@@ -18,20 +19,14 @@ import { districtById } from '../../../packages/shared/src/districts';
 import { PLOT_SIZE, type GateSide } from '../../../packages/shared/src/land';
 import { MapCanvas, noise2, rng } from './lib';
 
-/** A plot's lawn inside its fence (a ground style starting with "lawn" gets the game's grass texture). */
-const PLOT_GROUND: MapCanvas['ground'][number] = {
-  name: 'lawn-dzialka',
-  kinds: 'dzialka',
-  radius: 1,
-  bands: [
-    [0.45, '#6fae4c'],
-    [0.5, '#84c25c'],
-  ],
-};
 /** The ends of a wasteland stay free of plots (the city's ground fades in there, the seams lie there). */
-const PLOT_END_GAP = 18;
-/** Cells kept clear between a plot's fence and the road. */
-const PLOT_ROAD_GAP = 4;
+const PLOT_END_GAP = 16;
+/** Cells kept clear between a plot and the road. */
+const PLOT_ROAD_GAP = 6;
+/** At least this many cells along the road between two plots on the same side. */
+const PLOT_SPACING = 20;
+/** Plots on each side of a wasteland's road (the far side's sit in the gaps between this side's). */
+const PLOTS_PER_SIDE = 2;
 
 type Theme = {
   base: string;
@@ -357,19 +352,19 @@ export function route(r: Route, cities: MapCanvas[] = []): MapCanvas {
     }
   }
 
-  // ---------- the plots: fenced lawns on both sides of the road, gates facing it, a path from each gate ----------
+  // ---------- the plots: off the road on both sides, staggered, a drive from the road to each gate ----------
   const short = r.id.replace('pustkowie-', '');
   const last = PLOT_SIZE - 1;
-  for (const side of [-1, 1] as const) {
-    let a0 = PLOT_END_GAP;
-    while (a0 + last <= LEN - 1 - PLOT_END_GAP) {
-      // across: as close to the road as its winding allows along the whole plot
-      let near = side < 0 ? Infinity : -Infinity;
-      for (let a = a0; a <= a0 + last; a++) {
-        const c0 = Math.round(centre(a) - 1.5);
-        near = side < 0 ? Math.min(near, c0 - 1) : Math.max(near, c0 + 4);
-      }
-      const c0 = side < 0 ? near - PLOT_ROAD_GAP - last : near + PLOT_ROAD_GAP;
+  /** A plot at `a0` along the road on one side (a little further from the road if it must), or null when it can't lie there. */
+  const lotAt = (side: -1 | 1, a0: number) => {
+    // across: as close to the road as its winding allows along the whole plot
+    let near = side < 0 ? Infinity : -Infinity;
+    for (let a = a0; a <= a0 + last; a++) {
+      const c0 = Math.round(centre(a) - 1.5);
+      near = side < 0 ? Math.min(near, c0 - 1) : Math.max(near, c0 + 4);
+    }
+    for (let gap = PLOT_ROAD_GAP; gap <= PLOT_ROAD_GAP + 6; gap++) {
+      const c0 = side < 0 ? near - gap - last : near + gap;
       const cells: [number, number][] = [];
       for (let da = 0; da <= last; da++)
         for (let dc = 0; dc <= last; dc++) cells.push([a0 + da, c0 + dc]);
@@ -388,41 +383,62 @@ export function route(r: Route, cities: MapCanvas[] = []): MapCanvas {
         !path.length ||
         [...cells, ...path].some(([a, c]) => {
           const k = cell(a, c);
-          return c < 6 || c > WID - 7 || hidden.has(k.join()) || !m.get(...k);
+          return c < 5 || c > WID - 6 || hidden.has(k.join()) || !m.get(...k);
         });
-      if (clash) {
-        a0 += 2;
-        continue;
-      }
+      if (!clash) return { a0, c0, path };
+    }
+    return null;
+  };
+  // where the plots would ideally be (shares of the free length): this side's two, the far side's in their gaps
+  const span = LEN - 2 * PLOT_END_GAP - PLOT_SIZE;
+  const targets: Record<-1 | 1, number[]> = { [-1]: [0.05, 0.6], [1]: [0.38, 0.95] };
+  const lots: { a0: number; x: number; y: number; gate: GateSide }[] = [];
+  for (const side of [-1, 1] as const) {
+    const chosen: number[] = [];
+    for (const share of targets[side]) {
+      const want = PLOT_END_GAP + Math.round(share * span);
+      let best: NonNullable<ReturnType<typeof lotAt>> | null = null;
+      // the free spot nearest the target that keeps its distance from this side's other plot
+      for (let d = 0; d <= span && !best; d++)
+        for (const a0 of [want - d, want + d]) {
+          if (a0 < PLOT_END_GAP || a0 + last > LEN - 1 - PLOT_END_GAP) continue;
+          if (chosen.some((o) => Math.abs(o - a0) < PLOT_SIZE + PLOT_SPACING)) continue;
+          const lot = lotAt(side, a0);
+          if (lot) {
+            best = lot;
+            break;
+          }
+        }
+      if (!best) continue;
+      chosen.push(best.a0);
+      const { a0, c0, path } = best;
       // the gate faces the road: south or north on a west–east wasteland, east or west on a north–south one
       const gate: GateSide = horizontal ? (side < 0 ? 's' : 'n') : side < 0 ? 'e' : 'w';
       const [px, py] = horizontal ? [a0, c0] : [c0, a0];
-      for (const [a, c] of cells) {
-        const [x, y] = cell(a, c);
-        const lx = x - px;
-        const ly = y - py;
-        const edge = lx === 0 || ly === 0 || lx === last || ly === last;
-        const mid = last >> 1;
-        const inGate =
-          (gate === 'n' && ly === 0 && Math.abs(lx - mid) <= 1) ||
-          (gate === 's' && ly === last && Math.abs(lx - mid) <= 1) ||
-          (gate === 'w' && lx === 0 && Math.abs(ly - mid) <= 1) ||
-          (gate === 'e' && lx === last && Math.abs(ly - mid) <= 1);
-        if (edge && !inGate) m.set(x, y, { g: 'dzialka', p: 'dzialka-post', s: true });
-        else m.set(x, y, { g: inGate ? t.road : 'dzialka' });
-        hidden.add(`${x},${y}`);
-      }
+      // plain land, nothing standing (the game draws what grows there), and a free ring round the plot
+      for (let da = -1; da <= last + 1; da++)
+        for (let dc = -1; dc <= last + 1; dc++) {
+          const [x, y] = cell(a0 + da, c0 + dc);
+          if (!m.get(x, y) || onRoad.has(`${x},${y}`)) continue;
+          const inPlot = da >= 0 && dc >= 0 && da <= last && dc <= last;
+          if (inPlot || !m.get(x, y)!.s) m.set(x, y, { g: t.land });
+          hidden.add(`${x},${y}`);
+        }
       for (const [a, c] of path) {
         const k = cell(a, c);
         if (onRoad.has(k.join())) continue;
         m.set(...k, { g: t.road });
         hidden.add(k.join());
       }
-      m.lots.push({ id: `${short}-${m.lots.length + 1}`, x: px, y: py, gate });
-      a0 += PLOT_SIZE + 3;
+      lots.push({ a0, x: px, y: py, gate });
     }
   }
-  if (m.lots.length < 6) throw new Error(`${r.id}: only ${m.lots.length} plots fit`);
+  // numbered along the road, from the a-end
+  lots.sort((p, q) => p.a0 - q.a0);
+  for (const l of lots)
+    m.lots.push({ id: `${short}-${m.lots.length + 1}`, x: l.x, y: l.y, gate: l.gate });
+  if (m.lots.length < 2 * PLOTS_PER_SIDE)
+    throw new Error(`${r.id}: only ${m.lots.length} plots fit`);
 
   // ---------- dotted over the land: groves, rocks, junk (never on the road or in the nooks' clearings) ----------
   const free = (a: number, c: number) => {
@@ -482,7 +498,7 @@ export function route(r: Route, cities: MapCanvas[] = []): MapCanvas {
     t.zones[2],
   );
   m.spawn = cell(Math.floor(LEN / 2), Math.round(centre(Math.floor(LEN / 2))));
-  m.ground.push(...t.ground, PLOT_GROUND);
+  m.ground.push(...t.ground);
   // nothing scattered on the plots: a district's paving lies there
   m.scatter.push(...t.scatter);
   // both ends take on the ground of the city they meet (seamless in the game)

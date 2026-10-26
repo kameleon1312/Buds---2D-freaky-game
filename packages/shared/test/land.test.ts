@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   BUILDINGS,
-  HALL,
   LOOT_SHARE,
   MAX_DEFENCE,
   NEW_SHIELD_HOURS,
@@ -13,15 +12,19 @@ import {
   RAID_RETRY_MINUTES,
   RAIDS_PER_DAY,
   ROUTES,
+  ROUTE_STYLE,
+  SECTORS,
+  SECTOR_LIMIT,
   allReachable,
   build,
+  clearProblem,
+  clearingCost,
   collect,
   districtNameSchema,
   districtView,
   fortify,
   gateCells,
-  grow,
-  growProblem,
+  hallSpot,
   hourly,
   landDefence,
   landPower,
@@ -33,8 +36,12 @@ import {
   raid,
   raidHeld,
   raidProblem,
-  stageArea,
+  rankOf,
+  sectorIndex,
+  settle,
+  startClearing,
   startRaid,
+  startSectors,
   storage,
   upgrade,
   upgradeProblem,
@@ -47,9 +54,11 @@ const T0 = Date.UTC(2026, 9, 26, 12);
 const H = 3_600_000;
 /** A plot on Leśne Ostępy (energy grows half as much again there), its gate facing south. */
 const PLOT = 'ostepy-1';
-/** Free spots for a 3×3 building on a first-stage district, either side above the town hall. */
-const A = { x: 8, y: 9 };
-const B = { x: 14, y: 9 };
+/** Free spots for a 3×3 building in a new district: the sectors either side of the gate's. */
+const A = { x: 7, y: 22 };
+const B = { x: 17, y: 22 };
+const HALL = hallSpot('s');
+const ALL = Array.from({ length: SECTORS * SECTORS }, (_, i) => i);
 
 const land = (over: Partial<LandState> = {}): LandState => ({
   ...newLand(PLOT, 'Nowa Huta', T0),
@@ -57,14 +66,19 @@ const land = (over: Partial<LandState> = {}): LandState => ({
 });
 
 describe('plots on the wastelands', () => {
-  it('lie on every wasteland, inside its map, each one once', () => {
+  it('lie on every wasteland, a few far apart, each one once, in the style of the land', () => {
     expect(new Set(PLOTS.map((p) => p.id)).size).toBe(PLOTS.length);
-    for (const r of ROUTES)
-      expect(PLOTS.filter((p) => p.route === r.id).length).toBeGreaterThanOrEqual(6);
-    for (const p of PLOTS) {
-      expect(p.x).toBeGreaterThanOrEqual(0);
-      expect(p.y).toBeGreaterThanOrEqual(0);
+    for (const r of ROUTES) {
+      const on = PLOTS.filter((p) => p.route === r.id);
+      expect(on.length).toBe(4);
+      expect(ROUTE_STYLE[r.id]).toBeDefined();
+      // no two plots closer than a plot's side
+      for (const p of on)
+        for (const q of on)
+          if (p !== q)
+            expect(Math.max(Math.abs(p.x - q.x), Math.abs(p.y - q.y))).toBeGreaterThan(PLOT_SIZE);
     }
+    expect(ROUTE_STYLE['pustkowie-wydmy']).toBe('tropik');
     expect(plotById(PLOT)?.gate).toBe('s');
   });
 
@@ -92,23 +106,30 @@ describe('district names', () => {
 });
 
 describe('building a district', () => {
-  it('starts with a town hall in the middle, a shield and materials', () => {
-    const l = newLand(PLOT, 'Nowa Huta', T0);
-    expect(l.buildings[0]).toMatchObject({ kind: 'ratusz', x: HALL.x, y: HALL.y, level: 1 });
-    expect(l.stage).toBe(1);
+  it('starts small: a clearing by the gate, a town hall behind it, a shield and materials', () => {
+    for (const gate of ['n', 's', 'e', 'w'] as const) {
+      const plot = PLOTS.find((p) => p.gate === gate)!;
+      const l = newLand(plot.id, 'Nowa Huta', T0);
+      expect(l.sectors).toEqual(startSectors(gate));
+      expect(l.buildings[0]).toMatchObject({ kind: 'ratusz', ...hallSpot(gate), level: 1 });
+      expect(allReachable(l)).toBe(true);
+    }
+    const l = land();
+    expect(l.sectors.length).toBe(4);
     expect(l.shieldUntil).toBe(T0 + NEW_SHIELD_HOURS * H);
-    expect(allReachable(l)).toBe(true);
   });
 
-  it('builds only on the stage’s square, never on the hall, the gate or walling anything in', () => {
+  it('builds only on cleared land, never on the hall, the gate or walling anything in', () => {
     const l = land();
     expect(placementProblem(l, 'szklarnia', A.x, A.y, 3)).toBeNull();
     expect(placementProblem(l, 'szklarnia', B.x, B.y, 3)).toBeNull();
-    expect(placementProblem(l, 'szklarnia', 3, 9, 9)).toBe('outside');
+    // the sector beside the town hall is still wild
+    expect(placementProblem(l, 'szklarnia', 7, 17, 9)).toBe('outside');
     expect(placementProblem(l, 'szklarnia', HALL.x, HALL.y, 9)).toBe('occupied');
     expect(placementProblem(l, 'szklarnia', A.x, A.y, 2)).toBe('level_too_low');
     expect(placementProblem(l, 'ratusz', A.x, A.y, 9)).toBe('too_many');
     expect(placementProblem(l, 'zamek', A.x, A.y, 9)).toBe('unknown_building');
+    expect(placementProblem(l, 'fontanna', A.x, A.y, 9)).toBe('too_many');
     expect(
       placementProblem(
         land({ resources: { beton: 0, stal: 0, energia: 0, zywnosc: 0 } }),
@@ -118,13 +139,13 @@ describe('building a district', () => {
         9,
       ),
     ).toBe('poor');
-    // at the last stage the square reaches the fence: the gate keeps a clear way in
-    const full = land({ stage: 4 });
-    expect(placementProblem(full, 'szklarnia', (PLOT_SIZE - 1) / 2, PLOT_SIZE - 3, 9)).toBe('gate');
-    // a building over the town hall's door would wall it in
-    const wide = land({ stage: 2 });
-    expect(placementProblem(wide, 'szklarnia', HALL.x, HALL.y + 3, 9)).toBeNull();
-    expect(build(wide, 'szklarnia', HALL.x, HALL.y + 3, T0)).toBe('walls_in');
+    // the gate keeps a clear way in
+    expect(placementProblem(l, 'szklarnia', 12, 21, 9)).toBe('gate');
+    // a building over the town hall's door would wall it in (a plot with its gate to the north)
+    const north = { ...newLand('ostepy-2', 'Północ', T0), sectors: ALL };
+    const hall = hallSpot('n');
+    expect(placementProblem(north, 'szklarnia', hall.x, hall.y + 3, 9)).toBeNull();
+    expect(build(north, 'szklarnia', hall.x, hall.y + 3, T0)).toBe('walls_in');
   });
 
   it('pays, builds over time, produces with the wasteland’s bonus and fills storage', () => {
@@ -141,25 +162,31 @@ describe('building a district', () => {
     expect(storage(l, T0)).toBe(300);
   });
 
-  it('pays rent straight to the wallet', () => {
-    const flats = {
-      ...land(),
-      buildings: [
-        ...land().buildings,
-        {
-          id: 2,
-          kind: 'apartamentowiec' as const,
-          x: A.x,
-          y: A.y,
-          level: 1,
-          readyAt: T0,
-          collectedAt: T0,
-        },
-      ],
-    };
+  it('pays rent straight to the wallet, more with squares, fountains, a statue and the tower', () => {
+    const flat = (level: number) => ({
+      id: 2,
+      kind: 'apartamentowiec' as const,
+      x: A.x,
+      y: A.y,
+      level,
+      readyAt: T0,
+      collectedAt: T0,
+    });
+    const flats = { ...land(), buildings: [...land().buildings, flat(1)] };
     const got = collect(flats, T0 + 2 * H);
     expect(got.coins).toBe(8);
     expect(got.gathered).toMatchObject({ beton: 0, stal: 0, energia: 0, zywnosc: 0 });
+    const tower = {
+      id: 3,
+      kind: 'iglica' as const,
+      x: 12,
+      y: 8,
+      level: 1,
+      readyAt: T0,
+      collectedAt: T0,
+    };
+    const proud = { ...land(), buildings: [...land().buildings, flat(5), tower] };
+    expect(hourly(proud, proud.buildings[1]!)).toBe(30);
   });
 
   it('raises buildings within the town hall’s level', () => {
@@ -179,39 +206,66 @@ describe('building a district', () => {
   });
 });
 
-describe('growing over the plot', () => {
-  it('needs the bud’s level, the hall’s level, materials and coins', () => {
-    const rich = land({ resources: { beton: 2000, stal: 2000, energia: 2000, zywnosc: 2000 } });
-    expect(growProblem(rich, 4, 1000).problem).toBe('level_too_low');
-    expect(growProblem(rich, 5, 1000).problem).toBe('hall_too_low');
-    const hall2 = { ...rich, buildings: [{ ...rich.buildings[0]!, level: 2 }] };
-    expect(growProblem(hall2, 5, 100).problem).toBe('poor');
-    expect(growProblem(hall2, 5, 150)).toMatchObject({ problem: null, coins: 150 });
-    const grown = grow(hall2);
-    expect(grown.stage).toBe(2);
-    expect(grown.resources.beton).toBe(2000 - 150);
-    expect(stageArea(2).x1 - stageArea(2).x0 + 1).toBe(13);
-    expect(growProblem({ ...grown, stage: 4 }, 30, 99_999).problem).toBe('max_stage');
+describe('clearing the plot', () => {
+  const west = sectorIndex(0, SECTORS - 1);
+
+  it('takes the land next to what the district holds, one sector at a time, for coins and materials', () => {
+    const l = land();
+    expect(clearProblem(l, west, 3, 1000, T0)).toMatchObject({
+      problem: null,
+      coins: 60,
+      level: 3,
+    });
+    expect(clearProblem(l, 0, 3, 1000, T0).problem).toBe('not_next');
+    expect(clearProblem(l, sectorIndex(2, SECTORS - 1), 3, 1000, T0).problem).toBe('cleared');
+    expect(clearProblem(l, west, 3, 10, T0).problem).toBe('poor');
+    expect(clearProblem(l, west, 2, 1000, T0).problem).toBe('level_too_low');
+    const busy = startClearing(l, west, T0);
+    expect(busy.resources.beton).toBe(100 - 20);
+    // the work turns up the wasteland's own resource
+    expect(busy.resources.energia).toBe(clearingCost(0).yields);
+    expect(busy.clearing).toEqual({ sector: west, readyAt: T0 + 60_000 });
+    expect(clearProblem(busy, sectorIndex(4, SECTORS - 1), 3, 1000, T0).problem).toBe('clearing');
+    expect(settle(busy, T0 + 59_000).sectors).not.toContain(west);
+    const done = settle(busy, T0 + 60_000);
+    expect(done.sectors).toContain(west);
+    expect(done.clearing).toBeNull();
+    // the next one costs more
+    expect(clearProblem(done, sectorIndex(4, SECTORS - 1), 3, 1000, T0).coins).toBe(100);
   });
 
-  it('makes the district mightier and harder to raid', () => {
+  it('as far as the town hall allows, until the whole plot is the district', () => {
+    const six = land({ sectors: ALL.slice(0, SECTOR_LIMIT[0]) });
+    const rich = { ...six, resources: { beton: 9000, stal: 9000, energia: 9000, zywnosc: 9000 } };
+    expect(clearProblem(rich, 6, 30, 99_999, T0).problem).toBe('hall_too_low');
+    const full = land({ sectors: ALL });
+    expect(clearProblem(full, 0, 30, 99_999, T0).problem).toBe('cleared');
+    expect(clearingCost(20).level).toBeGreaterThan(clearingCost(0).level);
+    expect(clearingCost(20).coins).toBeGreaterThan(clearingCost(10).coins);
+  });
+
+  it('makes the district mightier, higher in rank and harder to raid', () => {
     const small = land();
     const big = {
-      ...land({ stage: 4 }),
+      ...land({ sectors: ALL }),
       buildings: BUILDINGS.map((b, i) => ({
         id: i + 1,
         kind: b.id,
         x: 0,
         y: 0,
-        level: 5,
+        level: b.levels.length,
         readyAt: T0,
         collectedAt: T0,
       })),
     };
-    expect(landPower(small)).toBe(45);
-    expect(landDefence(landPower(small))).toBe(10);
+    expect(landPower(small)).toBe(4 * 8 + 30);
+    expect(landDefence(landPower(small))).toBe(7);
     expect(landDefence(landPower(big))).toBeGreaterThan(landDefence(landPower(small)));
     expect(landDefence(1_000_000)).toBe(MAX_DEFENCE);
+    expect(rankOf(landPower(small)).name).toBe('Osada');
+    expect(rankOf(400)).toMatchObject({ name: 'Dzielnica', next: { name: 'Dystrykt' } });
+    expect(rankOf(landPower(big)).index).toBeGreaterThan(2);
+    expect(rankOf(1_000_000).next).toBeNull();
   });
 });
 
@@ -270,19 +324,23 @@ describe('raids', () => {
     expect(fortify(f, 30)).toMatchObject({ maxHp: 130, hp: 130, armor: 9 });
   });
 
-  it('show everyone the district but never its stores', () => {
-    const v = districtView(theirs, { slug: 'b', name: 'Bartek', level: 7 });
-    expect(v).toMatchObject({ plot: PLOT, name: 'Nowa Huta', stage: 1 });
+  it('show everyone the district, its cleared land and its rank, but never its stores', () => {
+    const busy = startClearing(theirs, sectorIndex(0, SECTORS - 1), T0);
+    const v = districtView(busy, { slug: 'b', name: 'Bartek', level: 7 }, T0 + H);
+    expect(v).toMatchObject({ plot: PLOT, name: 'Nowa Huta', rank: 'Osada', clearing: null });
+    expect(v.sectors.length).toBe(5);
     expect(JSON.stringify(v)).not.toContain('resources');
   });
 });
 
 describe('walking', () => {
-  it('goes in through the gate and never through the fence', () => {
+  it('goes in through the gate, never through the fence or the wild land', () => {
     const l = land();
     const c = (PLOT_SIZE - 1) / 2;
     expect(walkable(l, c, PLOT_SIZE - 1)).toBe(true);
-    expect(walkable(l, 0, 5)).toBe(false);
+    expect(walkable(l, A.x, A.y + 1)).toBe(true);
+    expect(walkable(l, 0, 22)).toBe(false);
+    expect(walkable(l, 2, 2)).toBe(false);
     expect(walkable(l, HALL.x, HALL.y)).toBe(false);
   });
 });

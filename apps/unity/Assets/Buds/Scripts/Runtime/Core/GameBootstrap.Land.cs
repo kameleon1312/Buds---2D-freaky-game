@@ -9,18 +9,22 @@ using UnityEngine;
 namespace Buds.Core
 {
     /// <summary>
-    /// Dystrykty (docs/dystrykty.md): fenced plots along the wastelands' roads. Every district on the current wasteland
-    /// is drawn for everyone (<see cref="DistrictsWorld"/>, from <c>GET /v1/districts/:route</c>, refreshed while the bud is
-    /// there). At a plot's gate E: a free plot is bought for coins and named; another bud's district shows its card
-    /// with "Napadnij" (a duel against its owner, fortified by the district, from the raid level); the bud's own opens its
-    /// window. On its own plot: walk up to a building and press E (collect what it made or the rent, or see its card with
-    /// the upgrade), open the skyline button (B) to put up something new: its ghost stands in front of the bud (green
-    /// where it fits) until E puts it there. Every change is asked of the server, which works it all out.
+    /// Dystrykty (docs/dystrykty.md): a few plots off the wastelands' roads, overgrown with the land around them. Every
+    /// district on the current wasteland is drawn for everyone (<see cref="DistrictsWorld"/>, from
+    /// <c>GET /v1/districts/:route</c>, refreshed while the bud is there). At a plot's gate E: a free plot is bought for
+    /// coins and named; another bud's district shows its card (rank, might) with "Napadnij" (a duel against its owner,
+    /// fortified by the district, from the raid level); the bud's own opens its window. On its own plot: walk up to a
+    /// building and press E (collect what it made or the rent, or see its card with the upgrade), walk up to the wild
+    /// land at the district's edge and press E to have it cleared, open the skyline button (B) to put up something new:
+    /// its ghost stands in front of the bud (green where it fits) until E puts it there. Every change is asked of the
+    /// server, which works it all out.
     /// </summary>
     public sealed partial class GameBootstrap
     {
         const float LandReach = 1.2f;
         const float GateReach = 1.6f;
+        /// <summary>Beside the wild land a building wins only this close (so its edge can be cleared next to one).</summary>
+        const float WildEdgeReach = 0.35f;
         /// <summary>Seconds between fresh looks at the wasteland's districts while the bud is on it.</summary>
         const float DistrictsRefreshSeconds = 30f;
 
@@ -33,6 +37,8 @@ namespace Buds.Core
         int landCoins = -1;
         LandBuildingDto nearbyBuilding;
         PlotData nearbyPlot;
+        /// <summary>The wild sector of the own plot the bud stands at (-1: none).</summary>
+        int nearbySector = -1;
         float districtsRefreshAt;
         /// <summary>How the last raid ended (shown when the duel screen closes), and the district raided.</summary>
         RaidResultDto lastRaid;
@@ -42,13 +48,12 @@ namespace Buds.Core
         {
             if (quests.Content.land == null) return;
             land ??= new Land(quests.Content.land);
-            DistrictsWorld.Art(quests.Content.land);
             if (landScreen != null) return;
             landScreen = new LandScreen(ui.Root)
             {
                 OnOpen = () => OpenLandScreen(),
                 OnBuild = StartPlacing,
-                OnGrow = () => _ = GrowLand(),
+
                 OnSell = (r, n) => _ = SellResource(r, n),
                 OnCancelPlacing = StopPlacing,
                 OnRename = AskRename,
@@ -64,19 +69,20 @@ namespace Buds.Core
             StopPlacing();
             nearbyBuilding = null;
             nearbyPlot = null;
+            nearbySector = -1;
             landScreen?.ShowBar(false);
             if (!HasPlots || land == null) return;
             _ = SetUpDistricts(world);
         }
 
         /// <summary>
-        /// The districts come a couple of frames after the map (loading their art then would lengthen the frame a seam
-        /// is crossed in), unless the map has changed meanwhile.
+        /// The districts come after the map: their style's art is loaded a little a frame first (so the frame a seam is
+        /// crossed in stays short), unless the map has changed meanwhile.
         /// </summary>
         async Awaitable SetUpDistricts(WorldView on)
         {
             await Awaitable.NextFrameAsync();
-            await Awaitable.NextFrameAsync();
+            await DistrictsWorld.Preload(quests.Content.land, quests.Content.land.StyleOf(on ? on.Map.Id : ""));
             if (!on || world != on || districtsWorld) return;
             districtsWorld = DistrictsWorld.Create(world, quests.Content.land, land);
             _ = RefreshDistricts(true);
@@ -212,8 +218,11 @@ namespace Buds.Core
             }
 
             var now = land.Now;
-            nearbyBuilding = onOwn ? districtsWorld.NearOwn(feet, LandReach) : null;
-            nearbyPlot = nearbyBuilding == null ? districtsWorld.NearGate(feet, GateReach) : null;
+            // at the wild edge the land comes first, unless the bud stands right at a building
+            nearbySector = onOwn ? NearWildSector(cell) : -1;
+            nearbyBuilding = onOwn ? districtsWorld.NearOwn(feet, nearbySector >= 0 ? WildEdgeReach : LandReach) : null;
+            if (nearbyBuilding != null) nearbySector = -1;
+            nearbyPlot = nearbyBuilding == null && nearbySector < 0 ? districtsWorld.NearGate(feet, GateReach) : null;
             string hint = null;
             if (nearbyBuilding != null)
             {
@@ -230,6 +239,7 @@ namespace Buds.Core
                             : $"{kind.name}: zbierz {waiting} ({land.Rules.Resource(kind.produces)?.name.ToLowerInvariant()})  [E]";
                 }
             }
+            else if (nearbySector >= 0) hint = ClearHint(nearbySector);
             else if (nearbyPlot != null) hint = PlotHint(nearbyPlot);
             ui.SetHint(hint);
             if (!input.InteractPressed) return hint != null;
@@ -239,17 +249,88 @@ namespace Buds.Core
                 return true;
             }
             if (nearbyBuilding != null) UseBuilding(nearbyBuilding, now);
+            else if (nearbySector >= 0) AskClear(nearbySector);
             else if (nearbyPlot != null) UsePlot(nearbyPlot);
             return hint != null;
         }
 
         string PlotHint(PlotData p)
         {
-            if (land.Has && land.State.plot == p.id) return $"Twój dystrykt {land.State.name}  [E]";
+            if (land.Has && land.State.plot == p.id) return $"Twój dystrykt {land.State.name} · {land.Rank}  [E]";
             var d = districtsWorld.DistrictOn(p.id);
             if (d == null) return $"Działka na sprzedaż · {Coins(p.price)}  [E]";
-            return $"Dystrykt {d.name} · {d.owner.name} (poz. {d.owner.level}) · obrona +{d.defence}%  [E]";
+            return $"{d.name} · {d.rank} · {d.owner.name} (poz. {d.owner.level}) · obrona +{d.defence}%  [E]";
         }
+
+        // ---------- clearing the plot ----------
+
+        /// <summary>What the wild land is called in each style: forest, thicket of palms, old orchard, scrap.</summary>
+        static string WildName(string style) => style switch
+        {
+            "tropik" => "zarośla",
+            "dwor" => "stary sad",
+            "zlom" => "złomowisko",
+            _ => "las",
+        };
+
+        static string ClearVerb(string style) => style switch
+        {
+            "tropik" => "Oczyść zarośla",
+            "dwor" => "Wykarczuj sad",
+            "zlom" => "Uprzątnij złom",
+            _ => "Wytnij las",
+        };
+
+        /// <summary>The wild sector right beside the bud (the cell it stands on or one step away), on its own plot; -1 if none.</summary>
+        int NearWildSector(Vector2Int cell)
+        {
+            if (!land.Has) return -1;
+            var local = land.ToLocal(cell);
+            if (!land.Claimed(local.x, local.y)) return -1;
+            foreach (var d in new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+            {
+                var s = land.WildSectorAt(local + d);
+                if (s >= 0) return s;
+            }
+            return -1;
+        }
+
+        string ClearHint(int sector)
+        {
+            if (land.InWork == sector) return $"Ekipa pracuje: jeszcze {Land.Countdown(land.State.clearing.readyAt, land.Now)}";
+            var next = land.NextClearing;
+            if (next == null) return null;
+            var problem = land.ClearProblem(sector, level, landCoins);
+            if (problem == "not_next") return null;
+            return problem == null || problem == "poor"
+                ? $"{ClearVerb(land.Style)}: {Land.CostText(next, next.coins)}  [E]"
+                : $"{ClearVerb(land.Style)}: {Land.ProblemText(problem)}";
+        }
+
+        /// <summary>E at the wild land: what clearing it costs and gives, and "Oczyść" when it can be done.</summary>
+        void AskClear(int sector)
+        {
+            if (land.InWork == sector) return;
+            var next = land.NextClearing;
+            if (next == null) return;
+            var title = $"Teren dystryktu ({land.ClearedCount}/{land.SectorLimit})";
+            var bonus = land.Rules.Resource(land.Rules.BonusOf(land.Plot.route))?.name.ToLowerInvariant();
+            var text = $"{ClearVerb(land.Style)} i zrób miejsce pod nowe budynki.\n" +
+                       $"Koszt: <b>{Land.CostText(next, next.coins)}</b> · poziom Buda {next.level} · praca ekipy {Land.Countdown(land.Now + next.seconds * 1000d, land.Now)}." +
+                       (bonus != null ? $"\nPrzy okazji: +{next.yields} ({bonus})." : "");
+            var problem = land.ClearProblem(sector, level, landCoins);
+            if (problem != null)
+            {
+                var why = problem == "poor" ? "Brakuje surowców albo monet." : Land.ProblemText(problem);
+                ui.ShowDialog(title, text + $"\n<color=#bd1c31><b>{why}</b></color>");
+                return;
+            }
+            ui.ShowChoice(title, text, "Oczyść", "Zamknij", () => _ = ClearSector(sector), null);
+        }
+
+        async Awaitable ClearSector(int sector) =>
+            await LandCall(() => api.ClearSector(session.Token, sector), _ =>
+                $"Ekipa ruszyła: {WildName(land.Style)} zniknie za {Land.Countdown(land.State.clearing.readyAt, land.Now)}");
 
         /// <summary>E at a plot's gate: buy it, look at someone's district (and maybe raid it), or open the own one.</summary>
         void UsePlot(PlotData p)
@@ -287,11 +368,12 @@ namespace Buds.Core
                 return;
             }
             var bonus = land.Rules.Resource(land.Rules.BonusOf(p.route))?.name.ToLowerInvariant();
-            var side = land.Rules.stageSides[0];
+            var wild = WildName(land.Rules.StyleOf(p.route));
             ui.ShowChoice(title,
-                $"Ogrodzona działka {land.Rules.plotSize}×{land.Rules.plotSize} przy drodze: {Districts.NameOf(p.route)}. Cena: <b>{Coins(p.price)}</b>.\n" +
-                $"Dostajesz ratusz, plac {side}×{side} pod pierwsze budynki, trochę betonu i stali, a przez {land.Rules.newShieldHours} h nikt nie napadnie. " +
-                $"Dystrykt rośnie z twoim poziomem i surowcami.{(bonus != null ? $"\n<b>Tutaj idzie lepiej: {bonus}.</b>" : "")}",
+                $"Działka przy drodze: {Districts.NameOf(p.route)}. Cena: <b>{Coins(p.price)}</b>.\n" +
+                $"Zaczynasz od małego placu z ratuszem, trochę betonu i stali, a przez {land.Rules.newShieldHours} h nikt nie napadnie. " +
+                $"Resztę działki porasta {wild}: oczyszczaj ją kawałek po kawałku i buduj, aż dystrykt zacznie budzić podziw." +
+                $"{(bonus != null ? $"\n<b>Tutaj idzie lepiej: {bonus}.</b>" : "")}",
                 "Kupuję", "Jeszcze nie", () => AskPlotName(p), null);
         }
 
@@ -331,7 +413,7 @@ namespace Buds.Core
         {
             var title = $"Dystrykt {d.name}";
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            var text = $"Właściciel: <b>{d.owner.name}</b> (poz. {d.owner.level}) · etap {d.stage} · moc {d.power}\n" +
+            var text = $"<b>{d.rank}</b> · właściciel: <b>{d.owner.name}</b> (poz. {d.owner.level}) · prestiż {d.power} · teren {d.sectors?.Length ?? 0}/{land.Rules.sectors * land.Rules.sectors}\n" +
                        $"Obrona dystryktu: <b>+{d.defence}%</b> zdrowia dla obrońcy.";
             string why = null;
             if (session == null) why = "Napadają tylko połączone Budy.";
@@ -472,13 +554,6 @@ namespace Buds.Core
 
         async Awaitable CollectLand(int id) =>
             await LandCall(() => api.Collect(session.Token, id), GatheredText);
-
-        async Awaitable GrowLand() =>
-            await LandCall(() => api.GrowLand(session.Token), _ =>
-            {
-                var side = land.StageArea(land.State.stage).width;
-                return $"Dystrykt rośnie: etap {land.State.stage}, {side}×{side} pól!";
-            });
 
         async Awaitable RenameLand(string name)
         {

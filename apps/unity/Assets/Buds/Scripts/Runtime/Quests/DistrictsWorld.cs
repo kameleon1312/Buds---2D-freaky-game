@@ -7,12 +7,15 @@ using UnityEngine;
 namespace Buds.Quests
 {
     /// <summary>
-    /// The districts on a wasteland's plots (packages/shared land.ts), drawn for everyone passing by: a free plot has a
-    /// board for sale at its gate; a bought one has its district's paving over the stage's square (and a walk in from
-    /// the gate), its buildings with colliders and cast shadows, a building site with a crane while something new goes
-    /// up, and a sign with the district's colours at the gate. The bud's own district also shows bubbles over producers
-    /// worth collecting and the ghost of a building being placed. Lives under the map (goes with it); redrawn whenever
-    /// the server answers.
+    /// The districts on a wasteland's plots (packages/shared land.ts), drawn for everyone passing by, in the style of the
+    /// land around them (las, tropik, dwor, zlom). A plot is 5×5 sectors: those not cleared yet are wild (the forest, the
+    /// palms and dunes, the orchard, the scrap of that wasteland: props over the sector and one collider), a sector being
+    /// cleared shows the crew's digger and stumps, cleared ones are paved in the style's paving with a kerb and fenced
+    /// along the plot's edge, the gate left open. A free plot is a small clearing by the road with a board for sale; a
+    /// bought one has its sign, its buildings (colliders and cast shadows; a building site with a crane while something
+    /// new goes up). The bud's own district also shows bubbles over producers worth collecting and the ghost of a
+    /// building being placed. Lives under the map (goes with it); the art is loaded per style without an atlas, before
+    /// the districts are made; plots are rebuilt one a frame when their land changes.
     /// </summary>
     public sealed class DistrictsWorld : MonoBehaviour
     {
@@ -34,26 +37,29 @@ namespace Buds.Quests
         {
             public PlotData Plot;
             public GameObject Root;
+            /// <summary>The land's ground, wild sectors, fence and sign (rebuilt when <see cref="Look"/> changes).</summary>
+            public GameObject Land;
             public string Look;
             public readonly Dictionary<int, BuildingView> Buildings = new();
+            /// <summary>Map cells the land blocks (wild sectors, the fence), map index.</summary>
+            public readonly HashSet<int> Solid = new();
         }
 
         WorldView world;
         LandContent rules;
         Land own;
-        PropArt art;
+        string style;
         readonly Dictionary<string, PlotView> plots = new();
         readonly Dictionary<string, DistrictDto> districts = new();
         /// <summary>Map cells under any district's building (map index), for walking.</summary>
         readonly HashSet<int> solid = new();
+        readonly Queue<PlotView> rebuild = new();
         double othersOffset;
         GameObject ghost;
         SpriteRenderer ghostBody;
         SpriteRenderer ghostShade;
         float nextRefresh;
         static Sprite white;
-        static Sprite paving;
-        static Sprite kerb;
 
         public string Route { get; private set; }
 
@@ -66,34 +72,81 @@ namespace Buds.Quests
             dw.rules = rules;
             dw.own = own;
             dw.Route = world.Map.Id;
-            dw.art = Art(rules);
+            dw.style = rules.StyleOf(dw.Route);
             dw.Redraw();
             return dw;
         }
 
-        static PropArt sharedArt;
-
-        /// <summary>
-        /// The districts' buildings and signs in one small atlas, packed once and shared by every wasteland (loaded when
-        /// the game starts, so crossing onto a wasteland never waits for it).
-        /// </summary>
-        public static PropArt Art(LandContent rules)
-        {
-            if (sharedArt != null) return sharedArt;
-            var names = new HashSet<string> { "dz-budowa", "dz-budowa-duza", "dz-ratusz-1", "dz-ratusz-2", "dz-ratusz-3", "dz-tablica", "dz-na-sprzedaz" };
-            foreach (var b in rules.buildings)
-                if (b.id != Land.Hall)
-                    names.Add("dz-" + b.id);
-            return sharedArt = PropArt.Load(names);
-        }
-
         int H => world.Map.Height;
+        int W => world.Map.Width;
         int Size => rules.plotSize;
+        int Sector => Mathf.Max(1, rules.sector);
+        int Sectors => Mathf.Max(1, rules.sectors);
 
         /// <summary>The world point at the bottom-middle of a map cell (where props stand).</summary>
-        Vector3 Ground(int x, int y) => world.transform.position + new Vector3(x + 0.5f, H - 1 - y + 0.1f, 0);
+        Vector3 Ground(float x, float y) => world.transform.position + new Vector3(x + 0.5f, H - 1 - y + 0.1f, 0);
 
         static double LocalMs => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        // ---------- the art: one style's sprites, loaded once, no atlas (a few dozen big pictures) ----------
+
+        static readonly Dictionary<string, Sprite> sprites = new();
+        static readonly HashSet<string> loadedStyles = new();
+        static PropArt.Manifest manifest;
+
+        /// <summary>What grows on a wild sector of each style (existing world props), the big ones first.</summary>
+        static readonly Dictionary<string, string[]> Wild = new()
+        {
+            ["las"] = new[] { "sosna", "swierk", "tree-a", "sosna", "tree-b", "bush-a", "krzak-jagody", "paproc" },
+            ["tropik"] = new[] { "palm-a", "palm-b", "palm-c", "palm-a", "hibiskus", "bush-b", "rock-a", "paproc" },
+            ["dwor"] = new[] { "tree-c", "tree-c", "tree-a", "tree-c", "bush-a", "siano", "bush-b", "bush-a" },
+            ["zlom"] = new[] { "zlom", "wrak-a", "drzewo-suche", "zlom", "opony", "smieci", "rock-dark", "opony" },
+        };
+
+        /// <summary>What stays of a sector being cleared (stumps, tyres), scattered behind the crew.</summary>
+        static string Stump(string s) => s == "zlom" ? "opony" : "pien";
+
+        static IEnumerable<string> NamesFor(LandContent rules, string s)
+        {
+            yield return "dz-budowa";
+            yield return "dz-budowa-duza";
+            yield return "dz-na-sprzedaz";
+            yield return "dz-palik";
+            foreach (var part in new[] { "ratusz-1", "ratusz-2", "ratusz-3", "tablica", "wycinka", "plot-post", "plot-h", "plot-v" })
+                yield return $"dz-{s}-{part}";
+            foreach (var b in rules.buildings ?? Array.Empty<BuildingData>())
+                if (b.id != Land.Hall)
+                    yield return $"dz-{s}-{b.id}";
+            foreach (var n in Wild.TryGetValue(s, out var w) ? w : Wild["las"]) yield return n;
+            yield return Stump(s);
+        }
+
+        /// <summary>
+        /// Loads a style's pictures a little at a time (Resources.LoadAsync), so stepping onto a wasteland never waits for
+        /// them in one frame; already loaded ones are kept for the next visit.
+        /// </summary>
+        public static async Awaitable Preload(LandContent rules, string s)
+        {
+            if (loadedStyles.Contains(s)) return;
+            manifest ??= PropArt.LoadManifest();
+            foreach (var name in NamesFor(rules, s))
+            {
+                if (sprites.ContainsKey(name)) continue;
+                var entry = Array.Find(manifest.props, e => e.name == name);
+                if (entry == null) continue;
+                var req = Resources.LoadAsync<Texture2D>("World/" + name);
+                while (!req.isDone) await Awaitable.NextFrameAsync();
+                if (req.asset is not Texture2D tex || sprites.ContainsKey(name)) continue;
+                tex.wrapMode = TextureWrapMode.Clamp;
+                sprites[name] = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(entry.pivotX, entry.pivotY),
+                    manifest.ppu, 0, SpriteMeshType.FullRect);
+            }
+            loadedStyles.Add(s);
+        }
+
+        static Sprite Art(string name) => name != null && sprites.TryGetValue(name, out var s) ? s : null;
+
+        // ---------- the server's word ----------
 
         /// <summary>The districts the server says stand on this wasteland (everyone's, the bud's own included).</summary>
         public void Apply(DistrictsResponse res)
@@ -102,6 +155,8 @@ namespace Buds.Quests
             foreach (var d in res?.districts ?? Array.Empty<DistrictDto>())
             {
                 d.buildings ??= Array.Empty<LandBuildingDto>();
+                d.sectors ??= Array.Empty<int>();
+                d.clearing ??= new LandClearingDto();
                 if (!string.IsNullOrEmpty(d.plot)) districts[d.plot] = d;
             }
             if (res != null) othersOffset = res.now - LocalMs;
@@ -116,7 +171,6 @@ namespace Buds.Quests
         /// <summary>Everything again from the latest word: the bud's own district from its land, the others from the list.</summary>
         public void Redraw()
         {
-            solid.Clear();
             foreach (var p in rules.PlotsOn(Route))
             {
                 if (!plots.TryGetValue(p.id, out var view) || !view.Root)
@@ -127,29 +181,42 @@ namespace Buds.Quests
                 }
                 Draw(view);
             }
+            RebuildSolid();
+        }
+
+        /// <summary>What a plot's land is now: who holds it, its cleared sectors, the one in work.</summary>
+        (bool owned, int[] sectors, int inWork, LandBuildingDto[] buildings, double now) StateOf(PlotData p)
+        {
+            if (IsOwn(p))
+            {
+                var now = own.Now;
+                return (true, Cleared(own.State.sectors, own.State.clearing, now), own.InWork, own.State.buildings, now);
+            }
+            var d = DistrictOn(p.id);
+            var then = LocalMs + othersOffset;
+            if (d == null) return (false, Land.StartSectors(p.gate, Sectors), -1, Array.Empty<LandBuildingDto>(), then);
+            return (true, Cleared(d.sectors, d.clearing, then), Land.SectorInWork(d.clearing, then), d.buildings, then);
+        }
+
+        int[] Cleared(int[] sectors, LandClearingDto clearing, double now)
+        {
+            var list = new List<int>(sectors ?? Array.Empty<int>());
+            if (clearing != null && clearing.readyAt > 0 && clearing.readyAt <= now && !list.Contains(clearing.sector)) list.Add(clearing.sector);
+            list.Sort();
+            return list.ToArray();
         }
 
         void Draw(PlotView view)
         {
             var p = view.Plot;
-            var mine = IsOwn(p);
-            var other = mine ? null : DistrictOn(p.id);
-            var stage = mine ? own.State.stage : other?.stage ?? 0;
-            var buildings = mine ? own.State.buildings : other?.buildings ?? Array.Empty<LandBuildingDto>();
-            var look = stage == 0 ? "free" : $"stage {stage}";
+            var (owned, sectors, inWork, buildings, now) = StateOf(p);
+            var look = $"{owned}|{string.Join(",", sectors)}|{inWork}";
             if (view.Look != look)
             {
-                // the ground and the sign change only with the stage (or a sale)
-                foreach (var b in view.Buildings.Values)
-                    if (b.Root)
-                        Destroy(b.Root);
-                view.Buildings.Clear();
-                for (var i = view.Root.transform.childCount - 1; i >= 0; i--) Destroy(view.Root.transform.GetChild(i).gameObject);
                 view.Look = look;
-                if (stage > 0) DrawPaving(view, stage);
-                DrawSign(view, stage > 0 ? "dz-tablica" : "dz-na-sprzedaz");
+                if (!rebuild.Contains(view)) rebuild.Enqueue(view);
             }
-            var now = mine ? own.Now : LocalMs + othersOffset;
+            var mine = IsOwn(p);
             var seen = new HashSet<int>();
             foreach (var b in buildings)
             {
@@ -161,12 +228,6 @@ namespace Buds.Quests
                     view.Buildings[b.id] = bv = new BuildingView { Root = root };
                 }
                 Place(view, bv, b, now, mine);
-                var kind = rules.Building(b.kind);
-                if (kind == null) continue;
-                var f = new RectInt(b.x - (kind.w - 1) / 2, b.y - kind.h + 1, kind.w, kind.h);
-                for (var y = f.yMin; y < f.yMax; y++)
-                for (var x = f.xMin; x < f.xMax; x++)
-                    solid.Add((p.y + y) * world.Map.Width + p.x + x);
             }
             var gone = new List<int>();
             foreach (var id in view.Buildings.Keys)
@@ -179,62 +240,165 @@ namespace Buds.Quests
             }
         }
 
-        // ---------- the ground and the sign ----------
-
-        /// <summary>Light paving over the stage's square with a darker kerb, and a paved walk in from the gate.</summary>
-        void DrawPaving(PlotView view, int stage)
+        void RebuildSolid()
         {
-            MakeSprites();
-            var p = view.Plot;
-            var area = Land.StageArea(rules, stage);
-            Slab(view, "Kerb", kerb, p.x + area.xMin - 0.15f, p.y + area.yMin - 0.15f, area.width + 0.3f, area.height + 0.3f, KerbSort);
-            Slab(view, "Paving", paving, p.x + area.xMin, p.y + area.yMin, area.width, area.height, PavingSort);
-            // the walk from the gate to the square, three cells wide
-            var c = (Size - 1) / 2;
-            var last = Size - 1;
-            switch (p.gate)
+            solid.Clear();
+            foreach (var view in plots.Values)
             {
-                case "n":
-                    Slab(view, "Walk", paving, p.x + c - 1, p.y, 3, area.yMin, PavingSort);
-                    break;
-                case "s":
-                    Slab(view, "Walk", paving, p.x + c - 1, p.y + area.yMax, 3, last + 1 - area.yMax, PavingSort);
-                    break;
-                case "w":
-                    Slab(view, "Walk", paving, p.x, p.y + c - 1, area.xMin, 3, PavingSort);
-                    break;
-                default:
-                    Slab(view, "Walk", paving, p.x + area.xMax, p.y + c - 1, last + 1 - area.xMax, 3, PavingSort);
-                    break;
+                foreach (var c in view.Solid) solid.Add(c);
+                var p = view.Plot;
+                var (_, _, _, buildings, _) = StateOf(p);
+                foreach (var b in buildings)
+                {
+                    var kind = rules.Building(b.kind);
+                    if (kind == null) continue;
+                    var f = new RectInt(b.x - (kind.w - 1) / 2, b.y - kind.h + 1, kind.w, kind.h);
+                    for (var y = f.yMin; y < f.yMax; y++)
+                    for (var x = f.xMin; x < f.xMax; x++)
+                        solid.Add((p.y + y) * W + p.x + x);
+                }
             }
         }
 
+        // ---------- the land: ground, wild sectors, the crew, the fence, the sign ----------
+
+        /// <summary>Makes a plot's land again (one plot a frame, from <see cref="Update"/>).</summary>
+        void BuildLand(PlotView view)
+        {
+            if (!view.Root) return;
+            if (view.Land) Destroy(view.Land);
+            view.Land = new GameObject("Land");
+            view.Land.transform.SetParent(view.Root.transform, false);
+            view.Solid.Clear();
+            var p = view.Plot;
+            var (owned, sectors, inWork, _, _) = StateOf(p);
+            var cleared = new HashSet<int>(sectors);
+            var n = Sectors;
+            for (var s = 0; s < n * n; s++)
+            {
+                var sx = s % n;
+                var sy = s / n;
+                var x0 = sx * Sector;
+                var y0 = sy * Sector;
+                if (cleared.Contains(s))
+                {
+                    // a bought district is paved; a plot for sale is a bare clearing
+                    if (owned) Pave(view, p.x + x0, p.y + y0, Sector, Sector);
+                    continue;
+                }
+                if (s == inWork) Crew(view, p, s, x0, y0);
+                else WildSector(view, p, s, x0, y0);
+                BlockSector(view, p, x0, y0);
+            }
+            if (owned) Fence(view, p, cleared);
+            // the corners of the plot are marked with survey stakes, so a plot reads as one even overgrown
+            foreach (var (cx, cy) in new[] { (-1, -1), (Size, -1), (-1, Size), (Size, Size) })
+                Prop(view.Land.transform, "dz-palik", p.x + cx, p.y + cy, shadow: false);
+            var sign = SignCell(p);
+            Prop(view.Land.transform, owned ? $"dz-{style}-tablica" : "dz-na-sprzedaz", sign.x, sign.y);
+        }
+
+        /// <summary>A wild sector: the style's growth spread over its cells (the same every time for this plot and sector).</summary>
+        void WildSector(PlotView view, PlotData p, int s, int x0, int y0)
+        {
+            var names = Wild.TryGetValue(style, out var w) ? w : Wild["las"];
+            var rnd = new System.Random(p.id.GetHashCode() * 31 + s * 7919);
+            // a loose grid of spots so the sector reads as dense growth without props standing in each other
+            for (var gy = 0; gy < 3; gy++)
+            for (var gx = 0; gx < 3; gx++)
+            {
+                if (rnd.NextDouble() < 0.18) continue;
+                var big = rnd.NextDouble() < 0.6;
+                var name = big ? names[rnd.Next(0, 4)] : names[4 + rnd.Next(0, names.Length - 4)];
+                var x = x0 + 0.4f + gx * 1.6f + (float)rnd.NextDouble() * 1.1f;
+                var y = y0 + 0.6f + gy * 1.6f + (float)rnd.NextDouble() * 1.0f;
+                Prop(view.Land.transform, name, p.x + x - 0.5f, p.y + y, shadow: false);
+            }
+        }
+
+        /// <summary>A sector the crew is clearing: stumps behind, the digger and a pile at its front.</summary>
+        void Crew(PlotView view, PlotData p, int s, int x0, int y0)
+        {
+            var rnd = new System.Random(p.id.GetHashCode() * 17 + s);
+            for (var i = 0; i < 5; i++)
+                Prop(view.Land.transform, Stump(style), p.x + x0 + 0.3f + (float)rnd.NextDouble() * 3.8f, p.y + y0 + 0.4f + (float)rnd.NextDouble() * 2.6f,
+                    shadow: false);
+            Prop(view.Land.transform, $"dz-{style}-wycinka", p.x + x0 + 2, p.y + y0 + Sector - 1);
+        }
+
+        /// <summary>One collider over a sector that can't be walked (wild or being cleared), and its cells for walking.</summary>
+        void BlockSector(PlotView view, PlotData p, int x0, int y0)
+        {
+            var box = view.Land.AddComponent<BoxCollider2D>();
+            box.size = new Vector2(Sector, Sector);
+            box.offset = (Vector2)(world.transform.position - view.Land.transform.position) +
+                         new Vector2(p.x + x0 + Sector / 2f, H - (p.y + y0) - Sector / 2f);
+            for (var y = 0; y < Sector; y++)
+            for (var x = 0; x < Sector; x++)
+                view.Solid.Add((p.y + y0 + y) * W + p.x + x0 + x);
+        }
+
+        /// <summary>
+        /// The fence along the plot's edge where the district reaches it (the cleared sectors' outer cells), the gate open:
+        /// posts on every fence cell, rails to the east and north neighbours, a collider per cell.
+        /// </summary>
+        void Fence(PlotView view, PlotData p, HashSet<int> cleared)
+        {
+            var last = Size - 1;
+            var gate = new HashSet<Vector2Int>(Land.GateCells(p.gate, Size));
+            var cells = new HashSet<Vector2Int>();
+            for (var i = 0; i < Size; i++)
+                foreach (var c in new[] { new Vector2Int(i, 0), new Vector2Int(i, last), new Vector2Int(0, i), new Vector2Int(last, i) })
+                    if (!gate.Contains(c) && cleared.Contains(Land.SectorOf(c.x, c.y, Sector, Sectors)))
+                        cells.Add(c);
+            foreach (var c in cells)
+            {
+                Prop(view.Land.transform, $"dz-{style}-plot-post", p.x + c.x, p.y + c.y);
+                if (cells.Contains(c + Vector2Int.right)) Prop(view.Land.transform, $"dz-{style}-plot-h", p.x + c.x, p.y + c.y);
+                if (cells.Contains(c + Vector2Int.down)) Prop(view.Land.transform, $"dz-{style}-plot-v", p.x + c.x, p.y + c.y);
+                var box = view.Land.AddComponent<BoxCollider2D>();
+                box.size = Vector2.one;
+                box.offset = (Vector2)(world.transform.position - view.Land.transform.position) +
+                             new Vector2(p.x + c.x + 0.5f, H - (p.y + c.y) - 0.5f);
+                view.Solid.Add((p.y + c.y) * W + p.x + c.x);
+            }
+        }
+
+        /// <summary>A standing prop at a map cell (fractions allowed), y-sorted, with a cast shadow when asked.</summary>
+        void Prop(Transform parent, string name, float x, float y, bool shadow = true)
+        {
+            var sprite = Art(name);
+            if (!sprite) return;
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.position = Ground(x, y);
+            var holder = WorldView.Stand(go.transform, "Visual");
+            var sr = new GameObject("Sprite").AddComponent<SpriteRenderer>();
+            sr.transform.SetParent(holder, false);
+            sr.sprite = sprite;
+            sr.sortingOrder = WorldView.SortOrderFor(go.transform.position.y);
+            if (shadow) CastShadow.Attach(go.transform, sr, holder);
+        }
+
+        /// <summary>The style's paving over map cells from (x, y) (top-left) w × h, with its kerb a little wider underneath.</summary>
+        void Pave(PlotView view, int x, int y, int w, int h)
+        {
+            var (paving, kerb) = Paving(style);
+            Slab(view.Land.transform, "Kerb", kerb, x - 0.12f, y - 0.12f, w + 0.24f, h + 0.24f, KerbSort);
+            Slab(view.Land.transform, "Paving", paving, x, y, w, h, PavingSort);
+        }
+
         /// <summary>A tiled flat sprite covering map cells from (x, y) (top-left, map coordinates) w × h cells.</summary>
-        void Slab(PlotView view, string name, Sprite sprite, float x, float y, float w, float h, int sort)
+        void Slab(Transform parent, string name, Sprite sprite, float x, float y, float w, float h, int sort)
         {
             if (w <= 0 || h <= 0) return;
             var sr = new GameObject(name).AddComponent<SpriteRenderer>();
-            sr.transform.SetParent(view.Root.transform, false);
+            sr.transform.SetParent(parent, false);
             sr.sprite = sprite;
             sr.drawMode = SpriteDrawMode.Tiled;
             sr.size = new Vector2(w, h);
             sr.sortingOrder = sort;
             sr.transform.position = world.transform.position + new Vector3(x + w / 2f, H - y - h / 2f, 0);
-        }
-
-        /// <summary>The sign beside the gate, just inside the fence.</summary>
-        void DrawSign(PlotView view, string prop)
-        {
-            var at = SignCell(view.Plot);
-            var go = new GameObject("Sign");
-            go.transform.SetParent(view.Root.transform, false);
-            go.transform.position = Ground(at.x, at.y);
-            var holder = WorldView.Stand(go.transform, "Visual");
-            var sr = new GameObject("Sprite").AddComponent<SpriteRenderer>();
-            sr.transform.SetParent(holder, false);
-            sr.sprite = art.Get(prop);
-            sr.sortingOrder = WorldView.SortOrderFor(go.transform.position.y);
-            if (sr.sprite) CastShadow.Attach(go.transform, sr, holder);
         }
 
         /// <summary>The map cell of a plot's sign: inside the fence, two cells beside the middle of the gate.</summary>
@@ -252,31 +416,78 @@ namespace Buds.Quests
             return new Vector2Int(p.x + local.x, p.y + local.y);
         }
 
-        static void MakeSprites()
+        static readonly Dictionary<string, (Sprite paving, Sprite kerb)> pavings = new();
+
+        /// <summary>
+        /// The style's paving, 64 px a cell: pale stone slabs with mossy joints (las), warm sandstone tiles (tropik), red
+        /// clinker in a running bond (dwor), big dark concrete slabs with bolts (zlom); a kerb of the style's stone.
+        /// </summary>
+        static (Sprite, Sprite) Paving(string s)
         {
-            if (paving) return;
-            // 64 px = one cell: four light slabs with thin joints and a faint grain
-            const int s = 64;
-            var tex = new Texture2D(s, s, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Bilinear };
-            var slab = new Color32(0xdf, 0xe3, 0xe8, 0xff);
-            var joint = new Color32(0xb9, 0xc0, 0xc9, 0xff);
-            var rnd = new System.Random(7);
-            for (var y = 0; y < s; y++)
-            for (var x = 0; x < s; x++)
+            if (pavings.TryGetValue(s, out var made)) return made;
+            const int size = 64;
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Bilinear };
+            Color32 face, joint, kerbColor;
+            switch (s)
             {
-                var j = x % 32 < 2 || y % 32 < 2;
-                var c = j ? joint : slab;
-                var g = rnd.Next(-5, 6);
-                tex.SetPixel(x, y, new Color32((byte)(c.r + g), (byte)(c.g + g), (byte)(c.b + g), 255));
+                case "tropik":
+                    face = new Color32(0xf0, 0xdc, 0xb4, 0xff);
+                    joint = new Color32(0xd2, 0xb8, 0x88, 0xff);
+                    kerbColor = new Color32(0xc9, 0xa9, 0x74, 0xff);
+                    break;
+                case "dwor":
+                    face = new Color32(0xc8, 0x6e, 0x52, 0xff);
+                    joint = new Color32(0xe6, 0xd6, 0xbc, 0xff);
+                    kerbColor = new Color32(0x8f, 0x86, 0x78, 0xff);
+                    break;
+                case "zlom":
+                    face = new Color32(0x86, 0x8b, 0x93, 0xff);
+                    joint = new Color32(0x5c, 0x60, 0x68, 0xff);
+                    kerbColor = new Color32(0x4a, 0x4f, 0x5a, 0xff);
+                    break;
+                default:
+                    face = new Color32(0xdc, 0xdd, 0xd4, 0xff);
+                    joint = new Color32(0x9c, 0xb8, 0x82, 0xff);
+                    kerbColor = new Color32(0x8a, 0x8f, 0x86, 0xff);
+                    break;
+            }
+            var rnd = new System.Random(s.Length * 7 + 3);
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                bool j;
+                switch (s)
+                {
+                    case "dwor":
+                        // bricks 32×16 px, every other row shifted half a brick
+                        j = y % 16 < 2 || (x + (y / 16 % 2) * 16) % 32 < 2;
+                        break;
+                    case "tropik":
+                        // tiles 32×32 px, offset rows, softer joints
+                        j = y % 32 < 2 || (x + (y / 32 % 2) * 16) % 32 < 2;
+                        break;
+                    case "zlom":
+                        j = x % 64 < 2 || y % 64 < 2;
+                        if (!j && (x % 64 is 8 or 56) && (y % 64 is 8 or 56)) j = true; // bolts
+                        break;
+                    default:
+                        j = x % 32 < 2 || y % 32 < 2;
+                        break;
+                }
+                var c = j ? joint : face;
+                var g = rnd.Next(-6, 7);
+                tex.SetPixel(x, y, new Color32((byte)Mathf.Clamp(c.r + g, 0, 255), (byte)Mathf.Clamp(c.g + g, 0, 255), (byte)Mathf.Clamp(c.b + g, 0, 255), 255));
             }
             tex.Apply();
-            paving = Sprite.Create(tex, new Rect(0, 0, s, s), new Vector2(0.5f, 0.5f), s, 0, SpriteMeshType.FullRect);
+            var paving = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size, 0, SpriteMeshType.FullRect);
             var k = new Texture2D(4, 4, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat };
             var pixels = new Color32[16];
-            for (var i = 0; i < 16; i++) pixels[i] = new Color32(0x86, 0x8c, 0x97, 0xff);
+            for (var i = 0; i < 16; i++) pixels[i] = kerbColor;
             k.SetPixels32(pixels);
             k.Apply();
-            kerb = Sprite.Create(k, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4, 0, SpriteMeshType.FullRect);
+            var kerb = Sprite.Create(k, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4, 0, SpriteMeshType.FullRect);
+            pavings[s] = (paving, kerb);
+            return (paving, kerb);
         }
 
         // ---------- buildings ----------
@@ -285,7 +496,7 @@ namespace Buds.Quests
         {
             var kind = rules.Building(b.kind);
             if (kind == null) return;
-            var sprite = Land.SpriteFor(b, now);
+            var sprite = Land.SpriteFor(b, now, style, kind);
             var at = Ground(view.Plot.x + b.x, view.Plot.y + b.y);
             v.Root.transform.position = at;
             if (v.Sprite != sprite)
@@ -293,7 +504,7 @@ namespace Buds.Quests
                 // a new look (finished building, the town hall grown): body, collider and shadow made again
                 for (var i = v.Root.transform.childCount - 1; i >= 0; i--) Destroy(v.Root.transform.GetChild(i).gameObject);
                 foreach (var c in v.Root.GetComponents<Collider2D>()) Destroy(c);
-                var s = art.Get(sprite);
+                var s = Art(sprite);
                 var holder = WorldView.Stand(v.Root.transform, "Visual");
                 var body = new GameObject("Sprite").AddComponent<SpriteRenderer>();
                 body.transform.SetParent(holder, false);
@@ -338,18 +549,27 @@ namespace Buds.Quests
 
         void Update()
         {
+            // one plot's land a frame, so a wasteland's districts never make one long frame
+            if (rebuild.Count > 0)
+            {
+                BuildLand(rebuild.Dequeue());
+                RebuildSolid();
+            }
             if (Time.time < nextRefresh) return;
             nextRefresh = Time.time + RefreshSeconds;
-            // finished buildings change their look, producers fill up
+            // finished buildings change their look, producers fill up, a crew finishes
             foreach (var view in plots.Values)
                 if (view.Root)
                     Draw(view);
         }
 
+        /// <summary>Whether every plot's land has been made (the demo waits for it).</summary>
+        public bool Ready => rebuild.Count == 0;
+
         // ---------- what the bud walks up to ----------
 
-        /// <summary>Whether a map cell is under a building of any district.</summary>
-        public bool Blocks(int x, int y) => solid.Contains(y * world.Map.Width + x);
+        /// <summary>Whether a map cell is blocked by a district: a building, a wild sector, the fence.</summary>
+        public bool Blocks(int x, int y) => solid.Contains(y * W + x);
 
         /// <summary>The plot whose gate (or sign) is next to a point (feet in world units), or null.</summary>
         public PlotData NearGate(Vector2 feet, float reach)
@@ -423,7 +643,8 @@ namespace Buds.Quests
             ghost.SetActive(true);
             var map = own.ToMap(anchor.x, anchor.y);
             ghost.transform.position = Ground(map.x, map.y);
-            ghostBody.sprite = art.Get("dz-" + kind.id) ?? art.Get("dz-budowa");
+            var look = kind.id == Land.Hall ? $"dz-{style}-ratusz-1" : $"dz-{style}-{kind.id}";
+            ghostBody.sprite = Art(look) ?? Art("dz-budowa");
             ghostBody.color = fits ? new Color(0.75f, 1f, 0.75f, 0.7f) : new Color(1f, 0.55f, 0.55f, 0.6f);
             ghostBody.sortingOrder = WorldView.SortOrderFor(ghost.transform.position.y) + 1;
             ghostShade.color = fits ? new Color(0.64f, 0.9f, 0.21f, 0.35f) : new Color(1f, 0.24f, 0.31f, 0.35f);

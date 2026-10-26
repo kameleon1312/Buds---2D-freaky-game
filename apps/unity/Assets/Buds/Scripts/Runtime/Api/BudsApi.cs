@@ -151,8 +151,9 @@ namespace Buds.Api
         public Awaitable<Quests.LandResponse> RenameLand(string token, string name) =>
             Post<Quests.LandResponse>("/v1/land/name", token, JsonUtility.ToJson(new Quests.RenameLandRequest { name = name }));
 
-        /// <summary>The next stage: the district spreads over more of its plot.</summary>
-        public Awaitable<Quests.LandResponse> GrowLand(string token) => Post<Quests.LandResponse>("/v1/land/grow", token, "{}");
+        /// <summary>Has a crew clear a wild sector of the plot next to the district.</summary>
+        public Awaitable<Quests.LandResponse> ClearSector(string token, int sector) =>
+            Post<Quests.LandResponse>("/v1/land/clear", token, JsonUtility.ToJson(new Quests.ClearRequest { sector = sector }));
 
         /// <summary>Raids the district on a plot: a duel against its owner, fortified by the district.</summary>
         public Awaitable<FightResponse> StartRaid(string token, string plot) =>

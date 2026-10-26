@@ -3062,37 +3062,37 @@
       ]
     },
     {
-      "name": "dz-ratusz-1",
-      "pivotX": 0.5002,
-      "pivotY": 0.0332,
+      "name": "dz-las-ratusz-1",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
       "flat": false,
       "foot": [
-        5,
-        4
+        3,
+        3
       ]
     },
     {
-      "name": "dz-ratusz-2",
-      "pivotX": 0.5002,
-      "pivotY": 0.024,
+      "name": "dz-las-ratusz-2",
+      "pivotX": 0.4997,
+      "pivotY": 0.0253,
       "flat": false,
       "foot": [
-        5,
-        4
+        3,
+        3
       ]
     },
     {
-      "name": "dz-ratusz-3",
-      "pivotX": 0.4998,
-      "pivotY": 0.0141,
+      "name": "dz-las-ratusz-3",
+      "pivotX": 0.5005,
+      "pivotY": 0.0147,
       "flat": false,
       "foot": [
-        5,
-        4
+        3,
+        3
       ]
     },
     {
-      "name": "dz-apartamentowiec",
+      "name": "dz-las-apartamentowiec",
       "pivotX": 0.4994,
       "pivotY": 0.0205,
       "flat": false,
@@ -3102,7 +3102,7 @@
       ]
     },
     {
-      "name": "dz-szklarnia",
+      "name": "dz-las-szklarnia",
       "pivotX": 0.4994,
       "pivotY": 0.0278,
       "flat": false,
@@ -3112,7 +3112,7 @@
       ]
     },
     {
-      "name": "dz-farma-solarna",
+      "name": "dz-las-farma-solarna",
       "pivotX": 0.4994,
       "pivotY": 0.0417,
       "flat": false,
@@ -3122,7 +3122,7 @@
       ]
     },
     {
-      "name": "dz-betoniarnia",
+      "name": "dz-las-betoniarnia",
       "pivotX": 0.5003,
       "pivotY": 0.0247,
       "flat": false,
@@ -3132,7 +3132,7 @@
       ]
     },
     {
-      "name": "dz-recykling",
+      "name": "dz-las-recykling",
       "pivotX": 0.5003,
       "pivotY": 0.0275,
       "flat": false,
@@ -3142,13 +3142,643 @@
       ]
     },
     {
-      "name": "dz-magazyn",
+      "name": "dz-las-magazyn",
       "pivotX": 0.4994,
       "pivotY": 0.0357,
       "flat": false,
       "foot": [
         3,
         3
+      ]
+    },
+    {
+      "name": "dz-las-skwer",
+      "pivotX": 0.5003,
+      "pivotY": 0.0385,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-las-fontanna",
+      "pivotX": 0.5003,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-las-pomnik",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-las-iglica",
+      "pivotX": 0.4998,
+      "pivotY": 0.0099,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-las-tablica",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-las-wycinka",
+      "pivotX": 0.5005,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "dz-las-plot-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-las-plot-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-las-plot-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0556,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-tropik-ratusz-1",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-ratusz-2",
+      "pivotX": 0.4997,
+      "pivotY": 0.0253,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-ratusz-3",
+      "pivotX": 0.5005,
+      "pivotY": 0.0147,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-apartamentowiec",
+      "pivotX": 0.4994,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-szklarnia",
+      "pivotX": 0.4994,
+      "pivotY": 0.0278,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-farma-solarna",
+      "pivotX": 0.4994,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-betoniarnia",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-recykling",
+      "pivotX": 0.5003,
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-magazyn",
+      "pivotX": 0.4994,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-skwer",
+      "pivotX": 0.5003,
+      "pivotY": 0.0385,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-fontanna",
+      "pivotX": 0.5003,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-pomnik",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-tropik-iglica",
+      "pivotX": 0.4998,
+      "pivotY": 0.0099,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-tropik-tablica",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-tropik-wycinka",
+      "pivotX": 0.5005,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "dz-tropik-plot-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-tropik-plot-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-tropik-plot-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0556,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-dwor-ratusz-1",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-ratusz-2",
+      "pivotX": 0.4997,
+      "pivotY": 0.0253,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-ratusz-3",
+      "pivotX": 0.5005,
+      "pivotY": 0.0147,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-apartamentowiec",
+      "pivotX": 0.4994,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-szklarnia",
+      "pivotX": 0.4994,
+      "pivotY": 0.0278,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-farma-solarna",
+      "pivotX": 0.4994,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-betoniarnia",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-recykling",
+      "pivotX": 0.5003,
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-magazyn",
+      "pivotX": 0.4994,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-skwer",
+      "pivotX": 0.5003,
+      "pivotY": 0.0385,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-fontanna",
+      "pivotX": 0.5003,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-pomnik",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-dwor-iglica",
+      "pivotX": 0.4998,
+      "pivotY": 0.0099,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-dwor-tablica",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-dwor-wycinka",
+      "pivotX": 0.5005,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "dz-dwor-plot-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-dwor-plot-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-dwor-plot-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0556,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-zlom-ratusz-1",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-ratusz-2",
+      "pivotX": 0.4997,
+      "pivotY": 0.0253,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-ratusz-3",
+      "pivotX": 0.5005,
+      "pivotY": 0.0147,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-apartamentowiec",
+      "pivotX": 0.4994,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-szklarnia",
+      "pivotX": 0.4994,
+      "pivotY": 0.0278,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-farma-solarna",
+      "pivotX": 0.4994,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-betoniarnia",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-recykling",
+      "pivotX": 0.5003,
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-magazyn",
+      "pivotX": 0.4994,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-skwer",
+      "pivotX": 0.5003,
+      "pivotY": 0.0385,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-fontanna",
+      "pivotX": 0.5003,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-pomnik",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-zlom-iglica",
+      "pivotX": 0.4998,
+      "pivotY": 0.0099,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-zlom-tablica",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-zlom-wycinka",
+      "pivotX": 0.5005,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "dz-zlom-plot-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-zlom-plot-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-zlom-plot-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0556,
+      "flat": false,
+      "foot": [
+        1,
+        1
       ]
     },
     {
@@ -3172,16 +3802,6 @@
       ]
     },
     {
-      "name": "dz-tablica",
-      "pivotX": 0.5,
-      "pivotY": 0.05,
-      "flat": false,
-      "foot": [
-        1,
-        1
-      ]
-    },
-    {
       "name": "dz-na-sprzedaz",
       "pivotX": 0.5005,
       "pivotY": 0.0559,
@@ -3192,29 +3812,9 @@
       ]
     },
     {
-      "name": "dzialka-post",
-      "pivotX": 0.5,
-      "pivotY": 0.1364,
-      "flat": false,
-      "foot": [
-        1,
-        1
-      ]
-    },
-    {
-      "name": "dzialka-h",
-      "pivotX": 0.0556,
-      "pivotY": 0.1364,
-      "flat": false,
-      "foot": [
-        1,
-        1
-      ]
-    },
-    {
-      "name": "dzialka-v",
-      "pivotX": 0.5,
-      "pivotY": 0.0556,
+      "name": "dz-palik",
+      "pivotX": 0.5015,
+      "pivotY": 0.0976,
       "flat": false,
       "foot": [
         1,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  HALL,
   NEW_SHIELD_HOURS,
+  hallSpot,
   RAID_RETRY_MINUTES,
   plotPrice,
   type DistrictsResponse,
@@ -24,13 +24,13 @@ const look = {
 };
 
 const H = 3_600_000;
-/** Free spots for a 3×3 building in a first-stage district. */
-const A = { x: 8, y: 9 };
-const B = { x: 14, y: 9 };
+/** Free spots for a 3×3 building in a new district (gate to the south): either side of the gate's sector. */
+const A = { x: 7, y: 22 };
+const B = { x: 17, y: 22 };
+const HALL = hallSpot('s');
 const PRICE = plotPrice('pustkowie-ostepy');
-/** XP of levels 3, 5 and 6. */
+/** XP of levels 3 and 6. */
 const LEVEL_3 = 400;
-const LEVEL_5 = 1600;
 const LEVEL_6 = 2500;
 
 async function setup(extraEnv: Record<string, string> = {}) {
@@ -92,7 +92,9 @@ describe('dystrykty', () => {
     const made = await buy('  Nowa   Huta ');
     expect(made.status).toBe(201);
     const view = (await json(made)).land!;
-    expect(view.land).toMatchObject({ plot: 'ostepy-1', name: 'Nowa Huta', stage: 1 });
+    expect(view.land).toMatchObject({ plot: 'ostepy-1', name: 'Nowa Huta', clearing: null });
+    expect(view.land.sectors).toHaveLength(4);
+    expect(view.rank).toBe('Osada');
     expect(view.land.buildings[0]).toMatchObject({ kind: 'ratusz', x: HALL.x, y: HALL.y });
     expect((await store.wallet(ala.slug)).coins).toBe(0);
     expect((await buy('Druga', 'ostepy-2')).status).toBe(409);
@@ -105,10 +107,14 @@ describe('dystrykty', () => {
   });
 
   it('shows every district on a wasteland to anyone, without its stores', async () => {
-    const { bud, json } = await setup();
+    const { bud, json, store } = await setup();
     const ala = await bud('Ala');
     await ala.grant(LEVEL_3, PRICE);
     await ala.call('POST', '/v1/land', { plot: 'ostepy-2', name: 'Zielone Tarasy' });
+    // a document from the first plan (stages, no sectors) is left out instead of breaking the list
+    const old = await bud('Olek');
+    const legacy = { plot: 'ostepy-3', name: 'Stara Huta', stage: 1 };
+    await store.createLand(old.slug, 'ostepy-3', 'pustkowie-ostepy', legacy, 45, 0);
     const res = await ala.call('GET', '/v1/districts/pustkowie-ostepy', undefined, false);
     expect(res.status).toBe(200);
     const list = await json<DistrictsResponse>(res);
@@ -140,7 +146,7 @@ describe('dystrykty', () => {
     expect(built.status).toBe(200);
     const plant = (await json(built)).land!.land.buildings.find((b) => b.kind === 'betoniarnia')!;
     expect((await json(await build('betoniarnia', B))).error?.code).toBe('too_many');
-    expect((await json(await build('szklarnia', { x: 3, y: 9 }))).error?.code).toBe('outside');
+    expect((await json(await build('szklarnia', { x: 7, y: 17 }))).error?.code).toBe('outside');
     expect((await json(await build('szklarnia', HALL))).error?.code).toBe('occupied');
 
     wait(60_000 + 2 * H);
@@ -156,14 +162,27 @@ describe('dystrykty', () => {
     expect((await store.wallet(ala.slug)).coins).toBe(40);
   });
 
-  it('grows over the plot with the bud’s level and the town hall', async () => {
-    const { bud, json } = await setup();
+  it('clears the plot sector by sector next to the district, one at a time, by the server clock', async () => {
+    const { bud, json, store, wait } = await setup();
     const ala = await bud('Ala');
     await ala.grant(LEVEL_3, PRICE + 500);
     await ala.call('POST', '/v1/land', { plot: 'ostepy-1', name: 'Nowa Huta' });
-    expect((await json(await ala.call('POST', '/v1/land/grow'))).error?.code).toBe('level_too_low');
-    await ala.grant(LEVEL_5 - LEVEL_3, 0);
-    expect((await json(await ala.call('POST', '/v1/land/grow'))).error?.code).toBe('hall_too_low');
+    const clear = (sector: unknown) => ala.call('POST', '/v1/land/clear', { sector });
+    expect((await clear('x')).status).toBe(400);
+    expect((await json(await clear(0))).error?.code).toBe('not_next');
+    const started = await json(await clear(20));
+    expect(started.land!.land.clearing).toMatchObject({ sector: 20 });
+    expect(started.coins).toBe(500 - 60);
+    expect((await store.wallet(ala.slug)).coins).toBe(500 - 60);
+    expect((await json(await clear(24))).error?.code).toBe('clearing');
+    wait(60_000);
+    const done = await json(await ala.call('GET', '/v1/land'));
+    expect(done.land!.land.sectors).toContain(20);
+    expect(done.land!.land.clearing).toBeNull();
+    // the cleared sector can be built on now
+    const shed = await ala.call('POST', '/v1/land/build', { kind: 'szklarnia', x: 2, y: 22 });
+    expect(shed.status).toBe(200);
+    expect((await json(await clear(15))).land!.land.clearing).toMatchObject({ sector: 15 });
     expect((await ala.call('POST', '/v1/land/buildings/abc/upgrade')).status).toBe(400);
     expect((await ala.call('POST', '/v1/land/buildings/77/upgrade')).status).toBe(404);
   });

@@ -9,16 +9,16 @@ namespace Buds.UI
     /// <summary>
     /// The district's screens: a bar at the top of the screen while the bud is on its plot (the four resources and how
     /// much fits, a skyline button that opens the window, a cancel button while a building is being placed), the window
-    /// with four tabs: Budynki (what can be put up, what it costs, why not), Rozbudowa (the next stage over the plot),
-    /// Skup (resources sold for coins) and Napady (defence, shield, what is safe, who raided), its name with "Zmień
-    /// nazwę", and the naming window (buying a plot and renaming). The windows only say what the player wants; the game
-    /// asks the server.
+    /// with four tabs: Budynki (what can be put up, what it costs, why not), Teren (the district's rank and prestige, its
+    /// cleared land, what clearing the next piece asks for, the crew at work), Skup (resources sold for coins) and Napady
+    /// (defence, shield, what is safe, who raided), its name with "Zmień nazwę", and the naming window (buying a plot
+    /// and renaming). The windows only say what the player wants; the game asks the server.
     /// </summary>
     public sealed class LandScreen
     {
-        public const int TabBuildings = 0, TabGrow = 1, TabSell = 2, TabRaids = 3;
+        public const int TabBuildings = 0, TabTerrain = 1, TabSell = 2, TabRaids = 3;
         const int Tabs = 4;
-        const float W = 960, H = 640;
+        const float W = 960, H = 730;
 
         readonly GameObject bar;
         readonly Text[] amounts = new Text[4];
@@ -44,7 +44,6 @@ namespace Buds.UI
         int tab;
 
         public Action<string> OnBuild;
-        public Action OnGrow;
         public Action<string, int> OnSell;
         public Action OnCancelPlacing;
         public Action OnOpen;
@@ -97,7 +96,7 @@ namespace Buds.UI
             group.gameObject.AddComponent<FitInParent>();
             var body = UiKit.Window("Window", group, new Vector2(W, H), "Dystrykt", Hide, out var window, out title);
             UiKit.Place(window, new Vector2(0.5f, 0.5f), Vector2.zero, window.sizeDelta);
-            string[] names = { "Budynki", "Rozbudowa", "Skup", "Napady" };
+            string[] names = { "Budynki", "Teren", "Skup", "Napady" };
             for (var i = 0; i < Tabs; i++)
             {
                 var index = i;
@@ -273,7 +272,7 @@ namespace Buds.UI
             foreach (var r in rows) UnityEngine.Object.Destroy(r);
             rows.Clear();
             if (land == null || !land.Has) return;
-            SetStatus($"Moc: {land.Power} · obrona +{land.Defence}%");
+            SetStatus($"{land.Rank} · prestiż {land.Power} · obrona +{land.Defence}%");
             switch (tab)
             {
                 case TabBuildings:
@@ -284,8 +283,8 @@ namespace Buds.UI
                         BuildingRow(kind, i++);
                     }
                     break;
-                case TabGrow:
-                    GrowRows();
+                case TabTerrain:
+                    TerrainRows();
                     break;
                 case TabSell:
                     SellRows();
@@ -320,67 +319,88 @@ namespace Buds.UI
             if (have >= limit) why = limit == 0 ? "Najpierw ulepsz ratusz." : $"Masz {have}/{limit}. Więcej po ulepszeniu ratusza.";
             else if (budLevel < first.player) why = $"Od poziomu {first.player}.";
             else if (!land.CanAfford(first)) why = "Brakuje surowców.";
-            // two columns, three rows: every kind on one screen
-            var card = Row(index / 2, 104, why == null ? UiKit.Paper300 : UiKit.Paper100, index % 2);
+            // two columns, five rows of shorter cards: every kind on one screen
+            var card = RowAt(index / 2 * 92, 84, why == null ? UiKit.Paper300 : UiKit.Paper100, index % 2);
             var icon = UiKit.Rect("Icon", card).gameObject.AddComponent<Image>();
             icon.sprite = UiKit.Picture(string.IsNullOrEmpty(kind.produces) ? "Ui/dzielnica" : "Ui/zasob-" + kind.produces);
             icon.preserveAspect = true;
             icon.raycastTarget = false;
-            UiKit.Place(icon.rectTransform, new Vector2(0, 0.5f), new Vector2(12, 0), new Vector2(50, 50), new Vector2(0, 0.5f));
-            var name = UiKit.Label("Name", card, $"{kind.name}  <size=16><color=#55514a>{have}/{limit}</color></size>", 22, UiKit.Ink, true, TextAnchor.MiddleLeft);
+            UiKit.Place(icon.rectTransform, new Vector2(0, 0.5f), new Vector2(12, 0), new Vector2(46, 46), new Vector2(0, 0.5f));
+            var name = UiKit.Label("Name", card, $"{kind.name}  <size=16><color=#55514a>{have}/{limit}</color></size>", 21, UiKit.Ink, true, TextAnchor.MiddleLeft);
             name.supportRichText = true;
-            UiKit.Place(name.rectTransform, new Vector2(0, 1), new Vector2(72, -8), new Vector2(340, 30), new Vector2(0, 1));
+            UiKit.Place(name.rectTransform, new Vector2(0, 1), new Vector2(68, -6), new Vector2(340, 28), new Vector2(0, 1));
             var line = string.IsNullOrEmpty(kind.produces)
-                ? kind.blurb
+                ? kind.prestige > 0 ? $"+{kind.prestige} prestiżu, +{kind.rentBoost}% czynszu · {Land.CostText(first)}" : kind.blurb
                 : kind.produces == Land.Rent
                     ? $"czynsz {Core.GameBootstrap.Coins(first.value)} na godzinę · {Land.CostText(first)}"
                     : $"{first.value} na godzinę · {Land.CostText(first)}";
-            var detail = UiKit.Label("Detail", card, why ?? (string.IsNullOrEmpty(kind.produces) ? $"{Land.CostText(first)} · {kind.blurb}" : line), 16,
+            var detail = UiKit.Label("Detail", card,
+                why ?? (string.IsNullOrEmpty(kind.produces) && kind.prestige <= 0 ? $"{Land.CostText(first)} · {kind.blurb}" : line), 15,
                 why == null ? UiKit.InkSoft : UiKit.Alert700, false, TextAnchor.UpperLeft);
-            UiKit.Place(detail.rectTransform, new Vector2(0, 1), new Vector2(72, -40), new Vector2(why == null ? 214 : 340, 56), new Vector2(0, 1));
+            UiKit.Place(detail.rectTransform, new Vector2(0, 1), new Vector2(68, -34), new Vector2(why == null ? 236 : 340, 48), new Vector2(0, 1));
             if (why == null)
             {
                 var id = kind.id;
-                var go = UiKit.Button("Build", card, "Postaw", new Vector2(120, 52), () =>
+                var go = UiKit.Button("Build", card, "Postaw", new Vector2(110, 48), () =>
                 {
                     Hide();
                     OnBuild?.Invoke(id);
-                }, UiKit.Tone.Gold, 22);
-                UiKit.Place((RectTransform)go.transform, new Vector2(1, 0), new Vector2(-12, 14), new Vector2(120, 52), new Vector2(1, 0));
+                }, UiKit.Tone.Gold, 21);
+                UiKit.Place((RectTransform)go.transform, new Vector2(1, 0.5f), new Vector2(-10, 2), new Vector2(110, 48), new Vector2(1, 0.5f));
             }
         }
 
-        /// <summary>The stage now and what the next one asks for, with the button when everything is there.</summary>
-        void GrowRows()
+        /// <summary>
+        /// The district's rank with its prestige towards the next one, its land (cleared of the plot, what the town hall
+        /// allows), the crew at work or what clearing the next piece asks for and how it is done.
+        /// </summary>
+        void TerrainRows()
         {
-            var side = land.Rules.stageSides[Mathf.Clamp(land.State.stage, 1, land.Rules.stageSides.Length) - 1];
-            var header = Row(0, 64, UiKit.Paper100);
-            var now = UiKit.Label("Text", header,
-                $"Etap {land.State.stage} z {land.Rules.stages.Length}: dystrykt zajmuje {side}×{side} pól działki {land.Rules.plotSize}×{land.Rules.plotSize}.", 19,
-                UiKit.Ink, false, TextAnchor.MiddleLeft);
-            UiKit.Stretch(now.rectTransform, 16, 0, 16, 0);
-            var next = land.NextStage;
-            if (next == null)
+            var rules = land.Rules;
+            var rank = rules.RankIndex(land.Power);
+            var next = rules.ranks != null && rank + 1 < rules.ranks.Length ? rules.ranks[rank + 1] : null;
+            var header = RowAt(0, 112, UiKit.Paper100);
+            var title = UiKit.Label("Rank", header, land.Rank, 30, UiKit.Ink, true, TextAnchor.UpperLeft);
+            UiKit.Place(title.rectTransform, new Vector2(0, 1), new Vector2(18, -10), new Vector2(520, 40), new Vector2(0, 1));
+            var info = UiKit.Label("Prestige", header,
+                next != null
+                    ? $"Prestiż {land.Power} / {next.min}: dalej {next.name}. Rośnie z terenem, budynkami i ich poziomami, a najbardziej ze skwerów, fontann, pomnika i Iglicy."
+                    : $"Prestiż {land.Power}. Najwyższa ranga: ten dystrykt zna całe pogranicze.",
+                17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+            UiKit.Place(info.rectTransform, new Vector2(0, 1), new Vector2(18, -52), new Vector2(W - 64 - 36, 54), new Vector2(0, 1));
+            var floor = rules.ranks != null && rules.ranks.Length > 0 ? rules.ranks[rank].min : 0;
+            var fill = UiKit.Bar("Bar", header, UiKit.Buds400, out var bar);
+            UiKit.Place(bar, new Vector2(1, 1), new Vector2(-18, -14), new Vector2(300, 26), new Vector2(1, 1));
+            Canvas.ForceUpdateCanvases();
+            UiKit.SetBar(fill, next == null ? 1 : Mathf.Clamp01((land.Power - floor) / (float)Mathf.Max(1, next.min - floor)));
+
+            var n = rules.sectors * rules.sectors;
+            var cleared = land.ClearedCount;
+            var area = RowAt(122, 64, UiKit.Paper100);
+            var areaText = UiKit.Label("Area", area,
+                $"Teren: <b>{cleared}</b> z {n} kawałków działki · ratusz pozwala na {land.SectorLimit}" +
+                (land.RentBoost > 0 ? $" · czynsz +{land.RentBoost}%" : ""),
+                19, UiKit.Ink, false, TextAnchor.MiddleLeft);
+            areaText.supportRichText = true;
+            UiKit.Stretch(areaText.rectTransform, 16, 0, 16, 0);
+
+            var card = RowAt(196, 150, UiKit.Paper300);
+            string text;
+            if (land.InWork >= 0)
+                text = $"<b>Ekipa pracuje</b>: jeszcze {Land.Countdown(land.State.clearing.readyAt, land.Now)}.\nPotem ten kawałek jest twój i można na nim budować.";
+            else if (land.NextClearing == null)
+                text = "<b>Cała działka jest twoja.</b>\nDystrykt rośnie dalej w górę: ulepszaj budynki i stawiaj to, co budzi podziw.";
+            else
             {
-                var full = RowAt(74, 64, UiKit.Paper300);
-                var done = UiKit.Label("Text", full, "Dystrykt zajmuje całą działkę. Rośnie dalej w górę: ulepszaj budynki.", 19, UiKit.Ink, false, TextAnchor.MiddleLeft);
-                UiKit.Stretch(done.rectTransform, 16, 0, 16, 0);
-                return;
+                var c = land.NextClearing;
+                text = $"<b>Następny kawałek</b>: {Land.CostText(c, c.coins)} · poziom Buda {c.level} · praca ekipy {Land.Countdown(land.Now + c.seconds * 1000d, land.Now)}\n" +
+                       "Podejdź do zarośniętego terenu przy swoim dystrykcie i naciśnij E.";
+                if (cleared >= land.SectorLimit) text += "\n<color=#bd1c31><b>Więcej terenu po ulepszeniu ratusza.</b></color>";
+                else if (budLevel < c.level) text += $"\n<color=#bd1c31><b>Potrzebujesz poziomu {c.level}.</b></color>";
             }
-            var nextSide = land.Rules.stageSides[Mathf.Min(land.State.stage, land.Rules.stageSides.Length - 1)];
-            var problem = land.GrowProblem(budLevel, coins);
-            var card = RowAt(74, 150, problem == null ? UiKit.Paper300 : UiKit.Paper100);
-            var title = UiKit.Label("Name", card, $"Etap {land.State.stage + 1}: {nextSide}×{nextSide} pól", 24, UiKit.Ink, true, TextAnchor.MiddleLeft);
-            UiKit.Place(title.rectTransform, new Vector2(0, 1), new Vector2(18, -10), new Vector2(600, 34), new Vector2(0, 1));
-            var lines = $"Koszt: {Land.CostText(next, next.coins)}\nPoziom Buda {next.level} · ratusz poziom {next.hall}";
-            if (problem != null)
-                lines += $"\n<color=#bd1c31><b>{(problem == "poor" ? "Brakuje surowców albo monet." : Land.ProblemText(problem))}</b></color>";
-            var detail = UiKit.Label("Detail", card, lines, 18, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-            detail.supportRichText = true;
-            UiKit.Place(detail.rectTransform, new Vector2(0, 1), new Vector2(18, -48), new Vector2(640, 96), new Vector2(0, 1));
-            if (problem != null) return;
-            var go = UiKit.Button("Grow", card, "Rozbuduj", new Vector2(180, 56), () => OnGrow?.Invoke(), UiKit.Tone.Gold, 24);
-            UiKit.Place((RectTransform)go.transform, new Vector2(1, 0.5f), new Vector2(-14, 3), new Vector2(180, 56), new Vector2(1, 0.5f));
+            var t = UiKit.Label("Text", card, text, 19, UiKit.Ink, false, TextAnchor.MiddleLeft);
+            t.supportRichText = true;
+            UiKit.Stretch(t.rectTransform, 18, 8, 18, 8);
         }
 
         /// <summary>The district's defence, its shield, what is safe from raids and who raided it lately.</summary>

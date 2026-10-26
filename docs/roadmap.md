@@ -45,8 +45,9 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
    Wymogi sklepów: polityka prywatności, regulamin, pokazywanie szans przy losowaniach (najlepiej ich nie mieć).
 7. ~~**Multiplayer**~~ — gracze na wspólnej mapie, w czasie rzeczywistym (`docs/multiplayer.md`). Dalej: wspólne
    mini-gry, wymiana przedmiotów twarzą w twarz, walki na żywo (obie strony grają naraz).
-8. **Dystrykty** (`docs/dystrykty.md`): ~~działki na pustkowiach, własny nazwany dystrykt rosnący etapami, produkcja,
-   czynsz, widoczny dla wszystkich, napady od poziomu 6 z obroną rosnącą z mocą~~; dalej powiadomienia o napadach i
+8. **Dystrykty** (`docs/dystrykty.md`): ~~działki na pustkowiach w stylu okolicy, własny nazwany dystrykt rosnący
+   wycinką kawałek po kawałku, produkcja, czynsz, budowle prestiżowe i rangi, widoczny dla wszystkich, napady od poziomu
+   6 z obroną rosnącą z prestiżem~~; dalej powiadomienia o napadach i
    zemsta, budynki obronne, więcej działek, ekipy i ranking dystryktów.
 9. Wydarzenia czasowe, przepustka sezonowa, kolejne dzielnice.
 

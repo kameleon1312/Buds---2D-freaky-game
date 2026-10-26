@@ -272,13 +272,30 @@ namespace Buds.Quests
         public int value;
     }
 
-    /// <summary>What growing to a stage asks for: materials, coins, the bud's level and the town hall's level.</summary>
+    /// <summary>What clearing a sector asks for (materials, coins, the bud's level), how long the crew works, what it turns up.</summary>
     [Serializable]
-    public sealed class LandStageData : LandCost
+    public sealed class LandClearData : LandCost
     {
         public int coins;
         public int level;
-        public int hall;
+        public int seconds;
+        public int yields;
+    }
+
+    /// <summary>A district rank by might (Osada … Legenda Pogranicza).</summary>
+    [Serializable]
+    public sealed class LandRankData
+    {
+        public int min;
+        public string name;
+    }
+
+    /// <summary>The look of the districts on a wasteland (las, tropik, dwor, zlom).</summary>
+    [Serializable]
+    public sealed class RouteStyleData
+    {
+        public string route;
+        public string style;
     }
 
     [Serializable]
@@ -291,6 +308,9 @@ namespace Buds.Quests
         public string produces;
         public int[] limit;
         public string blurb;
+        /// <summary>Might it adds by itself (squares, fountains, the statue, the tower), and per cent more rent.</summary>
+        public int prestige;
+        public int rentBoost;
         public LandLevelData[] levels;
     }
 
@@ -326,8 +346,10 @@ namespace Buds.Quests
     public sealed class LandContent
     {
         public int plotSize;
-        public int hallX;
-        public int hallY;
+        /// <summary>Cells in a sector's side, sectors in the plot's side, sectors allowed by the town hall's level.</summary>
+        public int sector;
+        public int sectors;
+        public int[] sectorLimit;
         public int nameMin;
         public int nameMax;
         public int minLevel;
@@ -342,8 +364,10 @@ namespace Buds.Quests
         public ResourceData[] resources;
         public RouteBonusData[] routeBonus;
         public PlotData[] plots;
-        public int[] stageSides;
-        public LandStageData[] stages;
+        public LandClearData[] clearings;
+        public LandRankData[] ranks;
+        public RouteStyleData[] styles;
+        public int maxRentBoost;
         public BuildingData[] buildings;
 
         public BuildingData Building(string id) => Array.Find(buildings ?? Array.Empty<BuildingData>(), b => b.id == id);
@@ -351,6 +375,19 @@ namespace Buds.Quests
         public PlotData[] PlotsOn(string route) => Array.FindAll(plots ?? Array.Empty<PlotData>(), p => p.route == route);
         public string BonusOf(string route) => Array.Find(routeBonus ?? Array.Empty<RouteBonusData>(), b => b.route == route)?.resource;
         public ResourceData Resource(string id) => Array.Find(resources ?? Array.Empty<ResourceData>(), r => r.id == id);
+        public string StyleOf(string route) => Array.Find(styles ?? Array.Empty<RouteStyleData>(), s => s.route == route)?.style ?? "las";
+
+        /// <summary>The rank a might gives (index into <see cref="ranks"/>).</summary>
+        public int RankIndex(int power)
+        {
+            var index = 0;
+            for (var i = 0; i < (ranks?.Length ?? 0); i++)
+                if (power >= ranks[i].min)
+                    index = i;
+            return index;
+        }
+
+        public string RankName(int power) => ranks == null || ranks.Length == 0 ? "" : ranks[RankIndex(power)].name;
     }
 
     /// <summary>All NPCs and quests the game knows (the API validates completions against the same data).</summary>
