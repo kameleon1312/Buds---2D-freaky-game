@@ -60,6 +60,13 @@ html {
   scroll-padding-top: 84px;
 }
 
+/* links to a section glide there (the header's links and the hero's buttons), unless the reader asked for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -177,6 +184,18 @@ h3 {
   backdrop-filter: blur(14px) saturate(1.4);
 }
 
+/* once the page has scrolled the bar settles into a denser glass with a hairline under it */
+.site-bar {
+  transition:
+    background-color 0.4s var(--ease-answer, ease),
+    border-color 0.4s var(--ease-answer, ease);
+}
+
+.site-bar.is-scrolled {
+  background: rgba(22, 24, 31, 0.88);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .site-bar {
     background: rgba(22, 24, 31, 0.94);
@@ -228,10 +247,38 @@ h3 {
   color: var(--text-on-dark-muted);
 }
 
+.site-header nav a {
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
 .site-header nav a:hover {
   color: var(--text-on-dark);
   background: var(--surface-800);
   border-color: var(--outline);
+}
+
+/* the section on screen (or the page you are on) */
+.site-header nav a.is-active {
+  color: var(--ink);
+  background: var(--buds-400);
+  border-color: var(--outline);
+}
+
+.logo {
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 560px) {
+  .site-header nav a.nav-wide {
+    display: none;
+  }
 }
 
 .site-footer {

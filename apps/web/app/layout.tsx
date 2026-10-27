@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import localFont from 'next/font/local';
+import { SiteHeader } from '@/components/SiteHeader';
 import { SITE_URL } from '@/lib/site';
 import './globals.css';
 import './journey.css';
@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pl" className={rubik.variable}>
+    <html lang="pl" className={rubik.variable} data-scroll-behavior="smooth">
       <head>
         {/* without JavaScript the scroll reveals never run: show everything */}
         <noscript>
@@ -41,26 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         {/* pinned to the top while scrolling, frosted so the page shows through */}
-        <div className="site-bar">
-          <header className="site-header">
-            <Link href="/" className="logo">
-              <Image
-                src="/buds-icon.png"
-                alt=""
-                width={52}
-                height={52}
-                className="logo-icon"
-                priority
-              />
-              <span>Buds</span>
-            </Link>
-            <nav>
-              <Link href="/#kreator">Stwórz</Link>
-              <Link href="/top">Ranking</Link>
-              <Link href="/konto">Konto</Link>
-            </nav>
-          </header>
-        </div>
+        <SiteHeader />
         {children}
         <footer className="site-footer">
           <span>Buds · gra o ziomkach z charakterem</span>

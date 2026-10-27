@@ -1,9 +1,15 @@
 /*
- * The landing page as a journey through Buds: scroll reveals, the progress bar, the winding road a bud walks as the
- * reader scrolls, a phone frame for screenshots, gameplay tabs, the compact creator and the centred
- * sign-in card. Design-system rules hold: hard lips and drops, outlines, no soft shadows; motion uses only
- * transform and opacity, and stops with reduced motion.
+ * The landing page as a journey through Buds: scroll reveals, the world in numbers, the winding road a bud walks as
+ * the reader scrolls, a phone frame for screenshots, the growth cards, the gallery of places, the compact creator and
+ * the centred sign-in card. Design-system rules hold: hard lips and drops, outlines, no soft shadows; motion uses
+ * only transform and opacity, eases out long and short (nothing bounces or flies far), and stops with reduced motion.
  */
+
+/* the motion's two curves: a long, soft ease-out for things arriving, a quick one for answers to the pointer */
+:root {
+  --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-answer: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
 /* the page never scrolls sideways: reveals start shifted and the hero clouds drift (clip keeps sticky working) */
 .journey {
@@ -11,29 +17,29 @@
   overflow-x: clip;
 }
 
-/* ---------- scroll reveal ---------- */
+/* ---------- scroll reveal: a short, soft arrival ---------- */
 .reveal {
   opacity: 0;
   transition:
-    opacity 0.7s ease,
-    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity 0.9s var(--ease-arrive),
+    transform 1.1s var(--ease-arrive);
   transition-delay: var(--delay, 0ms);
 }
 
 .reveal-up {
-  transform: translateY(28px);
+  transform: translate3d(0, 16px, 0);
 }
 
 .reveal-left {
-  transform: translateX(-40px);
+  transform: translate3d(-20px, 0, 0);
 }
 
 .reveal-right {
-  transform: translateX(40px);
+  transform: translate3d(20px, 0, 0);
 }
 
 .reveal-zoom {
-  transform: scale(0.94);
+  transform: scale(0.975);
 }
 
 .reveal.is-shown {
@@ -41,21 +47,102 @@
   transform: none;
 }
 
-/* ---------- journey progress ---------- */
-.scroll-progress {
-  position: fixed;
-  inset: 0 0 auto;
-  height: 4px;
-  z-index: 50;
-  pointer-events: none;
+/* ---------- the world in numbers ---------- */
+.world-stats-band {
+  margin-top: calc(var(--space-6) * -1);
 }
 
-.scroll-progress span {
+.world-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.world-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-4) var(--space-2);
+  text-align: center;
+  background: var(--surface-800);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-m);
+  box-shadow: 0 4px 0 var(--surface-700);
+}
+
+.world-stat strong {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+  line-height: 1;
+  color: var(--buds-400);
+  font-variant-numeric: tabular-nums;
+}
+
+.world-stat > span {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-on-dark-muted);
+}
+
+/* ---------- how a bud grows ---------- */
+.growth {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.growth-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  transition: transform 0.45s var(--ease-answer);
+}
+
+.growth-card:hover {
+  transform: translateY(-3px);
+}
+
+.growth-shot {
+  overflow: hidden;
+  aspect-ratio: 1200 / 521;
+  margin-bottom: var(--space-3);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: 12px;
+  background: var(--surface-900);
+}
+
+.growth-shot img {
   display: block;
+  width: 100%;
   height: 100%;
-  background: var(--buds-400);
-  transform-origin: left center;
-  transition: transform 0.1s linear;
+  object-fit: cover;
+  transform: scale(1.001);
+  transition: transform 1.4s var(--ease-arrive);
+}
+
+.growth-card:hover .growth-shot img {
+  transform: scale(1.035);
+}
+
+.growth-card h3 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.25rem;
+}
+
+.growth-card p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* the hero's picture drifts a touch slower than the page */
+.parallax {
+  will-change: transform;
 }
 
 .eyebrow {
@@ -142,7 +229,7 @@
   border: var(--stroke-ui) solid var(--outline);
   border-radius: 26px;
   box-shadow: var(--drop-panel);
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.6s var(--ease-answer);
 }
 
 .device::before {
@@ -158,7 +245,7 @@
 }
 
 .stop:hover .device {
-  transform: translateY(-4px) rotate(-0.4deg);
+  transform: translateY(-3px) rotate(-0.25deg);
 }
 
 .device-screen {
@@ -177,10 +264,10 @@
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transform: scale(1.04);
+  transform: scale(1.035);
   transition:
-    opacity 0.6s ease,
-    transform 1.2s ease;
+    opacity 0.8s var(--ease-answer),
+    transform 6s var(--ease-arrive);
 }
 
 .device-shot.is-active {
@@ -212,13 +299,13 @@
   border-radius: var(--radius-pill);
   cursor: pointer;
   transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+    background-color 0.25s var(--ease-answer),
+    color 0.25s var(--ease-answer),
+    transform 0.25s var(--ease-answer);
 }
 
 .gameplay-tab:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .gameplay-tab:focus-visible {
@@ -244,7 +331,7 @@
   height: 4px;
   background: var(--buds-600);
   transform-origin: left;
-  animation: tab-timer 5.2s linear forwards;
+  animation: tab-timer 5.6s linear forwards;
 }
 
 @keyframes tab-timer {
@@ -264,7 +351,17 @@
 }
 
 .gameplay-copy {
-  animation: copy-in 0.5s ease both;
+  animation: copy-in 0.7s var(--ease-arrive) 0.12s both;
+}
+
+.gameplay-count {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  color: var(--buds-400);
+  font-variant-numeric: tabular-nums;
 }
 
 .gameplay-copy h3 {
@@ -281,7 +378,7 @@
 @keyframes copy-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translate3d(0, 8px, 0);
   }
 }
 
@@ -296,12 +393,12 @@
 .cta-icon {
   width: 120px;
   height: 120px;
-  animation: icon-bob 3s ease-in-out infinite;
+  animation: icon-bob 4.2s ease-in-out infinite;
 }
 
 @keyframes icon-bob {
   50% {
-    transform: translateY(-8px) rotate(-3deg);
+    transform: translateY(-5px) rotate(-2deg);
   }
 }
 
@@ -343,7 +440,7 @@
   height: 320px;
   overflow-y: auto;
   padding: var(--space-1) var(--space-2) var(--space-1) 0;
-  animation: copy-in 0.35s ease both;
+  animation: copy-in 0.45s var(--ease-arrive) both;
 }
 
 /* ---------- account: the sign-in card in the middle of the screen ---------- */
@@ -557,8 +654,9 @@
   border-radius: var(--radius-pill);
   box-shadow: 0 4px 0 var(--surface-700);
   transition:
-    transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1),
-    background-color 0.3s ease;
+    transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1),
+    background-color 0.35s var(--ease-answer),
+    color 0.35s var(--ease-answer);
 }
 
 .stop-shot {
@@ -629,31 +727,46 @@
 
 /* before the bud gets there a stop waits folded away; reaching it opens the screenshot and the story */
 .trail.is-live .stop .stop-shot,
-.trail.is-live .stop .stop-copy {
+.trail.is-live .stop .stop-copy,
+.trail.is-live .stop .stop-fact {
   transition:
-    opacity 0.6s ease,
-    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity 0.8s var(--ease-arrive),
+    transform 1s var(--ease-arrive);
 }
 
 .trail.is-live .stop:not(.is-reached) .stop-shot {
   opacity: 0;
-  transform: translateY(28px) scale(0.92) rotate(-2deg);
+  transform: translate3d(0, 18px, 0) scale(0.97) rotate(-0.8deg);
+}
+
+.trail.is-live .stop.is-flipped:not(.is-reached) .stop-shot {
+  transform: translate3d(0, 18px, 0) scale(0.97) rotate(0.8deg);
 }
 
 .trail.is-live .stop:not(.is-reached) .stop-copy {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translate3d(0, 14px, 0);
 }
 
+.trail.is-live .stop:not(.is-reached) .stop-fact {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+}
+
+/* the story follows the picture, the trivia slip comes last */
 .trail.is-live .stop.is-reached .stop-copy {
-  transition-delay: 0.15s;
+  transition-delay: 0.12s;
+}
+
+.trail.is-live .stop.is-reached .stop-fact {
+  transition-delay: 0.28s;
 }
 
 .trail.is-live .stop.is-reached .stop-node {
   color: var(--ink);
   background: var(--buds-400);
   box-shadow: var(--lip-buds);
-  transform: scale(1.12);
+  transform: scale(1.08);
 }
 
 /* ---------- small screens ---------- */
@@ -716,8 +829,24 @@
   }
 
   .gameplay-stage,
-  .journey .creator {
+  .journey .creator,
+  .growth {
     grid-template-columns: 1fr;
+  }
+
+  /* three a row, the last ones centred under them */
+  .world-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .world-stats .world-stat {
+    flex: 0 1 calc((100% - 2 * var(--space-3)) / 3);
+  }
+
+  .world-stats-band {
+    margin-top: 0;
   }
 
   .journey .creator-preview {
@@ -744,7 +873,14 @@
   .device-shot,
   .trail.is-live .stop .stop-shot,
   .trail.is-live .stop .stop-copy,
-  .stop-node {
+  .trail.is-live .stop .stop-fact,
+  .stop-node,
+  .growth-card,
+  .growth-shot img {
     transition: none;
+  }
+
+  .parallax {
+    transform: none !important;
   }
 }
