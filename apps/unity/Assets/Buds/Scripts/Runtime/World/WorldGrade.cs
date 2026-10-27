@@ -47,7 +47,7 @@ namespace Buds.World
                 "dwor-carski" => new Mood
                     { Contrast = 15, Saturation = 4, Highlights = Hex("#ffe0a0"), Shadows = Hex("#55467c"), Balance = 0, Vignette = 0.28f },
                 "los-karkos" => new Mood
-                    { Contrast = 18, Saturation = -4, Highlights = Hex("#ffcc96"), Shadows = Hex("#4a3a5c"), Balance = -10, Vignette = 0.32f },
+                    { Contrast = 19, Saturation = -9, Highlights = Hex("#ffc890"), Shadows = Hex("#4a3a4c"), Balance = -14, Vignette = 0.34f },
                 _ => new Mood
                     { Contrast = 16, Saturation = 8, Highlights = Hex("#ffdcae"), Shadows = Hex("#465a8c"), Balance = 0, Vignette = 0.26f },
             };

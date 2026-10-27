@@ -360,29 +360,138 @@ function car(body: Tone, police = false): Prop {
   return { w, h, ax, ay, foot, body: s };
 }
 
-function garages(): Prop {
+/**
+ * A row of three block garages, 3×2: a concrete shell with a tar-sealed roof edge (dark drips where it ran), a gutter
+ * and a downpipe, rain streaks and a mossy plinth, weeds at the foot; up-and-over doors in three colours with ribs,
+ * rust coming through and small number plates (blank: no words). Variant 1 has one door half open on a dark inside
+ * with boxes and a bike wheel, variant 2 a sprayed throw-up across two doors and a satellite dish.
+ */
+function garages(variant = 0): Prop {
   const foot: [number, number] = [3, 2];
-  const { w, h, ax, ay, L, R } = frame(foot, 2.6, 0.15);
+  const { w, h, ax, ay, L, R } = frame(foot, 2.7, 0.18);
   const top = ay - 2.3 * T;
   const facadeTop = ay - 1.45 * T;
-  const doors: Tone[] = [
-    ['#7fa6c9', '#5f86a9'],
-    ['#c9a97f', '#a9895f'],
-    ['#8fbf8a', '#6f9f6a'],
+  const palettes: Tone[][] = [
+    [
+      ['#7fa6c9', '#5f86a9'],
+      ['#c9a97f', '#a9895f'],
+      ['#8fbf8a', '#6f9f6a'],
+    ],
+    [
+      ['#c97f7f', '#a95f5f'],
+      ['#8f9aa8', '#6f7a88'],
+      ['#d9c27a', '#b9a25a'],
+    ],
+    [
+      ['#6f8fa0', '#4f6f80'],
+      ['#a48fc0', '#846fa0'],
+      ['#c99a6b', '#a07448'],
+    ],
   ];
-  let s = shadow(ax, ay - 2, 1.7 * T, 10, 0.22);
-  s += flatRoof(L, R, top, facadeTop - top + 4, ['#8d8a84', '#76736d']);
-  s += shaded(rr(L, facadeTop, R - L, ay - facadeTop, 4), ['#cfcac0', '#b2ada3'], LINE, -6, -3);
+  const doors = palettes[variant % palettes.length]!;
+  const r = rng(830 + variant * 17);
+  let s = shadow(ax, ay - 2, 1.75 * T, 10, 0.24);
+  // the roof, seen from the front and above: tar sheet, a raised edge, gravel
+  s += flatRoof(L, R, top, facadeTop - top + 4, ['#6f6c68', '#5a5753']);
+  // the shell
+  s += shaded(rr(L, facadeTop, R - L, ay - facadeTop, 3), ['#cfcac0', '#aea99f'], LINE, -6, -3);
+  // the concrete edge beam under the roof, with tar running down from it
+  s += shaded(rr(L - 4, facadeTop - 4, R - L + 8, 10, 2), ['#b8b3a9', '#98938a'], LINE, -1, -1, 2);
+  let drips = '';
+  for (let x = L + 6; x < R - 4; x += 10 + r() * 14)
+    drips += `M${n(x)} ${n(facadeTop + 6)}v${n(3 + r() * 9)}`;
+  s += stroke(drips, '#3d3a36', 2.2, 0.55);
+  // rain streaks and a mossy, damp plinth
+  let streaks = '';
+  for (let x = L + 12; x < R - 6; x += 18 + r() * 20)
+    streaks += `M${n(x)} ${n(facadeTop + 8)}v${n(14 + r() * 18)}`;
+  s += stroke(streaks, '#8f8a80', 3, 0.25);
+  s += fill(rr(L + 1, ay - 9, R - L - 2, 8, 2), '#6f8a5a', 0.35);
+  // the doors
+  const dw = (R - L - 8) / 3;
   doors.forEach((d, i) => {
-    const x = L + 6 + i * T;
-    s += shaded(rr(x, facadeTop + 10, T - 12, ay - facadeTop - 12, 3), d, LINE, -3, -2, 2.5);
-    for (let k = 1; k < 6; k++)
+    const x = L + 4 + i * dw + 2;
+    const dTop = facadeTop + 12;
+    const dh = ay - dTop - 4;
+    const open = variant === 1 && i === 1;
+    // the opening's dark reveal round every door
+    s += fill(rr(x - 2, dTop - 2, dw - 4 + 4, dh + 4, 2), '#2a2724', 0.35);
+    if (open) {
+      // half up: the dark inside below, boxes and a wheel
+      s += fill(rr(x, dTop, dw - 4, dh, 2), '#26231f', 1);
+      s += shaded(rr(x + 6, ay - 22, 16, 14, 1), ['#c9a46a', '#a3804a'], '#5a4022', -1, -1, 1.4);
+      s += shaded(rr(x + 10, ay - 32, 12, 10, 1), ['#c9a46a', '#a3804a'], '#5a4022', -1, -1, 1.4);
+      s += `<circle cx="${n(x + dw - 16)}" cy="${n(ay - 15)}" r="9" fill="none" stroke="#151412" stroke-width="3"/>`;
       s += stroke(
-        `M${x + 3} ${n(facadeTop + 10 + k * ((ay - facadeTop - 12) / 6))}h${T - 18}`,
-        d[1],
-        2,
+        `M${n(x + dw - 16)} ${n(ay - 24)}v18M${n(x + dw - 25)} ${n(ay - 15)}h18`,
+        '#4a4744',
+        1,
+        0.8,
       );
+      s += shaded(rr(x - 2, dTop - 2, dw, dh * 0.45, 2), d, LINE, -2, -2, 2.5);
+      s += fill(rr(x, dTop + dh * 0.43 - 2, dw - 4, 5, 1), '#000000', 0.3);
+    } else {
+      s += shaded(rr(x, dTop, dw - 4, dh, 2), d, LINE, -3, -2, 2.5);
+      let ribs = '';
+      for (let k = 1; k < 7; k++) ribs += `M${n(x + 3)} ${n(dTop + (k * dh) / 7)}h${n(dw - 10)}`;
+      s += stroke(ribs, d[1], 2);
+      s += stroke(
+        ribs.replace(/M([\d.]+) ([\d.]+)/g, (_, a, b) => `M${a} ${Number(b) + 1.6}`),
+        '#ffffff',
+        1,
+        0.25,
+      );
+      // the handle and rust coming through at the bottom corners
+      s += shaded(rr(x + dw / 2 - 7, dTop + dh * 0.55, 10, 4, 1), METAL, LINE, -0.5, -0.5, 1.2);
+      s += fill(
+        `M${n(x + 2)} ${n(ay - 6)}q4 -${n(6 + r() * 6)} ${n(10 + r() * 8)} -2v2Z`,
+        '#a0522d',
+        0.55,
+      );
+      if (r() > 0.4)
+        s += fill(circ(x + dw - 12, dTop + dh * (0.3 + r() * 0.4), 2.5 + r() * 2), '#a0522d', 0.4);
+    }
+    // the number plate over the door (blank)
+    s += shaded(
+      rr(x + dw / 2 - 8, facadeTop + 2, 12, 7, 1),
+      ['#f2efe8', '#d2cfc6'],
+      LINE,
+      -0.5,
+      -0.5,
+      1,
+    );
   });
+  // a gutter along the edge and a downpipe at the right
+  s += stroke(`M${n(L - 2)} ${n(facadeTop + 7)}H${n(R + 3)}`, '#8a8f97', 3);
+  s += stroke(`M${n(R + 1)} ${n(facadeTop + 7)}V${n(ay - 3)}`, '#7a7f87', 4);
+  s += stroke(`M${n(R + 1)} ${n(ay - 3)}h5`, '#7a7f87', 4);
+  if (variant === 2) {
+    // a throw-up across two doors: two fat round outlines with a fill and a shine (letters of no word)
+    const gx = L + dw * 0.55;
+    const gy = ay - 0.55 * T;
+    s += `<path d="M${n(gx)} ${n(gy)}q10 -26 30 -8q14 -22 32 -2q18 -14 26 10q-30 14 -88 0Z" fill="#ff5fa2" stroke="#1b1b1b" stroke-width="3" opacity="0.92"/>`;
+    s += stroke(
+      `M${n(gx + 8)} ${n(gy - 8)}q8 -10 16 -2M${n(gx + 44)} ${n(gy - 14)}q8 -6 12 2`,
+      '#ffffff',
+      2.4,
+      0.8,
+    );
+    // a satellite dish on the roof
+    s += stroke(`M${n(R - 30)} ${n(top + 14)}v-10`, '#5b606b', 3);
+    s += shaded(
+      `M${n(R - 44)} ${n(top + 2)}a14 9 0 0 1 28 -6l-4 12Z`,
+      ['#e9edf2', '#c3c9d2'],
+      LINE,
+      -1,
+      -1,
+      1.6,
+    );
+  }
+  // weeds at the foot of the wall
+  let weeds = '';
+  for (let x = L + 4; x < R; x += 12 + r() * 18)
+    weeds += `M${n(x)} ${n(ay)}l-3 -9M${n(x)} ${n(ay)}l1 -11M${n(x)} ${n(ay)}l4 -8`;
+  s += stroke(weeds, '#5d8f3a', 2);
   return { w, h, ax, ay, foot, body: s };
 }
 
@@ -584,7 +693,9 @@ export const CITY: Record<string, Prop> = {
   'auto-b': car(['#4c8fd6', '#36689f']),
   'auto-c': car(['#ffc93c', '#d98a0b']),
   radiowoz: car(['#f6f2e9', '#cfd5de'], true),
-  garaze: garages(),
+  garaze: garages(0),
+  'garaze-b': garages(1),
+  'garaze-c': garages(2),
   'altanka-a': altanka(['#7fa6c9', '#5f86a9']),
   'altanka-b': altanka(['#c86b4e', '#a3523a']),
   fontanna: fountain(),

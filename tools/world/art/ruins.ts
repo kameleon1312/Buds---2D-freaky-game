@@ -1,6 +1,6 @@
 // Los Karkos: the rough district — abandoned blocks covered in graffiti, chain-link fences, car wrecks, burning
 // barrels, trash and tyres, a junkyard, a boxing ring, a gym, a weapon shop and an old factory.
-import { CAR, GRAFFITI_COLORS, SHOP, graffitiWall } from './city';
+import { CAR, GRAFFITI_COLORS, graffitiWall } from './city';
 import { fenceKit } from './common';
 import {
   GLASS_DARK,
@@ -246,33 +246,142 @@ function ring(): Prop {
   return { w, h, ax, ay, foot, body: s };
 }
 
+/** Corrugated sheet steel with rust running down from the ribs (Los Karkos' walls). */
+function corrugated(l: number, t: number, w: number, h: number, tone: Tone, seed: number) {
+  let s = shaded(rr(l, t, w, h, 3), tone, LINE, -8, -3);
+  let ribs = '';
+  for (let x = l + 6; x < l + w - 3; x += 7) ribs += `M${n(x)} ${n(t + 3)}V${n(t + h - 3)}`;
+  s += stroke(ribs, tone[1], 2.2, 0.7);
+  const r = rng(seed);
+  for (let i = 0; i < 7; i++) {
+    const x = l + 10 + r() * (w - 20);
+    s += fill(
+      `M${n(x)} ${n(t + 6)}q3 ${n(14 + r() * 20)} -1 ${n(26 + r() * 26)}h4q-2 -20 2 -${n(26 + r() * 20)}Z`,
+      '#a0522d',
+      0.35,
+    );
+  }
+  return s;
+}
+
+/** A neon tube shape: a glowing halo and a bright core. */
+const neon = (d: string, colour: string) =>
+  stroke(d, colour, 10, 0.25) + stroke(d, colour, 4.5) + stroke(d, '#ffffff', 1.6, 0.8);
+
+/**
+ * The gym of Los Karkos, 5×3: a corrugated steel shed with rust streaks, a dumbbell in red neon over a roller door
+ * half up (the light of the gym inside, a bench and a rack), wired-glass windows, two air conditioners and a pipe on
+ * the wall, a sprayed tag (no word) by the door.
+ */
 function gym(): Prop {
   const foot: [number, number] = [5, 3];
-  const { w, h, ax, ay, L, R } = frame(foot, 3.6);
+  const { w, h, ax, ay, L, R } = frame(foot, 3.7);
   const roofTop = ay - 3.2 * T;
   const facadeTop = ay - 2.3 * T;
-  let s = shadow(ax, ay - 2, 2.7 * T, 12, 0.24);
-  s += flatRoof(L, R, roofTop, facadeTop - roofTop + 4, ['#6f7380', '#585c68']);
-  s += shaded(rr(L, facadeTop, R - L, ay - facadeTop, 3), ['#8a929e', '#6f7783'], LINE, -8, -3);
-  for (let x = L + 10; x < R - 4; x += 12)
-    s += stroke(`M${x} ${facadeTop + 4}V${ay - 4}`, '#6f7783', 2.5, 0.8);
+  let s = shadow(ax, ay - 2, 2.7 * T, 12, 0.26);
+  s += flatRoof(L, R, roofTop, facadeTop - roofTop + 4, ['#5f636e', '#4a4e58']);
+  s += corrugated(L, facadeTop, R - L, ay - facadeTop, ['#8a929e', '#6f7783'], 251);
+  // the neon dumbbell on a dark board
   s += shaded(
-    rr(ax - 1.1 * T, facadeTop + 10, 2.2 * T, 34, 6),
-    ['#2b2e38', '#1d1f26'],
+    rr(ax - 1.05 * T, facadeTop + 8, 2.1 * T, 34, 5),
+    ['#22252e', '#16181f'],
     LINE,
     -2,
     -2,
+    2,
   );
-  // dumbbell sign
-  s +=
-    stroke(`M${ax - 26} ${facadeTop + 27}h52`, '#b7bec9', 5) +
-    flat(rr(ax - 34, facadeTop + 17, 10, 20, 3), '#ff3d50', LINE, 2) +
-    flat(rr(ax + 24, facadeTop + 17, 10, 20, 3), '#ff3d50', LINE, 2);
-  s += shaded(rr(ax - 0.8 * T, ay - 1.2 * T, 1.6 * T, 1.2 * T - 2, 3), METAL, LINE, -3, -2);
-  for (let k = 1; k < 7; k++)
-    s += stroke(`M${ax - 0.8 * T + 4} ${n(ay - 1.2 * T + k * 10)}h${1.6 * T - 8}`, '#8a929e', 2);
-  s += windowAt(L + 16, facadeTop + 60, 1 * T, 40, { glass: GLASS_DARK, line: LINE, r: 2 });
-  s += windowAt(R - 16 - T, facadeTop + 60, 1 * T, 40, { glass: GLASS_DARK, line: LINE, r: 2 });
+  s += neon(`M${n(ax - 26)} ${n(facadeTop + 25)}h52`, '#ff3d50');
+  s += neon(
+    `M${n(ax - 30)} ${n(facadeTop + 15)}v20M${n(ax - 36)} ${n(facadeTop + 18)}v14M${n(ax + 30)} ${n(facadeTop + 15)}v20M${n(ax + 36)} ${n(facadeTop + 18)}v14`,
+    '#ff3d50',
+  );
+  // the roller door half up: the warm light of the gym, a bench, a rack of weights
+  const dl = ax - 0.85 * T;
+  const dw = 1.7 * T;
+  const dTop = ay - 1.25 * T;
+  s += fill(rr(dl, dTop, dw, ay - dTop - 2, 2), '#ffd59a', 1);
+  s += fill(rr(dl, dTop + 0.5 * T, dw, 8, 0), '#000000', 0.25);
+  s += shaded(rr(dl + 10, ay - 18, 40, 6, 2), ['#2b2e38', '#1d1f26'], LINE, -1, -1, 1.4);
+  s += stroke(`M${n(dl + 14)} ${n(ay - 12)}v9M${n(dl + 46)} ${n(ay - 12)}v9`, '#2b2e38', 3);
+  s += stroke(
+    `M${n(dl + dw - 34)} ${n(ay - 40)}v38M${n(dl + dw - 12)} ${n(ay - 40)}v38`,
+    '#3a3d47',
+    3,
+  );
+  for (let k = 0; k < 3; k++) s += fill(circ(dl + dw - 23, ay - 34 + k * 11, 5), '#1d1f26');
+  s += shaded(rr(dl - 3, dTop - 3, dw + 6, 0.5 * T, 2), METAL, LINE, -3, -2, 2.4);
+  let slats = '';
+  for (let k = 1; k < 4; k++) slats += `M${n(dl + 2)} ${n(dTop - 3 + k * 8)}h${n(dw + 2)}`;
+  s += stroke(slats, '#6f7783', 1.8);
+  // wired-glass windows, air conditioners, a pipe
+  for (const x of [L + 14, R - 14 - T]) {
+    s += windowAt(x, facadeTop + 56, T, 38, { glass: GLASS_DARK, line: LINE, r: 2 });
+    let mesh = '';
+    for (let k = 1; k < 4; k++)
+      mesh += `M${n(x + (k * T) / 4)} ${n(facadeTop + 58)}v34M${n(x + 2)} ${n(facadeTop + 56 + k * 9.5)}h${n(T - 4)}`;
+    s += stroke(mesh, '#b7bec9', 1, 0.6);
+  }
+  for (const x of [L + 22, R - 54]) {
+    s += shaded(rr(x, facadeTop + 102, 34, 22, 2), ['#d7dce1', '#aab1b9'], LINE, -1, -1, 1.6);
+    s += `<circle cx="${n(x + 11)}" cy="${n(facadeTop + 113)}" r="7" fill="none" stroke="#6f7783" stroke-width="2"/>`;
+  }
+  s += stroke(`M${n(R - 8)} ${n(facadeTop + 4)}V${n(ay - 4)}`, '#5f636e', 5);
+  // a tag by the door: a fast loop with an arrow (no word)
+  s += stroke(`M${n(dl - 56)} ${n(ay - 30)}q10 -22 22 -6q8 12 18 -10l8 4`, '#3fd06a', 3.4);
+  return { w, h, ax, ay, foot, body: s };
+}
+
+/**
+ * The weapons shop of Los Karkos, 5×3: a low corrugated shop with heavy bars over its windows, a roller shutter half
+ * down over the door, a camera on a bracket, a red neon crosshair on the board (no words), steel posts in front.
+ */
+function gunShop(): Prop {
+  const foot: [number, number] = [5, 3];
+  const { w, h, ax, ay, L, R } = frame(foot, 3.4);
+  const roofTop = ay - 2.9 * T;
+  const facadeTop = ay - 2.05 * T;
+  let s = shadow(ax, ay - 2, 2.7 * T, 12, 0.26);
+  s += flatRoof(L, R, roofTop, facadeTop - roofTop + 4, ['#55525a', '#423f46']);
+  s += corrugated(L, facadeTop, R - L, ay - facadeTop, ['#6f6a72', '#57525a'], 263);
+  // the board with the crosshair
+  s += shaded(
+    rr(ax - 1.1 * T, facadeTop + 6, 2.2 * T, 34, 5),
+    ['#1b1c22', '#121318'],
+    LINE,
+    -2,
+    -2,
+    2,
+  );
+  s += neon(`M${n(ax - 11)} ${n(facadeTop + 23)}a11 11 0 1 0 22 0a11 11 0 1 0 -22 0`, '#ff3d50');
+  s += neon(
+    `M${n(ax - 20)} ${n(facadeTop + 23)}h12M${n(ax + 8)} ${n(facadeTop + 23)}h12M${n(ax)} ${n(facadeTop + 9)}v8M${n(ax)} ${n(facadeTop + 29)}v8`,
+    '#ff3d50',
+  );
+  // barred windows with a dim inside
+  for (const x of [L + 12, R - 12 - 1.2 * T]) {
+    s += windowAt(x, facadeTop + 52, 1.2 * T, 44, { glass: GLASS_DARK, line: LINE, r: 2 });
+    let bars = '';
+    for (let k = 1; k < 6; k++) bars += `M${n(x + (k * 1.2 * T) / 6)} ${n(facadeTop + 50)}v48`;
+    s += stroke(bars + `M${n(x - 2)} ${n(facadeTop + 74)}h${n(1.2 * T + 4)}`, '#2a2d36', 3);
+  }
+  // the door under a shutter half down
+  const dl = ax - 0.45 * T;
+  const dw = 0.9 * T;
+  s += shaded(rr(dl, ay - 1.1 * T, dw, 1.1 * T - 3, 2), ['#3a3d47', '#262830'], LINE, -2, -2, 2);
+  s += fill(rr(dl + 6, ay - 0.6 * T, dw - 12, 0.45 * T, 2), '#ffd59a', 0.7);
+  s += shaded(rr(dl - 4, ay - 1.15 * T, dw + 8, 0.55 * T, 2), METAL, LINE, -2, -2, 2.2);
+  let slats = '';
+  for (let k = 1; k < 5; k++) slats += `M${n(dl - 2)} ${n(ay - 1.15 * T + k * 7)}h${n(dw + 4)}`;
+  s += stroke(slats, '#6f7783', 1.6);
+  // the camera
+  s += stroke(`M${n(R - 22)} ${n(facadeTop + 10)}h-14`, '#2a2d36', 3);
+  s += shaded(rr(R - 52, facadeTop + 4, 20, 11, 3), ['#d7dce1', '#aab1b9'], LINE, -1, -1, 1.4);
+  s += fill(circ(R - 50, facadeTop + 9.5, 2.4), '#ff3d50');
+  // steel posts in front
+  for (const x of [L + 8, ax - 0.85 * T, ax + 0.85 * T, R - 8]) {
+    s += shaded(rr(x - 5, ay - 18, 10, 18, 3), ['#ffd23f', '#d9a40b'], LINE, -1, -1, 1.6);
+    s += fill(rr(x - 5, ay - 12, 10, 4, 0), '#1b1b1b', 0.85);
+  }
   return { w, h, ax, ay, foot, body: s };
 }
 
@@ -452,7 +561,7 @@ export const RUINS: Record<string, Prop> = {
   zlom: junkPile(),
   ring: ring(),
   silownia: gym(),
-  'sklep-bron': SHOP('bron', ['#8a929e', '#6f7783'], ['#3a3d4a', '#ff3d50']),
+  'sklep-bron': gunShop(),
   fabryka: factory(),
   'drzewo-suche': deadTree(),
   'bazar-a': bazaarStall(301, ['#4c8fd6', '#36689f']),

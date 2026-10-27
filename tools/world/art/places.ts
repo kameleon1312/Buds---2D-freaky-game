@@ -591,47 +591,117 @@ function campfire(): Prop {
 // ---------- Dwór Carski: the old mill and the orangery ----------
 
 /** A brick watermill with a wooden wheel. */
+/**
+ * The old water mill, 5×4: a fieldstone ground floor, a half-timbered upper floor (dark beams over cream plaster), a
+ * steep shingle roof with a hoist beam and a sack on its rope, a wooden water wheel on the right turning in its race,
+ * sacks of flour by the door.
+ */
 function mill(): Prop {
   const foot: [number, number] = [5, 4];
-  const { w, h, ax, ay, L, R } = frame(foot, 4.6, 0.35);
-  let s = shadow(ax, ay - 2, (R - L) / 2 + 12, 16, 0.25);
-  const wall = ay - 2.6 * T;
-  s += shaded(rr(L + 6, wall, R - L - 12, ay - wall, 6), ['#c86b4e', '#a3523a'], LINE, -6, -4);
-  // bricks
-  let bricks = '';
-  for (let y = wall + 14; y < ay - 6; y += 16)
-    for (let x = L + 12 + ((y / 16) % 2) * 14; x < R - 20; x += 28) bricks += `M${x} ${y}h18`;
-  s += stroke(bricks, '#8a3f2c', 2, 0.6);
-  // roof
+  const { w, h, ax, ay, L, R } = frame(foot, 5.2, 0.4);
+  const beam: Tone = ['#5a3a22', '#3f2816'];
+  const plaster: Tone = ['#f2e8d2', '#d6c8a8'];
+  let s = shadow(ax, ay - 2, (R - L) / 2 + 14, 16, 0.26);
+  const l = L + 6;
+  const r = R - 0.6 * T;
+  const stoneTop = ay - 1.2 * T;
+  const wallTop = ay - 2.7 * T;
+  // the stone ground floor: rounded fieldstones
+  s += shaded(rr(l, stoneTop, r - l, ay - stoneTop, 4), ['#b9b2a6', '#958e82'], LINE, -5, -3);
+  const rr2 = rng(611);
+  for (let y = stoneTop + 8; y < ay - 4; y += 12)
+    for (let x = l + 6 + (Math.round(y) % 2) * 8; x < r - 8; x += 16 + rr2() * 6)
+      s += `<ellipse cx="${n(x)}" cy="${n(y)}" rx="${n(6 + rr2() * 2)}" ry="4.5" fill="${rr2() > 0.5 ? '#c9c2b6' : '#a8a194'}" stroke="#7a736a" stroke-width="1.2"/>`;
+  // the half-timbered floor
+  s += shaded(rr(l + 4, wallTop, r - l - 8, stoneTop - wallTop, 2), plaster, LINE, -5, -3);
+  let beams = `M${n(l + 4)} ${n(wallTop + 3)}H${n(r - 4)}M${n(l + 4)} ${n(stoneTop - 3)}H${n(r - 4)}`;
+  for (let x = l + 6; x <= r - 6; x += (r - l - 12) / 4)
+    beams += `M${n(x)} ${n(wallTop)}V${n(stoneTop)}`;
+  const third = (r - l - 12) / 4;
+  beams += `M${n(l + 6)} ${n(stoneTop)}L${n(l + 6 + third)} ${n(wallTop)}M${n(r - 6)} ${n(stoneTop)}L${n(r - 6 - third)} ${n(wallTop)}`;
+  s += stroke(beams, beam[1], 6) + stroke(beams, beam[0], 3.5);
+  s += shaded(rr(l + 6 + third + 10, wallTop + 14, third - 20, 26, 3), GLASS, LINE, -2, -2, 2);
+  s += shaded(rr(l + 6 + 2 * third + 10, wallTop + 14, third - 20, 26, 3), GLASS, LINE, -2, -2, 2);
+  // the roof: steep shingles, a hoist beam with a sack
+  const peak = wallTop - 1.7 * T;
   s += shaded(
     poly([
-      [L - 6, wall + 4],
-      [ax, wall - 1.4 * T],
-      [R + 6, wall + 4],
+      [l - 10, wallTop + 6],
+      [(l + r) / 2, peak],
+      [r + 10, wallTop + 6],
     ]),
-    ['#6b5a4a', '#4c3f34'],
+    ['#7a5a3e', '#5a3f2a'],
     LINE,
     -6,
-    -4,
+    -5,
   );
-  s += shaded(rr(ax - 26, ay - 1.3 * T, 52, 1.3 * T - 4, 4), WOOD, WOOD_LINE, -3, -2);
-  s += shaded(rr(ax - 1.6 * T, wall + 0.5 * T, 34, 30, 4), GLASS, LINE, -2, -2, 2.5);
-  s += shaded(rr(ax + 1.6 * T - 34, wall + 0.5 * T, 34, 30, 4), GLASS, LINE, -2, -2, 2.5);
-  // the wheel on the right side
-  const wx = R - 0.7 * T;
+  let shingles = '';
+  for (let k = 1; k < 6; k++) {
+    const y = peak + (k * (wallTop + 6 - peak)) / 6;
+    const half = ((r - l + 20) / 2) * (k / 6);
+    for (let x = (l + r) / 2 - half; x < (l + r) / 2 + half - 6; x += 10)
+      shingles += `M${n(x)} ${n(y)}v6`;
+    shingles += `M${n((l + r) / 2 - half)} ${n(y)}H${n((l + r) / 2 + half)}`;
+  }
+  s += stroke(shingles, '#4c3424', 1.4, 0.6);
+  s += shaded(rr((l + r) / 2 - 18, wallTop - 0.7 * T, 36, 30, 3), beam, LINE, -2, -2, 2);
+  s += stroke(`M${n((l + r) / 2)} ${n(wallTop - 0.7 * T + 4)}h${n(0.55 * T)}`, beam[1], 6);
+  s += stroke(`M${n((l + r) / 2 + 0.5 * T)} ${n(wallTop - 0.7 * T + 6)}v26`, '#6b5a3a', 1.6);
+  s += shaded(
+    rr((l + r) / 2 + 0.5 * T - 9, wallTop - 0.7 * T + 30, 18, 20, 5),
+    ['#efe6cf', '#cfc2a0'],
+    '#7a6a48',
+    -1,
+    -1,
+    1.4,
+  );
+  // the door, flour sacks
+  s += shaded(rr(ax - 0.9 * T, ay - 0.95 * T, 0.75 * T, 0.95 * T - 4, 4), WOOD, WOOD_LINE, -3, -2);
+  for (const [dx, dy] of [
+    [-0.05, 0],
+    [0.18, 0],
+    [0.07, -0.22],
+  ] as const)
+    s += shaded(
+      rr(ax + dx * T, ay - 0.42 * T + dy * T, 0.26 * T, 0.38 * T, 6),
+      ['#efe6cf', '#cfc2a0'],
+      '#7a6a48',
+      -1,
+      -1,
+      1.4,
+    );
+  // the water wheel in its race
+  const wx = R - 0.62 * T;
   const wy = ay - 1.15 * T;
-  s += `<circle cx="${wx}" cy="${n(wy)}" r="${n(1.05 * T)}" fill="none" stroke="${WOOD_LINE}" stroke-width="12"/>`;
-  s += `<circle cx="${wx}" cy="${n(wy)}" r="${n(1.05 * T)}" fill="none" stroke="#c48a52" stroke-width="7"/>`;
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
+  const rad = 1.05 * T;
+  s += fill(rr(wx - rad - 6, ay - 12, rad * 2 + 12, 12, 3), WATER, 0.9);
+  s += `<circle cx="${n(wx)}" cy="${n(wy)}" r="${n(rad)}" fill="none" stroke="${WOOD_LINE}" stroke-width="13"/>`;
+  s += `<circle cx="${n(wx)}" cy="${n(wy)}" r="${n(rad)}" fill="none" stroke="#c48a52" stroke-width="8"/>`;
+  s += `<circle cx="${n(wx)}" cy="${n(wy)}" r="${n(rad * 0.62)}" fill="none" stroke="#9a6537" stroke-width="4"/>`;
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
     s += stroke(
-      `M${wx} ${n(wy)}L${n(wx + Math.cos(a) * 1.05 * T)} ${n(wy + Math.sin(a) * 1.05 * T)}`,
+      `M${n(wx)} ${n(wy)}L${n(wx + Math.cos(a) * rad)} ${n(wy + Math.sin(a) * rad)}`,
       '#9a6537',
+      4,
+    );
+    // the paddles round the rim
+    const px = wx + Math.cos(a) * (rad + 4);
+    const py = wy + Math.sin(a) * (rad + 4);
+    s += stroke(
+      `M${n(px - Math.sin(a) * 6)} ${n(py + Math.cos(a) * 6)}L${n(px + Math.sin(a) * 6)} ${n(py - Math.cos(a) * 6)}`,
+      WOOD_LINE,
       5,
     );
   }
-  s += shaded(circ(wx, wy, 10), WOOD, WOOD_LINE, -2, -2, 2.5);
-  s += stroke(`M${wx - 14} ${ay - 4}q14 8 28 0`, WATER, 6, 0.9);
+  s += shaded(circ(wx, wy, 11), WOOD, WOOD_LINE, -2, -2, 2.5);
+  // water spilling from the paddles
+  s += stroke(
+    `M${n(wx - rad * 0.7)} ${n(wy + rad * 0.6)}q-4 10 -2 18M${n(wx - rad * 0.4)} ${n(wy + rad * 0.85)}q-2 6 0 10`,
+    '#bfeaff',
+    3,
+    0.9,
+  );
   return { w, h, ax, ay, foot, body: s };
 }
 

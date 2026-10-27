@@ -23,11 +23,58 @@ namespace Buds.World
             Sand,
             Water,
             Leaves,
+            // district materials (DistrictLook): appended, so the patterns above keep their seeds
+            Rock,
+            Rubble,
+            Lawn,
+            Ripples,
+            Cracked,
         }
 
         /// <summary>Texture pixels and the world size one texture covers (tiles).</summary>
         public const int Size = 128;
         public const float Span = 2f;
+
+        static bool IsWater(string kind) =>
+            kind.Contains("water") || kind.Contains("ocean") || kind.Contains("shallow") || kind.Contains("lagoon") ||
+            kind == "sludge" || kind == "bog";
+
+        /// <summary>
+        /// The pattern a ground style gets: water when everything it covers is water (whatever the style is called: a
+        /// "shore" style laid over a lake is still the lake), otherwise by its name in the map file.
+        /// </summary>
+        public static Pattern For(string style, IReadOnlyCollection<string> kinds, string district)
+        {
+            var basic = For(style, kinds);
+            // each district's own version of a material: the manor's mown lawns, the wind-rippled beaches of Las Palmas,
+            // the cracked concrete and asphalt of Los Karkos; rock and rubble everywhere they are
+            style ??= "";
+            if (style == "rock") return Pattern.Rock;
+            if (style == "rubble") return Pattern.Rubble;
+            switch (district)
+            {
+                case "dwor-carski" when basic == Pattern.Grass && style.StartsWith("lawn"):
+                    return Pattern.Lawn;
+                case "las-palmas" when style == "sand":
+                    return Pattern.Ripples;
+                case "los-karkos" when style == "concrete" || style == "asphalt":
+                    return Pattern.Cracked;
+            }
+            return basic;
+        }
+
+        public static Pattern For(string style, IReadOnlyCollection<string> kinds)
+        {
+            if (kinds != null && kinds.Count > 0)
+            {
+                var allWater = true;
+                foreach (var k in kinds)
+                    if (!IsWater(k ?? ""))
+                        allWater = false;
+                if (allWater) return Pattern.Water;
+            }
+            return For(style);
+        }
 
         /// <summary>The pattern a ground style gets, from its name in the map file.</summary>
         public static Pattern For(string style)
@@ -85,6 +132,61 @@ namespace Buds.World
             return gains[pattern];
         }
 
+        static Texture2D macro;
+        static Texture2D blob;
+
+        /// <summary>
+        /// The world's soft patches (the ground and water shaders' _BudsMacro): smooth tiling noise, three octaves of
+        /// lumps, mid-grey on average, so a shader can lighten and darken large stretches of ground around it.
+        /// </summary>
+        public static Texture2D Macro()
+        {
+            if (macro) return macro;
+            const int size = 128;
+            macro = new Texture2D(size, size, TextureFormat.R8, true)
+            {
+                name = "Ground patches", wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Trilinear,
+            };
+            var px = new byte[size * size];
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                var v = Noise(x, y, 4, 71) * 0.55f + Noise(x, y, 8, 72) * 0.3f + Noise(x, y, 16, 73) * 0.15f;
+                // stretched a little from the middle, so the patches have some edge to them
+                v = Mathf.Clamp01(0.5f + (v - 0.5f) * 1.6f);
+                px[y * size + x] = (byte)Mathf.RoundToInt(v * 255);
+            }
+            macro.SetPixelData(px, 0);
+            macro.Apply(true, true);
+            return macro;
+        }
+
+        /// <summary>A soft round spot (white, its alpha fading out to the edge): contact shade under things on the ground.</summary>
+        public static Texture2D SoftBlob()
+        {
+            if (blob) return blob;
+            const int size = 64;
+            blob = new Texture2D(size, size, TextureFormat.RGBA32, true)
+            {
+                name = "Soft blob", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear,
+            };
+            var px = new Color32[size * size];
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                var dx = (x + 0.5f) / size * 2 - 1;
+                var dy = (y + 0.5f) / size * 2 - 1;
+                var d = Mathf.Sqrt(dx * dx + dy * dy);
+                // dense in the middle, a long soft falloff
+                var a = Mathf.Clamp01(1 - d);
+                a = a * a * (3 - 2 * a);
+                px[y * size + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(a * 255));
+            }
+            blob.SetPixels32(px);
+            blob.Apply(true, true);
+            return blob;
+        }
+
         // ---------- the patterns (values 0…1, multiplied with the ground colour) ----------
 
         public static float[] Pixels(Pattern pattern)
@@ -102,7 +204,10 @@ namespace Buds.World
                     Pattern.Leaves => 0.86f + 0.12f * mottle,
                     Pattern.Asphalt => 0.9f + 0.05f * mottle,
                     Pattern.Water => 0.9f + 0.03f * mottle,
-                    Pattern.Sand => 0.91f + 0.06f * mottle,
+                    Pattern.Sand or Pattern.Ripples => 0.91f + 0.06f * mottle,
+                    Pattern.Lawn => 0.9f + 0.07f * mottle,
+                    Pattern.Rock or Pattern.Rubble => 0.88f + 0.08f * mottle,
+                    Pattern.Cracked => 0.9f + 0.06f * mottle,
                     _ => 0.92f + 0.05f * mottle,
                 };
             }
@@ -149,17 +254,54 @@ namespace Buds.World
                     Slabs(p, 128, 16, r, false); // sizes that divide the texture: no seam where it repeats
                     break;
                 case Pattern.Water:
-                    // ripples: thin bright arcs in rows, drifting by in the game (WorldView scrolls the texture)
-                    for (var i = 0; i < 46; i++)
+                    Caustics(p, r);
+                    break;
+                case Pattern.Rock:
+                    RockSlabs(p, r);
+                    break;
+                case Pattern.Rubble:
+                    for (var i = 0; i < 90; i++)
                     {
-                        int x = r.Next(Size), y = r.Next(Size), len = 6 + r.Next(10);
-                        for (var k = 0; k < len; k++) Set(p, x + k, y + (int)(Mathf.Sin(k / (float)len * Mathf.PI) * -1.5f), 1f);
+                        int x = r.Next(Size), y = r.Next(Size), rad = 1 + r.Next(4);
+                        Blob(p, x, y, rad, r.Next(3) == 0 ? 1.06f : 0.8f);
+                        Set(p, x - rad / 2, y - rad / 2, 1f); // each chunk's lit corner
                     }
+                    for (var i = 0; i < 600; i++) Set(p, r.Next(Size), r.Next(Size), r.Next(2) == 0 ? 1f : 0.84f);
+                    break;
+                case Pattern.Lawn:
+                    // mown stripes (half a tile each, the texture holds four) under the blades
+                    for (var y = 0; y < Size; y++)
+                    {
+                        var k = (y / 32) % 2 == 0 ? 1f : 0.93f;
+                        for (var x = 0; x < Size; x++) p[y * Size + x] *= k;
+                    }
+                    for (var i = 0; i < 380; i++)
+                    {
+                        int x = r.Next(Size), y = r.Next(Size), len = 2 + r.Next(3);
+                        for (var k = 0; k < len; k++) Mul(p, x, y + k, 0.88f);
+                    }
+                    break;
+                case Pattern.Ripples:
+                    // ripples the wind left in the sand: soft wavy crests, lit on one side
+                    for (var y = 0; y < Size; y++)
+                    for (var x = 0; x < Size; x++)
+                    {
+                        var wave = Mathf.Sin((y + Noise(x, y, 4, seed + 9) * 22f) * Mathf.PI * 2 / 16f);
+                        p[y * Size + x] *= wave > 0.75f ? 1.04f : wave < -0.6f ? 0.95f : 1f;
+                    }
+                    for (var i = 0; i < 500; i++) Set(p, r.Next(Size), r.Next(Size), r.Next(2) == 0 ? 1f : 0.86f);
+                    break;
+                case Pattern.Cracked:
+                    Slabs(p, 64, 64, r, true);
+                    Cracks(p, r, 14);
+                    for (var i = 0; i < 18; i++) Blob(p, r.Next(Size), r.Next(Size), 2 + r.Next(5), 0.9f); // stains
                     break;
                 default:
                     for (var i = 0; i < 700; i++) Set(p, r.Next(Size), r.Next(Size), r.Next(2) == 0 ? 1f : 0.86f);
                     break;
             }
+            // never darker than half: the layer keeps its colour, the pattern only shades it
+            for (var i = 0; i < p.Length; i++) p[i] = Mathf.Clamp(p[i], 0.55f, 1f);
             return p;
         }
 
@@ -188,6 +330,104 @@ namespace Buds.World
                 p[y * Size + x] = v;
             }
             for (var i = 0; i < 260; i++) Mul(p, r.Next(Size), r.Next(Size), 0.9f);
+        }
+
+        /// <summary>
+        /// Water: a web of light like sunlight through ripples (the edges between tiling cells, bright where two cells
+        /// meet, fading into the cell), drawn by the water shader in two layers drifting against each other.
+        /// </summary>
+        static void Caustics(float[] p, System.Random r)
+        {
+            const int points = 14;
+            var px = new float[points];
+            var py = new float[points];
+            for (var i = 0; i < points; i++)
+            {
+                px[i] = (float)r.NextDouble() * Size;
+                py[i] = (float)r.NextDouble() * Size;
+            }
+            for (var y = 0; y < Size; y++)
+            for (var x = 0; x < Size; x++)
+            {
+                float f1 = float.MaxValue, f2 = float.MaxValue;
+                for (var i = 0; i < points; i++)
+                {
+                    // the nearest copy of the point on the tiling texture
+                    var dx = Mathf.Abs(x - px[i]);
+                    var dy = Mathf.Abs(y - py[i]);
+                    dx = Mathf.Min(dx, Size - dx);
+                    dy = Mathf.Min(dy, Size - dy);
+                    var d = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (d < f1)
+                    {
+                        f2 = f1;
+                        f1 = d;
+                    }
+                    else if (d < f2) f2 = d;
+                }
+                var edge = Mathf.Clamp01(1 - (f2 - f1) / 7f);
+                p[y * Size + x] = 0.86f + 0.14f * edge * edge;
+            }
+        }
+
+        /// <summary>Bare rock: big irregular slabs with dark fissures between them, each its own shade, a few cracks.</summary>
+        static void RockSlabs(float[] p, System.Random r)
+        {
+            const int points = 9;
+            var px = new float[points];
+            var py = new float[points];
+            var tint = new float[points];
+            for (var i = 0; i < points; i++)
+            {
+                px[i] = (float)r.NextDouble() * Size;
+                py[i] = (float)r.NextDouble() * Size;
+                tint[i] = 0.93f + (float)r.NextDouble() * 0.08f;
+            }
+            for (var y = 0; y < Size; y++)
+            for (var x = 0; x < Size; x++)
+            {
+                float f1 = float.MaxValue, f2 = float.MaxValue;
+                var nearest = 0;
+                for (var i = 0; i < points; i++)
+                {
+                    var dx = Mathf.Abs(x - px[i]);
+                    var dy = Mathf.Abs(y - py[i]);
+                    dx = Mathf.Min(dx, Size - dx);
+                    dy = Mathf.Min(dy, Size - dy);
+                    var d = Mathf.Sqrt(dx * dx + dy * dy);
+                    if (d < f1)
+                    {
+                        f2 = f1;
+                        f1 = d;
+                        nearest = i;
+                    }
+                    else if (d < f2) f2 = d;
+                }
+                var v = p[y * Size + x] * tint[nearest];
+                var gap = f2 - f1;
+                if (gap < 1.6f) v *= 0.78f; // the fissure
+                else if (gap < 3f) v = Mathf.Min(1, v * 1.04f); // its lit lip
+                p[y * Size + x] = v;
+            }
+            Cracks(p, r, 6);
+        }
+
+        /// <summary>Thin branching cracks (random walks that wrap round the texture).</summary>
+        static void Cracks(float[] p, System.Random r, int count)
+        {
+            for (var c = 0; c < count; c++)
+            {
+                float x = r.Next(Size), y = r.Next(Size);
+                var a = (float)(r.NextDouble() * Mathf.PI * 2);
+                var len = 12 + r.Next(26);
+                for (var k = 0; k < len; k++)
+                {
+                    a += (float)(r.NextDouble() - 0.5) * 0.9f;
+                    x += Mathf.Cos(a);
+                    y += Mathf.Sin(a);
+                    Mul(p, Mathf.RoundToInt(x), Mathf.RoundToInt(y), 0.8f);
+                }
+            }
         }
 
         /// <summary>Cobbles: rounded stones in staggered rows with dark gaps.</summary>

@@ -178,6 +178,7 @@ namespace Buds.World
             var groundDone = clock.ElapsedMilliseconds;
             foreach (var step in Props(this, transform, Map, material)) yield return step;
             LastTimings = $"colliders {colliders} ms, ground {groundDone - colliders} ms ({(ground != null ? "ready" : "now")}), props {clock.ElapsedMilliseconds - groundDone} ms";
+            WorldLife.Attach(this);
         }
 
         EdgeCollider2D edge;
@@ -204,6 +205,15 @@ namespace Buds.World
             };
             baseMesh.RecalculateBounds();
         }
+
+        /// <summary>Where the life of the map starts from (map-local ground points): trees, flowers, burning barrels.</summary>
+        public readonly List<(string kind, Vector2 at)> LifeSpots = new();
+
+        static string LifeKind(string prop) =>
+            prop == "beczka-ogien" ? "fire"
+            : prop.StartsWith("flowers") || prop == "hibiskus" ? "flower"
+            : prop.StartsWith("tree") || prop.StartsWith("palm") || prop.StartsWith("jungle") || prop == "sosna" || prop == "swierk" ? "tree"
+            : null;
 
         /// <summary>The standing props and their height in the map (local), to sort them again after the world moved.</summary>
         readonly List<(SpriteRenderer r, float y)> standing = new();
@@ -271,12 +281,35 @@ namespace Buds.World
             });
             baseShape.Triangles.AddRange(new[] { 0, 2, 1, 0, 3, 2 });
             // every layer gets its material's surface (GroundLook): grass blades, paving slabs, asphalt grain, ripples…
+            // drawn by the ground and water shaders (soft world patches, moving water) when the device has them
+            LoadShaders();
+            var look = DistrictLook.For(map.Id);
             var surfaces = new Dictionary<GroundLook.Pattern, Material>();
             Material Surface(GroundLook.Pattern pattern)
             {
                 if (surfaces.TryGetValue(pattern, out var mat)) return mat;
-                mat = new Material(material) { name = "Ground " + pattern, mainTexture = GroundLook.Texture(pattern) };
-                if (pattern == GroundLook.Pattern.Water) water.Add(mat);
+                var isWater = pattern == GroundLook.Pattern.Water;
+                var shader = isWater ? waterShader : groundShader;
+                mat = shader ? new Material(shader) : new Material(material);
+                mat.name = "Ground " + pattern;
+                mat.mainTexture = GroundLook.Texture(pattern);
+                if (shader && !isWater)
+                {
+                    // the district's ground; rooms: hardly any patches, colours as the room was painted
+                    mat.SetFloat(MacroId, map.IsInterior ? 0.04f : look.Macro);
+                    mat.SetFloat(DesatId, map.IsInterior ? 0.03f : look.Desat);
+                }
+                if (shader && isWater)
+                {
+                    // the district's water: calm or lively, clear or murky
+                    mat.SetFloat("_WebLow", look.WebLow);
+                    mat.SetFloat("_WebHigh", look.WebHigh);
+                    mat.SetFloat("_Glint", look.Glint);
+                    mat.SetFloat("_Flow", look.Flow);
+                    mat.SetFloat("_Sky", look.Sky);
+                    mat.SetColor("_Tint", look.WaterTint);
+                }
+                if (isWater && !shader) water.Add(mat);
                 return surfaces[pattern] = mat;
             }
             var basePattern = map.IsInterior ? GroundLook.Pattern.Grain : GroundLook.Pattern.Grass;
@@ -314,11 +347,12 @@ namespace Buds.World
             var nx = w * GroundShapes.SamplesPerTile;
             var ny = h * GroundShapes.SamplesPerTile;
             var band = 0;
+            var district = DistrictLook.DistrictOf(map.Id);
             foreach (var style in map.GroundStyles)
             {
                 var kinds = new HashSet<string>(style.Kinds);
                 var field = GroundShapes.Field((x, y) => kinds.Contains(map.GroundAt(x, y)), w, h, style.Radius);
-                var pattern = GroundLook.For(style.Name);
+                var pattern = GroundLook.For(style.Name, style.Kinds, district);
                 foreach (var (threshold, color) in style.Bands)
                 {
                     for (var j0 = 0; j0 < ny; j0 += chunk)
@@ -421,6 +455,26 @@ namespace Buds.World
             return mesh;
         }
 
+        static Shader groundShader, waterShader;
+        static bool shadersLoaded;
+        static readonly int MacroId = Shader.PropertyToID("_Macro");
+        static readonly int DesatId = Shader.PropertyToID("_Desat");
+
+        /// <summary>
+        /// The ground and water shaders (Resources/Shaders) and the world's soft patches they share; a device that can't
+        /// run them keeps the plain sprite material.
+        /// </summary>
+        static void LoadShaders()
+        {
+            if (shadersLoaded) return;
+            shadersLoaded = true;
+            groundShader = Resources.Load<Shader>("Shaders/BudsGround");
+            waterShader = Resources.Load<Shader>("Shaders/BudsWater");
+            if (groundShader && !groundShader.isSupported) groundShader = null;
+            if (waterShader && !waterShader.isSupported) waterShader = null;
+            Shader.SetGlobalTexture("_BudsMacro", GroundLook.Macro());
+        }
+
         /// <summary>The default sprite material (always in the build) with a white texture: tinted by vertex colour.</summary>
         static Material SpriteMaterial()
         {
@@ -463,10 +517,86 @@ namespace Buds.World
                     var rule = map.Scatter[r];
                     if (rule.Ground != ground || MapFormat.Hash(x, y, 7 + r) >= rule.Chance) continue;
                     all.Add(new PropSpot { Name = MapFormat.Pick(rule.Props, x, y, 13 + r), X = x, Y = y, Scattered = true });
+                    occupied.Add(y * (long)map.Width + x);
                     break;
                 }
             }
+            if (!map.IsInterior)
+            {
+                EdgeGrowth(map, all, occupied);
+                Dressing(map, all, occupied);
+            }
             return all;
+        }
+
+        /// <summary>What lies on open ground of each material (art/dressing.ts) and how much of it: never a flat colour edge to edge.</summary>
+        public static (float chance, string props)? DressingFor(string g) => g switch
+        {
+            _ when g.StartsWith("grass") || g.StartsWith("lawn") => (0.03f, "grunt-koniczyna|grunt-kwiatki|grunt-koniczyna|grunt-kamyki|grunt-wydeptane"),
+            "sand" or "shore" => (0.022f, "grunt-slady|grunt-patyk|grunt-kamyki|grunt-slady"),
+            "dirt" or "soil" or "rubble" => (0.035f, "grunt-koleiny|grunt-pekniecia|grunt-kamyki-ciemne|grunt-pekniecia"),
+            "gravel" or "path" => (0.018f, "grunt-kamyki|grunt-pekniecia"),
+            "asphalt" => (0.015f, "grunt-latka"),
+            _ => null,
+        };
+
+        /// <summary>The ground's own small details over every open cell of a map, by material (the same every time).</summary>
+        static void Dressing(WorldMap map, List<PropSpot> all, HashSet<long> occupied)
+        {
+            for (var y = 0; y < map.Height; y++)
+            for (var x = 0; x < map.Width; x++)
+            {
+                var key = y * (long)map.Width + x;
+                if (map.Solid[y, x] || occupied.Contains(key)) continue;
+                if (DressingFor(map.GroundAt(x, y)) is not { } d || MapFormat.Hash(x, y, 53) >= d.chance) continue;
+                all.Add(new PropSpot { Name = MapFormat.Pick(d.props.Split('|'), x, y, 59), X = x, Y = y, Scattered = true });
+                occupied.Add(key);
+            }
+            // then the district's own things (mushrooms in the forest, shells on the beach, rubble on the scrapland…)
+            var extra = DistrictLook.For(map.Id).Extra;
+            if (extra.Length == 0) return;
+            for (var y = 0; y < map.Height; y++)
+            for (var x = 0; x < map.Width; x++)
+            {
+                var key = y * (long)map.Width + x;
+                if (map.Solid[y, x] || occupied.Contains(key)) continue;
+                var g = map.GroundAt(x, y);
+                foreach (var (ground, chance, props) in extra)
+                {
+                    if (ground != g || MapFormat.Hash(x, y, 67) >= chance) continue;
+                    all.Add(new PropSpot { Name = MapFormat.Pick(props.Split('|'), x, y, 71), X = x, Y = y, Scattered = true });
+                    occupied.Add(key);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>Soft ground that grows: grass and lawns.</summary>
+        static bool Grows(string g) => g != null && (g.StartsWith("grass") || g.StartsWith("lawn") || g == "weeds");
+
+        /// <summary>Hard ground that grass creeps onto: paths, pavements, squares, gravel, sand.</summary>
+        static bool Trodden(string g) =>
+            g is "path" or "sidewalk" or "plaza" or "gravel" or "dirt" or "cobble" or "sand" or "concrete" or "soil";
+
+        /// <summary>
+        /// Where grass meets a path or a pavement, tufts and weeds grow along the edge (a third of such cells, the same
+        /// every time), so materials meet the way they do outside instead of along a clean cut.
+        /// </summary>
+        static void EdgeGrowth(WorldMap map, List<PropSpot> all, HashSet<long> occupied)
+        {
+            for (var y = 1; y < map.Height - 1; y++)
+            for (var x = 1; x < map.Width - 1; x++)
+            {
+                var key = y * (long)map.Width + x;
+                if (map.Solid[y, x] || occupied.Contains(key) || !Grows(map.GroundAt(x, y))) continue;
+                if (!Trodden(map.GroundAt(x + 1, y)) && !Trodden(map.GroundAt(x - 1, y)) && !Trodden(map.GroundAt(x, y + 1)) &&
+                    !Trodden(map.GroundAt(x, y - 1)))
+                    continue;
+                var roll = MapFormat.Hash(x, y, 41);
+                if (roll >= 0.34f) continue;
+                all.Add(new PropSpot { Name = roll < 0.24f ? "tuft" : roll < 0.3f ? "chwast" : "flowers-c", X = x, Y = y, Scattered = true });
+                occupied.Add(key);
+            }
         }
 
         // ---------- light: cast shadows and wind ----------
@@ -560,6 +690,7 @@ namespace Buds.World
         static IEnumerable<int> Props(WorldView view, Transform parent, WorldMap map, Material groundMaterial)
         {
             var shadows = new Dictionary<(Texture tex, int cx, int cy), ShadowBatch>();
+            var contacts = new Dictionary<(int cx, int cy), ShadowBatch>();
             var spots = AllProps(map);
             var names = new HashSet<string>();
             foreach (var s in spots) names.Add(s.Name);
@@ -575,6 +706,7 @@ namespace Buds.World
                 var sprite = art.Get(spot.Name);
                 if (!sprite) continue;
                 var flat = art.IsFlat(spot.Name);
+                var life = LifeKind(spot.Name);
                 var baseY = map.Height - 1 - spot.Y; // bottom edge of the cell in world units
                 // scattered decorations wander a little inside their cell so they don't look planted in rows
                 var jx = spot.Scattered ? (MapFormat.Hash(spot.X, spot.Y, 3) - 0.5f) * 0.5f : 0;
@@ -582,6 +714,7 @@ namespace Buds.World
                 var go = new GameObject(spot.Name);
                 go.transform.SetParent(root, false);
                 go.transform.localPosition = new Vector3(spot.X + 0.5f + jx, baseY + 0.1f + jy, 0);
+                if (life != null) view.LifeSpots.Add((life, go.transform.localPosition));
                 if (!flat) go.transform.localRotation = Upright; // buildings, trees, lamps stand up; flowers and markings lie flat
                 var r = go.AddComponent<SpriteRenderer>();
                 r.sprite = sprite;
@@ -591,7 +724,9 @@ namespace Buds.World
                 var sway = SwayFor(spot.Name);
                 // scattered plants sway a little less and each its own way
                 if (sway > 0) view.swaying.Add((go.transform, sway * (spot.Scattered ? 0.8f : 1f), go.transform.localPosition));
-                if (map.IsInterior || !CastsShadow(spot.Name)) continue;
+                if (!CastsShadow(spot.Name)) continue;
+                AddContact(contacts, sprite, go.transform.localPosition, (int)(spot.X / ChunkTiles), (int)(baseY / ChunkTiles));
+                if (map.IsInterior) continue;
                 var key = (sprite.texture as Texture, (int)(spot.X / ChunkTiles), (int)(baseY / ChunkTiles));
                 if (!shadows.TryGetValue(key, out var batch)) shadows[key] = batch = new ShadowBatch();
                 var at = (Vector2)go.transform.localPosition;
@@ -637,6 +772,66 @@ namespace Buds.World
                 mesh.RecalculateBounds();
                 var go = new GameObject(mesh.name, typeof(MeshFilter), typeof(MeshRenderer));
                 go.transform.SetParent(shadowRoot, false);
+                go.GetComponent<MeshFilter>().sharedMesh = mesh;
+                var renderer = go.GetComponent<MeshRenderer>();
+                renderer.sharedMaterial = material;
+                renderer.sortingOrder = SortCastShadow;
+                renderer.shadowCastingMode = ShadowCastingMode.Off;
+            }
+            yield return 0;
+            BuildContacts(shadowRoot, contacts, groundMaterial, map.IsInterior);
+        }
+
+        // ---------- contact shade: where things meet the ground ----------
+
+        /// <summary>How dark the soft shade right under a standing thing is (rooms: lighter, there is no sun).</summary>
+        public static readonly Color ContactColor = new(0.03f, 0.05f, 0.09f, 0.46f);
+        static Texture2D contactBlob;
+
+        /// <summary>
+        /// A soft oval of shade on the ground under a standing prop, as wide as its base: the cast shadow says where the
+        /// sun is, this says the thing stands on the ground (ambient occlusion where it meets it).
+        /// </summary>
+        static void AddContact(Dictionary<(int, int), ShadowBatch> contacts, Sprite sprite, Vector2 at, int cx, int cy)
+        {
+            // the width of the drawing near its ground point (its base), not its widest part: a tree's crown is wider than its trunk
+            var verts = sprite.vertices;
+            var (vMin, vMax) = Bounds(verts);
+            var width = Mathf.Clamp((vMax.x - vMin.x) * 0.72f, 0.5f, 6f);
+            var depth = Mathf.Clamp(width * 0.32f, 0.28f, 1.1f);
+            if (!contacts.TryGetValue((cx, cy), out var batch)) contacts[(cx, cy)] = batch = new ShadowBatch();
+            var first = batch.Vertices.Count;
+            var c = at + new Vector2(0, depth * 0.18f);
+            batch.Vertices.Add(new Vector3(c.x - width / 2, c.y - depth / 2));
+            batch.Vertices.Add(new Vector3(c.x + width / 2, c.y - depth / 2));
+            batch.Vertices.Add(new Vector3(c.x + width / 2, c.y + depth / 2));
+            batch.Vertices.Add(new Vector3(c.x - width / 2, c.y + depth / 2));
+            batch.Uvs.Add(new Vector2(0, 0));
+            batch.Uvs.Add(new Vector2(1, 0));
+            batch.Uvs.Add(new Vector2(1, 1));
+            batch.Uvs.Add(new Vector2(0, 1));
+            batch.Triangles.AddRange(new[] { first, first + 2, first + 1, first, first + 3, first + 2 });
+        }
+
+        static void BuildContacts(Transform root, Dictionary<(int, int), ShadowBatch> contacts, Material groundMaterial, bool interior)
+        {
+            if (contacts.Count == 0) return;
+            contactBlob ??= GroundLook.SoftBlob();
+            var material = new Material(groundMaterial) { name = "Contact shade", mainTexture = contactBlob };
+            var color = ContactColor;
+            if (interior) color.a *= 0.6f;
+            foreach (var ((cx, cy), batch) in contacts)
+            {
+                var mesh = new Mesh { name = $"Contact [{cx},{cy}]", indexFormat = IndexFormat.UInt32 };
+                mesh.SetVertices(batch.Vertices);
+                mesh.SetUVs(0, batch.Uvs);
+                mesh.SetTriangles(batch.Triangles, 0);
+                var colors = new Color[batch.Vertices.Count];
+                Array.Fill(colors, color);
+                mesh.colors = colors;
+                mesh.RecalculateBounds();
+                var go = new GameObject(mesh.name, typeof(MeshFilter), typeof(MeshRenderer));
+                go.transform.SetParent(root, false);
                 go.GetComponent<MeshFilter>().sharedMesh = mesh;
                 var renderer = go.GetComponent<MeshRenderer>();
                 renderer.sharedMaterial = material;

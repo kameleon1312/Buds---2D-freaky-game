@@ -22,6 +22,19 @@ namespace Buds.Tests
         }
 
         [Test]
+        public void DistrictsHaveTheirOwnMaterials()
+        {
+            var lawn = new[] { "lawn" };
+            Assert.AreEqual(GroundLook.Pattern.Lawn, GroundLook.For("lawn2", lawn, "dwor-carski"), "the manor's mown lawns");
+            Assert.AreEqual(GroundLook.Pattern.Grass, GroundLook.For("lawn2", lawn, "miasto-ziomkow"));
+            Assert.AreEqual(GroundLook.Pattern.Ripples, GroundLook.For("sand", new[] { "sand" }, "las-palmas"));
+            Assert.AreEqual(GroundLook.Pattern.Cracked, GroundLook.For("concrete", new[] { "concrete" }, "los-karkos"));
+            Assert.AreEqual(GroundLook.Pattern.Slabs, GroundLook.For("concrete", new[] { "concrete" }, "miasto-ziomkow"));
+            Assert.AreEqual(GroundLook.Pattern.Rock, GroundLook.For("rock", new[] { "rock" }, "dzika-puszcza"));
+            Assert.AreEqual(GroundLook.Pattern.Water, GroundLook.For("shore", new[] { "water" }, "dwor-carski"), "a shore style over a lake is the lake");
+        }
+
+        [Test]
         public void SurfacesAreNearWhiteAndTheSameEveryTime()
         {
             foreach (GroundLook.Pattern pattern in System.Enum.GetValues(typeof(GroundLook.Pattern)))

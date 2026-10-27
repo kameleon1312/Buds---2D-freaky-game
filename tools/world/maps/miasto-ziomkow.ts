@@ -282,7 +282,8 @@ export function miastoZiomkow(): MapCanvas {
     [47, 87],
     [51, 87],
   ] as const)
-    m.place('garaze', x, y);
+    // three looks along the row (the first is the one with Rysiu's door)
+    m.place(['garaze', 'garaze-b', 'garaze-c'][((x - 15) / 4) % 3]!, x, y);
   m.place('graffiti-a', 27, 87);
   m.place('graffiti-c', 39, 87);
   m.place('auto-b', 25, 90);

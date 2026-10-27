@@ -18,6 +18,8 @@ namespace Buds.World
             public float pivotX;
             public float pivotY;
             public bool flat;
+            /// <summary>Blocked cells [width, depth]; the anchor is the middle of the bottom row.</summary>
+            public int[] foot;
         }
 
         [Serializable]

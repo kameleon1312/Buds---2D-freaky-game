@@ -9,8 +9,10 @@ import {
   bricks,
   circ,
   door,
+  fill,
   flat,
   frame,
+  n,
   poly,
   puffs,
   rr,
@@ -367,52 +369,132 @@ function carriage(): Prop {
   return { w, h, ax, ay, foot, body: s };
 }
 
+/**
+ * The manor's stables, 5×3: white plastered walls on a red brick plinth, a red tile roof with a little cupola and a
+ * gilded weather vane, three stalls with split doors (the top halves open, a horse looking out of two), a hay-loft
+ * door under the gable, iron lanterns between the stalls and a water trough in front.
+ */
 function stable(): Prop {
   const foot: [number, number] = [5, 3];
-  const { w, h, ax, ay, L, R } = frame(foot, 3.8, 0.35);
-  const wood: Tone = ['#b0703f', '#8a552d'];
-  const wallTop = ay - 1.9 * T;
-  const top = ay - 3.5 * T;
-  let s = shadow(ax, ay - 2, 2.7 * T, 12, 0.22);
-  s += shaded(rr(L + 4, wallTop, R - L - 8, ay - wallTop, 4), wood, LINE, -8, -3);
-  for (let x = L + 18; x < R - 8; x += 16)
-    s += stroke(`M${x} ${wallTop + 4}V${ay - 4}`, wood[1], 2, 0.7);
-  s += shaded(
-    rr(ax - 0.8 * T, ay - 1.45 * T, 1.6 * T, 1.45 * T - 2, 4),
-    ['#8a552d', '#6b4229'],
-    LINE,
-    -4,
-    -2,
-  );
-  s += stroke(
-    `M${ax - 0.8 * T} ${ay - 1.45 * T}L${ax + 0.8 * T} ${ay - 2}M${ax + 0.8 * T} ${ay - 1.45 * T}L${ax - 0.8 * T} ${ay - 2}`,
-    CREAM,
-    5,
-  );
+  const { w, h, ax, ay, L, R } = frame(foot, 4.3, 0.35);
+  const plaster: Tone = ['#f4ecdc', '#d9ceb8'];
+  const tile: Tone = ['#c35b40', '#97402c'];
+  const green: Tone = ['#3f6b4a', '#2c4f36'];
+  const wallTop = ay - 1.95 * T;
+  const top = ay - 3.45 * T;
+  let s = shadow(ax, ay - 2, 2.7 * T, 12, 0.24);
+  // walls: plaster over a brick plinth
+  s += shaded(rr(L + 4, wallTop, R - L - 8, ay - wallTop, 3), plaster, LINE, -8, -3);
+  s += shaded(rr(L + 4, ay - 18, R - L - 8, 16, 2), BRICK, LINE, -1, -1, 2);
+  s += bricks(L + 6, ay - 17, R - L - 12, 14, '#7a3424', 0.5);
+  // the roof: tiles in rows, the ridge, a cupola with a weather vane
   s += shaded(
     poly([
       [L - 14, wallTop + 6],
-      [ax, top],
+      [ax - 0.9 * T, top],
+      [ax + 0.9 * T, top],
       [R + 14, wallTop + 6],
     ]),
-    ['#7a3a2e', '#5e2c23'],
+    tile,
     LINE,
     -6,
     -6,
   );
-  s += windowAt(ax - 16, top + 0.75 * T, 32, 26, {
-    line: LINE,
-    r: 12,
-    glass: ['#3a2a20', '#2a1d16'],
-    lit: false,
-  });
+  let rows = '';
+  for (let k = 1; k < 5; k++) {
+    const y = top + (k * (wallTop + 6 - top)) / 5;
+    const half = 0.9 * T + ((R + 14 - (ax + 0.9 * T)) * k) / 5;
+    for (let x = ax - half; x < ax + half - 8; x += 12) rows += `M${n(x)} ${n(y)}q6 5 12 0`;
+  }
+  s += stroke(rows, '#7d3322', 1.6, 0.7);
+  s += shaded(rr(ax - 0.95 * T, top - 6, 1.9 * T, 9, 3), ['#a34c36', '#86402f'], LINE, -1, -1, 2);
+  s += shaded(rr(ax - 16, top - 40, 32, 34, 3), plaster, LINE, -2, -2, 2);
+  s += fill(rr(ax - 9, top - 32, 18, 16, 6), '#3a2a20', 0.85);
   s += shaded(
-    rr(L + 14, ay - 0.6 * T, 0.9 * T, 0.6 * T - 2, 6),
-    ['#e8c86a', '#c9a64a'],
+    poly([
+      [ax - 22, top - 38],
+      [ax, top - 58],
+      [ax + 22, top - 38],
+    ]),
+    green,
     LINE,
-    -3,
     -2,
+    -2,
+    2,
   );
+  s += stroke(`M${n(ax)} ${n(top - 58)}V${n(top - 80)}`, '#6b5a2a', 2.4);
+  s += shaded(`M${n(ax)} ${n(top - 78)}l16 4l-16 4Z`, ['#ffc93c', '#d98a0b'], LINE, -1, -1, 1.4);
+  // the hay-loft door under the gable, hay peeking out
+  s += shaded(
+    rr(ax - 20, wallTop - 0.55 * T, 40, 0.5 * T, 3),
+    ['#a07448', '#7f552f'],
+    LINE,
+    -2,
+    -2,
+    2,
+  );
+  s += shaded(
+    `M${n(ax - 16)} ${n(wallTop - 0.08 * T)}q16 -12 32 0Z`,
+    ['#e8cf7a', '#c9ad52'],
+    '#8a7230',
+    -1,
+    -1,
+    1.4,
+  );
+  // three stalls: split doors in the manor's green, the top halves open
+  const stallW = (R - L - 40) / 3;
+  for (let i = 0; i < 3; i++) {
+    const x = L + 20 + i * stallW + 6;
+    const dw = stallW - 12;
+    const dTop = ay - 1.35 * T;
+    s += fill(rr(x - 3, dTop - 3, dw + 6, ay - dTop, 3), '#2a1d16', 0.35);
+    s += fill(rr(x, dTop, dw, 0.6 * T, 2), '#241814', 1); // the dark inside above
+    if (i !== 1) {
+      // a horse looking out: its head, a white blaze, an ear, the mane
+      const hx = x + dw / 2;
+      const hy = dTop + 0.42 * T;
+      const coat: Tone = i === 0 ? ['#8a5a3a', '#6b4229'] : ['#3a2a22', '#261a14'];
+      s += shaded(
+        `M${n(hx - 9)} ${n(hy + 6)}Q${n(hx - 12)} ${n(hy - 16)} ${n(hx)} ${n(hy - 20)}Q${n(hx + 12)} ${n(hy - 14)} ${n(hx + 8)} ${n(hy + 8)}Z`,
+        coat,
+        '#1f140e',
+        -1,
+        -2,
+        1.6,
+      );
+      s += fill(`M${n(hx - 2)} ${n(hy - 16)}l3 0l1 18l-5 0Z`, '#f4ecdc', 0.9);
+      s += shaded(
+        poly([
+          [hx - 7, hy - 16],
+          [hx - 4, hy - 26],
+          [hx - 1, hy - 18],
+        ]),
+        coat,
+        '#1f140e',
+        0,
+        0,
+        1.2,
+      );
+      s += fill(circ(hx - 5, hy - 8, 1.5), '#111111') + fill(circ(hx + 5, hy - 8, 1.5), '#111111');
+    }
+    s += shaded(rr(x, dTop + 0.6 * T, dw, ay - dTop - 0.6 * T - 4, 2), green, LINE, -2, -2, 2);
+    s += stroke(
+      `M${n(x + 2)} ${n(dTop + 0.6 * T + 2)}L${n(x + dw - 2)} ${n(ay - 6)}M${n(x + dw - 2)} ${n(dTop + 0.6 * T + 2)}L${n(x + 2)} ${n(ay - 6)}`,
+      CREAM,
+      2.4,
+      0.9,
+    );
+    s += shaded(rr(x - 4, dTop - 7, dw + 8, 7, 2), ['#e0d6c2', '#bfb39a'], LINE, -1, -1, 1.6); // the lintel
+  }
+  // lanterns between the stalls
+  for (const lx of [L + 20 + stallW, L + 20 + 2 * stallW]) {
+    s += stroke(`M${n(lx)} ${n(ay - 1.55 * T)}h6`, '#2a2d36', 2);
+    s += shaded(rr(lx + 2, ay - 1.55 * T, 10, 14, 2), ['#3a3e48', '#24272e'], LINE, -1, -1, 1.2);
+    s += fill(rr(lx + 4, ay - 1.55 * T + 3, 6, 8, 1), '#ffe3a1', 0.95);
+  }
+  // a stone water trough in front
+  s += shaded(rr(R - 0.95 * T, ay - 16, 0.7 * T, 14, 3), STONE, LINE, -1, -1, 1.8);
+  s += fill(rr(R - 0.95 * T + 4, ay - 14, 0.7 * T - 8, 4, 2), '#7fd6f2', 0.9);
   return { w, h, ax, ay, foot, body: s };
 }
 
