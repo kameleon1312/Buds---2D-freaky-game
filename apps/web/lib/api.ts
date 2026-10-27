@@ -38,7 +38,7 @@ const FRIENDLY: Record<number, string> = {
 
 async function request<T>(
   path: string,
-  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  schema: z.ZodType<T, unknown>,
   init?: RequestInit,
 ): Promise<T> {
   let res: Response;

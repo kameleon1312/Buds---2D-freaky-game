@@ -68,7 +68,7 @@ export const weaponKindSchema = z.enum(WEAPON_KINDS);
 /** Items can lift a skill this many ranks above what the bud has trained. */
 export const SKILL_GEAR_MAX = 2;
 
-const skillBonus = z.record(
+const skillBonus = z.partialRecord(
   z.enum(SKILLS.map((s) => s.id) as [SkillId, ...SkillId[]]),
   z.number().int().min(1).max(2),
 );

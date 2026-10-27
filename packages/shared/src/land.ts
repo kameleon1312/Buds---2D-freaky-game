@@ -533,7 +533,11 @@ export const landStateSchema = z.object({
   raids: z.array(raidRecordSchema).default([]),
   /** This bud's own raids: how many today, and when it last tried each district (owner slug → ms). */
   raiding: z
-    .object({ day: z.string(), count: z.number().int().nonnegative(), tried: z.record(z.number()) })
+    .object({
+      day: z.string(),
+      count: z.number().int().nonnegative(),
+      tried: z.record(z.string(), z.number()),
+    })
     .default({ day: '', count: 0, tried: {} }),
 });
 export type LandState = z.infer<typeof landStateSchema>;
