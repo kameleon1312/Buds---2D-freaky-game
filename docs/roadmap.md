@@ -27,7 +27,7 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
 
 ## Kolejność prac
 
-1. ~~Mapy 4 dzielnic~~ (`docs/districts.md`) i ~~NPC + questy z XP przyznawanym przez serwer~~ (`docs/questy.md`: 27 NPC i 29 zadań we wszystkich dzielnicach), ~~panel Buda z ekwipunkiem i umiejętnościami~~, ~~wnętrza budynków, skrytki z monetami i mapa z mgłą~~ (`docs/districts.md`, `docs/questy.md`), ~~ekwipunek od stóp do głów ze statystykami, sklep za monety i konta na stronie~~ (`docs/ekwipunek.md`), ~~ponad 100 przedmiotów z poziomami, pojedynki turowe z ruchami zależnymi od broni, 21 przeciwników z łupem~~ (`docs/pojedynki.md`), ~~kreator Buda w grze, Wyspa Startowa z samouczkiem, większe dzielnice z działkami pod nowe treści, nowe części i kolory wyglądu~~ (`docs/wyglad.md`, `docs/districts.md`), ~~trening umiejętności na mapie, wyjątkowe umiejętności, napoje energetyczne i pojazdy~~ (`docs/umiejetnosci.md`). Teraz: **lista NPC i zadań od autora gry**, potem pierwsza mini-gra (freestyle / graffiti) i potyczki, w których zadziałają umiejętności.
+1. ~~Mapy 4 dzielnic~~ (`docs/districts.md`) i ~~NPC + questy z XP przyznawanym przez serwer~~ (`docs/questy.md`: 27 NPC i 29 zadań we wszystkich dzielnicach), ~~panel Buda z ekwipunkiem i umiejętnościami~~, ~~wnętrza budynków, skrytki z monetami i mapa z mgłą~~ (`docs/districts.md`, `docs/questy.md`), ~~ekwipunek od stóp do głów ze statystykami, sklep za monety i konta na stronie~~ (`docs/ekwipunek.md`), ~~ponad 100 przedmiotów z poziomami, walka w czasie rzeczywistym w świecie (zdolności zależne od broni, PvP i ekipy), przeciwnicy z łupem~~ (`docs/walka.md`), ~~kreator Buda w grze, Wyspa Startowa z samouczkiem, większe dzielnice z działkami pod nowe treści, nowe części i kolory wyglądu~~ (`docs/wyglad.md`, `docs/districts.md`), ~~trening umiejętności na mapie, wyjątkowe umiejętności, napoje energetyczne i pojazdy~~ (`docs/umiejetnosci.md`). Teraz: **lista NPC i zadań od autora gry**, potem pierwsza mini-gra (freestyle / graffiti) i potyczki, w których zadziałają umiejętności.
    NPC z prostymi zadaniami (porozmawiaj, przynieś, zbierz), zgłaszanie zdarzeń do API i **XP przyznawane
    przez serwer** (`POST /v1/buds/me/events`, walidacja + limity). Pierwsza mini-gra.
 2. **Ekwipunek w grze.** Ekran postaci: co mam (`/v1/buds/me/items`), co mogę założyć; zmiana wyglądu
@@ -55,8 +55,8 @@ kilkoma dzielnicami i docelowo trybem multiplayer. Ten plik mówi, **co robimy p
 
 Jest (`docs/multiplayer.md`): mapa = pokój na serwerze (kolejne kopie, gdy pokój się zapełni), jeden WebSocket
 na urządzenie w tym samym procesie co API (`apps/api/src/live.ts`, bez osobnej usługi i bez Colyseusa), ruch
-sprawdzany na serwerze siatką chodzenia z map i limitem prędkości, hasła w dymkach, nazwy nad głowami, wyzwanie
-na pojedynek z ulicy. Nagrody dalej wyłącznie przez REST API. Gdy graczy będzie tylu, że jeden proces nie wystarczy:
+sprawdzany na serwerze siatką chodzenia z map i limitem prędkości, hasła w dymkach, nazwy nad głowami, walka w
+świecie liczona na serwerze (`docs/walka.md`). Nagrody wyłącznie z zapisu na serwerze. Gdy graczy będzie tylu, że jeden proces nie wystarczy:
 pokoje na kilku instancjach (klucz pokoju = mapa, łatwy podział) i Redis do wspólnego stanu połączeń.
 
 ## Dalsze decyzje do podjęcia

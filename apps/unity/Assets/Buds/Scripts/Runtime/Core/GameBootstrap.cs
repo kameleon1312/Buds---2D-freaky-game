@@ -326,12 +326,11 @@ namespace Buds.Core
             var map = world.Map;
             questWorld = QuestWorld.Create(world, quests);
             cacheWorld = CacheWorld.Create(world, caches);
-            enemyWorld = EnemyWorld.Create(world, quests.Content);
+            SetUpMapFight(); // the map's opponents and the fight's effects
             UpdateTracker();
             // strolling NPCs stop for the player and stand still while anyone talks or a screen is open
             questWorld.PlayerFeet = () => player ? (Vector2?)player.transform.position : null;
-            questWorld.Busy = () => ui.DialogOpen || (fightScreen?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
-                                    (rivalryScreen?.IsOpen ?? false);
+            questWorld.Busy = () => ui.DialogOpen || (mapScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false);
             SetUpMapExtras(); // training stations, the ride and the walking speed
             UpdateCameraBounds();
             Camera.main!.backgroundColor = map.BaseColor;
@@ -358,12 +357,15 @@ namespace Buds.Core
             ui.Tick();
             if (travelling) return;
             var input = player.Input;
-            input.Blocked = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
-                            (fightScreen?.IsOpen ?? false) || (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
-                            (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false) ||
-                            (landScreen?.IsOpen ?? false);
+            var windowOpen = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
+                             (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
+                             (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false) ||
+                             (landScreen?.IsOpen ?? false);
+            // knocked out, stunned or flung by a blow: the fight holds the bud (walka.md)
+            input.Blocked = windowOpen || CombatLocked;
+            // the fight's buttons, the aim, the mouse: every frame, the world never stops for a fight
+            UpdateCombat(input, windowOpen || ui.ChoiceOpen);
             if (creatorScreen?.IsOpen ?? false) return; // the look editor is open over the world
-            if (UpdateFight()) return;
             if (UpdateChat()) return; // typing: every key is a letter, the world waits
             if (UpdateLandScreen(input)) return;
             if (UpdateRidesAndTraining(input)) return;
@@ -390,25 +392,14 @@ namespace Buds.Core
             CheckQuestProgress(cell);
             Explore(cell);
 
-            // what the bud can interact with: a person first, then an opponent, a cache, a door, a sign
+            // what the bud can interact with: a person first, then a cache, a door, a sign (opponents are fought with the
+            // fight's buttons; only a guest, who can't fight on the server, walks up to the tutorial's dummy with E)
             var feet = (Vector2)player.transform.position;
-            // off the road on a route: someone in the bushes may jump out and pick a fight on their own
-            var fighting = fightBusy || (fightScreen?.IsOpen ?? false);
-            enemyWorld.Settle(feet, fighting);
-            if (!ui.DialogOpen)
-            {
-                var lurker = enemyWorld.AmbushNear(feet, fighting);
-                if (lurker)
-                {
-                    _ = SprungOn(lurker);
-                    return;
-                }
-            }
             // the districts on a wasteland: plots' gates, the own buildings and the building being placed come first
             if (UpdateLandWorld(input, cell, feet)) return;
             var (mx, my) = FeetOnMap();
             nearbyNpc = questWorld.NearestNpc(feet, InteractRange);
-            nearbyEnemy = nearbyNpc ? null : enemyWorld.Nearest(feet, InteractRange);
+            nearbyEnemy = nearbyNpc || session != null ? null : enemyWorld.Nearest(feet, InteractRange);
             nearbyCache = nearbyNpc || nearbyEnemy ? null : caches.Nearest(world.Map.Id, mx, my, CacheWorld.SearchRange);
             nearbyTraining = nearbyNpc || nearbyEnemy || nearbyCache != null ? null : trainingWorld.Nearest(feet, TrainingRange);
             nearbyDoor = nearbyNpc || nearbyEnemy || nearbyCache != null || nearbyTraining != null ? null : FindNearbyDoor(feet);
@@ -418,7 +409,7 @@ namespace Buds.Core
                 ? null
                 : NearestRemote(feet);
             ui.SetHint(nearbyNpc ? $"Rozmawiaj: {nearbyNpc.Data.name}  [E]"
-                : nearbyEnemy ? $"Walcz: {nearbyEnemy.Data.name} (poz. {nearbyEnemy.Data.level})  [E]"
+                : nearbyEnemy ? $"Ćwicz: {nearbyEnemy.Data.name}  [E]"
                 : nearbyCache != null ? "Przeszukaj  [E]"
                 : nearbyTraining != null ? TrainingHint(nearbyTraining)
                 : nearbyDoor != null ? $"Wejdź: {nearbyDoor.Name}  [E]"
@@ -430,7 +421,7 @@ namespace Buds.Core
             if (!input.InteractPressed) return;
             if (ui.DialogOpen) ui.HideDialog();
             else if (nearbyNpc) TalkTo(nearbyNpc);
-            else if (nearbyEnemy) Challenge(nearbyEnemy);
+            else if (nearbyEnemy) FightOffline();
             else if (nearbyCache != null) _ = OpenCache(nearbyCache);
             else if (nearbyTraining != null) StartTraining(nearbyTraining);
             else if (nearbyDoor != null) EnterDoor(nearbyDoor);

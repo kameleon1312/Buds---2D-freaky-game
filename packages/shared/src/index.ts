@@ -15,6 +15,8 @@ export * from './rides-and-drinks';
 export * from './training';
 export * from './premium';
 export * from './combat';
+export * from './brawl';
+export * from './loadout';
 export * from './account';
 export * from './skills';
 export * from './rivalry';

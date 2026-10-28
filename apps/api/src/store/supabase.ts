@@ -186,6 +186,49 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       }));
     },
 
+    async loadouts(slug) {
+      const { data, error } = await db
+        .from('bud_loadouts')
+        .select('weapon, kit')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return Object.fromEntries(
+        (data as { weapon: string; kit: (string | null)[] }[]).map((r) => [r.weapon, r.kit]),
+      );
+    },
+
+    async setLoadout(slug, weapon, kit) {
+      const { error } = await db.from('bud_loadouts').upsert({
+        bud_id: await idBySlug(slug),
+        weapon,
+        kit,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+    },
+
+    async moveRanks(slug) {
+      const { data, error } = await db
+        .from('bud_move_ranks')
+        .select('move_id, rank')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return Object.fromEntries(
+        (data as { move_id: string; rank: number }[]).map((r) => [r.move_id, r.rank]),
+      );
+    },
+
+    async upgradeMove(slug, moveId, from, price) {
+      const { data, error } = await db.rpc('upgrade_move', {
+        p_bud: await idBySlug(slug),
+        p_move: moveId,
+        p_from: from,
+        p_price: price,
+      });
+      if (error) throw error;
+      return data as { status: 'ok' | 'race' | 'poor'; coins: number; rank: number };
+    },
+
     async upgradeSkill(slug, skillId, points, maxRank) {
       const { data, error } = await db.rpc('upgrade_skill', {
         p_bud: await idBySlug(slug),
@@ -357,6 +400,17 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       });
       if (error) throw error;
       return (data as { xp: number; coins: number } | null) ?? null;
+    },
+
+    async knockout(victim, killer, percent, max) {
+      const { data, error } = await db.rpc('knockout_coins', {
+        p_victim: await idBySlug(victim),
+        p_killer: killer ? await idBySlug(killer) : null,
+        p_percent: percent,
+        p_max: max,
+      });
+      if (error) throw error;
+      return data as { lost: number; coins: number };
     },
 
     async training(slug) {

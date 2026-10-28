@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { WALK_GRIDS } from './walk-grids';
+import type { BrawlEvent, KitEntry } from './brawl';
+import type { FightReward } from './combat';
+import type { Influence, PvpResult, RaidResult } from './influence';
 
 /**
  * Live play: buds on the same map see each other move, ride and call out, in real time. One WebSocket per device
@@ -17,7 +20,7 @@ export const LIVE_ROOM_CAP = 40;
 /** The fastest a bud can go (tiles/s): running with every speed boost on the fastest ride, with room to spare. */
 export const LIVE_MAX_SPEED = 16;
 /** Messages a device may send per second (bursts up to twice that). */
-export const LIVE_RATE = 20;
+export const LIVE_RATE = 30;
 /** The longest message the server reads (bytes). */
 export const LIVE_MAX_MESSAGE = 1024;
 /** Seconds to say hello after connecting, and between pings before a silent connection is dropped. */
@@ -44,7 +47,7 @@ export const emoteIds = EMOTES.map((e) => e.id) as [EmoteId, ...EmoteId[]];
 
 /** Facing on the wire: 0 down, 1 side (left), 2 up, 3 side facing right. */
 export const facingSchema = z.number().int().min(0).max(3);
-/** What the bud is busy with: 0 nothing, 1 a duel, 2 a menu, 3 typing in the chat. */
+/** What the bud is busy with: 0 nothing, 1 fighting, 2 a menu, 3 typing in the chat. */
 export const liveStatusSchema = z.number().int().min(0).max(3);
 
 const mapId = z.string().regex(/^[a-z0-9-]{2,60}$/);
@@ -69,7 +72,22 @@ export const liveClientMessageSchema = z.discriminatedUnion('t', [
     m: z.boolean(),
     r: ride.default(''),
     s: liveStatusSchema.default(0),
+    /** The last forced move (dash, knockback, getting up) the game has applied: older reports are ignored. */
+    q: z.number().int().min(0).max(1_000_000).default(0),
   }),
+  /** A button pressed (walka.md): 0 basic, 1–2 abilities, 3 guard, 4 ultimate, aimed at a spot or a foe. */
+  z.object({
+    t: z.literal('act'),
+    a: z.number().int().min(0).max(4),
+    x: coord,
+    y: coord,
+    tid: z
+      .string()
+      .regex(/^[a-z0-9-]{1,80}$/)
+      .optional(),
+  }),
+  /** Call a rival's or a district's defender out to the street: a fight the REST API has just started. */
+  z.object({ t: z.literal('summon'), fight: z.string().uuid() }),
   z.object({ t: z.literal('join'), map: mapId, x: coord, y: coord }),
   z.object({ t: z.literal('emote'), e: z.enum(emoteIds) }),
   /** The player's own words (chat.ts cleans them; longer input is cut, not refused). */
@@ -92,6 +110,65 @@ export type LivePlayer = {
   m: boolean;
   r: string;
   s: number;
+  /** Health in a fight and its maximum (0: not known yet). */
+  hp: number;
+  mhp: number;
+  /** Crew tag (allies share it; '' = none). */
+  team: string;
+};
+
+/** An opponent of the districts or a shadow (a rival's or a defender's saved fighter) as the room sees it. */
+export type LiveEntity = {
+  id: string;
+  kind: 'mob' | 'shadow';
+  /** The opponent's content id (its sheet in the game), or the bud whose sheet a shadow wears. */
+  enemy: string;
+  slug: string;
+  name: string;
+  level: number;
+  x: number;
+  y: number;
+  f: number;
+  h: number;
+  mh: number;
+  boss: boolean;
+  /** Hidden in its nook (a lurker), beaten (waiting to stand up), fighting this bud only. */
+  lurk: boolean;
+  down: boolean;
+  only: string;
+};
+
+/** A unit's state in a tick: position (opponents) and health (everyone). */
+export type LiveUnitState = {
+  id: string;
+  x: number;
+  y: number;
+  f: number;
+  m: boolean;
+  h: number;
+  mh: number;
+  d: boolean;
+};
+
+/** A blow, a cast, a status… (brawl.ts BrawlEvent, as it is). */
+export type LiveFx = BrawlEvent;
+
+/** What only the bud itself sees: its health, its buttons and when they are ready (ms left). */
+export type LiveYou = {
+  t: 'you';
+  hp: number;
+  mhp: number;
+  sh: number;
+  /** Knocked out (ms left), protected after getting up (ms left), stunned (ms left). */
+  ko: number;
+  guard: number;
+  stun: number;
+  kit: (KitEntry | null)[] | null;
+  cd: number[];
+  /** Can fight other buds here and now (level and zone). */
+  open: boolean;
+  /** The bud's crew tag ('' = none): allies share it. */
+  team: string;
 };
 
 export type LiveServerMessage =
@@ -104,6 +181,29 @@ export type LiveServerMessage =
   | { t: 'chat'; id: string; name: string; text: string }
   /** Too many messages too fast (or the same again): this one was not sent. */
   | { t: 'slow' }
+  | { t: 'ents'; es: LiveEntity[] }
+  | { t: 'es'; es: LiveUnitState[] }
+  | { t: 'fx'; ev: LiveFx[] }
+  | LiveYou
+  /** A won fight: what the server granted (fight.ts shapes). */
+  | {
+      t: 'reward';
+      kind: 'mob' | 'pvp' | 'raid' | 'street';
+      enemy: string;
+      name: string;
+      reward: FightReward | null;
+      influence: Influence | null;
+      pvp: PvpResult | null;
+      raid: RaidResult | null;
+    }
+  /** Knocked out: who did it and the coins it cost. */
+  | {
+      t: 'lost';
+      kind: 'mob' | 'pvp' | 'raid' | 'street';
+      name: string;
+      coins: number;
+      left: number;
+    }
   | { t: 'pong' }
   | { t: 'bye'; reason: string };
 

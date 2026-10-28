@@ -161,7 +161,6 @@ namespace Buds.Core
             if (quests.Duel(enemy.Data.id))
                 ui.ShowDialog("Trenerka Ewa", "Ćwiczysz na sucho, bo grasz jako gość. Zaliczam! Prawdziwe pojedynki toczy połączony Bud.");
             else ui.ShowDialog(enemy.Data.name, "Manekin stoi spokojnie. Weź zadanie od Trenerki Ewy.");
-            enemyWorld.Rest(enemy.Data.id, 5);
             return true;
         }
 
@@ -256,15 +255,10 @@ namespace Buds.Core
                 if (session == null) PracticeAsGuest(dummy);
                 else
                 {
-                    await StartDuel(dummy);
-                    await Awaitable.WaitForSecondsAsync(0.4f);
-                    for (var turn = 0; turn < 20 && currentFight is { status: "active" }; turn++)
-                    {
-                        await FightMove(fightScreen.MoveAt(turn % 2 == 0 ? 2 : 1) ?? fightScreen.MoveAt(0));
-                        if (turn == 0) await shot("t4-duel.png");
-                    }
+                    // the dummy is fought right where it stands, with the fight's buttons
+                    var outcome = await FightIt(() => dummy.Down, 40, shot, "t4-duel");
                     await shot("t5-duel-won.png");
-                    CloseFight();
+                    Debug.Log($"[AutoPilot] tutorial dummy: {outcome}");
                 }
                 await Press();
             }

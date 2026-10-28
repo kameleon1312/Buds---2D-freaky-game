@@ -542,6 +542,9 @@ export const fighterSchema = z.object({
   moves: z.array(moveIdSchema),
   /** Special abilities (skill perks) that count in a duel. */
   perks: z.array(z.string()).default([]),
+  /** The five fight buttons the bud chose (loadout.ts; null = the weapon's own), and how far each move is upgraded. */
+  kit: z.array(z.string().nullable()).nullable().default(null),
+  ranks: z.record(z.string(), z.number().int().min(0).max(3)).default({}),
   status: statusSchema,
 });
 export type Fighter = z.infer<typeof fighterSchema>;
@@ -588,7 +591,7 @@ function next(state: number): [number, number] {
   return [((t ^ (t >>> 14)) >>> 0) / 4294967296, a];
 }
 
-class Rng {
+export class Rng {
   constructor(public state: number) {}
   float() {
     const [v, s] = next(this.state);
@@ -616,7 +619,17 @@ export function budFighter(
   xp: number,
   stats: CharacterStats,
   weaponItem: CatalogItem | undefined,
-  { perks = [], buffs = [] }: { perks?: readonly string[]; buffs?: readonly BuffId[] } = {},
+  {
+    perks = [],
+    buffs = [],
+    kit = null,
+    ranks = {},
+  }: {
+    perks?: readonly string[];
+    buffs?: readonly BuffId[];
+    kit?: (string | null)[] | null;
+    ranks?: Record<string, number>;
+  } = {},
 ): Fighter {
   const level = levelFromXp(xp).level;
   const weapon = weaponItem?.weapon ?? 'piesci';
@@ -642,6 +655,8 @@ export function budFighter(
     weaponItem: weaponItem?.id ?? null,
     moves: [...learnedMoves(weapon, level, stats.skills), ...extra],
     perks: [...perks],
+    kit,
+    ranks: { ...ranks },
     status: { blind: 0, weaken: 0, aim: false, secondWind: false },
   };
 }
@@ -663,6 +678,8 @@ export function enemyFighter(e: Enemy): Fighter {
     weaponItem: null,
     moves: MOVES_BY_WEAPON[e.weapon],
     perks: [],
+    kit: null,
+    ranks: {},
     status: { blind: 0, weaken: 0, aim: false, secondWind: false },
   };
 }

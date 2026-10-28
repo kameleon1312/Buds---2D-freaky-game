@@ -12,7 +12,9 @@ import {
   type BuyResponse,
   type CreateBudResponse,
   type EquipmentResponse,
-  type FightResponse,
+  type MovesResponse,
+  kitOf,
+  rankCost,
   MOVES_BY_WEAPON,
   type OpenCacheResponse,
   type PairCodeResponse,
@@ -367,95 +369,77 @@ describe('accounts', () => {
   });
 });
 
-describe('duels', () => {
+describe('fight ends (live fights, fights.ts)', () => {
   async function ready(level = 1) {
     const ctx = setup();
     const { body } = await ctx.create();
     if (level > 1) await reachLevel(ctx.store, body.bud.slug, level);
-    const post = (path: string, data?: unknown) =>
-      ctx.app.request(path, { method: 'POST', ...ctx.json(data ?? {}, body.token) });
-    return { ...ctx, body, post };
+    const bud = (await ctx.store.getBySlug(body.bud.slug))!;
+    return { ...ctx, body, bud, fights: ctx.app.fights };
   }
-  const read = async (res: Response) => (await res.json()) as FightResponse;
 
-  it('needs the player token and a known opponent', async () => {
-    const { app, post } = await ready();
-    expect((await app.request('/v1/fights', { method: 'POST' })).status).toBe(401);
-    expect((await post('/v1/fights', { enemyId: 'nikt' })).status).toBe(404);
-    expect((await post('/v1/fights/not-a-uuid/move', { move: 'prosty' })).status).toBe(404);
+  it('the old turn-by-turn routes are gone', async () => {
+    const { app, json, body } = await ready();
+    for (const path of ['/v1/fights', '/v1/fights/x/move', '/v1/fights/x/flee'])
+      expect((await app.request(path, { method: 'POST', ...json({}, body.token) })).status).toBe(
+        404,
+      );
   });
 
-  it('starts with fists and full health, without leaking the RNG', async () => {
-    const { post } = await ready();
-    const res = await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' });
-    expect(res.status).toBe(201);
-    const { fight } = await read(res);
-    expect(fight.bud.moves).toEqual(MOVES_BY_WEAPON.piesci);
-    expect(fight.bud.hp).toBe(fight.bud.maxHp);
-    expect('rng' in fight).toBe(false);
-  });
-
-  it('uses the moves of the worn weapon and refuses others', async () => {
-    const { app, store, json, body, post } = await ready(3);
+  it('fights with fists by default and the moves of the worn weapon', async () => {
+    const { app, store, json, body, bud, fights } = await ready(3);
+    expect((await fights.fighterOf(bud, true)).moves).toEqual(MOVES_BY_WEAPON.piesci);
     await store.grantItem(body.bud.slug, 'kij-hejnal', 'reward');
     await app.request('/v1/buds/me/equipment/held', {
       method: 'PUT',
       ...json({ itemId: 'kij-hejnal' }, body.token),
     });
-    const { fight } = await read(await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' }));
-    expect(fight.bud.weapon).toBe('kij');
-    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'prosty' })).status).toBe(400);
-    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'zamach' })).status).toBe(200);
+    const armed = await fights.fighterOf(bud, true);
+    expect(armed.weapon).toBe('kij');
+    expect(armed.moves).toEqual(MOVES_BY_WEAPON.kij);
   });
 
-  it('plays to the end on the server, grants XP and coins once, then rests the opponent', async () => {
-    const { store, body, post } = await ready(4);
-    const { fight } = await read(await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' }));
-    let last: FightResponse | null = null;
-    for (let i = 0; i < 40; i++) {
-      last = await read(await post(`/v1/fights/${fight.id}/move`, { move: 'sierpowy' }));
-      if (last.fight.status !== 'active') break;
-    }
-    expect(last!.fight.status).toBe('won'); // a level 4 bud beats the level 1 doorman
-    const reward = last!.reward!;
+  it('a won fight grants XP, coins and maybe loot, written down as a won fight', async () => {
+    const { store, body, bud, fights } = await ready(4);
+    const me = await fights.fighterOf(bud, true);
+    const win = (await fights.winMob(bud.slug, 'dresiarz-z-bramy', 0, me))!;
+    const reward = win.reward!;
     expect(reward.xpGained).toBeGreaterThan(0);
     expect(reward.coinsGained).toBeGreaterThan(0);
     expect((await store.getBySlug(body.bud.slug))!.xp).toBe(reward.xp);
     expect((await store.wallet(body.bud.slug)).coins).toBe(reward.coins);
     if (reward.item)
       expect((await store.items(body.bud.slug)).some((i) => i.itemId === reward.item)).toBe(true);
-    // no second reward, no instant rematch
-    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'prosty' })).status).toBe(409);
-    const again = await post('/v1/fights', { enemyId: 'dresiarz-z-bramy' });
-    expect(again.status).toBe(409);
-    expect(((await again.json()) as ApiError).error.code).toBe('resting');
+    expect(await store.lastWin(bud.slug, 'dresiarz-z-bramy')).not.toBeNull();
+    expect(await fights.winMob(bud.slug, 'nikt', 0, me)).toBeNull();
   });
 
-  it('lets the bud run away without a reward', async () => {
-    const { store, body, post } = await ready();
-    const { fight } = await read(await post('/v1/fights', { enemyId: 'szef-gangu' }));
-    const fled = await read(await post(`/v1/fights/${fight.id}/flee`));
-    expect(fled.fight.status).toBe('fled');
-    expect((await store.getBySlug(body.bud.slug))!.xp).toBe(0);
-    expect((await post(`/v1/fights/${fight.id}/move`, { move: 'prosty' })).status).toBe(409);
+  it('a knockout by the street costs a few coins, never below zero', async () => {
+    const { store, bud, fights } = await ready();
+    const me = await fights.fighterOf(bud, true);
+    expect(await fights.loseMob(bud.slug, 'dresiarz-z-bramy', me)).toEqual({ lost: 0, coins: 0 });
+    await store.openCache(bud.slug, 'test-coins', 500, 0);
+    const before = (await store.wallet(bud.slug)).coins;
+    const ko = await fights.loseMob(bud.slug, 'dresiarz-z-bramy', me);
+    expect(ko.lost).toBe(Math.min(20, Math.floor(before / 50)));
+    expect((await store.wallet(bud.slug)).coins).toBe(before - ko.lost);
   });
 
-  it('a new duel abandons the unfinished one', async () => {
-    const { post } = await ready();
-    const first = (await read(await post('/v1/fights', { enemyId: 'kibol-mirek' }))).fight;
-    await post('/v1/fights', { enemyId: 'ziomal-z-proca' });
-    expect((await post(`/v1/fights/${first.id}/move`, { move: 'prosty' })).status).toBe(409);
-  });
-
-  it('keeps fights private to their bud', async () => {
-    const ctx = await ready();
-    const { fight } = await read(await ctx.post('/v1/fights', { enemyId: 'kibol-mirek' }));
-    const other = await ctx.create('Inny');
-    const res = await ctx.app.request(`/v1/fights/${fight.id}/move`, {
-      method: 'POST',
-      ...ctx.json({ move: 'prosty' }, other.body.token),
-    });
-    expect(res.status).toBe(404);
+  it('a street knockout between buds moves coins to the winner, only when the pair pays', async () => {
+    const ctx = setup();
+    const a = (await ctx.create('Ala')).body.bud;
+    const v = (await ctx.create('Wiktor')).body.bud;
+    await reachLevel(ctx.store, a.slug, 6);
+    await reachLevel(ctx.store, v.slug, 6);
+    await ctx.store.openCache(v.slug, 'test-coins', 400, 0);
+    const before = (await ctx.store.wallet(v.slug)).coins;
+    const out = await ctx.app.fights.street(a.slug, v.slug, true);
+    expect(out.lost).toBe(Math.min(50, Math.floor((before * 5) / 100)));
+    expect((await ctx.store.wallet(v.slug)).coins).toBe(before - out.lost);
+    expect(out.win!.pvp!.opponent).toBe(v.slug);
+    const again = await ctx.app.fights.street(a.slug, v.slug, false);
+    expect(again.lost).toBe(0);
+    expect(again.win).toBeNull();
   });
 });
 
@@ -470,5 +454,72 @@ describe('level requirements', () => {
     });
     expect(res.status).toBe(403);
     expect(((await res.json()) as ApiError).error.code).toBe('level_too_low');
+  });
+});
+
+describe('ciosy: loadouts and move upgrades', () => {
+  async function ready(level = 1, coins = 0) {
+    const ctx = setup();
+    const { body } = await ctx.create();
+    if (level > 1) await reachLevel(ctx.store, body.bud.slug, level);
+    if (coins) await ctx.store.openCache(body.bud.slug, 'test-coins', coins, 0);
+    const call = (method: string, path: string, data?: unknown) =>
+      method === 'GET'
+        ? ctx.app.request(path, auth(body.token))
+        : ctx.app.request(path, { method, ...ctx.json(data ?? {}, body.token) });
+    return { ...ctx, body, call };
+  }
+  const read = async (res: Response) => (await res.json()) as MovesResponse & ApiError;
+
+  it('shows the buttons of the weapon in hand and every option, behind the player token', async () => {
+    const { app, call } = await ready();
+    expect((await app.request('/v1/buds/me/moves')).status).toBe(401);
+    const view = await read(await call('GET', '/v1/buds/me/moves'));
+    expect(view.weapon).toBe('piesci');
+    expect(view.kit).toEqual(['prosty', 'sierpowy', 'kopniak', 'garda', null]);
+    expect(view.slots[1]!.options.map((o) => o.id)).toContain('podciecie');
+  });
+
+  it('saves a loadout of open moves and the fighter fights with it', async () => {
+    const { app, store, body, call } = await ready(4);
+    const kit = ['prosty', 'podciecie', 'kopniak', 'zryw', null];
+    const saved = await call('PUT', '/v1/buds/me/moves/loadout', { weapon: 'piesci', kit });
+    expect(saved.status).toBe(200);
+    expect((await read(saved)).kit).toEqual(kit);
+    const fighter = await app.fights.fighterOf((await store.getBySlug(body.bud.slug))!, true);
+    expect(kitOf(fighter)).toEqual(kit);
+    // closed, misplaced or doubled moves are refused
+    for (const bad of [
+      ['prosty', 'bomba', 'kopniak', 'garda', null],
+      ['garda', 'sierpowy', 'kopniak', 'prosty', null],
+      ['prosty', 'kopniak', 'kopniak', 'garda', null],
+    ])
+      expect(
+        (await call('PUT', '/v1/buds/me/moves/loadout', { weapon: 'piesci', kit: bad })).status,
+      ).toBe(409);
+    expect(
+      (await call('PUT', '/v1/buds/me/moves/loadout', { weapon: 'piesci', kit: ['x'] })).status,
+    ).toBe(400);
+  });
+
+  it('upgrades a move for coins from a level, once per rank, never below zero coins', async () => {
+    const { store, body, call } = await ready(1, 2000);
+    expect((await read(await call('POST', '/v1/buds/me/moves/sierpowy/upgrade'))).error.code).toBe(
+      'level',
+    );
+    await reachLevel(store, body.bud.slug, 3);
+    const before = (await store.wallet(body.bud.slug)).coins;
+    const up = await read(await call('POST', '/v1/buds/me/moves/sierpowy/upgrade'));
+    const option = up.slots[1]!.options.find((o) => o.id === 'sierpowy')!;
+    expect(option.rank).toBe(1);
+    expect(up.coins).toBe(before - rankCost('sierpowy', 1));
+    expect((await store.moveRanks(body.bud.slug)).sierpowy).toBe(1);
+    expect((await read(await call('POST', '/v1/buds/me/moves/sierpowy/upgrade'))).error.code).toBe(
+      'level',
+    );
+    expect((await call('POST', '/v1/buds/me/moves/nic/upgrade')).status).toBe(404);
+    expect((await read(await call('POST', '/v1/buds/me/moves/bomba/upgrade'))).error.code).toBe(
+      'locked',
+    );
   });
 });

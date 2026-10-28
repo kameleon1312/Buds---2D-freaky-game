@@ -1,8 +1,9 @@
 # Multiplayer: inni gracze na mapie
 
 Każdy połączony Bud (konto albo sparowany gość z tokenem) widzi na swojej mapie Budy innych graczy: jak chodzą,
-biegną, jeżdżą na pojazdach, wchodzą do budynków i wołają hasła. Do każdego można podejść i wyzwać go na
-pojedynek. Gracz jako gość bez parowania (bez tokenu) gra sam.
+biegną, jeżdżą na pojazdach, wchodzą do budynków i wołają hasła. Na tej samej mapie toczy się jedna walka
+(`docs/walka.md`): od poziomu 6 Budowie biją się poza strefami bezpiecznymi, ekipa walczy razem. Gracz jako gość bez
+parowania (bez tokenu) gra sam.
 
 ## Jak to działa
 
@@ -21,8 +22,8 @@ pojedynek. Gracz jako gość bez parowania (bez tokenu) gra sam.
 
 ## Bezpieczeństwo i odporność
 
-- **Serwer nigdy nie przyznaje nagród przez WebSocket.** XP, monety, przedmioty i pojedynki zostają w REST API
-  (te same atomowe funkcje SQL co wcześniej). WebSocket pokazuje tylko, gdzie kto stoi.
+- **Nagrody tylko z zapisu na serwerze.** Walkę liczy symulacja w pokoju (`brawl.ts`), a XP, monety i łup przyznaje
+  `apps/api/src/fights.ts` tymi samymi atomowymi funkcjami SQL co wcześniej. Gra niczego nie przyznaje sama.
 - **Ruch jest sprawdzany:** każda pozycja przechodzi przez siatkę chodzenia mapy (`walk-grids.ts`, generowana przez
   `tools/world/export-maps.ts` z tych samych plików map co kolizje w grze) i limit prędkości `LIVE_MAX_SPEED`. Złej
   pozycji serwer po prostu nie przekazuje dalej. Własny Bud gracza nigdy nie jest cofany, więc chodzenie zawsze jest
@@ -87,9 +88,9 @@ pojedynek. Gracz jako gość bez parowania (bez tokenu) gra sam.
   - Gdy okno jest otwarte, świat czeka (klawisze to litery), a nad Budem inni widzą „pisze…” (status 3).
 - **Spotkanie:**
   - Kiedy podejdziesz do gracza, pojawia się „Gracz: X (poz. N) [E]”.
-  - E otwiera kartę z przyciskiem „Wyzwij”. To ten sam pojedynek PvP co w Rewirach (zapisany skład rywala, liga,
-    przerwa przed rewanżem) i tak samo rozstrzyga go serwer.
-  - Po walce wracasz na ulicę.
+  - E otwiera kartę: poziom, czy możecie się bić (od poziomu 6, poza strefami bezpiecznymi, nie z własnej ekipy) i
+    pozdrowienie.
+  - Walka z innym Budem toczy się zwyczajnie, przyciskami walki; nokaut liczy się do ligi Rewirów.
 - **Sprawdzanie:** dwa klienty naraz z `-buds-live-demo a` i `-buds-live-demo b` (każdy z własnym
   `-buds-pair KOD`, `-buds-api`, `-buds-district miasto-ziomkow` i `-buds-autoshot`). W logu pojawiają się linie
   `[Live]`: kto kogo widzi, ruch, karta, wejście do budynku i powrót. `-buds-offline` wyłącza tryb live.

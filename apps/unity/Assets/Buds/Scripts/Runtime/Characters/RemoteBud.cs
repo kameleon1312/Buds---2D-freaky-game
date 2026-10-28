@@ -25,6 +25,12 @@ namespace Buds.Characters
         Vector2 shownAt;
         Vector2 lastShown;
 
+        /// <summary>The body sprite and the standing visual it sits in (the fight's pose works on these).</summary>
+        public SpriteRenderer Body => body;
+        public Transform Visual => body ? body.transform.parent : null;
+        /// <summary>Where the bud is drawn now (a little in the past, smoothed).</summary>
+        public Vector2 Shown => shownAt;
+
         /// <summary>Where the head is (for the name and the speech bubble), in world space.</summary>
         public Vector3 Head => HeadOf(body, transform);
 
@@ -56,7 +62,7 @@ namespace Buds.Characters
             bud.sheet = placeholder;
             bud.rideArt = rideArt;
             bud.shownAt = bud.lastShown = at;
-            WorldView.Shadow(go.transform, 0.9f);
+            WorldView.Shadow(go.transform, WorldView.CharacterShadow);
             var visual = WorldView.StandCharacter(go.transform);
             var art = new GameObject("Sprite");
             art.transform.SetParent(visual, false);

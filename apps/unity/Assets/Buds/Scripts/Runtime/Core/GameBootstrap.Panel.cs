@@ -25,7 +25,8 @@ namespace Buds.Core
         void SetUpPanel()
         {
             panel ??= new BudPanel(ui.Root, quests.Content, id => _ = UpgradeSkill(id), (slot, id) => _ = Equip(slot, id),
-                id => _ = Buy(id), id => _ = Drink(id), () => _ = LinkAccount(), () => _ = Logout(), () => _ = OpenLookEditor());
+                id => _ = Buy(id), id => _ = Drink(id), () => _ = LinkAccount(), () => _ = Logout(), () => _ = OpenLookEditor(),
+                (weapon, kit) => _ = SaveLoadout(weapon, kit), id => _ = UpgradeMove(id));
             ui.ShowBudButton(() => _ = OpenPanel());
         }
 
@@ -93,6 +94,7 @@ namespace Buds.Core
                 var wallet = await api.GetWallet(session.Token);
                 var equipment = await api.GetEquipment(session.Token);
                 var consumables = await api.GetConsumables(session.Token);
+                panelData.Moves = await api.GetMoves(session.Token);
                 foreach (var i in items) panelData.Owned.Add(i.itemId);
                 ApplySkills(skills);
                 ApplyEquipment(equipment);
@@ -205,6 +207,52 @@ namespace Buds.Core
         {
             var names = quests.Content.NewlyLearned(before, CurrentMoves()).ConvertAll(id => quests.Content.Move(id)?.name ?? id);
             return names.Count > 0 ? $"  ·  Nowy cios: {string.Join(", ", names)}" : "";
+        }
+
+        /// <summary>A new set of fight buttons: saved by the server, and the fight here takes it at once.</summary>
+        async Awaitable SaveLoadout(string weapon, string[] kit)
+        {
+            if (session == null || panelData == null || panelData.Loading) return;
+            panelData.Loading = true;
+            panel.Refresh(panelData);
+            try
+            {
+                panelData.Moves = await api.SaveLoadout(session.Token, weapon, kit);
+                panelData.Error = null;
+                LiveRefreshMe(); // the live fight builds the fighter again with the new buttons
+            }
+            catch (ApiException e)
+            {
+                panelData.Error = e.Message;
+            }
+            panelData.Loading = false;
+            if (panel.IsOpen) panel.Refresh(panelData);
+        }
+
+        /// <summary>One upgrade of a move, paid in coins on the server.</summary>
+        async Awaitable UpgradeMove(string moveId)
+        {
+            if (session == null || panelData == null || panelData.Loading) return;
+            panelData.Loading = true;
+            panel.Refresh(panelData);
+            try
+            {
+                var before = panelData.Moves;
+                panelData.Moves = await api.UpgradeMove(session.Token, moveId);
+                panelData.Coins = panelData.Moves.coins;
+                panelData.Error = null;
+                MoveOptionDto option = null;
+                foreach (var slot in panelData.Moves.slots)
+                    option ??= System.Array.Find(slot.options, o => o.id == moveId);
+                if (option != null) ui.ShowToast($"{option.name}: ulepszenie {option.rank}/3 · siła {option.power}%", 3f);
+                LiveRefreshMe();
+            }
+            catch (ApiException e)
+            {
+                panelData.Error = e.Message;
+            }
+            panelData.Loading = false;
+            if (panel.IsOpen) panel.Refresh(panelData);
         }
 
         async Awaitable UpgradeSkill(string skillId)

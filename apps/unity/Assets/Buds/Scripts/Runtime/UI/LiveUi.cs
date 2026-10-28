@@ -38,7 +38,7 @@ namespace Buds.UI
             layer.SetAsFirstSibling();
         }
 
-        /// <summary>Hidden while a duel is on (its camera is elsewhere).</summary>
+        /// <summary>Hidden while the world is (a window over everything, travelling).</summary>
         public void SetVisible(bool visible)
         {
             if (layer.gameObject.activeSelf != visible) layer.gameObject.SetActive(visible);
@@ -106,7 +106,7 @@ namespace Buds.UI
         }
 
         /// <summary>Pins every tag over its bud (<paramref name="headOf"/>: the point over the head, null = not here).</summary>
-        public void Tick(Camera cam, Func<string, Vector3?> headOf)
+        public void Tick(Camera cam, Func<string, Vector3?> headOf, Func<string, bool> hasPlate = null)
         {
             if (!layer.gameObject.activeSelf) return;
             foreach (var pair in tags)
@@ -129,8 +129,11 @@ namespace Buds.UI
                 if (RectTransformUtility.ScreenPointToLocalPointInRectangle(layer, screen, null, out var local))
                     tag.Root.anchoredPosition = local;
                 tag.Name.gameObject.SetActive(tag.ShowName);
+                // a fighter's health plate sits right over the head: the name and the bubble move up over it
+                var lift = hasPlate != null && hasPlate(pair.Key) ? 30 : 0;
+                tag.Name.rectTransform.anchoredPosition = new Vector2(0, lift);
                 // the bubble sits over the name (or right over the head for the player)
-                tag.Bubble.anchoredPosition = new Vector2(0, tag.ShowName ? 34 : 6);
+                tag.Bubble.anchoredPosition = new Vector2(0, (tag.ShowName ? 34 : 6) + lift);
             }
         }
 

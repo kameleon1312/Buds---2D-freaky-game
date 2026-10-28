@@ -6,7 +6,7 @@ namespace Buds.Characters
 {
     /// <summary>
     /// Keyboard (WASD / arrows, Shift to run, E or Space to interact, M for the map) and touch: on phones a fixed
-    /// joystick in the bottom-right corner (a touch that starts on it steers; pushed to the rim = running; other
+    /// joystick in the bottom-left corner (the fight's buttons are on the right, like a mobile MOBA) (a touch that starts on it steers; pushed to the rim = running; other
     /// fingers stay free for buttons). Without a fixed stick, a floating one: touch anywhere and drag, tap interacts.
     /// </summary>
     public sealed class PlayerInput
@@ -55,6 +55,9 @@ namespace Buds.Characters
         }
 
 
+
+        /// <summary>A walk the fight asks for (into reach of the attacked foe): only while the player gives no direction.</summary>
+        public Vector2? Assist { get; set; }
 
         /// <summary>Scripted input for automated runs; overrides devices while set.</summary>
         public Vector2? Override { get; set; }
@@ -160,6 +163,8 @@ namespace Buds.Characters
                 }
             }
 
+            // the fight walks the bud into reach of the foe it attacks, while the player isn't steering
+            if (Assist.HasValue && move.sqrMagnitude < 0.01f) move = Assist.Value;
             // free movement in every direction, like most RPGs (the facing has its own hysteresis in BudMotor)
             if (Override.HasValue) move = Override.Value;
             if (OverrideRun) Run = true;

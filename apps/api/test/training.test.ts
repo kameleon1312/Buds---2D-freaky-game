@@ -7,7 +7,6 @@ import {
   type BuyResponse,
   type ConsumablesResponse,
   type CreateBudResponse,
-  type FightResponse,
   type SkillsResponse,
   type TrainResponse,
 } from '@buds/shared';
@@ -72,8 +71,8 @@ describe('training', () => {
   });
 
   it('grants training XP once per cooldown and turns it into ranks and perks', async () => {
-    const { post, get, create, later } = setup();
-    const { token } = await create();
+    const { app, store, post, get, create, later } = setup();
+    const { token, bud } = await create();
     let res = await post(`/v1/buds/me/training/${spot.id}`, token, { score: 5 });
     expect(res.status).toBe(200);
     let round = (await res.json()) as TrainResponse;
@@ -103,18 +102,15 @@ describe('training', () => {
     });
     expect(skills.perks).toEqual(['cios-specjalny']);
 
-    // the duel gets the special move
-    const enemy = CONTENT.enemies.find((e) => e.district === 'wyspa-startowa')!;
-    const fight = (await (
-      await post('/v1/fights', token, { enemyId: enemy.id })
-    ).json()) as FightResponse;
-    expect(fight.fight.bud.moves).toContain('specjalny');
+    // fights get the special move
+    const fighter = await app.fights.fighterOf((await store.getBySlug(bud.slug))!, true);
+    expect(fighter.moves).toContain('specjalny');
   });
 });
 
 describe('energy drinks', () => {
   it('are bought again and again, drunk one by one, and boost duels', async () => {
-    const { store, post, get, create } = setup();
+    const { app, store, post, get, create } = setup();
     const { token, bud } = await create();
     const drink = catalogItem('napoj-sila')!;
     expect((await post('/v1/shop/napoj-sila/buy', token)).status).toBe(409); // no coins yet
@@ -127,10 +123,8 @@ describe('energy drinks', () => {
     let bag = (await (await get('/v1/buds/me/consumables', token)).json()) as ConsumablesResponse;
     expect(bag).toEqual({ items: [{ itemId: 'napoj-sila', qty: 2 }], buffs: [] });
 
-    const enemy = CONTENT.enemies.find((e) => e.district === 'wyspa-startowa')!;
-    const plain = (await (
-      await post('/v1/fights', token, { enemyId: enemy.id })
-    ).json()) as FightResponse;
+    const record = (await store.getBySlug(bud.slug))!;
+    const plain = await app.fights.fighterOf(record, true);
 
     const res = await post('/v1/buds/me/consumables/napoj-sila/use', token);
     expect(res.status).toBe(200);
@@ -139,10 +133,8 @@ describe('energy drinks', () => {
     expect(bag.buffs.map((b) => b.buff)).toEqual(['sila']);
     expect(bag.buffs[0]!.secondsLeft).toBeGreaterThan(290);
 
-    const boosted = (await (
-      await post('/v1/fights', token, { enemyId: enemy.id })
-    ).json()) as FightResponse;
-    expect(boosted.fight.bud.attack - plain.fight.bud.attack).toBe(6);
+    const boosted = await app.fights.fighterOf(record, true);
+    expect(boosted.attack - plain.attack).toBe(6);
   });
 
   it('boosts run out and drinks run out', async () => {

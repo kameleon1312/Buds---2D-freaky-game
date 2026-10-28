@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Buds.Tests
 {
-    /// <summary>Every district has its own look (water, ground, birds), and every map takes the look of its district.</summary>
+    /// <summary>Every district has its own look (water, ground, life), and every map takes the look of its district.</summary>
     public class DistrictLookTests
     {
         [Test]
@@ -28,10 +28,8 @@ namespace Buds.Tests
                 var l = DistrictLook.For(id);
                 Assert.AreEqual(id, l.Id);
                 Assert.Less(l.WebLow, l.WebHigh, id);
-                Assert.IsTrue(seen.Add($"{l.Glint}|{l.Desat}|{l.Bird}|{l.Swans}"), $"{id} looks like another district");
+                Assert.IsTrue(seen.Add($"{l.Glint}|{l.Desat}|{l.LeafRate}"), $"{id} looks like another district");
             }
-            Assert.AreEqual("mewa", DistrictLook.For("las-palmas").Bird);
-            Assert.IsTrue(DistrictLook.For("dwor-carski").Swans);
             Assert.Greater(DistrictLook.For("los-karkos").Desat, DistrictLook.For("las-palmas").Desat, "the scrapland is the drabbest");
         }
     }

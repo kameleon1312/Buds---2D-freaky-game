@@ -85,10 +85,8 @@ namespace Buds.Core
                     if (ui.ChoiceOpen)
                     {
                         ui.ChooseAccept();
-                        for (var i = 0; i < 50 && fightBusy; i++) await Awaitable.WaitForSecondsAsync(0.1f);
-                        await shot($"l-{role}-6-challenge.png");
-                        Debug.Log($"[Live] b: duel open {fightScreen.IsOpen}, dialog {ui.DialogOpen}");
-                        if (fightScreen.IsOpen) CloseFight();
+                        await Awaitable.WaitForSecondsAsync(0.6f);
+                        await shot($"l-{role}-6-greeting.png");
                         if (ui.DialogOpen) ui.HideDialog();
                     }
                 }

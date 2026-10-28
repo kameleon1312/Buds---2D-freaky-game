@@ -47,6 +47,32 @@ namespace Buds.Characters
         /// <summary>The ride under the bud, or null on foot.</summary>
         public RideLook Ride { get; private set; }
 
+        /// <summary>The body sprite and the standing visual it sits in (the fight's pose works on these).</summary>
+        public SpriteRenderer Body => sprite;
+        public Transform Visual => visual;
+
+        /// <summary>The fight moves the bud on its own (a dash, a knockback): the input waits until it is done.</summary>
+        public bool Forced => forcedFor > 0;
+        Vector2 forcedFrom, forcedTo;
+        float forcedAt, forcedFor;
+
+        /// <summary>The server moved the bud (walka.md: a dash, a knockback, getting up): it glides there.</summary>
+        public void ForceMove(Vector2 to, float seconds)
+        {
+            if (!float.IsFinite(to.x) || !float.IsFinite(to.y)) return;
+            if (seconds <= 0.02f)
+            {
+                forcedFor = 0;
+                Teleport(to);
+                return;
+            }
+            forcedFrom = body.position;
+            forcedTo = to;
+            forcedAt = Time.time;
+            forcedFor = seconds;
+            Motor.Stop();
+        }
+
         public void SetRide(RideLook ride)
         {
             Ride = ride;
@@ -105,7 +131,7 @@ namespace Buds.Characters
             box.edgeRadius = 0.02f; // slightly rounded: glides along walls instead of catching on tile seams
 
             // the sprite is a child of a standing "Visual" (2.5D), so it can bounce without moving the body
-            WorldView.Shadow(go.transform, 0.9f);
+            WorldView.Shadow(go.transform, WorldView.CharacterShadow);
             var visual = WorldView.StandCharacter(go.transform);
             var art = new GameObject("Sprite");
             art.transform.SetParent(visual, false);
@@ -208,6 +234,21 @@ namespace Buds.Characters
             {
                 // the physics lost the bud: back to the last good spot
                 Teleport(lastGood);
+                return;
+            }
+            if (forcedFor > 0)
+            {
+                // a glide the fight decided: eased out, the input waits until it lands
+                var k = Mathf.Clamp01((Time.time - forcedAt) / forcedFor);
+                var eased = 1 - (1 - k) * (1 - k);
+                body.linearVelocity = Vector2.zero;
+                body.MovePosition(Vector2.Lerp(forcedFrom, forcedTo, eased));
+                if (k >= 1)
+                {
+                    forcedFor = 0;
+                    lastGood = forcedTo;
+                    pushedFrom = forcedTo;
+                }
                 return;
             }
             var move = fourWay;

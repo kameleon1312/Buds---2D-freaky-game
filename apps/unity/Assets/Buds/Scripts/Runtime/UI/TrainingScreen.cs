@@ -443,9 +443,8 @@ namespace Buds.UI
             foreach (var n in g.Notes)
             {
                 var img = Picture("Note", board, disc, Vector2.zero, new Vector2(48, 48), tones[n.Lane]);
-                var ring = img.gameObject.AddComponent<Outline>();
-                ring.effectColor = UiKit.Outline;
-                ring.effectDistance = new Vector2(3, 3);
+                // an even ink ring round the note (a round stroke, not four shifted copies)
+                img.gameObject.AddComponent<RoundStroke>().Width = 3;
                 noteImages.Add(img);
             }
             for (var l = 0; l < RhythmGame.Lanes; l++)

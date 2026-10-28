@@ -22,7 +22,7 @@ Ranga 3 i ranga 5 każdej umiejętności odblokowują perk (`PERKS`, liczone z r
 | -------------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
 | Flow                 | Rytm ulicy: +5% szybkości                                          | Freestyle mistrza: ruch „Freestyle” (2 ciosy, osłabia) |
 | Graffiti             | Szybka puszka: +10% monet ze skrytek                               | Tag legendy: ruch „Tag” (oślepia)                      |
-| Surfing              | Na fali: +5% szybkości                                             | Unik surfera: +10 do uniku w pojedynkach               |
+| Surfing              | Na fali: +5% szybkości                                             | Unik surfera: +10 do uniku w walce                     |
 | Spryt                | Szósty zmysł: skrytki widać z dalszej odległości                   | Łowca łupów: +10 pkt % szansy na łup                   |
 | Walka                | Cios specjalny: ruch „Cios specjalny”                              | Mistrz ringu: +10% obrażeń                             |
 | Instynkt przetrwania | Drugi oddech: raz na walkę, poniżej 25% zdrowia, wraca 1/3 zdrowia | Twardziel: +20 zdrowia                                 |
@@ -47,19 +47,19 @@ serwer gry wieloosobowej.
 
 Sześć napojów (`packages/shared/src/rides-and-drinks.ts`, efekty w `consumables.ts`):
 
-| Napój       | Efekt                                                | Czas   |
-| ----------- | ---------------------------------------------------- | ------ |
-| Turbo       | +15% szybkości chodzenia, +5 Szybkości w pojedynkach | 3 min  |
-| Siła        | +6 Ataku w pojedynkach                               | 5 min  |
-| Pancerz     | +6 Pancerza w pojedynkach                            | 5 min  |
-| Fart        | +10 Szczęścia (monety ze skrytek, krytyki)           | 5 min  |
-| Skupienie   | podwójne XP z treningu                               | 10 min |
-| Regeneracja | +25 zdrowia w pojedynkach                            | 5 min  |
+| Napój       | Efekt                                          | Czas   |
+| ----------- | ---------------------------------------------- | ------ |
+| Turbo       | +15% szybkości chodzenia, +5 Szybkości w walce | 3 min  |
+| Siła        | +6 Ataku w walce                               | 5 min  |
+| Pancerz     | +6 Pancerza w walce                            | 5 min  |
+| Fart        | +10 Szczęścia (monety ze skrytek, krytyki)     | 5 min  |
+| Skupienie   | podwójne XP z treningu                         | 10 min |
+| Regeneracja | +25 zdrowia w walce                            | 5 min  |
 
-Kupuje się je w sklepie za monety, ile razy się chce (`buy_consumable`), a w pojedynkach wypadają z szansą 25%
+Kupuje się je w sklepie za monety, ile razy się chce (`buy_consumable`), a w walce wypadają z szansą 25%
 (`DRINK_DROP_CHANCE`, osobny strumień RNG, nie zmienia łupu). Wypicie (`POST /v1/buds/me/consumables/:id/use`,
 `use_consumable`) zabiera jedną puszkę i uruchamia efekt (ponowne wypicie odnawia czas). Serwer stosuje efekty tam,
-gdzie sam liczy: w pojedynkach (`budFighter`), w skrytkach (Fart), w treningu (Skupienie). Gra pokazuje liczniki pod
+gdzie sam liczy: w walce (`budFighter`), w skrytkach (Fart), w treningu (Skupienie). Gra pokazuje liczniki pod
 przyciskami HUD i w zakładce „Napoje”. Napoje nigdy nie są za prawdziwe pieniądze (`gearProblems`). Za gemy są za to unikatowe warianty pojazdów
 (Deskorolka Holo, Hulajnowa Neon, Rower Chrom, Motocykl Smok, Quad Wulkan): ta sama prędkość co odpowiednik z gry,
 inny wygląd (`docs/ekwipunek.md`).

@@ -436,6 +436,48 @@ namespace Buds.Api
         public RaidResultDto raid;
     }
 
+    /// <summary>The Ciosy screen (packages/shared loadout.ts movesView): the five buttons and what can go on each.</summary>
+    [Serializable]
+    public class MovesResponseDto
+    {
+        public string weapon;
+        /// <summary>Five ability ids in button order ("" or null = an empty ultimate).</summary>
+        public string[] kit;
+        public MoveSlotDto[] slots;
+        public int coins;
+    }
+
+    [Serializable]
+    public class MoveSlotDto
+    {
+        public string name;
+        public string kind;
+        public MoveOptionDto[] options;
+    }
+
+    [Serializable]
+    public class MoveOptionDto
+    {
+        public string id;
+        public string name;
+        public string icon;
+        public string blurb;
+        public string shape;
+        /// <summary>What still opens it ("Poziom 7 · Walka 2"); empty when it is open.</summary>
+        public string need;
+        public int rank;
+        public int power;
+        /// <summary>The next upgrade; coins 0 = none left (JsonUtility turns a null into an empty object).</summary>
+        public MoveNextDto next;
+    }
+
+    [Serializable]
+    public class MoveNextDto
+    {
+        public int coins;
+        public int level;
+    }
+
     /// <summary>How a raid on a district ended for the raider (empty <c>plot</c>: not a raid).</summary>
     [Serializable]
     public class RaidResultDto

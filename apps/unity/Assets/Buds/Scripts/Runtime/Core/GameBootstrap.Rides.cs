@@ -301,22 +301,12 @@ namespace Buds.Core
                 for (var i = 0; i < 30 && (openingCache || !caches.Opened.Contains(c.id)); i++)
                     await Awaitable.WaitForSecondsAsync(0.1f);
                 await Awaitable.WaitForSecondsAsync(0.6f); // the result dialog
-                if (fightScreen != null && fightScreen.IsOpen)
-                {
-                    await Flee();
-                    CloseFight();
-                }
                 if (ui.DialogOpen) ui.HideDialog();
                 await Awaitable.WaitForSecondsAsync(0.2f);
                 opened++;
             }
 
             await Awaitable.WaitForSecondsAsync(1f);
-            if (fightScreen != null && fightScreen.IsOpen)
-            {
-                await Flee();
-                CloseFight();
-            }
             await OpenPanel();
             await Awaitable.WaitForSecondsAsync(0.3f);
             await Buy("mount-deskorolka");

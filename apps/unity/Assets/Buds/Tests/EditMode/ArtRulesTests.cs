@@ -53,9 +53,6 @@ namespace Buds.Tests
                 foreach (var (_, _, props) in look.Extra)
                 foreach (var n in props.Split('|'))
                     Assert.IsTrue(names.Contains(n), $"{id}: {n}");
-                if (look.Bird != null)
-                    foreach (var pose in new[] { "", "-dziob", "-lot-a", "-lot-b" })
-                        Assert.IsTrue(names.Contains($"zycie-{look.Bird}{pose}"), $"{id}: bird {look.Bird}{pose}");
             }
             foreach (var n in new[] { "tuft", "chwast", "flowers-c" }) Assert.IsTrue(names.Contains(n), $"edges: {n}");
         }

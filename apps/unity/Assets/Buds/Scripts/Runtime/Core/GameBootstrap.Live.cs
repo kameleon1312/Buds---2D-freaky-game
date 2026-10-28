@@ -86,10 +86,9 @@ namespace Buds.Core
             {
                 PumpLive();
                 PumpLiveSheets();
-                var fightOn = fightScreen?.IsOpen ?? false;
-                liveUi.SetVisible(!fightOn && player);
-                if (fightOn) chatScreen?.Hide(); // a duel takes the whole screen
-                liveUi.Tick(Camera.main, HeadOf);
+                liveUi.SetVisible(player && !travelling);
+                FightPlates(); // health over the fighters' heads, the blows' numbers (GameBootstrap.Combat)
+                liveUi.Tick(Camera.main, HeadOf, HasPlate);
             }
             catch (Exception e)
             {
@@ -145,13 +144,13 @@ namespace Buds.Core
             var ride = player.Ride?.Kind ?? "";
             var status = LiveStatus();
             if (liveSender.ShouldSend(Time.unscaledTime, at, facing, moving, ride, status))
-                live.Send(LiveProtocol.Move(at, facing, moving, ride, status));
+                live.Send(LiveProtocol.Move(at, facing, moving, ride, status, self.Forced));
         }
 
-        /// <summary>0 out and about, 1 in a duel, 2 in a menu or a talk, 3 typing in the chat.</summary>
+        /// <summary>0 out and about, 1 fighting, 2 in a menu or a talk, 3 typing in the chat.</summary>
         int LiveStatus()
         {
-            if (fightScreen?.IsOpen ?? false) return 1;
+            if (InCombat) return 1;
             if (chatScreen?.IsOpen ?? false) return 3;
             return ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
                    (trainingScreen?.IsOpen ?? false) || (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) ||
@@ -214,6 +213,7 @@ namespace Buds.Core
             live = null;
             liveWelcomed = false;
             ForgetRemotes();
+            ForgetFight();
             if (!LiveProtocol.Retryable(code))
             {
                 // the server doesn't know the token: trying again at once would only fail again, but a hiccup on its
@@ -284,6 +284,7 @@ namespace Buds.Core
                     liveWelcomed = true;
                     liveAttempt = 0;
                     ForgetRemotes();
+                    ForgetFight(); // a new room: its fight comes with it ("ents", "you")
                     if (m.players != null)
                         foreach (var p in m.players) Arrive(p, false);
                     DropUnusedSheets();
@@ -329,6 +330,9 @@ namespace Buds.Core
                     break;
                 case "bye":
                     if (!string.IsNullOrEmpty(m.reason)) Debug.Log($"[Live] bye: {m.reason}");
+                    break;
+                default:
+                    HandleFight(m);
                     break;
             }
             LiveIndicators();
@@ -584,7 +588,7 @@ namespace Buds.Core
         }
 
         bool OtherScreenOpen() =>
-            ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) || (fightScreen?.IsOpen ?? false) ||
+            ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
             (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) || (creatorScreen?.IsOpen ?? false) ||
             (ferryScreen?.IsOpen ?? false) || (landScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false) || travelling;
 
@@ -626,7 +630,7 @@ namespace Buds.Core
 
         string RemoteHint(RemoteBud r) => $"Gracz: {r.Name} (poz. {r.Data.level})  [E]";
 
-        /// <summary>Walking up to another bud and pressing E: their card with a challenge and a greeting.</summary>
+        /// <summary>Walking up to another bud and pressing E: their card (level, whether you can fight) and a greeting.</summary>
         void MeetRemote(RemoteBud r)
         {
             var p = r.Data;
@@ -634,48 +638,30 @@ namespace Buds.Core
             var name = p.name;
             var busy = p.s == 1 ? "\n<color=#bd1c31><b>Teraz walczy.</b></color>" : "";
             var danger = p.level > level + 2 ? "\n<color=#bd1c31><b>Uwaga: dużo silniejszy gracz.</b></color>" : "";
-            ui.ShowChoice(name, $"<b>Poziom {p.level}</b>{busy}{danger}\nPojedynek liczy się do ligi Rewirów.", "Wyzwij", "Zamknij",
-                () => _ = ChallengeLive(slug, name), null);
+            var side = SideOf(slug);
+            var fight = side == Combat.BrawlLook.Side.Ally
+                ? "\nZ twojej ekipy: walczycie ramię w ramię."
+                : p.level >= 6 && level >= 6
+                    ? "\nPoza strefami bezpiecznymi możecie się bić: nokaut liczy się do ligi Rewirów."
+                    : "\nWalki między Budami od poziomu 6, poza strefami bezpiecznymi.";
+            ui.ShowChoice(name, $"<b>Poziom {p.level}</b>{busy}{danger}{fight}", "Siema!", "Zamknij", () => SendEmote("siema"), null);
         }
 
-        /// <summary>A duel with another player's bud met on the street (the same PvP as in Rewiry, judged by the server).</summary>
-        async Awaitable ChallengeLive(string slug, string name)
+        /// <summary>
+        /// A rival or a district's defender the REST API just put up for a fight comes out to the street, next to the
+        /// bud (live.ts "summon"): the fight is right here, with the same buttons.
+        /// </summary>
+        void Summon(string fightId)
         {
-            if (fightBusy || session == null || (fightScreen?.IsOpen ?? false)) return;
-            fightBusy = true;
-            BudSheet theirs = null;
-            try
+            if (string.IsNullOrEmpty(fightId)) return;
+            if (live == null || !liveWelcomed)
             {
-                theirs = new BudSheet(await api.GetSheet(slug), true);
-                var res = await api.StartPvp(session.Token, slug);
-                if (!this || !player) return;
-                chatScreen?.Hide();
-                ReleasePvpSheet();
-                pvpSheet = theirs;
-                pvpOnStreet = true;
-                currentFight = res.fight;
-                fightingWith = null;
-                lastReward = null;
-                lastPvp = null;
-                lastInfluence = null;
-                fightScreen.Open(res.fight, sheet, theirs, $"{name} przyjmuje wyzwanie.", gear);
-                theirs = null; // the duel owns it now (freed when it closes)
+                ui.ShowDialog("Walka", "Walka toczy się na żywo: poczekaj na połączenie z serwerem i spróbuj jeszcze raz.");
+                return;
             }
-            catch (ApiException e)
-            {
-                ui.ShowDialog(name, e.Message);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                if (fightScreen != null && fightScreen.IsOpen) CloseFight();
-                ui.ShowDialog(name, "Coś przerwało pojedynek. Spróbuj jeszcze raz.");
-            }
-            finally
-            {
-                if (theirs != null && theirs != pvpSheet) theirs.Dispose();
-                fightBusy = false;
-            }
+            chatScreen?.Hide();
+            live.Send(LiveProtocol.Summon(fightId));
+            lastCombatAt = Time.time;
         }
     }
 }

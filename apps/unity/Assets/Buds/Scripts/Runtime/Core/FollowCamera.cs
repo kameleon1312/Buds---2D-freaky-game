@@ -48,7 +48,24 @@ namespace Buds.Core
         /// <summary>The bud's feet, a bit north: the point the camera looks at (the bud stands up from its feet).</summary>
         Vector3 FocusOf(Vector3 target) => new(target.x, target.y + 0.6f, 0);
 
-        void Place() => transform.position = focus - transform.forward * distance;
+        void Place() => transform.position = focus + Shake() - transform.forward * distance;
+
+        /// <summary>How hard the view shakes now (0…1): a blow lands, it fades in a fraction of a second.</summary>
+        float trauma;
+
+        /// <summary>A blow that shakes the view (a critical hit, a knockout); small ones barely move it.</summary>
+        public void Kick(float amount)
+        {
+            trauma = Mathf.Clamp01(Mathf.Max(trauma, amount));
+        }
+
+        Vector3 Shake()
+        {
+            if (trauma <= 0) return Vector3.zero;
+            var t = Time.unscaledTime * 38f;
+            var k = trauma * trauma * 0.16f;
+            return new Vector3((Mathf.PerlinNoise(t, 0.3f) - 0.5f) * 2 * k, (Mathf.PerlinNoise(0.7f, t) - 0.5f) * 2 * k, 0);
+        }
 
         /// <summary>Half the visible height in tiles so that both target extents fit.</summary>
         public static float OrthoSizeFor(int screenW, int screenH, bool compact = false) =>
@@ -84,6 +101,7 @@ namespace Buds.Core
             Resize();
             if (!target) return;
             focus = Vector3.Lerp(focus, Clamp(FocusOf(target.position)), 1 - Mathf.Exp(-smoothing * Time.deltaTime));
+            trauma = Mathf.Max(0, trauma - Time.unscaledDeltaTime * 2.6f);
             Place();
         }
 

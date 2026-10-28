@@ -231,6 +231,7 @@ namespace Buds.Core
             if (questWorld) Destroy(questWorld.gameObject);
             if (cacheWorld) Destroy(cacheWorld.gameObject);
             if (enemyWorld) Destroy(enemyWorld.gameObject);
+            if (combatFx) Destroy(combatFx.gameObject);
             if (trainingWorld) Destroy(trainingWorld.gameObject);
             if (districtsWorld) Destroy(districtsWorld.gameObject);
             nearbyNpc = null;

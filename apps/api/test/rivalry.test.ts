@@ -307,25 +307,20 @@ describe('crews (ekipy)', () => {
   });
 });
 
-/** Plays the duel with the first move until it ends. */
+/** Fights the rival's shadow on the street to an end (what the live server does when one of them drops). */
 async function playOut(
-  post: ReturnType<typeof setup>['post'],
-  token: string,
+  app: ReturnType<typeof setup>['app'],
+  slug: string,
   start: FightResponse,
+  outcome: 'won' | 'lost' = 'won',
 ) {
-  let fight = start;
-  for (let i = 0; i < 40 && fight.fight.status === 'active'; i++) {
-    const res = await post(`/v1/fights/${fight.fight.id}/move`, token, {
-      move: fight.fight.bud.moves[0],
-    });
-    fight = (await res.json()) as FightResponse;
-  }
-  return fight;
+  const end = (await app.fights.finishShadow(slug, start.fight.id, outcome, true))!;
+  return { ...end, fight: { ...start.fight, status: outcome } };
 }
 
 describe('PvP', () => {
   it('offers buds within reach, plays a duel and moves the ratings once', async () => {
-    const { store, post, get, bud } = setup();
+    const { app, store, post, get, bud } = setup();
     const a = await bud('Ala', 900);
     const b = await bud('Bartek', 900);
     await bud('Daleki', 100 * 20 ** 2); // level 21: out of reach
@@ -341,7 +336,7 @@ describe('PvP', () => {
     const first = (await start.json()) as FightResponse;
     expect(first.fight.enemyId).toBe(`pvp-${b.slug}`);
     expect(first.fight.enemy.name).toBe('Bartek');
-    const end = await playOut(post, a.token, first);
+    const end = await playOut(app, a.slug, first);
     expect(end.fight.status === 'won' || end.fight.status === 'lost').toBe(true);
     const ratings = await store.ratings([a.slug, b.slug]);
     const delta = end.pvp!.delta;
@@ -357,9 +352,8 @@ describe('PvP', () => {
       expect(delta).toBeLessThan(0);
       expect(end.reward).toBeNull();
     }
-    // a replayed move changes nothing
-    const replay = await post(`/v1/fights/${end.fight.id}/move`, a.token, { move: 'cios' });
-    expect(replay.status).toBe(409);
+    // a second end changes nothing
+    expect(await app.fights.finishShadow(a.slug, end.fight.id, 'won', true)).toBeNull();
     expect((await store.ratings([a.slug])).get(a.slug)!.rating).toBe(RATING_START + delta);
     // the same opponent rests for a while
     const again = await post('/v1/pvp/fights', a.token, { opponent: b.slug });
@@ -367,36 +361,34 @@ describe('PvP', () => {
   });
 
   it('running away after the first exchange, or starting another duel, counts as a loss', async () => {
-    const { store, post, bud } = setup();
+    const { app, store, post, bud } = setup();
     const a = await bud('Ala', 900);
     const b = await bud('Bartek', 900);
     const c = await bud('Celina', 900);
     const start = (await (
       await post('/v1/pvp/fights', a.token, { opponent: b.slug })
     ).json()) as FightResponse;
-    const moved = (await (
-      await post(`/v1/fights/${start.fight.id}/move`, a.token, { move: start.fight.bud.moves[0] })
-    ).json()) as FightResponse;
-    if (moved.fight.status === 'active') {
-      const fled = (await (
-        await post(`/v1/fights/${start.fight.id}/flee`, a.token)
-      ).json()) as FightResponse;
-      expect(fled.pvp!.delta).toBeLessThan(0);
-    }
+    const fled = (await app.fights.finishShadow(a.slug, start.fight.id, 'fled', true))!;
+    expect(fled.pvp!.delta).toBeLessThan(0);
     const before = (await store.ratings([a.slug])).get(a.slug)?.rating ?? RATING_START;
     const second = (await (
       await post('/v1/pvp/fights', a.token, { opponent: c.slug })
     ).json()) as FightResponse;
-    const one = (await (
-      await post(`/v1/fights/${second.fight.id}/move`, a.token, { move: second.fight.bud.moves[0] })
+    // the first blows on the street, then walking off to another rival
+    await app.fights.exchanged(a.slug, second.fight.id);
+    expect((await post('/v1/pvp/fights', a.token, { opponent: b.slug })).status).toBe(409); // b rests
+    const d = await bud('Darek', 900);
+    expect((await post('/v1/pvp/fights', a.token, { opponent: d.slug })).status).toBe(201);
+    expect((await store.ratings([a.slug])).get(a.slug)!.rating).toBeLessThan(before);
+    expect((await store.ratings([c.slug])).get(c.slug)!.rating).toBeGreaterThan(RATING_START);
+    // fled before any blow: nothing happens to the rating
+    const e = await bud('Edek', 900);
+    const quiet = (await (
+      await post('/v1/pvp/fights', a.token, { opponent: e.slug })
     ).json()) as FightResponse;
-    if (one.fight.status === 'active') {
-      // walking off to fight someone of the district
-      const enemy = CONTENT.enemies.find((e) => e.district === 'miasto-ziomkow')!;
-      expect((await post('/v1/fights', a.token, { enemyId: enemy.id })).status).toBe(201);
-      expect((await store.ratings([a.slug])).get(a.slug)!.rating).toBeLessThan(before);
-      expect((await store.ratings([c.slug])).get(c.slug)!.rating).toBeGreaterThan(RATING_START);
-    }
+    const mid = (await store.ratings([a.slug])).get(a.slug)!.rating;
+    expect((await app.fights.finishShadow(a.slug, quiet.fight.id, 'fled', false))!.pvp).toBeNull();
+    expect((await store.ratings([a.slug])).get(a.slug)!.rating).toBe(mid);
   });
 
   it('refuses yourself, unknown buds, the tutorial and buds out of reach', async () => {

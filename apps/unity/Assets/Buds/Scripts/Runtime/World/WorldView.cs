@@ -24,8 +24,15 @@ namespace Buds.World
         public const float Tilt = 40f;
         /// <summary>Rotation of everything that stands up (props, characters): facing the tilted camera.</summary>
         public static readonly Quaternion Upright = Quaternion.Euler(-Tilt, 0, 0);
-        /// <summary>Characters are drawn this much bigger than their sheet, and a bit wider: sturdier next to the props.</summary>
-        public const float CharacterScale = 1.35f;
+        /// <summary>
+        /// Characters are drawn at this scale of their sheet: a bud stands about as tall as a door, in proportion to the
+        /// houses, trees and benches around it.
+        /// </summary>
+        public const float CharacterScale = 1f;
+        /// <summary>A character's ground shadow width (tiles), in step with its size.</summary>
+        public const float CharacterShadow = 0.68f;
+        /// <summary>How high over a character's feet a marker floats (just above the top of the head).</summary>
+        public const float AboveHead = CharacterScale * 0.98f + 0.45f;
         /// <summary>1: the sheets themselves are drawn sturdy now (BULK in packages/shared vector.ts).</summary>
         public const float CharacterWidth = 1f;
 

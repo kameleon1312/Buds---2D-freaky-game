@@ -7,6 +7,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
+import { ABILITY_ICONS } from './art/ability-icons';
 import { ICONS } from './art/icons';
 import { FX } from './art/fx';
 import { ALL_PROPS } from './art/index';
@@ -134,6 +135,7 @@ if (args[0] === '--fx-preview') {
     ['Items', ICONS.items],
     ['Skills', ICONS.skills],
     ['Ui', ICONS.ui],
+    ['Abilities', ABILITY_ICONS],
   ] as const) {
     const out = fileURLToPath(
       new URL(`../../apps/unity/Assets/Buds/Resources/${folder}/`, import.meta.url),

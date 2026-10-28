@@ -7,15 +7,20 @@ import {
   LIVE_CLOSE,
   LIVE_PATH,
   LIVE_ROOM_CAP,
+  CONTENT,
+  TURFS,
   WALK_GRIDS,
+  cellFeet,
   cellWalkable,
   nearestWalkable,
   positionWalkable,
+  type LiveFx,
   type LiveServerMessage,
 } from '@buds/shared';
 import { createApp } from '../src/app.js';
 import { loadEnv } from '../src/env.js';
 import { attachLive, type LiveServer } from '../src/live.js';
+import { hashToken } from '../src/middleware/player.js';
 import { createMemoryStore } from '../src/store/memory.js';
 
 const look = {
@@ -39,6 +44,7 @@ type Rig = {
   server: Server;
   store: ReturnType<typeof createMemoryStore>;
   token(name: string): Promise<string>;
+  post(path: string, token: string, body: unknown): Promise<Response>;
 };
 let rig: Rig | undefined;
 
@@ -55,6 +61,7 @@ async function start(): Promise<Rig> {
   });
   const live = attachLive(server, store, {
     addressOf: (req) => req.socket.remoteAddress ?? 'test',
+    fights: app.fights,
   });
   const { port } = server.address() as AddressInfo;
   const token = async (name: string) => {
@@ -65,7 +72,13 @@ async function start(): Promise<Rig> {
     });
     return ((await res.json()) as { token: string }).token;
   };
-  rig = { url: `ws://127.0.0.1:${port}${LIVE_PATH}`, live, server, store, token };
+  const post = async (path: string, tok: string, body: unknown) =>
+    app.request(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+      body: JSON.stringify(body),
+    });
+  rig = { url: `ws://127.0.0.1:${port}${LIVE_PATH}`, live, server, store, token, post };
   return rig;
 }
 
@@ -392,5 +405,136 @@ describe('the live server', () => {
     a.ws.close();
     b.ws.close();
     expect(LIVE_ROOM_CAP).toBeGreaterThanOrEqual(20);
+  });
+});
+
+describe('fights in the main view (walka.md)', () => {
+  /** A bud of a level, with its slug (XP granted the way quests do). */
+  async function fighter(r: Rig, name: string, level = 1) {
+    const token = await r.token(name);
+    const bud = (await r.store.getByTokenHash(hashToken(token)))!;
+    if (level > 1) await r.store.completeQuest(bud.slug, `test-${name}`, 100 * (level - 1) ** 2);
+    return { token, slug: bud.slug };
+  }
+  const park = () => {
+    const t = TURFS.find((x) => x.id === 'mz-park-miejski')!;
+    return nearestWalkable(
+      MAP,
+      cellFeet(MAP, (t.x0 + t.x1) >> 1, 0).x,
+      cellFeet(MAP, 0, (t.y0 + t.y1) >> 1).y,
+    )!;
+  };
+
+  it('shows the map’s opponents and the bud’s own buttons', async () => {
+    const r = await start();
+    const a = await connect(r.url);
+    a.send(hello((await fighter(r, 'Ala')).token));
+    await a.next('welcome');
+    const ents = await a.next('ents');
+    const spots = CONTENT.enemies
+      .filter((e) => e.district === MAP)
+      .reduce((n, e) => n + e.spots.length, 0);
+    expect(ents.es).toHaveLength(spots);
+    expect(ents.es.every((e) => e.kind === 'mob' && e.h === e.mh && e.mh > 0)).toBe(true);
+    const you = await a.next('you');
+    expect(you.kit!.map((k) => k?.id ?? null)).toEqual([
+      'prosty',
+      'sierpowy',
+      'kopniak',
+      'garda',
+      null,
+    ]);
+    expect(you.hp).toBe(you.mhp);
+    expect(you.open).toBe(false);
+  });
+
+  it('a blow at an opponent lands on the server and everyone sees it', async () => {
+    const r = await start();
+    const enemy = CONTENT.enemies.find((e) => e.district === MAP && !e.ambush && !e.boss)!;
+    const at = cellFeet(MAP, enemy.spots[0]!.x, enemy.spots[0]!.y);
+    const near = nearestWalkable(MAP, at.x + 1, at.y)!;
+    const a = await connect(r.url);
+    a.send(hello((await fighter(r, 'Ala', 3)).token, near));
+    await a.next('welcome');
+    const mob = (await a.next('ents')).es.find(
+      (e) => e.enemy === enemy.id && Math.hypot(e.x - at.x, e.y - at.y) < 0.1,
+    )!;
+    await a.next('you');
+    a.send({ t: 'act', a: 0, x: mob.x, y: mob.y, tid: mob.id });
+    let hit: LiveFx | undefined;
+    for (let i = 0; i < 10 && !hit; i++)
+      hit = (await a.next('fx')).ev.find((e) => e.k === 'hit' && e.v === mob.id);
+    expect(hit!.u).toBeDefined();
+    expect(hit!.h).toBeLessThanOrEqual(hit!.mh!);
+    // the opponent fights back now
+    expect(r.live.brawlOf(MAP)!.units.get(mob.id)!.target).not.toBeNull();
+  });
+
+  it('buds fight each other from level 6 outside the safe zones, never in them', async () => {
+    const r = await start();
+    const spot = park();
+    const a = await connect(r.url);
+    const b = await connect(r.url);
+    const ala = await fighter(r, 'Ala', 6);
+    const bartek = await fighter(r, 'Bartek', 6);
+    a.send(hello(ala.token, spot));
+    await a.next('welcome');
+    await a.next('you');
+    const beside = nearestWalkable(MAP, spot.x + 0.8, spot.y)!;
+    b.send(hello(bartek.token, beside));
+    await b.next('welcome');
+    expect((await b.next('you')).open).toBe(true);
+    await until(() => r.live.brawlOf(MAP)!.units.has(bartek.slug));
+    a.send({ t: 'act', a: 0, x: beside.x, y: beside.y, tid: bartek.slug });
+    let hit: LiveFx | undefined;
+    for (let i = 0; i < 10 && !hit; i++)
+      hit = (await b.next('fx')).ev.find((e) => e.k === 'hit' && e.v === bartek.slug);
+    expect(hit!.u).toBe(ala.slug);
+
+    // in the market nobody can be hurt
+    const brawl = r.live.brawlOf(MAP)!;
+    const t = TURFS.find((x) => x.id === 'mz-rynek')!;
+    const safe = nearestWalkable(
+      MAP,
+      cellFeet(MAP, (t.x0 + t.x1) >> 1, 0).x,
+      cellFeet(MAP, 0, (t.y0 + t.y1) >> 1).y,
+    )!;
+    const ua = brawl.units.get(ala.slug)!;
+    const ub = brawl.units.get(bartek.slug)!;
+    ua.x = safe.x;
+    ua.y = safe.y;
+    ub.x = safe.x + 0.5;
+    ub.y = safe.y;
+    expect(brawl.hostile(ua, ub)).toBe(false);
+  });
+
+  it('calls a rival out to the street as a shadow only its challenger fights', async () => {
+    const r = await start();
+    const ala = await fighter(r, 'Ala', 4);
+    const bartek = await fighter(r, 'Bartek', 4);
+    const started = await r.post('/v1/pvp/fights', ala.token, { opponent: bartek.slug });
+    expect(started.status).toBe(201);
+    const { fight } = (await started.json()) as { fight: { id: string } };
+    const a = await connect(r.url);
+    a.send(hello(ala.token, park()));
+    await a.next('welcome');
+    await a.next('ents');
+    await a.next('you');
+    a.send({ t: 'summon', fight: fight.id });
+    const shadow = (await a.next('ents')).es[0]!;
+    expect(shadow).toMatchObject({
+      kind: 'shadow',
+      slug: bartek.slug,
+      only: ala.slug,
+      name: 'Bartek',
+    });
+    // a second call for the same fight brings nobody else
+    a.send({ t: 'summon', fight: fight.id });
+    expect(await a.none('ents')).toBe(true);
+    // walking away from it: the rival gives up, and after no blow at all it is just fled
+    const far = nearestWalkable(MAP, shadow.x + 40, shadow.y)!;
+    a.send({ t: 'join', map: MAP, x: far.x, y: far.y });
+    await until(() => !r.live.brawlOf(MAP)!.units.has(shadow.id));
+    expect(r.live.brawlOf(MAP)!.units.has(shadow.id)).toBe(false);
   });
 });

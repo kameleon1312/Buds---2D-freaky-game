@@ -41,7 +41,6 @@ namespace Buds.Core
         int nearbySector = -1;
         float districtsRefreshAt;
         /// <summary>How the last raid ended (shown when the duel screen closes), and the district raided.</summary>
-        RaidResultDto lastRaid;
         string raidingName;
 
         void SetUpLand()
@@ -430,30 +429,25 @@ namespace Buds.Core
                 "Napadnij", "Odejdź", () => _ = RaidDistrict(p, d), null);
         }
 
-        /// <summary>Raids a district: the owner's picture first (a failed download wastes no try), then the duel.</summary>
+        /// <summary>
+        /// Raids a district: the server checks it (levels, shield, the day's tries) and starts the fight, then the
+        /// owner's fighter, fortified by the district's defence, comes out of the gate (walka.md) and it is fought here.
+        /// </summary>
         async Awaitable RaidDistrict(PlotData p, DistrictDto d)
         {
-            if (landBusy || fightBusy || session == null) return;
+            if (landBusy || session == null) return;
+            if (!CanFight)
+            {
+                ui.ShowDialog($"Dystrykt {d.name}", "Napad toczy się na żywo: poczekaj na połączenie z serwerem.");
+                return;
+            }
             landBusy = true;
-            fightBusy = true;
-            BudSheet theirs = null;
             try
             {
-                ui.ShowToast($"Napad na dystrykt {d.name}…", 2f);
-                theirs = new BudSheet(await api.GetSheet(d.owner.slug), true);
                 var res = await api.StartRaid(session.Token, p.id);
-                ReleasePvpSheet();
-                pvpSheet = theirs;
-                pvpOnStreet = true;
-                currentFight = res.fight;
-                fightingWith = null;
-                lastReward = null;
-                lastPvp = null;
-                lastRaid = null;
-                lastInfluence = null;
                 raidingName = d.name;
-                fightScreen.Open(res.fight, sheet, theirs, $"Obrona dystryktu: +{d.defence}%.", gear);
-                theirs = null; // the duel owns it now (freed when it closes)
+                ui.ShowToast($"Napad na dystrykt {d.name}! Obrona +{d.defence}%.", 2.5f);
+                Summon(res.fight.id);
             }
             catch (ApiException e)
             {
@@ -461,9 +455,7 @@ namespace Buds.Core
             }
             finally
             {
-                if (theirs != null && theirs != pvpSheet) theirs.Dispose();
                 landBusy = false;
-                fightBusy = false;
             }
         }
 

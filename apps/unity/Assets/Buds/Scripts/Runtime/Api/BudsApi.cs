@@ -252,10 +252,6 @@ namespace Buds.Api
             return Parse<BuyResponse>(req);
         }
 
-        /// <summary>Starts a duel at one of the opponent's spots (the turf it counts for); the server builds both fighters.</summary>
-        public Awaitable<FightResponse> StartFight(string token, string enemyId, int spot = 0) =>
-            Post<FightResponse>("/v1/fights", token, $"{{\"enemyId\":\"{enemyId}\",\"spot\":{Math.Clamp(spot, 0, 5)}}}");
-
         // ---------- rywalizacja ----------
 
         /// <summary>Who rules each turf of a district this week, and this bud's standing there.</summary>
@@ -285,7 +281,7 @@ namespace Buds.Api
         public Awaitable<PvpOpponentsResponse> GetPvpOpponents(string token) =>
             Get<PvpOpponentsResponse>("/v1/pvp/opponents", token);
 
-        /// <summary>Challenges another bud's saved fighter; the duel then runs through FightMove like any other.</summary>
+        /// <summary>Challenges another bud's saved fighter: the fight it starts is then fought live (summoned to the street).</summary>
         public Awaitable<FightResponse> StartPvp(string token, string opponentSlug) =>
             Post<FightResponse>("/v1/pvp/fights", token, $"{{\"opponent\":\"{opponentSlug}\"}}");
 
@@ -309,13 +305,6 @@ namespace Buds.Api
             return Parse<MarketResponse>(req);
         }
 
-        /// <summary>Plays one turn; the server answers with what happened (and the reward on a win).</summary>
-        public Awaitable<FightResponse> FightMove(string token, string fightId, string move) =>
-            Post<FightResponse>($"/v1/fights/{Uri.EscapeDataString(fightId)}/move", token, $"{{\"move\":\"{move}\"}}");
-
-        public Awaitable<FightResponse> Flee(string token, string fightId) =>
-            Post<FightResponse>($"/v1/fights/{Uri.EscapeDataString(fightId)}/flee", token, "{}");
-
         /// <summary>Buys a premium item for gems; the server checks the price and the gem balance.</summary>
         public Awaitable<BuyResponse> BuyPremium(string token, string itemId) =>
             Post<BuyResponse>($"/v1/premium/{Uri.EscapeDataString(itemId)}/buy", token, "{}");
@@ -335,10 +324,31 @@ namespace Buds.Api
         public Awaitable<ConsumablesResponse> UseConsumable(string token, string itemId) =>
             Post<ConsumablesResponse>($"/v1/buds/me/consumables/{Uri.EscapeDataString(itemId)}/use", token, "{}");
 
-        /// <summary>POST with a small JSON body (ids are [a-z0-9-], safe to inline).</summary>
-        async Awaitable<T> Post<T>(string path, string token, string json)
+        // ---------- ciosy ----------
+
+        /// <summary>The five fight buttons of the weapon in hand, every move that could go on them, the upgrades.</summary>
+        public Awaitable<MovesResponseDto> GetMoves(string token) => Get<MovesResponseDto>("/v1/buds/me/moves", token);
+
+        /// <summary>Saves a loadout (the server checks every move: it fits, it is open, the two abilities differ).</summary>
+        public Awaitable<MovesResponseDto> SaveLoadout(string token, string weapon, string[] kit)
         {
-            using var req = new UnityWebRequest(baseUrl + path, UnityWebRequest.kHttpVerbPOST)
+            var parts = new string[kit.Length];
+            for (var i = 0; i < kit.Length; i++) parts[i] = string.IsNullOrEmpty(kit[i]) ? "null" : $"\"{kit[i]}\"";
+            return Send<MovesResponseDto>("PUT", "/v1/buds/me/moves/loadout", token,
+                $"{{\"weapon\":\"{weapon}\",\"kit\":[{string.Join(",", parts)}]}}");
+        }
+
+        /// <summary>One upgrade of a move for coins; the server checks the level and the price.</summary>
+        public Awaitable<MovesResponseDto> UpgradeMove(string token, string moveId) =>
+            Post<MovesResponseDto>($"/v1/buds/me/moves/{Uri.EscapeDataString(moveId)}/upgrade", token, "{}");
+
+        /// <summary>POST with a small JSON body (ids are [a-z0-9-], safe to inline).</summary>
+        Awaitable<T> Post<T>(string path, string token, string json) => Send<T>(UnityWebRequest.kHttpVerbPOST, path, token, json);
+
+        /// <summary>A request with a small JSON body.</summary>
+        async Awaitable<T> Send<T>(string method, string path, string token, string json)
+        {
+            using var req = new UnityWebRequest(baseUrl + path, method)
             {
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json)),
                 downloadHandler = new DownloadHandlerBuffer(),

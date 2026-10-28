@@ -294,13 +294,19 @@ namespace Buds.UI
             TextAnchor align = TextAnchor.MiddleCenter)
         {
             var t = Label(name, parent, text, size, color ?? TextOnDark, true, align);
-            var drop = t.gameObject.AddComponent<Shadow>();
-            drop.effectColor = Outline;
-            drop.effectDistance = new Vector2(0, -2 * U);
-            var stroke = t.gameObject.AddComponent<UnityEngine.UI.Outline>();
-            stroke.effectColor = Outline;
-            stroke.effectDistance = new Vector2(Stroke * 0.75f, Stroke * 0.75f);
+            // a round stroke (the letters drawn round a circle under themselves) and one hard drop under it all:
+            // the built-in Outline only shifts four copies diagonally, which leaves every curve stepped
+            var stroke = t.gameObject.AddComponent<RoundStroke>();
+            stroke.Width = Mathf.Clamp(size * 0.11f, 2.2f, Stroke * 0.85f);
+            stroke.Drop = new Vector2(0, -Mathf.Clamp(size * 0.07f, 1.5f, 2 * U));
             return t;
+        }
+
+        /// <summary>Small type: the stroke alone, a hard drop would read as a second copy.</summary>
+        public static void NoDrop(Text t)
+        {
+            var stroke = t ? t.GetComponent<RoundStroke>() : null;
+            if (stroke) stroke.Drop = Vector2.zero;
         }
 
         // ---------- components ----------
@@ -440,8 +446,7 @@ namespace Buds.UI
             caption = Outlined("Caption", button.transform, Keys(label), font);
             caption.horizontalOverflow = HorizontalWrapMode.Overflow;
             // small text: the outline alone, the hard drop would read as a second copy
-            foreach (var effect in caption.GetComponents<Shadow>())
-                if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
+            NoDrop(caption);
             Place(caption.rectTransform, new Vector2(0.5f, 0), new Vector2(0, -font - 9), new Vector2(size + 60, font + 8), new Vector2(0.5f, 0));
             return button;
         }
@@ -546,9 +551,10 @@ namespace Buds.UI
             radius = Mathf.Min(radius, 128); // larger radii (pills) clamp; the slice keeps them round at any height ≤ 256
             if (rounded.TryGetValue(radius, out var cached)) return cached;
             var size = radius * 2 + 2;
-            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            // mipmapped and trilinear: drawn smaller than its pixels, a corner stays smooth instead of shimmering
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, true)
             {
-                filterMode = FilterMode.Bilinear,
+                filterMode = FilterMode.Trilinear,
                 wrapMode = TextureWrapMode.Clamp,
             };
             var pixels = new Color32[size * size];
@@ -565,7 +571,7 @@ namespace Buds.UI
                 pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
             }
             tex.SetPixels32(pixels);
-            tex.Apply();
+            tex.Apply(true);
             var sprite = Sprite.Create(tex, new UnityEngine.Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100, 0,
                 SpriteMeshType.FullRect, new Vector4(radius + 1, radius + 1, radius + 1, radius + 1));
             rounded[radius] = sprite;
@@ -604,21 +610,39 @@ namespace Buds.UI
             return Sprite.Create(tex, new UnityEngine.Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
         }
 
-        public static Sprite Circle(int radius)
+        static readonly Dictionary<long, Sprite> discs = new();
+
+        /// <summary>A filled disc, anti-aliased and mipmapped (smooth at any size it is drawn), made once per radius.</summary>
+        public static Sprite Circle(int radius) => Ring(radius, 0);
+
+        /// <summary>
+        /// A ring <paramref name="width"/> texels wide at the rim (0 = a filled disc): one even, smooth line, so an
+        /// outline drawn with it is the same thickness all the way round.
+        /// </summary>
+        public static Sprite Ring(int radius, float width)
         {
+            var key = radius * 10000L + Mathf.RoundToInt(width * 10);
+            if (discs.TryGetValue(key, out var cached)) return cached;
             var size = radius * 2;
-            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear };
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, true)
+            {
+                filterMode = FilterMode.Trilinear,
+                wrapMode = TextureWrapMode.Clamp,
+            };
             var pixels = new Color32[size * size];
             for (var y = 0; y < size; y++)
             for (var x = 0; x < size; x++)
             {
                 var d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(radius, radius));
-                var a = Mathf.Clamp01(radius - d);
-                pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+                var outer = Mathf.Clamp01(radius - 0.5f - d + 0.5f);
+                var inner = width > 0 ? Mathf.Clamp01(d - (radius - 0.5f - width) + 0.5f) : 1;
+                pixels[y * size + x] = new Color32(255, 255, 255, (byte)(Mathf.Min(outer, inner) * 255));
             }
             tex.SetPixels32(pixels);
-            tex.Apply();
-            return Sprite.Create(tex, new UnityEngine.Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+            tex.Apply(true);
+            var sprite = Sprite.Create(tex, new UnityEngine.Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+            discs[key] = sprite;
+            return sprite;
         }
     }
 
@@ -701,6 +725,61 @@ namespace Buds.UI
             var size = rt.sizeDelta;
             var scale = Mathf.Min(1f, parent.width / size.x, parent.height / size.y);
             rt.localScale = new Vector3(scale, scale, 1);
+        }
+    }
+}
+
+namespace Buds.UI
+{
+    /// <summary>
+    /// A smooth outline for UI text: the glyphs drawn again round a circle of <see cref="Width"/> under themselves
+    /// (twelve steps, so curves and diagonals get the same thickness as straight strokes), and an optional hard drop
+    /// below everything, in the design system's ink.
+    /// </summary>
+    public sealed class RoundStroke : UnityEngine.UI.BaseMeshEffect
+    {
+        public Color Color = UiKit.Outline;
+        public float Width = 3;
+        public Vector2 Drop;
+        public int Steps = 12;
+        readonly List<UIVertex> stream = new();
+        readonly List<UIVertex> output = new();
+
+        public override void ModifyMesh(VertexHelper vh)
+        {
+            if (!IsActive() || vh.currentVertCount == 0) return;
+            stream.Clear();
+            vh.GetUIVertexStream(stream);
+            output.Clear();
+            if (Drop != Vector2.zero)
+            {
+                // the drop is the stroked shape moved down: one copy per stroke step keeps its edge round too
+                for (var k = 0; k < Steps; k += 2) Copy(Drop + Around(k), Color);
+                Copy(Drop, Color);
+            }
+            for (var k = 0; k < Steps; k++) Copy(Around(k), Color);
+            output.AddRange(stream);
+            vh.Clear();
+            vh.AddUIVertexTriangleStream(output);
+        }
+
+        Vector2 Around(int k)
+        {
+            var a = k * Mathf.PI * 2 / Steps;
+            return new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * Width;
+        }
+
+        void Copy(Vector2 offset, Color color)
+        {
+            foreach (var v in stream)
+            {
+                var c = v;
+                c.position += (Vector3)offset;
+                var tint = color;
+                tint.a *= v.color.a / 255f;
+                c.color = tint;
+                output.Add(c);
+            }
         }
     }
 }

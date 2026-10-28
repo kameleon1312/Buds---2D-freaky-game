@@ -82,15 +82,6 @@ namespace Buds.Tests
         }
 
         [Test]
-        public void ALurkerSpringsOnlyWhenReadyCloseAndNothingElseIsGoingOn()
-        {
-            Assert.IsTrue(Ambush.ShouldSpring(2f, true, false));
-            Assert.IsFalse(Ambush.ShouldSpring(Ambush.SpringRadius + 0.1f, true, false), "too far");
-            Assert.IsFalse(Ambush.ShouldSpring(1f, false, false), "resting or waiting");
-            Assert.IsFalse(Ambush.ShouldSpring(1f, true, true), "already fighting");
-        }
-
-        [Test]
         public void EveryCityHasAHarbourWithAFerrymanOnFreeShore()
         {
             Assert.AreEqual(Districts.All.Length, Content.ports.Length);

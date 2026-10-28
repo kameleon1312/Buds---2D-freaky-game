@@ -92,15 +92,18 @@ namespace Buds.Core
                 await Walk(new Vector2(-side, 0), 1.2f);
                 await Awaitable.WaitForSecondsAsync(0.2f);
                 await shot("v3-zasadzka.png");
-                for (var i = 0; i < 40 && !(fightScreen?.IsOpen ?? false); i++) await Awaitable.WaitForSecondsAsync(0.1f);
-                if (fightScreen?.IsOpen ?? false)
+                // it jumps out on its own and comes at the bud: a few blows, then running for it down the road
+                var view = enemyWorld ? enemyWorld.Unit($"m-{lurker.id}-0") : null;
+                for (var i = 0; i < 30 && view && view.Lurking; i++) await Awaitable.WaitForSecondsAsync(0.1f);
+                if (view && !view.Lurking)
                 {
-                    await Awaitable.WaitForSecondsAsync(1.6f);
+                    await Awaitable.WaitForSecondsAsync(0.8f);
                     await shot("v4-walka-z-zasadzki.png");
-                    await Flee();
-                    for (var i = 0; i < 40 && !fightScreen.ShowingResult; i++) await Awaitable.WaitForSecondsAsync(0.1f);
+                    await FightIt(() => !view || view.Down, 4, shot, "v4b");
+                    player.Input.OverrideRun = true;
+                    await Walk(new Vector2(side, 0), 3f);
+                    player.Input.OverrideRun = false;
                     await shot("v5-ucieczka.png");
-                    CloseFight();
                 }
             }
 

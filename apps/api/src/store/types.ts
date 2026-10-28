@@ -96,6 +96,18 @@ export interface BudStore extends RivalryStore, LandStore {
   completeQuest(slug: string, questId: string, xp: number): Promise<number | null>;
   /** Skill ranks (skills never upgraded are absent). */
   skills(slug: string): Promise<{ id: string; rank: number }[]>;
+  /** Fight loadouts (loadout.ts), one per weapon kind: five ability ids or null. */
+  loadouts(slug: string): Promise<Record<string, (string | null)[]>>;
+  setLoadout(slug: string, weapon: string, kit: (string | null)[]): Promise<void>;
+  /** How far each move is upgraded (absent = 0). */
+  moveRanks(slug: string): Promise<Record<string, number>>;
+  /** One upgrade of a move from rank `from` for `price` coins, atomically (a stale rank is a race). */
+  upgradeMove(
+    slug: string,
+    moveId: string,
+    from: number,
+    price: number,
+  ): Promise<{ status: 'ok' | 'race' | 'poor'; coins: number; rank: number }>;
   /**
    * Spends one point on a skill if the bud has a free point (`points` earned in total) and the skill is below
    * `maxRank`. Returns the new rank, or null when not allowed. Must be atomic.
@@ -155,6 +167,16 @@ export interface BudStore extends RivalryStore, LandStore {
     xp: number,
     coins: number,
   ): Promise<{ xp: number; coins: number } | null>;
+  /**
+   * A knockout in a real-time fight (walka.md): the victim loses `percent`% of its coins, at most `max`, atomically;
+   * to the killer when there is one, burned otherwise. Returns what was lost and the victim's coins after.
+   */
+  knockout(
+    victim: string,
+    killer: string | null,
+    percent: number,
+    max: number,
+  ): Promise<{ lost: number; coins: number }>;
   /** When the bud last beat this opponent. */
   lastWin(slug: string, enemyId: string): Promise<Date | null>;
   /** Training XP per skill (skills never trained are absent). */

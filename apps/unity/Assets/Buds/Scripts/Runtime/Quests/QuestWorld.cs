@@ -35,7 +35,7 @@ namespace Buds.Quests
             view.Data = data;
             view.sheet = sheet;
             // 2.5D: a shadow on the ground, the body and its marker stand up towards the camera
-            WorldView.Shadow(go.transform, 0.9f);
+            WorldView.Shadow(go.transform, WorldView.CharacterShadow);
             var visual = WorldView.StandCharacter(go.transform);
             var bodyGo = new GameObject("Body");
             bodyGo.transform.SetParent(visual, false);
@@ -102,7 +102,7 @@ namespace Buds.Quests
         {
             // the marker floats above the head; standing NPCs breathe a little so they don't look like statues
             var t = Time.time + phase * 3;
-            marker.transform.localPosition = new Vector3(0, 1.95f + Mathf.Sin(t * 3f) * 0.08f, 0);
+            marker.transform.localPosition = new Vector3(0, WorldView.AboveHead + Mathf.Sin(t * 3f) * 0.08f, 0);
             if (wander == null)
             {
                 body.transform.localScale = new Vector3(1, 1 + Mathf.Sin(t * 2f) * 0.012f, 1);

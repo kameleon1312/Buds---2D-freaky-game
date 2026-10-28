@@ -77,8 +77,8 @@ namespace Buds.Characters
             var swing = (frame == 1 ? 22f : frame == 2 ? -22f : 0f) * Mathf.Deg2Rad;
             float dx = 61 - 60, dy = 107 - 74;
             var x = 60 + dx * Mathf.Cos(swing) - dy * Mathf.Sin(swing);
-            var y = 74 + dx * Mathf.Sin(swing) + dy * Mathf.Cos(swing) + 9 + (frame == 0 ? 0 : -1.5f);
-            x = 60 + (x - 60) * 1.12f;
+            var y = 74 + dx * Mathf.Sin(swing) + dy * Mathf.Cos(swing) + 9 + (frame == 0 ? 0 : -2f);
+            x = 60 + (x - 60) * 1.2f;
             var fx = 5 + 1.25f * x;
             var fy = 32.5f + 1.25f * y;
             return new Vector2((fx - SvgPerUnit / 2) / SvgPerUnit, (FeetY - fy) / SvgPerUnit);

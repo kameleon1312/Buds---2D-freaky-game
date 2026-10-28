@@ -46,7 +46,8 @@ Tydzień rozlicza się raz, przy pierwszym zapytaniu po jego końcu (SQL `settle
 ## Pojedynki z Budami (PvP)
 
 - Walczysz z zapisanym zawodnikiem innego Buda: jego sprzęt, umiejętności i perki, bez napojów.
-- Walkę rozstrzyga ten sam silnik co pojedynki w dzielnicach (`combat.ts`).
+- Rywal wychodzi na ulicę jako cień i walczy tylko z wyzywającym, tymi samymi przyciskami co cała walka
+  (`docs/walka.md`).
 - Rywale są w zasięgu ±4 poziomy. Tego samego Buda wyzywasz znowu po godzinie.
 - Ranking Elo (start 1000, K = 32). Ligi: Brąz, Srebro (od 1050), Złoto (1150), Platyna (1300), Legenda (1500).
 - Wygrana nie daje XP ani łupu. 5 pierwszych wygranych dziennie płaci 10 + 5 × indeks ligi monet.

@@ -9,9 +9,9 @@ jeden przedmiot. Zakładasz w grze: panel „Twój Bud” → Ekwipunek → klik
 
 | Statystyka | Co robi                                                             | Limit |
 | ---------- | ------------------------------------------------------------------- | ----- |
-| Atak       | mocniejsze ciosy w pojedynkach                                      | 40    |
+| Atak       | mocniejsze ciosy w walce                                            | 40    |
 | Szybkość   | +1% prędkości chodu i biegu za punkt, pierwszy ruch i uniki w walce | 25    |
-| Pancerz    | mniej obrażeń w pojedynkach                                         | 40    |
+| Pancerz    | mniej obrażeń w walce                                               | 40    |
 | Szczęście  | +1% monet ze skrytek i z walk za punkt, ciosy krytyczne             | 50    |
 
 Przedmioty mogą też dodawać poziomy umiejętności (np. Monokl: +1 Spryt). Ekwipunek dokłada najwyżej
@@ -21,7 +21,7 @@ Przedmioty mogą też dodawać poziomy umiejętności (np. Monokl: +1 Spryt). Ek
 
 Ponad 100 przedmiotów, od 12 do 19 w każdym miejscu, każdy z wymaganym poziomem (1–15): zakładasz i kupujesz go
 dopiero od tego poziomu. Przedmioty „W ręku” to broń: jej rodzaj (kij, proca, spray, mikrofon, deska) daje
-ruchy w pojedynkach (`docs/pojedynki.md`). Pełna lista: `packages/shared/src/gear-items.ts`.
+ciosy w walce (`docs/walka.md`). Pełna lista: `packages/shared/src/gear-items.ts`.
 
 W grze kafelki ekwipunku są ułożone jak na ciele: Głowa, Twarz, Tułów, Nogi i Stopy pośrodku, Dłonie z lewej,
 W ręku z prawej, Dodatek przy ramieniu.
@@ -36,7 +36,7 @@ W ręku z prawej, Dodatek przy ramieniu.
   zakładka „Premium” w sklepie, `POST /v1/premium/:itemId/buy`, funkcja SQL `buy_item_gems`). Każdy taki przedmiot
   ma „bliźniaka” (`twin`) do zdobycia w grze i jest **dokładnie tak samo mocny**: ten sam bonus, ta sama broń, ta
   sama prędkość jazdy. Różni się wyglądem (własna grafika, rzadkość „mityczna”, poświata i błysk) i może być założony
-  najwyżej 2 poziomy wcześniej (`PREMIUM_LEVEL_HEAD_START`). Nigdy nie wypada z pojedynków. Pilnuje tego test
+  najwyżej 2 poziomy wcześniej (`PREMIUM_LEVEL_HEAD_START`). Nigdy nie wypada z walk. Pilnuje tego test
   `gearProblems` w `packages/shared/src/catalog.ts`. Przedmioty bez mocy (stroje, buty) mogą być czystym wyglądem.
 - **Gemy:** kupowane za prawdziwe pieniądze. Przyznaje je tylko serwer po zweryfikowanej płatności
   (`grant_gems`, tabela `purchases`). Płatności (Stripe na stronie, Google Play / App Store w aplikacji) podłączymy

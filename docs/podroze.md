@@ -35,9 +35,8 @@ Miasto i jego pustkowia są połączone bez wczytywania (`World/Seams`, `GameBoo
 
 Przeciwnicy z `content/routes.ts` mają `ambush: true` i stoją w kryjówkach (pierścień krzaków, skał albo złomu z
 jednym wejściem od strony drogi), które generator wycina dokładnie w ich miejscach. Są niewidoczni, dopóki Bud nie
-podejdzie na `Ambush.SpringRadius` (2,4 pola): wyskakują, mówią swoje i po chwili sami zaczynają pojedynek (ten sam
-`POST /v1/fights`, serwer liczy wszystko jak zawsze). Z walki można uciec; uciekinier dostaje spokój na
-`Ambush.Cooldown` sekund. Trzymając się drogi, nikogo się nie spotka.
+podejdzie na `SPRING_RADIUS` (2,4 pola): wyskakują i sami atakują (decyduje serwer, `docs/walka.md`). Przed
+walką można uciec: odprowadzony za daleko od kryjówki wraca do niej i chowa się na `LURK_COOLDOWN_MS`. Trzymając się drogi, nikogo się nie spotka.
 
 ## Promy
 

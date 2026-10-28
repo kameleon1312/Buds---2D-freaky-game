@@ -201,7 +201,7 @@ pnpm phone          # build APK i instalacja na telefonie przez Wi-Fi
 Gra: otwórz `apps/unity` w Unity Hub (Unity 6.6) i uruchom scenę `Assets/Buds/Scenes/Main.unity`.
 
 Więcej: [architektura](docs/architecture.md) · [wdrożenie](docs/deployment.md) · [telefon](docs/telefon.md) ·
-[dzielnice](docs/districts.md) · [zadania](docs/questy.md) · [pojedynki](docs/pojedynki.md) ·
+[dzielnice](docs/districts.md) · [zadania](docs/questy.md) · [walka](docs/walka.md) ·
 [ekwipunek](docs/ekwipunek.md) · [umiejętności](docs/umiejetnosci.md) · [plan prac](docs/roadmap.md)
 
 </details>

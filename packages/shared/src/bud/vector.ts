@@ -27,7 +27,7 @@ const BODY_DROP = 9;
  * its shape. Sturdier figures that read well at game size, like the chunky heroes of mobile RPGs.
  */
 const BULK = 1.2;
-const BULK_SIDE = 1.12;
+const BULK_SIDE = 1.2;
 const widen = (k: number) => `translate(60 0) scale(${k} 1) translate(-60 0)`;
 const HIP_Y = 106 + BODY_DROP;
 
@@ -199,7 +199,8 @@ function hash(s: string): string {
 // ---------- shapes ----------
 
 // sloped shoulders, a slight taper to the waist and a hem that flares a touch (soft, not a box)
-const TORSO_M = 'M37 84 Q37 69 52 67 H68 Q83 69 83 84 L84 106 Q84 114 76 114 H44 Q36 114 36 106Z';
+const TORSO_M =
+  'M36 84 Q35 68 52 66 H68 Q85 68 84 84 Q82.5 95 84 106 Q84 114 76 114 H44 Q36 114 36 106 Q37.5 95 36 84Z';
 const TORSO_F =
   'M39 84 Q39 69 53 67 H67 Q81 69 81 84 Q77 96 82 106 Q82 114 75 114 H45 Q38 114 38 106 Q43 96 39 84Z';
 const TORSO_SIDE =
@@ -745,14 +746,19 @@ function shoe(pen: Pen, x: number, ground: number, p: BudPalette, toe: 0 | -1, l
 }
 
 function legsFront(pen: Pen, { look, p, frame }: Ctx) {
-  for (const [x, lifted, foot] of [
-    [50, frame === 1, 47],
-    [70, frame === 2, 73],
-  ] as const) {
-    const ground = lifted ? 145 : 150;
-    // a little taper from the hip to the ankle; feet turn slightly outwards
-    leg(pen, x, foot, ground, p, look, false);
-    shoe(pen, foot, ground, p, 0, look);
+  // a step seen from the front: the leg going back rises up the picture and darkens (it is further away), the one
+  // coming forward reaches lower; standing, both feet are planted a little apart and turn slightly outwards
+  const back = frame === 1 ? 70 : frame === 2 ? 50 : 0;
+  const legs = [
+    { x: 50, foot: frame === 2 ? 48.5 : 47, ground: frame === 1 ? 152 : frame === 2 ? 144 : 150 },
+    { x: 70, foot: frame === 1 ? 71.5 : 73, ground: frame === 2 ? 152 : frame === 1 ? 144 : 150 },
+  ];
+  // the leg further away first, so the near one overlaps it
+  legs.sort((a, b) => (a.x === back ? -1 : b.x === back ? 1 : 0));
+  for (const l of legs) {
+    const far = l.x === back;
+    leg(pen, l.x, l.foot, l.ground, p, look, far);
+    shoe(pen, l.foot, l.ground, far ? { ...p, shoes: [p.shoes[1], p.shoes[1]] } : p, 0, look);
   }
   skirt(pen, look, p, false);
 }
@@ -803,7 +809,7 @@ function arm(pen: Pen, sx: number, hx: number, hy: number, { look, p }: Ctx) {
     else
       pen.flat(limb(sx + (wx - sx) * 0.9, wy - 2, 6.2, wx, wy, 6.2), mix(p.top[0], '#ffffff', 0.2));
   }
-  pen.shaded(circ(hx, hy, 6.5), p.skin, -2, -2);
+  pen.shaded(circ(hx, hy, 5.8), p.skin, -2, -2);
   // a thumb, so the hand reads as a hand
   pen.line(
     `M${r2(hx + (hx < 60 ? 3 : -3))} ${r2(hy - 3)} q${hx < 60 ? 2.5 : -2.5} 2 ${hx < 60 ? 1 : -1} 5`,
@@ -1044,7 +1050,7 @@ export function budFrameMarkup(
 ): string {
   const ctx: Ctx = { look, p: budPalette(look), frame };
   const pen = new Pen();
-  const bob = frame === 0 ? 0 : -1.5;
+  const bob = frame === 0 ? 0 : -2;
 
   if (facing === 'side') {
     pen.group(widen(BULK_SIDE), (legs) => legsSide(legs, ctx));
@@ -1072,13 +1078,15 @@ export function budFrameMarkup(
     });
   } else {
     pen.group(widen(BULK), (legs) => legsFront(legs, ctx));
-    const leftHand = frame === 1 ? 103 : frame === 2 ? 109 : 107;
-    const rightHand = frame === 2 ? 103 : frame === 1 ? 109 : 107;
+    const leftHand = frame === 1 ? 102 : frame === 2 ? 110 : 107;
+    const rightHand = frame === 2 ? 102 : frame === 1 ? 110 : 107;
+    const leftX = frame === 2 ? 36.5 : 35;
+    const rightX = frame === 1 ? 83.5 : 85;
     pen.group(`translate(0 ${bob + BODY_DROP})`, (up) => {
       up.group(widen(BULK), (b) => {
         torsoFront(b, ctx, facing === 'up');
-        arm(b, 40, 33, leftHand, ctx);
-        arm(b, 80, 87, rightHand, ctx);
+        arm(b, 40.5, leftX, leftHand, ctx);
+        arm(b, 79.5, rightX, rightHand, ctx);
         // soft shadow the head casts on the collar
         if (facing === 'down')
           b.raw(`<ellipse cx="60" cy="69" rx="13" ry="3.5" fill="${ctx.p.top[1]}" opacity="0.8"/>`);

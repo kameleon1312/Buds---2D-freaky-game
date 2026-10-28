@@ -10,8 +10,8 @@ namespace Buds.UI
 {
     /// <summary>
     /// All on-screen UI: pairing, loading, HUD, dialog box and the touch joystick. Landscape layout: the player plate
-    /// and the quests top left, the buttons (Twój Bud, Mapa, the ride) top right, the action button bottom left and,
-    /// on phones, the joystick bottom right. Everything sits inside the screen's safe area (notches, rounded corners).
+    /// and the quests top left, the buttons (Twój Bud, Mapa, the ride) top right, the action button bottom centre,
+    /// on phones the joystick bottom left and the fight's buttons bottom right (CombatPad). Everything sits inside the screen's safe area (notches, rounded corners).
     /// </summary>
     public sealed class GameUi
     {
@@ -55,6 +55,9 @@ namespace Buds.UI
         public Transform Root => safe;
         /// <summary>The whole screen (behind the safe area): for full-screen backgrounds.</summary>
         public Transform FullScreen => canvas.transform;
+
+        /// <summary>The HUD is up (in the world, not on the pairing or loading screen).</summary>
+        public bool HudVisible => hud && hud.activeSelf;
         readonly RectTransform safe;
         /// <summary>The action button or the dialog was tapped (acts like E).</summary>
         public event Action Tapped;
@@ -226,8 +229,8 @@ namespace Buds.UI
 
             // the action button: what E does right now (talk, fight, search…); tapping it does the same
             hintText = UiKit.Pill("Hint", Root, "", UiKit.Buds400, UiKit.Mobile ? 28 : 24, new Vector2(HintMinWidth, UiKit.Mobile ? 72 : 52), out var hrt);
-            if (UiKit.Mobile) UiKit.Place(hrt, Vector2.zero, new Vector2(28, 28), hrt.sizeDelta, Vector2.zero);
-            else UiKit.Place(hrt, new Vector2(0.5f, 0), new Vector2(0, 40), hrt.sizeDelta);
+            // between the stick (left) and the fight's buttons (right)
+            UiKit.Place(hrt, new Vector2(0.5f, 0), new Vector2(UiKit.Mobile ? -40 : 0, UiKit.Mobile ? 30 : 40), hrt.sizeDelta);
             var tap = hrt.gameObject.AddComponent<Button>();
             tap.targetGraphic = hrt.GetComponentInChildren<Image>();
             tap.targetGraphic.raycastTarget = true; // UI shapes ignore touches by default
@@ -647,8 +650,7 @@ namespace Buds.UI
             var badgeRt = (RectTransform)badge.transform.parent;
             UiKit.Place(badgeRt, Vector2.one, new Vector2(9, 9), new Vector2(24, 24), new Vector2(1, 1));
             questCountText = UiKit.Outlined("Num", badge.transform, "", 15);
-            foreach (var effect in questCountText.GetComponents<Shadow>())
-                if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
+            UiKit.NoDrop(questCountText);
             UiKit.Stretch(questCountText.rectTransform, 0, 1, 0, 0);
             questCount = badgeRt.gameObject;
             questCount.SetActive(false);
@@ -684,8 +686,7 @@ namespace Buds.UI
             var badgeRt = (RectTransform)badge.transform.parent;
             UiKit.Place(badgeRt, Vector2.one, new Vector2(9, 9), new Vector2(24, 24), new Vector2(1, 1));
             chatCountText = UiKit.Outlined("Num", badge.transform, "", 15);
-            foreach (var effect in chatCountText.GetComponents<Shadow>())
-                if (effect.GetType() == typeof(Shadow)) UnityEngine.Object.Destroy(effect);
+            UiKit.NoDrop(chatCountText);
             UiKit.Stretch(chatCountText.rectTransform, 0, 1, 0, 0);
             chatCount = badgeRt.gameObject;
             chatCount.SetActive(false);
@@ -788,7 +789,7 @@ namespace Buds.UI
 
         // ---------- joystick ----------
 
-        /// <summary>The fixed joystick on phones: centre from the bottom-right corner and radius, in UI units.</summary>
+        /// <summary>The fixed joystick on phones: centre from the bottom-left corner and radius, in UI units.</summary>
         const float StickInset = 112;
         const float StickR = 78;
         const float KnobTravel = 54;
@@ -803,7 +804,7 @@ namespace Buds.UI
             stickKnob.rectTransform.sizeDelta = UiKit.Mobile ? new Vector2(70, 70) : new Vector2(80, 80);
             foreach (var img in new[] { stickBase, stickKnob })
             {
-                var anchor = UiKit.Mobile ? new Vector2(1, 0) : Vector2.zero;
+                var anchor = Vector2.zero;
                 img.rectTransform.anchorMin = img.rectTransform.anchorMax = anchor;
                 img.raycastTarget = false;
                 img.gameObject.SetActive(false);
@@ -830,7 +831,7 @@ namespace Buds.UI
             stickKnob.color = input.Run ? new Color(1f, 0.79f, 0.24f, 0.9f) : new Color(0.965f, 0.949f, 0.914f, 0.85f);
         }
 
-        /// <summary>Phones: the stick always sits bottom right; the input reads its centre and radius from here.</summary>
+        /// <summary>Phones: the stick always sits bottom left; the input reads its centre and radius from here.</summary>
         void UpdateFixedStick(PlayerInput input)
         {
             var show = hud.activeSelf && !DialogOpen;
@@ -839,7 +840,7 @@ namespace Buds.UI
             // always the fixed stick on phones: the floating one would turn every tap (even on X) into an action
             input.FixedStick = true;
             if (!show) return;
-            var home = new Vector2(-StickInset, StickInset);
+            var home = new Vector2(StickInset, StickInset);
             stickBase.rectTransform.anchoredPosition = home;
             var scale = canvas.scaleFactor;
             input.StickCenter = stickBase.rectTransform.position; // overlay canvas: world position = screen pixels

@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  catalogItem,
-  type ApiError,
-  type BuyResponse,
-  type CreateBudResponse,
-  type FightResponse,
-} from '@buds/shared';
-import { CONTENT } from '@buds/shared';
+import { catalogItem, type ApiError, type BuyResponse, type CreateBudResponse } from '@buds/shared';
 import { createApp } from '../src/app.js';
 import { loadEnv } from '../src/env.js';
 import { createMemoryStore } from '../src/store/memory.js';
@@ -45,7 +38,7 @@ function setup() {
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-  return { store, create, call };
+  return { app, store, create, call };
 }
 
 describe('premium shop', () => {
@@ -82,7 +75,7 @@ describe('premium shop', () => {
   });
 
   it('respects levels and gives exactly the power of the twin', async () => {
-    const { store, create, call } = setup();
+    const { app, store, create, call } = setup();
     const { token, bud } = await create();
     await store.grantGems(bud.slug, 5000);
     const res = await call('POST', '/v1/premium/premium-kij-smoka/buy', token);
@@ -96,10 +89,7 @@ describe('premium shop', () => {
       (await call('PUT', '/v1/buds/me/equipment/held', token, { itemId: 'premium-kij-neon' }))
         .status,
     ).toBe(200);
-    const enemy = CONTENT.enemies.find((e) => e.district === 'wyspa-startowa')!;
-    const fight = (await (
-      await call('POST', '/v1/fights', token, { enemyId: enemy.id })
-    ).json()) as FightResponse;
-    expect(fight.fight.bud.weapon).toBe(catalogItem('palka-teleskopowa')!.weapon);
+    const fighter = await app.fights.fighterOf((await store.getBySlug(bud.slug))!, true);
+    expect(fighter.weapon).toBe(catalogItem('palka-teleskopowa')!.weapon);
   });
 });

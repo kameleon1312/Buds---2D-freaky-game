@@ -151,7 +151,7 @@ następnej rangi.
   - po udanym napadzie dystrykt dostaje 12 h tarczy;
   - dziennie można zacząć 5 napadów;
   - nieudany napad na ten sam dystrykt można powtórzyć po 60 minutach.
-- **Walka:** to pojedynek z zapisanym zawodnikiem właściciela (sprzęt, umiejętności i atuty, bez napojów), wzmocnionym
+- **Walka:** zapisany zawodnik właściciela wychodzi na ulicę jako cień i walczy z napastnikiem (`docs/walka.md`) (sprzęt, umiejętności i atuty, bez napojów), wzmocnionym
   **obroną dystryktu**:
   - obrona = ⌊√prestiż⌋ %, najwyżej 60% (od prestiżu 3600);
   - tyle procent zdrowia obrońca dostaje dodatkowo, a do tego +1 pancerza za każde 6%.
@@ -201,7 +201,7 @@ następnej rangi.
 - **Serwer:**
   - `apps/api/src/land.ts`: `/v1/land`, `/v1/districts/:route`, `name`, `build`, `buildings/:id/upgrade`, `collect`,
     `clear`, `sell`, `raids`, `top`;
-  - koniec napadu w `app.ts`: przeciwnik pojedynku `raid-<działka>`, `finishRaid`;
+  - koniec napadu w `fights.ts` `finishShadow`: przeciwnik `raid-<działka>`, `finishRaid`;
   - migracje:
     - `20261024000000_lands.sql`: `bud_lands` z unikalną działką, `create_land`, `save_land`, `save_raid`;
     - `20261026000000_lands_v2.sql`: zamyka dystrykty z pierwszego planu (etapy, stare działki) i zwraca ich cenę

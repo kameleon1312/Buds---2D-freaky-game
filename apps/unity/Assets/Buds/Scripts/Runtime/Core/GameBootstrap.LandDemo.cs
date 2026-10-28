@@ -127,22 +127,19 @@ namespace Buds.Core
                 return;
             }
             ui.ChooseAccept();
-            await Until(() => fightScreen.IsOpen || ui.DialogOpen, 10);
-            if (!fightScreen.IsOpen)
+            var defender = await ShadowComes(10);
+            if (!defender)
             {
                 Debug.Log("[Land] the raid was turned down (rest after a try, or a shield)");
-                ui.HideDialog();
+                if (ui.DialogOpen) ui.HideDialog();
                 await OtherStyles(shot, Until, Outside);
                 return;
             }
-            await Awaitable.WaitForSecondsAsync(1.6f);
             await shot("d14-napad.png");
-            for (var turn = 0; turn < 40 && currentFight is { status: "active" }; turn++)
-                await FightMove(fightScreen.MoveAt(turn % 3 == 2 ? 0 : 1) ?? fightScreen.MoveAt(0));
-            await Awaitable.WaitForSecondsAsync(0.4f);
+            var outcome = await FightIt(() => !defender || defender.Down, 60, shot, "d15-walka");
+            await Awaitable.WaitForSecondsAsync(1.2f);
             await shot("d15-wynik.png");
-            Debug.Log($"[Land] raid {currentFight?.status}, loot: {Land.LootText(lastRaid?.loot) ?? "none"}");
-            CloseFight();
+            Debug.Log($"[Land] raid {outcome}");
             await Awaitable.WaitForSecondsAsync(1.5f);
             await shot("d16-po-napadzie.png");
             await OtherStyles(shot, Until, Outside);

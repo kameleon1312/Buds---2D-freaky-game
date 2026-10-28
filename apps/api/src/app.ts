@@ -33,17 +33,10 @@ import {
   portById,
   type FerryResponse,
   MAX_BUDS_PER_ACCOUNT,
-  REMATCH_SECONDS,
   budFighter,
-  enemyFighter,
-  fightMoveRequestSchema,
   fightViewSchema,
-  fightXp,
   levelOf,
   newFight,
-  playTurn,
-  rollLoot,
-  startFightRequestSchema,
   type FightResponse,
   type FightState,
   SLOTS,
@@ -89,16 +82,23 @@ import {
   type LeaderboardResponse,
   type MeResponse,
   type PairCodeResponse,
-  pvpOpponentOf,
-  raidPlotOf,
   turfAt,
   turfOf,
   type BudRecord,
   type Fighter,
+  type AbilityId,
+  type MovesResponse,
+  MOVE_UPGRADE_PROBLEM_TEXT,
+  kitProblem,
+  loadoutRequestSchema,
+  moveUpgradeProblem,
+  movesView,
+  rankCost,
+  resolveKit,
+  weaponKindSchema,
 } from '@buds/shared';
 import type { Env } from './env.js';
 import { randomInt } from 'node:crypto';
-import { z } from 'zod';
 import { createRemoteJWKSet, type JWTVerifyGetKey } from 'jose';
 import { optionalUser, requireAuth, type AuthKeys, type AuthVariables } from './middleware/auth.js';
 import {
@@ -109,6 +109,7 @@ import {
 } from './middleware/player.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { budSheetPng, budSheetPngCached } from './png.js';
+import { createFights } from './fights.js';
 import { createLand } from './land.js';
 import { createRivalry } from './rivalry.js';
 import { makePairCode } from './store/slug.js';
@@ -492,52 +493,107 @@ export function createApp(
     return c.json<BuyResponse>({ itemId: item.id, coins: wallet.coins, gems: result.gems });
   });
 
-  // ---------- duels (pojedynki), resolved here one turn at a time ----------
+  // ---------- fights (walka.md): run live (live.ts, brawl.ts), started here for rivals and raids ----------
 
-  const fightIdSchema = z.string().uuid();
   /** What clients see: everything but the RNG state. */
   const view = (id: string, s: FightState) => ({
     ...fightViewSchema.omit({ id: true }).parse(s),
     id,
   });
 
-  /** Starts a duel with an opponent of the districts; an unfinished earlier duel counts as fled. */
-  app.post('/v1/fights', requirePlayer(store), async (c) => {
-    const input = startFightRequestSchema.safeParse(await c.req.json().catch(() => null));
-    const enemy = input.success
-      ? content.enemies.find((e) => e.id === input.data.enemyId)
-      : undefined;
-    if (!enemy) throw new HTTPException(404, { message: 'Nie ma takiego przeciwnika' });
-    const bud = c.get('bud');
-    const last = await store.lastWin(bud.slug, enemy.id);
-    const wait = last ? REMATCH_SECONDS - Math.floor((Date.now() - last.getTime()) / 1000) : 0;
-    if (wait > 0) {
-      return c.json<ApiError>(
-        {
-          error: {
-            code: 'resting',
-            message: `${enemy.name} dochodzi do siebie. Wróć za ${wait} s.`,
-          },
-        },
-        409,
-      );
-    }
-    await rivalry.abandon(bud.slug);
-    const spot = Math.min(input.data!.spot ?? 0, enemy.spots.length - 1);
-    return startFight(c, bud, enemy.id, await fighterOf(bud, true), enemyFighter(enemy), spot);
-  });
-
-  /** The bud's fighter as the server trusts it: worn gear, skills and perks, and running drinks if asked. */
+  /** The bud's fighter as the server trusts it: worn gear, skills and perks, its loadout, and running drinks if asked. */
   const fighterOf = async (bud: BudRecord, withDrinks: boolean) => {
     const slots = await equipmentOf(bud.slug);
     const stats = await statsOf(bud.slug, slots);
     const weapon = slots.held ? catalogItem(slots.held, catalog) : undefined;
-    const [ranks, buffs] = await Promise.all([
+    const [ranks, buffs, loadouts, moveRanks] = await Promise.all([
       ranksOf(bud.slug),
       withDrinks ? buffsOf(bud.slug) : Promise.resolve([]),
+      store.loadouts(bud.slug),
+      store.moveRanks(bud.slug),
     ]);
-    return budFighter(bud.name, bud.xp, stats, weapon, { perks: perksFor(ranks), buffs });
+    const kind = weapon?.weapon ?? 'piesci';
+    const perks = perksFor(ranks);
+    // the saved loadout as far as it still fits (a new weapon, a reset skill: the weapon's own for the rest)
+    const kit = resolveKit(kind, loadouts[kind], {
+      level: levelFromXp(bud.xp).level,
+      skills: ranks,
+      perks,
+    });
+    return budFighter(bud.name, bud.xp, stats, weapon, { perks, buffs, kit, ranks: moveRanks });
   };
+
+  // ---------- ciosy: the bud's own fight buttons and their upgrades (loadout.ts) ----------
+
+  /** The Ciosy screen for the weapon in hand (or another kind, ?weapon=). */
+  const movesOf = async (bud: BudRecord, weaponKind?: string): Promise<MovesResponse> => {
+    const slots = await equipmentOf(bud.slug);
+    const held = slots.held ? catalogItem(slots.held, catalog) : undefined;
+    const parsed = weaponKindSchema.safeParse(weaponKind);
+    const kind = parsed.success ? parsed.data : (held?.weapon ?? 'piesci');
+    const [ranks, loadouts, moveRanks, wallet] = await Promise.all([
+      ranksOf(bud.slug),
+      store.loadouts(bud.slug),
+      store.moveRanks(bud.slug),
+      store.wallet(bud.slug),
+    ]);
+    const ctx = { level: levelFromXp(bud.xp).level, skills: ranks, perks: perksFor(ranks) };
+    return movesView(kind, resolveKit(kind, loadouts[kind], ctx), moveRanks, ctx, wallet.coins);
+  };
+
+  app.get('/v1/buds/me/moves', requirePlayer(store), async (c) =>
+    c.json<MovesResponse>(await movesOf(c.get('bud'), c.req.query('weapon'))),
+  );
+
+  /** Saves the five buttons for a weapon kind: every move must fit its button and be open. */
+  app.put('/v1/buds/me/moves/loadout', requirePlayer(store), async (c) => {
+    const input = loadoutRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success)
+      return c.json<ApiError>(
+        { error: { code: 'invalid_input', message: 'Wybierz pięć ciosów' } },
+        400,
+      );
+    const bud = c.get('bud');
+    const ranks = await ranksOf(bud.slug);
+    const ctx = { level: levelFromXp(bud.xp).level, skills: ranks, perks: perksFor(ranks) };
+    const problem = kitProblem(input.data.weapon, input.data.kit, ctx);
+    if (problem) return c.json<ApiError>({ error: { code: 'invalid_kit', message: problem } }, 409);
+    await store.setLoadout(bud.slug, input.data.weapon, input.data.kit);
+    return c.json<MovesResponse>(await movesOf(bud, input.data.weapon));
+  });
+
+  /** One upgrade of a move, for coins and from a level (loadout.ts rankCost, rankLevel), atomically. */
+  app.post('/v1/buds/me/moves/:id/upgrade', requirePlayer(store), async (c) => {
+    const id = c.req.param('id');
+    const bud = c.get('bud');
+    const [ranks, moveRanks, wallet] = await Promise.all([
+      ranksOf(bud.slug),
+      store.moveRanks(bud.slug),
+      store.wallet(bud.slug),
+    ]);
+    const ctx = { level: levelFromXp(bud.xp).level, skills: ranks, perks: perksFor(ranks) };
+    const rank = moveRanks[id] ?? 0;
+    const problem = moveUpgradeProblem(id, rank, ctx, wallet.coins);
+    if (problem)
+      return c.json<ApiError>(
+        { error: { code: problem, message: MOVE_UPGRADE_PROBLEM_TEXT[problem] } },
+        problem === 'unknown' ? 404 : 409,
+      );
+    const price = rankCost(id as AbilityId, rank + 1);
+    const done = await store.upgradeMove(bud.slug, id, rank, price);
+    if (done.status !== 'ok')
+      return c.json<ApiError>(
+        {
+          error: {
+            code: done.status === 'poor' ? 'poor' : 'busy',
+            message:
+              done.status === 'poor' ? MOVE_UPGRADE_PROBLEM_TEXT.poor : 'Spróbuj jeszcze raz.',
+          },
+        },
+        409,
+      );
+    return c.json<MovesResponse>(await movesOf(bud, c.req.query('weapon')));
+  });
 
   const startFight = async (
     c: Context,
@@ -554,143 +610,6 @@ export function createApp(
       201,
     );
   };
-
-  /** One turn: the bud's move, the opponent's answer. A win grants XP, coins and maybe loot, once. */
-  app.post('/v1/fights/:id/move', requirePlayer(store), async (c) => {
-    const id = fightIdSchema.safeParse(c.req.param('id'));
-    const bud = c.get('bud');
-    const before = id.success ? await store.fight(bud.slug, id.data) : null;
-    if (!id.success || !before)
-      throw new HTTPException(404, { message: 'Nie ma takiego pojedynku' });
-    if (before.status !== 'active') {
-      return c.json<ApiError>(
-        { error: { code: 'fight_over', message: 'Ten pojedynek już się skończył' } },
-        409,
-      );
-    }
-    const input = fightMoveRequestSchema.safeParse(await c.req.json().catch(() => null));
-    if (!input.success || !before.bud.moves.includes(input.data.move)) {
-      return c.json<ApiError>(
-        { error: { code: 'invalid_move', message: 'Nie masz takiego ruchu' } },
-        400,
-      );
-    }
-    const { state, events } = playTurn(before, input.data.move);
-    const conflict = () =>
-      c.json<ApiError>({ error: { code: 'fight_busy', message: 'Ruch już został wykonany' } }, 409);
-
-    const done = {
-      fight: view(id.data, state),
-      events,
-      reward: null,
-      influence: null,
-      pvp: null,
-      raid: null,
-    };
-    if (state.status === 'active') {
-      if (!(await store.saveTurn(bud.slug, id.data, before.turn, state))) return conflict();
-      return c.json<FightResponse>(done);
-    }
-    // against another bud: no XP or loot, the rating moves and the day's first wins pay coins
-    if (pvpOpponentOf(state.enemyId)) {
-      if (!(await store.finishFight(bud.slug, id.data, before.turn, state, state.status, 0, 0)))
-        return conflict();
-      const { pvp, reward } = await rivalry.finishPvp(bud, state);
-      return c.json<FightResponse>({ ...done, reward, pvp });
-    }
-    // a raid on another bud's district: loot (or the district's log) instead of XP
-    if (raidPlotOf(state.enemyId)) {
-      if (!(await store.finishFight(bud.slug, id.data, before.turn, state, state.status, 0, 0)))
-        return conflict();
-      return c.json<FightResponse>({ ...done, raid: await land.finishRaid(bud, state) });
-    }
-    if (state.status === 'lost') {
-      if (!(await store.finishFight(bud.slug, id.data, before.turn, state, 'lost', 0, 0)))
-        return conflict();
-      return c.json<FightResponse>(done);
-    }
-
-    // won: XP for the level gap, coins with luck, loot by the opponent's rarity table
-    const enemy = content.enemies.find((e) => e.id === state.enemyId)!;
-    const levelBefore = levelFromXp(bud.xp).level;
-    const xpGained = fightXp(enemy, levelBefore);
-    const owned = new Set((await store.items(bud.slug)).map((i) => i.itemId));
-    const loot = rollLoot(enemy, state.bud.luck, catalog, owned, state.rng, {
-      perks: state.bud.perks,
-    });
-    const result = await store.finishFight(
-      bud.slug,
-      id.data,
-      before.turn,
-      state,
-      'won',
-      xpGained,
-      loot.coins,
-    );
-    if (!result) return conflict();
-    if (loot.itemId) await store.grantItem(bud.slug, loot.itemId, 'reward');
-    if (loot.drink) await store.grantConsumable(bud.slug, loot.drink, 1);
-    const level = levelFromXp(result.xp).level;
-    const spot = enemy.spots[Math.min(state.spot ?? 0, enemy.spots.length - 1)]!;
-    const influence = await rivalry.earn(
-      bud.slug,
-      turfAt(enemy.district, spot.x, spot.y),
-      'duel',
-      'zwyciestwa',
-      enemy.boss ? 2 : 1,
-    );
-    return c.json<FightResponse>({
-      fight: view(id.data, state),
-      events,
-      influence,
-      pvp: null,
-      raid: null,
-      reward: {
-        xpGained,
-        xp: result.xp,
-        level,
-        levelUp: level > levelBefore,
-        coinsGained: loot.coins,
-        coins: result.coins,
-        item: loot.itemId,
-        drink: loot.drink,
-      },
-    });
-  });
-
-  /** Running away: no reward, no penalty. */
-  app.post('/v1/fights/:id/flee', requirePlayer(store), async (c) => {
-    const id = fightIdSchema.safeParse(c.req.param('id'));
-    const bud = c.get('bud');
-    const before = id.success ? await store.fight(bud.slug, id.data) : null;
-    if (!id.success || !before)
-      throw new HTTPException(404, { message: 'Nie ma takiego pojedynku' });
-    const opponent = pvpOpponentOf(before.enemyId);
-    let pvp: FightResponse['pvp'] = null;
-    let raid: FightResponse['raid'] = null;
-    if (
-      before.status === 'active' &&
-      (await store.finishFight(bud.slug, id.data, before.turn, before, 'fled', 0, 0)) &&
-      before.turn > 0
-    ) {
-      // running from another bud after the first exchange counts as a loss (no dodging a bad rating)
-      if (opponent)
-        pvp = await rivalry.finishPvp(bud, { ...before, status: 'lost' }).then((r) => r.pvp);
-      if (raidPlotOf(before.enemyId))
-        raid = await land.finishRaid(bud, { ...before, status: 'lost' });
-    }
-    return c.json<FightResponse>({
-      fight: view(id.data, {
-        ...before,
-        status: before.status === 'active' ? 'fled' : before.status,
-      }),
-      events: [],
-      reward: null,
-      influence: null,
-      pvp,
-      raid,
-    });
-  });
 
   // ---------- accounts (signed in on the website) ----------
 
@@ -1178,5 +1097,7 @@ export function createApp(
     return c.json<ApiError>({ error: { code: 'internal', message: 'Internal server error' } }, 500);
   });
 
-  return app;
+  /** The ends of live fights (fights.ts), for the live server attached to the same process. */
+  const fights = createFights({ store, catalog, content, rivalry, land, fighterOf });
+  return Object.assign(app, { fights });
 }

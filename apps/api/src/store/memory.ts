@@ -13,6 +13,8 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const owned = new Map<string, OwnedItem[]>(); // slug -> granted items
   const quests = new Map<string, Set<string>>(); // slug -> completed quest ids
   const skills = new Map<string, Map<string, number>>(); // slug -> skill -> rank
+  const loadouts = new Map<string, Map<string, (string | null)[]>>(); // slug -> weapon -> kit
+  const moveRanks = new Map<string, Map<string, number>>(); // slug -> move -> rank
   const caches = new Map<string, Set<string>>(); // slug -> opened cache ids
   const coins = new Map<string, number>(); // slug -> coin balance
   const gems = new Map<string, number>(); // slug -> gem balance
@@ -100,6 +102,32 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
         id,
         rank,
       }));
+    },
+
+    async loadouts(slug) {
+      return Object.fromEntries(loadouts.get(slug) ?? new Map());
+    },
+
+    async setLoadout(slug, weapon, kit) {
+      const mine = loadouts.get(slug) ?? new Map<string, (string | null)[]>();
+      mine.set(weapon, [...kit]);
+      loadouts.set(slug, mine);
+    },
+
+    async moveRanks(slug) {
+      return Object.fromEntries(moveRanks.get(slug) ?? new Map());
+    },
+
+    async upgradeMove(slug, moveId, from, price) {
+      const ranks = moveRanks.get(slug) ?? new Map<string, number>();
+      const rank = ranks.get(moveId) ?? 0;
+      const balance = coins.get(slug) ?? 0;
+      if (rank !== from || rank >= 3) return { status: 'race', coins: balance, rank };
+      if (balance < price) return { status: 'poor', coins: balance, rank };
+      coins.set(slug, balance - price);
+      ranks.set(moveId, rank + 1);
+      moveRanks.set(slug, ranks);
+      return { status: 'ok', coins: balance - price, rank: rank + 1 };
     },
 
     async upgradeSkill(slug, skillId, points, maxRank) {
@@ -217,6 +245,15 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
       bud.xp += Math.max(0, xp);
       coins.set(slug, (coins.get(slug) ?? 0) + Math.max(0, gained));
       return { xp: bud.xp, coins: coins.get(slug)! };
+    },
+
+    async knockout(victim, killer, percent, max) {
+      const balance = coins.get(victim) ?? 0;
+      const lost = Math.max(0, Math.min(max, Math.floor((balance * percent) / 100)));
+      coins.set(victim, balance - lost);
+      if (killer && killer !== victim && buds.has(killer))
+        coins.set(killer, (coins.get(killer) ?? 0) + lost);
+      return { lost, coins: balance - lost };
     },
 
     async lastWin(slug, enemyId) {

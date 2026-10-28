@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Buds.Api;
 using Buds.Quests;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,6 +41,8 @@ namespace Buds.UI
         public int QuestsDone;
         public int QuestsTotal;
         public readonly List<(string name, int level, bool open)> Districts = new();
+        /// <summary>The Ciosy screen from the server (GET /v1/buds/me/moves), null until it came.</summary>
+        public MovesResponseDto Moves;
     }
 
     /// <summary>
@@ -74,6 +77,8 @@ namespace Buds.UI
         readonly Action onLink;
         readonly Action onLogout;
         readonly Action onEditLook;
+        readonly Action<string, string[]> onLoadout;
+        readonly Action<string> onMoveUpgrade;
         Button editLookButton;
         Button logoutButton;
         Text logoutLabel;
@@ -114,8 +119,6 @@ namespace Buds.UI
 
         // moves
         Text movesTitle;
-        Text movesPerks;
-        readonly List<(Image card, Text now, Text next, Text needLevel, Image levelChip, Text needSkill, Image skillChip, Image arrow)> moveRows = new();
 
         // drinks
         RectTransform drinkGrid;
@@ -143,8 +146,11 @@ namespace Buds.UI
         public bool IsOpen => root.activeSelf;
 
         public BudPanel(Transform canvas, QuestContent content, Action<string> onUpgrade, Action<string, string> onEquip,
-            Action<string> onBuy, Action<string> onDrink, Action onLink, Action onLogout, Action onEditLook)
+            Action<string> onBuy, Action<string> onDrink, Action onLink, Action onLogout, Action onEditLook,
+            Action<string, string[]> onLoadout, Action<string> onMoveUpgrade)
         {
+            this.onLoadout = onLoadout;
+            this.onMoveUpgrade = onMoveUpgrade;
             this.onLink = onLink;
             this.onLogout = onLogout;
             this.onEditLook = onEditLook;
@@ -721,112 +727,285 @@ namespace Buds.UI
             }
         }
 
-        // ---------- moves: what the weapon in hand fights with, and the stronger versions still to learn ----------
+        // ---------- ciosy: the bud's own five fight buttons (loadout.ts), what can go on each, and the upgrades ----------
 
-        const float MoveRowH = 96, MoveRowStep = 104;
+        const float SlotCardW = 204, SlotCardStep = 218, SlotCardH = 150;
+        const float OptionW = 352, OptionStepX = 362, OptionH = 136, OptionStepY = 142;
+        const int OptionCards = 6;
+
+        sealed class SlotCard
+        {
+            public Image Face;
+            public Text Kind;
+            public Image Icon;
+            public Text Name;
+            public Image[] Pips;
+        }
+
+        sealed class OptionCard
+        {
+            public RectTransform Root;
+            public Image Face;
+            public Image Icon;
+            public Text Name;
+            public Text Blurb;
+            public Image[] Pips;
+            public Button Equip;
+            public Text EquipLabel;
+            public Button Upgrade;
+            public Text UpgradeLabel;
+            public Image Chip;
+            public Text ChipText;
+            public string Id;
+        }
+
+        readonly SlotCard[] slotCards = new SlotCard[5];
+        readonly OptionCard[] optionCards = new OptionCard[OptionCards];
+        Text optionsTitle;
+        Text movesCoins;
+        Text movesError;
+        int movesSlot = 1;
 
         void BuildMoves(RectTransform page)
         {
             movesTitle = UiKit.Label("Title", page, "", 28, UiKit.Ink, true, TextAnchor.UpperLeft);
-            UiKit.Place(movesTitle.rectTransform, new Vector2(0, 1), Vector2.zero, new Vector2(1076, 40), new Vector2(0, 1));
-            var note = UiKit.Label("Note", page, "", 17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-            note.text = "Każdy cios ma mocniejszą wersję. Uczysz się jej z poziomem i umiejętnością broni (trening i sprzęt też się liczą).";
-            UiKit.Place(note.rectTransform, new Vector2(0, 1), new Vector2(0, -40), new Vector2(1076, 26), new Vector2(0, 1));
-            for (var i = 0; i < 4; i++)
+            UiKit.Place(movesTitle.rectTransform, new Vector2(0, 1), Vector2.zero, new Vector2(760, 40), new Vector2(0, 1));
+            movesCoins = UiKit.Label("Coins", page, "", 24, UiKit.Gold600, true, TextAnchor.UpperRight);
+            UiKit.Place(movesCoins.rectTransform, new Vector2(1, 1), Vector2.zero, new Vector2(300, 40), new Vector2(1, 1));
+            var note = UiKit.Label("Note", page,
+                "Wybierz przycisk, potem cios, który na nim będzie. Każdy cios ulepszysz trzy razy za monety z gry (od poziomu).",
+                17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+            UiKit.Place(note.rectTransform, new Vector2(0, 1), new Vector2(0, -38), new Vector2(1076, 26), new Vector2(0, 1));
+
+            // the five buttons, left to right as on the fight pad: basic, two abilities, guard, ultimate
+            for (var i = 0; i < slotCards.Length; i++)
             {
-                var card = UiKit.OutlinedBox("Move" + i, page, UiKit.Paper300, UiKit.RadiusM);
-                UiKit.Place((RectTransform)card.transform.parent, new Vector2(0, 1), new Vector2(0, -74 - i * MoveRowStep),
-                    new Vector2(1076, MoveRowH), new Vector2(0, 1));
-                // the move it has now | an arrow | the stronger one | what it takes, as two chips on the right
-                var now = UiKit.Label("Now", card.transform, "", 24, UiKit.Ink, true, TextAnchor.MiddleLeft);
-                UiKit.Place(now.rectTransform, new Vector2(0, 0.5f), new Vector2(18, 0), new Vector2(330, MoveRowH - 16), new Vector2(0, 0.5f));
-                now.lineSpacing = 0.95f;
-                now.resizeTextForBestFit = true;
-                now.resizeTextMinSize = 14;
-                now.resizeTextMaxSize = 24;
-                var arrow = UiKit.Rect("Arrow", card.transform).gameObject.AddComponent<Image>();
-                arrow.sprite = UiKit.Arrow;
-                arrow.color = UiKit.InkSoft;
-                arrow.raycastTarget = false;
-                UiKit.Place(arrow.rectTransform, new Vector2(0, 0.5f), new Vector2(358, 0), new Vector2(34, 34), new Vector2(0, 0.5f));
-                var next = UiKit.Label("Next", card.transform, "", 24, UiKit.Ink, true, TextAnchor.MiddleLeft);
-                UiKit.Place(next.rectTransform, new Vector2(0, 0.5f), new Vector2(408, 0), new Vector2(370, MoveRowH - 16), new Vector2(0, 0.5f));
-                next.lineSpacing = 0.95f;
-                next.resizeTextForBestFit = true;
-                next.resizeTextMinSize = 14;
-                next.resizeTextMaxSize = 24;
-                var levelChip = UiKit.OutlinedBox("Level", card.transform, UiKit.Surface700, 999);
-                UiKit.Place((RectTransform)levelChip.transform.parent, new Vector2(1, 0.5f), new Vector2(-180, 0), new Vector2(118, 40),
-                    new Vector2(1, 0.5f));
-                var needLevel = UiKit.Label("Text", levelChip.transform, "", 18, UiKit.TextOnDark, true);
-                UiKit.Stretch(needLevel.rectTransform, 6, 1, 6, 0);
-                var skillChip = UiKit.OutlinedBox("Skill", card.transform, UiKit.Surface700, 999);
-                UiKit.Place((RectTransform)skillChip.transform.parent, new Vector2(1, 0.5f), new Vector2(-16, 0), new Vector2(156, 40),
-                    new Vector2(1, 0.5f));
-                var needSkill = UiKit.Label("Text", skillChip.transform, "", 18, UiKit.TextOnDark, true);
-                UiKit.Stretch(needSkill.rectTransform, 6, 1, 6, 0);
-                needSkill.resizeTextForBestFit = true;
-                needSkill.resizeTextMinSize = 12;
-                needSkill.resizeTextMaxSize = 18;
-                moveRows.Add((card, now, next, needLevel, levelChip, needSkill, skillChip, arrow));
+                var index = i;
+                var face = UiKit.OutlinedBox("Slot" + i, page, UiKit.Paper300, UiKit.RadiusM);
+                var rt = (RectTransform)face.transform.parent;
+                UiKit.Place(rt, new Vector2(0, 1), new Vector2(i * SlotCardStep, -70), new Vector2(SlotCardW, SlotCardH), new Vector2(0, 1));
+                face.raycastTarget = true;
+                var tap = rt.gameObject.AddComponent<Button>();
+                tap.targetGraphic = face;
+                tap.transition = Selectable.Transition.None;
+                tap.onClick.AddListener(() =>
+                {
+                    movesSlot = index;
+                    RefreshMoves();
+                });
+                var kind = UiKit.Label("Kind", face.transform, "", 15, UiKit.InkSoft, true);
+                UiKit.Place(kind.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -8), new Vector2(SlotCardW - 16, 20), new Vector2(0.5f, 1));
+                var disc = UiKit.Panel("Disc", face.transform, UiKit.Surface800);
+                disc.sprite = UiKit.Circle(96);
+                UiKit.Place(disc.rectTransform, new Vector2(0.5f, 1), new Vector2(0, -32), new Vector2(66, 66), new Vector2(0.5f, 1));
+                var icon = UiKit.Rect("Icon", disc.transform).gameObject.AddComponent<Image>();
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                UiKit.Stretch(icon.rectTransform, 9);
+                var name = UiKit.Label("Name", face.transform, "", 18, UiKit.Ink, true);
+                UiKit.Place(name.rectTransform, new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(SlotCardW - 14, 24), new Vector2(0.5f, 0));
+                name.resizeTextForBestFit = true;
+                name.resizeTextMinSize = 12;
+                name.resizeTextMaxSize = 18;
+                slotCards[i] = new SlotCard { Face = face, Kind = kind, Icon = icon, Name = name, Pips = Pips(face.transform, 10) };
             }
-            movesPerks = UiKit.Label("Perks", page, "", 17, UiKit.InkSoft, false, TextAnchor.UpperLeft);
-            UiKit.Place(movesPerks.rectTransform, new Vector2(0, 1), new Vector2(0, -74 - 4 * MoveRowStep + 2), new Vector2(1076, 50),
-                new Vector2(0, 1));
-            movesPerks.verticalOverflow = VerticalWrapMode.Truncate;
+
+            optionsTitle = UiKit.Label("Options", page, "", 22, UiKit.Ink, true, TextAnchor.UpperLeft);
+            UiKit.Place(optionsTitle.rectTransform, new Vector2(0, 1), new Vector2(0, -232), new Vector2(700, 30), new Vector2(0, 1));
+            movesError = UiKit.Label("Error", page, "", 17, UiKit.Alert700, true, TextAnchor.UpperRight);
+            UiKit.Place(movesError.rectTransform, new Vector2(1, 1), new Vector2(0, -236), new Vector2(380, 26), new Vector2(1, 1));
+
+            for (var i = 0; i < optionCards.Length; i++)
+            {
+                var face = UiKit.OutlinedBox("Option" + i, page, UiKit.Paper100, UiKit.RadiusM);
+                var rt = (RectTransform)face.transform.parent;
+                UiKit.Place(rt, new Vector2(0, 1), new Vector2((i % 3) * OptionStepX, -268 - (i / 3) * OptionStepY), new Vector2(OptionW, OptionH),
+                    new Vector2(0, 1));
+                var disc = UiKit.Panel("Disc", face.transform, UiKit.Surface800);
+                disc.sprite = UiKit.Circle(96);
+                UiKit.Place(disc.rectTransform, new Vector2(0, 1), new Vector2(12, -12), new Vector2(62, 62), new Vector2(0, 1));
+                var icon = UiKit.Rect("Icon", disc.transform).gameObject.AddComponent<Image>();
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                UiKit.Stretch(icon.rectTransform, 8);
+                var name = UiKit.Label("Name", face.transform, "", 21, UiKit.Ink, true, TextAnchor.UpperLeft);
+                UiKit.Place(name.rectTransform, new Vector2(0, 1), new Vector2(86, -10), new Vector2(OptionW - 96, 26), new Vector2(0, 1));
+                var blurb = UiKit.Label("Blurb", face.transform, "", 15, UiKit.InkSoft, false, TextAnchor.UpperLeft);
+                UiKit.Place(blurb.rectTransform, new Vector2(0, 1), new Vector2(86, -38), new Vector2(OptionW - 96, 38), new Vector2(0, 1));
+                blurb.lineSpacing = 0.9f;
+                blurb.verticalOverflow = VerticalWrapMode.Truncate;
+                // a long description gets smaller type instead of breaking a number off its unit
+                blurb.resizeTextForBestFit = true;
+                blurb.resizeTextMinSize = 12;
+                blurb.resizeTextMaxSize = 15;
+                var pips = Pips(face.transform, 0);
+                foreach (var p in pips)
+                {
+                    var prt = p.rectTransform;
+                    prt.anchorMin = prt.anchorMax = new Vector2(0, 1);
+                    prt.anchoredPosition = new Vector2(30 + System.Array.IndexOf(pips, p) * 16, -86);
+                }
+                var card = new OptionCard { Root = rt, Face = face, Icon = icon, Name = name, Blurb = blurb, Pips = pips };
+                card.Equip = UiKit.Button("Equip", face.transform, "Załóż", new Vector2(120, 46), () => EquipMove(card.Id), UiKit.Tone.Rep, 20);
+                UiKit.Place((RectTransform)card.Equip.transform, new Vector2(1, 0), new Vector2(-150, 12), new Vector2(120, 46), new Vector2(1, 0));
+                card.EquipLabel = card.Equip.GetComponentInChildren<Text>();
+                card.Upgrade = UiKit.Button("Upgrade", face.transform, "Ulepsz", new Vector2(128, 46), () => onMoveUpgrade(card.Id), UiKit.Tone.Buds, 18);
+                UiKit.Place((RectTransform)card.Upgrade.transform, new Vector2(1, 0), new Vector2(-12, 12), new Vector2(128, 46), new Vector2(1, 0));
+                card.UpgradeLabel = card.Upgrade.GetComponentInChildren<Text>();
+                card.Chip = UiKit.OutlinedBox("Chip", face.transform, UiKit.Surface700, 999);
+                UiKit.Place((RectTransform)card.Chip.transform.parent, new Vector2(1, 0), new Vector2(-12, 14), new Vector2(200, 40), new Vector2(1, 0));
+                card.ChipText = UiKit.Label("Text", card.Chip.transform, "", 15, UiKit.TextOnDark, true);
+                UiKit.Stretch(card.ChipText.rectTransform, 8, 1, 8, 0);
+                card.ChipText.resizeTextForBestFit = true;
+                card.ChipText.resizeTextMinSize = 11;
+                card.ChipText.resizeTextMaxSize = 15;
+                optionCards[i] = card;
+            }
         }
 
-        static string ShortSkill(string id) => id.Length > 0 ? char.ToUpperInvariant(id[0]) + id.Substring(1) : id;
+        /// <summary>Three upgrade pips (gold with an ink edge), centred along the bottom of a card.</summary>
+        static Image[] Pips(Transform parent, float bottom)
+        {
+            var pips = new Image[3];
+            for (var k = 0; k < 3; k++)
+            {
+                var edge = UiKit.Panel("Pip", parent, UiKit.Outline);
+                edge.sprite = UiKit.Circle(16);
+                var rt = edge.rectTransform;
+                rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0);
+                rt.sizeDelta = new Vector2(13, 13);
+                rt.anchoredPosition = new Vector2((k - 1) * 17, bottom + 6.5f);
+                var gold = UiKit.Panel("Gold", edge.transform, UiKit.Gold400);
+                gold.sprite = UiKit.Circle(16);
+                UiKit.Stretch(gold.rectTransform, 2.5f);
+                pips[k] = edge;
+            }
+            return pips;
+        }
+
+        static void ShowPips(Image[] pips, int rank)
+        {
+            for (var k = 0; k < pips.Length; k++)
+            {
+                // bought: gold; still to buy: an empty ring
+                pips[k].transform.GetChild(0).GetComponent<Image>().color = k < rank ? UiKit.Gold400 : UiKit.Paper100;
+            }
+        }
+
+        static string WeaponName(string weapon) => weapon switch
+        {
+            "kij" => "kij",
+            "procarka" => "proca",
+            "spray" => "spray",
+            "mikrofon" => "mikrofon",
+            "deska" => "deska",
+            _ => "pięści",
+        };
 
         void RefreshMoves()
         {
-            var item = data.Equipped.TryGetValue("held", out var held) && held != null ? content.Item(held) : null;
-            var weapon = string.IsNullOrEmpty(item?.weapon) ? "piesci" : item.weapon;
-            movesTitle.text = item != null ? $"Ciosy: {item.name}" : "Ciosy: gołe pięści";
-            var stats = Stats;
-            var baseMoves = content.MovesFor(weapon);
-            for (var i = 0; i < moveRows.Count; i++)
+            var m = data.Moves;
+            var has = m != null && m.slots is { Length: 5 } && m.kit is { Length: 5 };
+            movesTitle.text = has ? $"Ciosy: {WeaponName(m.weapon)}" : data.Loading ? "Ciosy: wczytuję…" : "Ciosy";
+            movesCoins.text = has ? $"{m.coins} monet" : "";
+            movesError.text = data.Error ?? "";
+            for (var i = 0; i < slotCards.Length; i++)
             {
-                var (card, now, next, needLevel, levelChip, needSkill, skillChip, arrow) = moveRows[i];
-                var has = i < baseMoves.Length;
-                card.transform.parent.gameObject.SetActive(has);
+                var c = slotCards[i];
+                c.Face.transform.parent.gameObject.SetActive(has);
                 if (!has) continue;
-                var from = content.Move(baseMoves[i]);
-                var u = content.UpgradeOf(baseMoves[i]);
-                var to = u != null ? content.Move(u.to) : null;
-                var learned = u != null && u.Known(data.Level, stats.SkillRank);
-                string Line(MoveData m) => m == null ? "" : $"{m.name}\n<size=16><color=#55514a>{FightScreen.MoveLine(m)}</color></size>";
-                // the move in use is in ink; the one it was (or will be) is muted
-                now.text = Line(from);
-                now.color = learned ? new Color(0.53f, 0.52f, 0.49f) : UiKit.Ink;
-                next.text = to != null ? Line(to) : "";
-                next.color = learned ? UiKit.Buds600 : UiKit.Ink;
-                card.color = learned ? UiKit.Hex("#e9f5d2") : UiKit.Paper300;
-                arrow.gameObject.SetActive(to != null);
-                levelChip.transform.parent.gameObject.SetActive(u != null);
-                skillChip.transform.parent.gameObject.SetActive(u != null);
-                if (u == null) continue;
-                var levelOk = data.Level >= u.level;
-                var skillOk = stats.SkillRank(u.skill) >= u.rank;
-                needLevel.text = $"Poziom {u.level}";
-                levelChip.color = levelOk ? UiKit.Buds600 : UiKit.Surface700;
-                // the short name fits the chip: "Przetrwanie 1", not "Instynkt przetrwania 1"
-                needSkill.text = $"{ShortSkill(u.skill)} {u.rank}";
-                skillChip.color = skillOk ? UiKit.Buds600 : UiKit.Surface700;
+                var id = string.IsNullOrEmpty(m.kit[i]) ? null : m.kit[i];
+                var option = id == null ? null : System.Array.Find(m.slots[i].options, o => o.id == id);
+                c.Kind.text = m.slots[i].name;
+                c.Name.text = option?.name ?? (i == 4 ? "od poz. 5" : "—");
+                c.Icon.sprite = option != null ? Icon("Abilities/" + option.icon) : null;
+                c.Icon.enabled = c.Icon.sprite;
+                ShowPips(c.Pips, option?.rank ?? 0);
+                foreach (var p in c.Pips) p.gameObject.SetActive(option != null);
+                // the button being changed stands out in lime
+                c.Face.color = i == movesSlot ? UiKit.Hex("#e9f5d2") : UiKit.Paper300;
+                ((Image)c.Face.transform.parent.GetComponent<Image>()).color = i == movesSlot ? UiKit.Buds600 : UiKit.Outline;
             }
-            // the special moves skills give on top (rank 3 or 5 abilities)
-            var perks = new List<string>();
-            foreach (var perk in content.perks)
+            optionsTitle.text = has ? $"Do wyboru: {m.slots[movesSlot].name}" : "";
+            var options = has ? m.slots[movesSlot].options : System.Array.Empty<MoveOptionDto>();
+            for (var i = 0; i < optionCards.Length; i++)
             {
-                if (string.IsNullOrEmpty(perk.move)) continue;
-                var mv = content.Move(perk.move);
-                var skillName = Array.Find(content.skills, s => s.id == perk.skill)?.name ?? perk.skill;
-                var owned = data.Perks.Contains(perk.id);
-                perks.Add(owned
-                    ? $"<color=#5d9a12><b>{mv?.name ?? perk.move}</b></color>"
-                    : $"{mv?.name ?? perk.move} ({skillName} {perk.rank})");
+                var card = optionCards[i];
+                var show = i < options.Length;
+                card.Root.gameObject.SetActive(show);
+                if (!show) continue;
+                var o = options[i];
+                card.Id = o.id;
+                var open = string.IsNullOrEmpty(o.need);
+                var on = m.kit[movesSlot] == o.id;
+                // the other ability button already has it: it can't go on both
+                var elsewhere = !on && movesSlot is 1 or 2 && m.kit[movesSlot == 1 ? 2 : 1] == o.id;
+                card.Icon.sprite = Icon("Abilities/" + o.icon);
+                card.Icon.color = open ? Color.white : new Color(1, 1, 1, 0.35f);
+                card.Name.text = o.name;
+                card.Name.color = open ? UiKit.Ink : UiKit.InkSoft;
+                card.Blurb.text = o.rank > 0 ? $"{o.blurb}\nSiła {o.power}%" : o.blurb;
+                ShowPips(card.Pips, o.rank);
+                card.Face.color = on ? UiKit.Hex("#e9f5d2") : open ? UiKit.Paper100 : UiKit.Paper300;
+                // what can be done with it: wear it, upgrade it, or what still opens it
+                var canUpgrade = open && o.next != null && o.next.coins > 0 && data.Level >= o.next.level;
+                card.Equip.gameObject.SetActive(open && !on && !elsewhere);
+                card.EquipLabel.text = "Załóż";
+                card.Upgrade.gameObject.SetActive(canUpgrade);
+                card.Upgrade.interactable = canUpgrade && m.coins >= o.next.coins && !data.Loading;
+                card.UpgradeLabel.text = canUpgrade ? $"Ulepsz {o.next.coins}" : "";
+                var chip = !open ? o.need
+                    : o.next == null || o.next.coins <= 0 ? "W pełni ulepszony"
+                    : !canUpgrade ? $"Ulepszenie od poz. {o.next.level}"
+                    : null;
+                if (on && chip == null && !canUpgrade) chip = "Na przycisku";
+                var chipRoot = card.Chip.transform.parent.gameObject;
+                chipRoot.SetActive(chip != null);
+                card.ChipText.text = chip ?? "";
+                // the chip sits where the upgrade button would be; "Załóż" moves left of it
+                ((RectTransform)chipRoot.transform).anchoredPosition = new Vector2(-12, 14);
+                ((RectTransform)chipRoot.transform).sizeDelta = new Vector2(card.Equip.gameObject.activeSelf ? 180 : 230, 40);
             }
-            movesPerks.text = perks.Count > 0 ? $"<b>Ciosy specjalne z umiejętności, z każdą bronią:</b> {string.Join("  ·  ", perks)}" : "";
+        }
+
+        /// <summary>Puts a move on the selected button and sends the whole loadout (the server checks it).</summary>
+        /// <summary>Selects a button on the Ciosy screen (0 basic … 4 ultimate).</summary>
+        public void SelectMoveSlot(int slot)
+        {
+            movesSlot = Mathf.Clamp(slot, 0, 4);
+            RefreshMoves();
+        }
+
+        void EquipMove(string id)
+        {
+            var m = data.Moves;
+            if (m?.kit == null || m.kit.Length != 5 || string.IsNullOrEmpty(id) || data.Loading) return;
+            var kit = (string[])m.kit.Clone();
+            for (var i = 0; i < kit.Length; i++)
+                if (string.IsNullOrEmpty(kit[i])) kit[i] = null;
+            kit[movesSlot] = id;
+            onLoadout(m.weapon, kit);
+        }
+
+        /// <summary>What a move does in a fight, in a few words: its damage and what it leaves behind.</summary>
+        public static string MoveLine(MoveData m)
+        {
+            if (m == null) return "";
+            var effect = m.effect switch
+            {
+                "guard" => "tarcza",
+                "dodge" => "unik i zryw",
+                "aim" => "pewne trafienia krytyczne",
+                "blind" => "oślepia",
+                "weaken" => "osłabia",
+                _ => "",
+            };
+            if (m.damage && m.power is { Length: 2 })
+            {
+                var hits = m.hits > 1 ? $" ×{m.hits}" : "";
+                return effect.Length > 0 ? $"{m.power[0]}–{m.power[1]}{hits} obr. · {effect}" : $"{m.power[0]}–{m.power[1]}{hits} obr.";
+            }
+            return effect;
         }
 
         // ---------- shop (coins earned in the game; premium = looks only, later) ----------

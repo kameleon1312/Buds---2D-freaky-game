@@ -34,6 +34,7 @@ const server = serve({ fetch: app.fetch, port: env.PORT, hostname: '0.0.0.0' }, 
 // live play on the same port: buds on the same map see each other (live.ts)
 const live = attachLive(server as Server, store, {
   addressOf: (req) => clientIpOfRequest(req, env.CLIENT_IP_HEADER),
+  fights: app.fights,
 });
 
 // Render stops the old instance with SIGTERM on every deploy: say goodbye to everyone, so the game reconnects

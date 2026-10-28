@@ -25,8 +25,6 @@ namespace Buds.Core
         bool rivalryBusy;
         bool turfsLoading;
         float leaveArmedUntil;
-        PvpResultDto lastPvp;
-        InfluenceDto lastInfluence;
 
         void SetUpRivalry()
         {
@@ -67,7 +65,7 @@ namespace Buds.Core
 
         void OpenRivalry(int tab)
         {
-            if (rivalryScreen == null || (fightScreen?.IsOpen ?? false)) return;
+            if (rivalryScreen == null) return;
             panel?.Hide();
             mapScreen?.Hide();
             rivalryData = new RivalryData
@@ -264,29 +262,25 @@ namespace Buds.Core
             await LoadRivalryTab(RivalryScreen.TabCrew);
         }
 
-        /// <summary>Challenges another bud: their sheet first (so a failed download wastes no rematch time), then the duel.</summary>
+        /// <summary>
+        /// Challenges another bud: the server checks it (reach, rest) and starts the fight, then the rival's saved
+        /// fighter comes out to the street as a shadow (walka.md) and the fight is right here, in the main view.
+        /// </summary>
         async Awaitable ChallengeBud(string slug)
         {
-            if (rivalryBusy || fightBusy || session == null) return;
+            if (rivalryBusy || session == null) return;
+            if (!CanFight)
+            {
+                rivalryScreen.SetStatus("Walka toczy się na ulicy: poczekaj na połączenie z serwerem.", true);
+                return;
+            }
             rivalryBusy = true;
-            fightBusy = true;
-            BudSheet theirs = null;
             try
             {
-                rivalryScreen.SetStatus("Rywal wchodzi na plac…");
-                theirs = new BudSheet(await api.GetSheet(slug), true);
+                rivalryScreen.SetStatus("Rywal wychodzi na ulicę…");
                 var res = await api.StartPvp(session.Token, slug);
                 rivalryScreen.Hide();
-                ReleasePvpSheet();
-                pvpSheet = theirs;
-                pvpOnStreet = false;
-                currentFight = res.fight;
-                fightingWith = null;
-                lastReward = null;
-                lastPvp = null;
-                lastInfluence = null;
-                fightScreen.Open(res.fight, sheet, theirs, "Pokaż, co potrafisz.", gear);
-                theirs = null; // the duel owns it now (freed when it closes)
+                Summon(res.fight.id);
             }
             catch (ApiException e)
             {
@@ -295,9 +289,7 @@ namespace Buds.Core
             }
             finally
             {
-                if (theirs != null && theirs != pvpSheet) theirs.Dispose();
                 rivalryBusy = false;
-                fightBusy = false;
             }
         }
 
@@ -362,27 +354,27 @@ namespace Buds.Core
                 await Awaitable.WaitForSecondsAsync(2.5f);
                 await shot(names[tab - 1]);
             }
-            // a duel with the first bud in reach, played to the end
+            // a fight with the first bud in reach: its shadow comes out to the street, fought to the end
             var opponent = Array.Find(rivalryData.Pvp?.opponents ?? Array.Empty<PvpOpponentDto>(), o => o.wait == 0);
+            var outcome = "none";
             if (opponent != null)
             {
                 await ChallengeBud(opponent.slug);
-                await Awaitable.WaitForSecondsAsync(1.6f);
+                var shadow = await ShadowComes(6);
                 await shot("r5-pvp-start.png");
-                for (var turn = 0; turn < 30 && currentFight is { status: "active" }; turn++)
-                    await FightMove(fightScreen.MoveAt(turn % 3 == 2 ? 0 : 1) ?? fightScreen.MoveAt(0));
-                await Awaitable.WaitForSecondsAsync(0.4f);
-                await shot("r6-pvp-result.png");
-                CloseFight();
-                await Awaitable.WaitForSecondsAsync(1.5f);
-                await shot("r7-after.png");
+                if (shadow)
+                {
+                    outcome = await FightIt(() => !shadow || shadow.Down, 60, shot, "r6-pvp");
+                    await Awaitable.WaitForSecondsAsync(1.2f);
+                    await shot("r7-after.png");
+                }
             }
             rivalryScreen.Hide();
             // the stamp of a taken turf, as the player sees it
             _ = ui.ShowCapture(world.Map.Zones.Count > 0 ? world.Map.Zones[0].Name : "Rynek");
             await Awaitable.WaitForSecondsAsync(0.9f);
             await shot("r8-capture.png");
-            Debug.Log($"[AutoPilot] rivalry demo done, pvp {(opponent != null ? currentFight?.status : "none")}");
+            Debug.Log($"[AutoPilot] rivalry demo done, pvp {outcome}");
         }
     }
 }

@@ -23,8 +23,91 @@ namespace Buds.Api
         public int f;
         public bool m;
         public string r;
-        /// <summary>0 nothing, 1 in a duel, 2 in a menu.</summary>
+        /// <summary>0 nothing, 1 fighting, 2 in a menu, 3 typing.</summary>
         public int s;
+        /// <summary>Health in a fight and its maximum (0: not known yet); the crew tag ("" = none).</summary>
+        public int hp;
+        public int mhp;
+        public string team;
+    }
+
+    /// <summary>
+    /// An opponent, a shadow or a bud in the fight (live.ts LiveEntity and LiveUnitState in one: the server sends the
+    /// first when one appears, the second every tick it changed).
+    /// </summary>
+    [Serializable]
+    public sealed class LiveUnitDto
+    {
+        public string id;
+        /// <summary>"mob" or "shadow" (entities only).</summary>
+        public string kind;
+        /// <summary>The opponent's content id (its sheet in the game).</summary>
+        public string enemy;
+        /// <summary>The bud whose sheet a shadow wears.</summary>
+        public string slug;
+        public string name;
+        public int level;
+        public float x;
+        public float y;
+        public int f;
+        public bool m;
+        public int h;
+        public int mh;
+        public bool boss;
+        /// <summary>Hidden in its nook (a lurker).</summary>
+        public bool lurk;
+        /// <summary>Beaten (in an entity) / down (in a tick's state).</summary>
+        public bool down;
+        public bool d;
+        /// <summary>A shadow fights only this bud.</summary>
+        public string only;
+    }
+
+    /// <summary>Something that happened in the fight (brawl.ts BrawlEvent): which fields mean something depends on k.</summary>
+    [Serializable]
+    public sealed class LiveFxDto
+    {
+        public string k;
+        public string u;
+        public string v;
+        public string a;
+        public float x;
+        public float y;
+        public float x2;
+        public float y2;
+        public float n;
+        public int h;
+        public int mh;
+        public bool c;
+        public bool e;
+        public int ms;
+        public float r;
+        public int q;
+        /// <summary>Casts and areas: the shape (melee, arc, proj, line, circle, self, dash, buff, shield; wedge), the wedge angle or strip width.</summary>
+        public string s;
+        public float w;
+    }
+
+    /// <summary>One of the bud's five buttons (brawl.ts KitEntry); an empty id = nothing there yet.</summary>
+    [Serializable]
+    public sealed class KitEntryDto
+    {
+        public string id;
+        public string name;
+        /// <summary>melee, arc, proj, line, circle, self, dash, buff, shield.</summary>
+        public string shape;
+        public float range;
+        public float radius;
+        public float angle;
+        public float width;
+        public int cd;
+        public string anim;
+        public string icon;
+        public int windup;
+        /// <summary>Upgrades bought for it (0–3).</summary>
+        public int rank;
+
+        public bool Present => !string.IsNullOrEmpty(id);
     }
 
     /// <summary>Any message from the server: which fields mean something depends on <see cref="t"/>.</summary>
@@ -42,6 +125,29 @@ namespace Buds.Api
         public string reason;
         public string name;
         public string text;
+        // the fight (walka.md)
+        public LiveUnitDto[] es;
+        public LiveFxDto[] ev;
+        public int hp;
+        public int mhp;
+        public int sh;
+        public int ko;
+        public int guard;
+        public int stun;
+        public KitEntryDto[] kit;
+        public int[] cd;
+        /// <summary>The bud can fight other buds where it stands now (level and zone).</summary>
+        public bool open;
+        public string kind;
+        public string enemy;
+        public FightRewardDto reward;
+        public InfluenceDto influence;
+        public PvpResultDto pvp;
+        public RaidResultDto raid;
+        public int coins;
+        public int left;
+        /// <summary>The bud's own crew tag (in "you").</summary>
+        public string team;
     }
 
     /// <summary>
@@ -84,8 +190,17 @@ namespace Buds.Api
         public static string Hello(string token, string map, Vector2 at, int facing, string ride) =>
             $"{{\"t\":\"hello\",\"token\":{Str(token)},\"map\":{Str(map)},\"x\":{Num(at.x)},\"y\":{Num(at.y)},\"f\":{facing},\"r\":{Str(ride)}}}";
 
-        public static string Move(Vector2 at, int facing, bool moving, string ride, int status) =>
-            $"{{\"t\":\"move\",\"x\":{Num(at.x)},\"y\":{Num(at.y)},\"f\":{facing},\"m\":{(moving ? "true" : "false")},\"r\":{Str(ride)},\"s\":{status}}}";
+        public static string Move(Vector2 at, int facing, bool moving, string ride, int status, int forced = 0) =>
+            $"{{\"t\":\"move\",\"x\":{Num(at.x)},\"y\":{Num(at.y)},\"f\":{facing},\"m\":{(moving ? "true" : "false")},\"r\":{Str(ride)},\"s\":{status},\"q\":{Mathf.Max(0, forced)}}}";
+
+        /// <summary>A button pressed: 0 basic, 1–2 abilities, 3 guard, 4 ultimate, aimed at a spot (and a foe for a tap).</summary>
+        public static string Act(int slot, Vector2 aim, string target) =>
+            string.IsNullOrEmpty(target)
+                ? $"{{\"t\":\"act\",\"a\":{Mathf.Clamp(slot, 0, 4)},\"x\":{Num(aim.x)},\"y\":{Num(aim.y)}}}"
+                : $"{{\"t\":\"act\",\"a\":{Mathf.Clamp(slot, 0, 4)},\"x\":{Num(aim.x)},\"y\":{Num(aim.y)},\"tid\":{Str(target)}}}";
+
+        /// <summary>Calls a rival or a district's defender out to the street (a fight the REST API just started).</summary>
+        public static string Summon(string fightId) => $"{{\"t\":\"summon\",\"fight\":{Str(fightId)}}}";
 
         public static string Join(string map, Vector2 at) =>
             $"{{\"t\":\"join\",\"map\":{Str(map)},\"x\":{Num(at.x)},\"y\":{Num(at.y)}}}";

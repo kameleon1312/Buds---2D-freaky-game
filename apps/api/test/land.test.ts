@@ -65,6 +65,7 @@ async function setup(extraEnv: Record<string, string> = {}) {
   const json = async <T = LandResponse>(res: Response) =>
     (await res.json()) as T & { error?: { code: string; message: string } };
   return {
+    app,
     store,
     bud,
     json,
@@ -209,7 +210,7 @@ describe('dystrykty', () => {
   });
 
   it('raids from level 6: shield, rest after a try, a duel against the fortified owner, loot or a log', async () => {
-    const { bud, json, store, wait, now } = await setup();
+    const { app, bud, json, store, wait, now } = await setup();
     const ala = await bud('Ala');
     const bartek = await bud('Bartek');
     await ala.grant(LEVEL_6, PRICE);
@@ -235,22 +236,14 @@ describe('dystrykty', () => {
     expect((await json(await raidOn('ostepy-2'))).error?.code).toBe('resting');
 
     // played to the end: a win takes loot and shields the district, a loss goes in its log
-    let last: FightResponse | null = null;
-    for (
-      let turn = 0;
-      turn < 80 && last?.fight.status !== 'won' && last?.fight.status !== 'lost';
-      turn++
-    )
-      last = await json<FightResponse>(
-        await ala.call('POST', `/v1/fights/${fight.id}/move`, { move: fight.bud.moves[0] }),
-      );
-    expect(last!.raid).toMatchObject({ plot: 'ostepy-2', district: 'Zielone Tarasy' });
+    const last = (await app.fights.finishShadow(ala.slug, fight.id, 'won', true))!;
+    expect(last.raid).toMatchObject({ plot: 'ostepy-2', district: 'Zielone Tarasy' });
     const defender = (await store.getLand(bartek.slug))!.state as {
       raids: { by: string; won: boolean }[];
       shieldUntil: number;
     };
-    expect(defender.raids[0]).toMatchObject({ by: 'Ala', won: last!.raid!.won });
-    if (last!.raid!.won) expect(defender.shieldUntil).toBeGreaterThan(now());
+    expect(defender.raids[0]).toMatchObject({ by: 'Ala', won: last.raid!.won });
+    if (last.raid!.won) expect(defender.shieldUntil).toBeGreaterThan(now());
 
     wait(RAID_RETRY_MINUTES * 60_000 + 1000);
     expect([201, 409]).toContain((await raidOn('ostepy-2')).status);
