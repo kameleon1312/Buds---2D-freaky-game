@@ -20,7 +20,7 @@ import {
   linkBud,
   signUp,
 } from '@/lib/api';
-import { getPlayer } from '@/lib/player';
+import { forgetPlayer, getPlayer } from '@/lib/player';
 import { authMessage, supabase, useSession } from '@/lib/supabase';
 import { plural } from '@/lib/plural';
 import { AccountSettings, BudManage } from './AccountManage';
@@ -220,6 +220,8 @@ function Dashboard({ email, token }: { email: string; token: string }) {
       setBuds(list);
       // a bud made in this browser before signing in can join the account
       const player = getPlayer();
+      // already on the account: this browser's guest key is no longer needed (nor valid)
+      if (player && list.some((b) => b.bud.slug === player.slug)) forgetPlayer();
       if (player && !list.some((b) => b.bud.slug === player.slug)) {
         const bud = await getMyBud(player.token).catch(() => null);
         setGuest(bud ? { name: bud.name, token: player.token } : null);
@@ -239,6 +241,7 @@ function Dashboard({ email, token }: { email: string; token: string }) {
     setError('');
     try {
       await claimBud(token, guest.token);
+      forgetPlayer();
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udało się dodać Buda.');

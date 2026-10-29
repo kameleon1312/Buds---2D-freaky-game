@@ -80,6 +80,12 @@ Testy: `apps/api/test/account.test.ts`.
 
 ## Bezpieczeństwo
 
+- **Bud na koncie wychodzi tylko przez konto.** Kod do gry (`POST /v1/buds/me/pair-code`) dostaje wyłącznie Bud bez
+  konta; Bud na koncie dostaje go tylko po zalogowaniu (`/v1/account/buds/:slug/pair-code`, 403 `bud_on_account`
+  dla tokenu urządzenia). Dodanie Buda do konta (`/v1/account/buds/claim`) unieważnia klucz gościa z przeglądarki,
+  a strona go zapomina (`forgetPlayer`), więc po wylogowaniu przeglądarka jest zwykłym gościem. Obcy w rankingu
+  nigdy nie miał klucza: widzi tylko publiczny profil.
+
 - **Publiczne nazwy** (imię Buda, nazwa i tag ekipy, nazwa dystryktu) przechodzą przez `publicNameOk`: filtr czatu na
   nazwie takiej, jak jest, i ze sklejonymi znakami („Ku rwa”, „k.u.r.w.a”).
 - **Limity zapytań** zapominają adresy po końcu okna; wcześniej pamięć rosła z każdym nowym adresem.

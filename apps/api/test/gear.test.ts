@@ -268,11 +268,20 @@ describe('accounts', () => {
     const claim = (token: string, account: string) =>
       app.request('/v1/account/buds/claim', { method: 'POST', ...json({ token }, account) });
 
+    // a phone paired while it was a guest
+    const pair = (await (
+      await app.request('/v1/buds/me/pair-code', { method: 'POST', ...json({}, body.token) })
+    ).json()) as PairCodeResponse;
+    const phone = (await (
+      await app.request('/v1/pair', { method: 'POST', ...json({ code: pair.code }) })
+    ).json()) as CreateBudResponse;
+
     let res = await claim(body.token, alice);
     expect(res.status).toBe(200);
     expect(((await res.json()) as AccountBud).bud.slug).toBe(body.bud.slug);
-    expect((await claim(body.token, alice)).status).toBe(200); // already hers: fine
-    res = await claim(body.token, await es256('bob'));
+    // the guest key is spent by the claim
+    expect((await claim(body.token, alice)).status).toBe(404);
+    res = await claim(phone.token, await es256('bob'));
     expect(res.status).toBe(409);
     expect(((await res.json()) as ApiError).error.code).toBe('bud_taken');
     expect((await claim('x'.repeat(40), alice)).status).toBe(404);
@@ -333,10 +342,10 @@ describe('accounts', () => {
     res = await link(code, alice);
     expect(res.status).toBe(404);
     expect(((await res.json()) as ApiError).error.code).toBe('invalid_code');
-    // another account can't take it with a new code
-    res = await link(await gameCode(), await es256('bob'));
-    expect(res.status).toBe(409);
-    expect(((await res.json()) as ApiError).error.code).toBe('bud_taken');
+    // on the account now: the game hands out no more codes, so no other account can take it
+    res = await app.request('/v1/buds/me/pair-code', { method: 'POST', ...json({}, body.token) });
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as ApiError).error.code).toBe('bud_on_account');
     expect((await link('ab', alice)).status).toBe(400);
   });
 

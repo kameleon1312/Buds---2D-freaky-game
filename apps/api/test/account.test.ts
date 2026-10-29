@@ -215,6 +215,43 @@ describe('the account', () => {
   });
 });
 
+describe('a bud on an account', () => {
+  it('leaves only through the account: the claiming guest key stops working, no device hands out codes', async () => {
+    const { call, user, bud } = setup();
+    const me = await user('u1');
+    const guest = await bud('Szymon');
+    // a guest bud can still be brought to the game with its own key
+    expect((await call('POST', '/v1/buds/me/pair-code', guest.token)).status).toBe(201);
+    // a phone paired before the claim keeps playing
+    const code = (await (
+      await call('POST', '/v1/buds/me/pair-code', guest.token)
+    ).json()) as PairCodeResponse;
+    const phone = (await (
+      await call('POST', '/v1/pair', undefined, { code: code.code })
+    ).json()) as CreateBudResponse;
+
+    expect((await call('POST', '/v1/account/buds/claim', me, { token: guest.token })).status).toBe(
+      200,
+    );
+    // the browser's guest key is spent
+    expect((await call('GET', '/v1/buds/me', guest.token)).status).toBe(401);
+    expect((await call('POST', '/v1/buds/me/pair-code', guest.token)).status).toBe(401);
+    // the phone plays on, but can't hand the bud to anyone else
+    expect((await call('GET', '/v1/buds/me', phone.token)).status).toBe(200);
+    const denied = await call('POST', '/v1/buds/me/pair-code', phone.token);
+    expect(denied.status).toBe(403);
+    expect(await err(denied)).toBe('bud_on_account');
+    // the signed-in owner still gets one
+    expect((await call('POST', `/v1/account/buds/${guest.bud.slug}/pair-code`, me)).status).toBe(
+      201,
+    );
+    // and another account never does
+    expect(
+      (await call('POST', `/v1/account/buds/${guest.bud.slug}/pair-code`, await user('u2'))).status,
+    ).toBe(404);
+  });
+});
+
 describe('creating an account', () => {
   const form = { email: ' Nowy@Buds.Example ', password: 'dobre-haslo-1', consent: true };
 

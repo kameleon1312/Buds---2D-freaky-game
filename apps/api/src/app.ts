@@ -983,6 +983,8 @@ export function createApp(
         409,
       );
     }
+    // the browser's guest key has done its job: from now on the account (signed in) manages the bud
+    await store.removeToken(hashToken(input.data.token));
     return c.json<AccountBud>(await accountBud(bud.slug));
   });
 
@@ -1229,6 +1231,20 @@ export function createApp(
 
   // web shows this code; the game redeems it for its own token
   app.post('/v1/buds/me/pair-code', requirePlayer(store), async (c) => {
+    // a bud on an account comes to a new device only through the account (signed in): a token left in some browser
+    // or on an old phone never hands it out
+    if ((await store.ownerOf(c.get('bud').slug)) !== null) {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'bud_on_account',
+            message:
+              'Ten Bud jest już na koncie. Kod do nowego urządzenia weźmiesz po zalogowaniu na stronie (Konto).',
+          },
+        },
+        403,
+      );
+    }
     const code = makePairCode();
     const expiresAt = new Date(Date.now() + PAIR_CODE_TTL_MINUTES * 60_000);
     await store.savePairCode(c.get('bud').slug, code, expiresAt);

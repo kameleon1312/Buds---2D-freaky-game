@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { byGender, type Gender } from '@buds/shared';
-import { createPairCode } from '@/lib/api';
-import { getPlayer } from '@/lib/player';
+import { ApiRequestError, createPairCode } from '@/lib/api';
+import { forgetPlayer, getPlayer } from '@/lib/player';
 
 /** Owners get a one-time code to link the bud to the game; visitors get a nudge to make their own. */
 export function PairPanel({
@@ -42,6 +42,12 @@ export function PairPanel({
       setCode({ code: res.code, expiresAt: Date.parse(res.expiresAt) });
       setNow(Date.now());
     } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 401) {
+        // the guest key went with the bud onto an account (or the bud is gone): this browser is a visitor now
+        forgetPlayer();
+        setOwner(false);
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Nie udało się wygenerować kodu.');
     } finally {
       setPending(false);
@@ -96,7 +102,7 @@ export function PairPanel({
       )}
       {error && (
         <p className="form-error" role="alert">
-          {error}
+          {error} {error.includes('Konto') && <Link href="/konto">Przejdź do konta</Link>}
         </p>
       )}
     </section>

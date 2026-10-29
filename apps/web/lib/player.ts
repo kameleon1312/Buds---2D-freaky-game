@@ -16,6 +16,15 @@ export function getPlayer(): StoredPlayer | null {
   return null;
 }
 
+/** Forgets the guest credential (the bud joined an account: the account manages it from now on). */
+export function forgetPlayer(): void {
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export function savePlayer(player: StoredPlayer): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(player));
