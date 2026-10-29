@@ -78,6 +78,8 @@ namespace Buds.UI
         readonly Action onLogout;
         readonly Action onEditLook;
         readonly Action<string, string[]> onLoadout;
+        readonly Action onAccount;
+        readonly Action onSettings;
         readonly Action<string> onMoveUpgrade;
         Button editLookButton;
         Button logoutButton;
@@ -147,8 +149,10 @@ namespace Buds.UI
 
         public BudPanel(Transform canvas, QuestContent content, Action<string> onUpgrade, Action<string, string> onEquip,
             Action<string> onBuy, Action<string> onDrink, Action onLink, Action onLogout, Action onEditLook,
-            Action<string, string[]> onLoadout, Action<string> onMoveUpgrade)
+            Action<string, string[]> onLoadout, Action<string> onMoveUpgrade, Action onAccount, Action onSettings)
         {
+            this.onAccount = onAccount;
+            this.onSettings = onSettings;
             this.onLoadout = onLoadout;
             this.onMoveUpgrade = onMoveUpgrade;
             this.onLink = onLink;
@@ -304,13 +308,19 @@ namespace Buds.UI
             UiKit.Stretch(xpText.rectTransform, 0, 2, 0, 0);
 
             statsText = UiKit.Label("Stats", page, "", 22, UiKit.Ink, false, TextAnchor.UpperLeft);
-            UiKit.Place(statsText.rectTransform, new Vector2(0, 1), new Vector2(330, -144), new Vector2(740, 290), new Vector2(0, 1));
+            UiKit.Place(statsText.rectTransform, new Vector2(0, 1), new Vector2(330, -144), new Vector2(740, 232), new Vector2(0, 1));
             statsText.lineSpacing = 1.1f;
             statsText.verticalOverflow = VerticalWrapMode.Truncate; // the bottom row (link, sign out) is never covered
 
             // a new look any time: the creator opens with this bud's look
             editLookButton = UiKit.Button("EditLook", page, "Zmień wygląd", new Vector2(300, 62), () => onEditLook(), UiKit.Tone.Rep, 26);
             UiKit.Place((RectTransform)editLookButton.transform, new Vector2(0, 1), new Vector2(0, -388), new Vector2(300, 62), new Vector2(0, 1));
+
+            // the bud and its data (name, devices, deleting it) and this device's settings, right of the look
+            var account = UiKit.Button("Account", page, "Konto", new Vector2(250, 62), () => onAccount(), UiKit.Tone.Rep, 26);
+            UiKit.Place((RectTransform)account.transform, new Vector2(1, 1), new Vector2(-262, -388), new Vector2(250, 62), new Vector2(1, 1));
+            var settings = UiKit.Button("Settings", page, "Ustawienia", new Vector2(250, 62), () => onSettings(), UiKit.Tone.Rep, 26);
+            UiKit.Place((RectTransform)settings.transform, new Vector2(1, 1), new Vector2(0, -388), new Vector2(250, 62), new Vector2(1, 1));
 
             // link the bud to an account on the website: a code to type in Twoje konto
             linkButton = UiKit.Button("Link", page, "Połącz z kontem", new Vector2(300, 70), () => onLink(), UiKit.Tone.Buds, 28);

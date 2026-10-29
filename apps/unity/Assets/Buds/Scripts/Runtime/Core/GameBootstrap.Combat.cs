@@ -567,6 +567,7 @@ namespace Buds.Core
             var color = e.v == Me ? UiKit.Alert500 : e.u == Me ? (e.c ? UiKit.Gold400 : Color.white) : new Color(0.85f, 0.86f, 0.9f, 0.9f);
             if (e.e) color = UiKit.TextOnDarkMuted;
             if (e.u == Me || e.v == Me || e.c) combatUi?.Pop(head + new Vector3(0, 0.1f, 0), BrawlLook.DamageText(damage, e.c, e.e), color, e.c);
+            if (e.v == Me && damage > 0) Haptics.Tap(e.c ? 45 : 25);
             if (e.v == Me && damage > 0) followCam?.Kick(Mathf.Clamp(0.18f + (float)damage / Mathf.Max(1, e.mh) * 2, 0.18f, 0.55f));
             else if (e.u == Me && e.c) followCam?.Kick(0.22f);
         }
@@ -586,6 +587,7 @@ namespace Buds.Core
             if (Body(e.v) is { } fallen) combatFx?.KnockOut(fallen.head);
             if (e.v == Me)
             {
+                Haptics.Tap(120);
                 followCam?.Kick(0.6f);
                 chaseId = null;
                 pad?.Release(false);

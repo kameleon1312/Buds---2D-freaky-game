@@ -49,6 +49,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/konto">Konto</Link>
             <Link href="/top">Ranking</Link>
             <Link href="/prywatnosc">Prywatność</Link>
+            <Link href="/regulamin">Regulamin</Link>
+            <Link href="/usun-konto">Usuń konto</Link>
           </nav>
         </footer>
       </body>

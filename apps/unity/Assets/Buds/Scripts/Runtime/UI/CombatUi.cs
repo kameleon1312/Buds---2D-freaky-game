@@ -130,6 +130,7 @@ namespace Buds.UI
         /// <summary>The numbers of a blow over a head: white for blows of the bud, red for blows it took, gold for crits.</summary>
         public void Pop(Vector3 head, string text, Color color, bool big)
         {
+            if (!Core.GameSettings.Current.DamageNumbers) return; // the player turned the numbers off
             var t = freeNumbers.Count > 0 ? freeNumbers.Pop() : MakeNumber();
             t.gameObject.SetActive(true);
             t.text = text;

@@ -96,6 +96,15 @@ import {
   rankCost,
   resolveKit,
   weaponKindSchema,
+  DELETE_ACCOUNT_WORDS,
+  RENAME_DAYS,
+  confirmsName,
+  deleteAccountRequestSchema,
+  deleteBudRequestSchema,
+  renameBudRequestSchema,
+  type AccountExport,
+  type BudExport,
+  type LogoutAllResponse,
 } from '@buds/shared';
 import type { Env } from './env.js';
 import { randomInt } from 'node:crypto';
@@ -144,6 +153,8 @@ export function createApp(
   };
   const app = new Hono<{ Variables: AuthVariables & PlayerVariables }>();
   const rivalry = createRivalry({ store, now, catalog, content });
+  /** What other parts of the process (the live server) hear about: a bud gone or renamed. Set by index.ts. */
+  const hooks = { budGone: (_slug: string) => {}, budChanged: (_slug: string) => {} };
   const land = createLand({ store, now, shieldHours: env.LAND_SHIELD_HOURS });
 
   app.use('*', requestId());
@@ -247,6 +258,123 @@ export function createApp(
     await store.removeToken(hashToken(token));
     return c.body(null, 204);
   });
+
+  // ---------- the player's own bud: name, devices, data, deleting it (docs/konto.md) ----------
+
+  const thisToken = (c: Context) =>
+    hashToken((c.req.header('authorization') ?? '').split(' ')[1] ?? '');
+
+  /** Renames a bud (the public name rules, the chat filter, once in RENAME_DAYS); the room hears the new name. */
+  const rename = async (c: Context, slug: string) => {
+    const input = renameBudRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success) {
+      const message = input.error.issues[0]?.message ?? 'Nieprawidłowe imię';
+      return c.json<ApiError>({ error: { code: 'invalid_input', message } }, 400);
+    }
+    const notSince = new Date(now().getTime() - RENAME_DAYS * 86_400_000);
+    const bud = await store.renameBud(slug, input.data.name, notSince);
+    if (!bud) {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'rename_too_soon',
+            message: `Imię zmienisz raz na ${RENAME_DAYS} dni. Spróbuj później.`,
+          },
+        },
+        409,
+      );
+    }
+    hooks.budChanged(slug);
+    return c.json<BudResponse>({ bud });
+  };
+
+  app.put('/v1/buds/me/name', requirePlayer(store), (c) => rename(c, c.get('bud').slug));
+
+  /** Signs out every other device of this bud (a lost phone, a shared computer); this one stays. */
+  app.post('/v1/buds/me/logout-all', requirePlayer(store), async (c) => {
+    const signedOut = await store.removeTokens(c.get('bud').slug, thisToken(c));
+    return c.json<LogoutAllResponse>({ signedOut });
+  });
+
+  /** Everything the game keeps about this bud, to download. */
+  app.get('/v1/buds/me/export', requirePlayer(store), async (c) => {
+    c.header('Content-Disposition', `attachment; filename="bud-${c.get('bud').slug}.json"`);
+    return c.json<BudExport>(await exportOf(c.get('bud'), null));
+  });
+
+  /**
+   * Deletes this bud for good (the player types its name). A bud on an account is deleted from the account's
+   * page or from the game the same way; everything it has goes with it.
+   */
+  app.delete('/v1/buds/me', requirePlayer(store), async (c) => {
+    const bud = c.get('bud');
+    const input = deleteBudRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success || !confirmsName(input.data.confirm, bud.name)) {
+      return c.json<ApiError>(
+        { error: { code: 'confirm_name', message: 'Wpisz imię Buda, żeby potwierdzić.' } },
+        400,
+      );
+    }
+    await removeBud(bud.slug);
+    return c.body(null, 204);
+  });
+
+  /** The bud and every trace of it; the live room lets it go at once. */
+  const removeBud = async (slug: string) => {
+    await store.deleteBud(slug);
+    hooks.budGone(slug);
+  };
+
+  const exportOf = async (bud: BudRecord, email: string | null): Promise<BudExport> => {
+    const slug = bud.slug;
+    const [
+      wallet,
+      items,
+      equipment,
+      skills,
+      training,
+      quests,
+      caches,
+      consumables,
+      loadouts,
+      moveRanks,
+      crew,
+      land,
+      devices,
+    ] = await Promise.all([
+      store.wallet(slug),
+      store.items(slug),
+      equipmentOf(slug),
+      store.skills(slug),
+      store.training(slug),
+      store.completedQuests(slug),
+      store.openedCaches(slug),
+      store.consumables(slug),
+      store.loadouts(slug),
+      store.moveRanks(slug),
+      store.crewOf(slug),
+      store.getLand(slug),
+      store.tokenCount(slug),
+    ]);
+    return {
+      exportedAt: now().toISOString(),
+      bud,
+      account: email === null ? null : { email },
+      wallet: { coins: wallet.coins, gems: wallet.gems },
+      items,
+      equipment,
+      skills,
+      training,
+      quests,
+      caches,
+      consumables,
+      loadouts,
+      moveRanks,
+      crew,
+      land: land?.state ?? null,
+      devices,
+    };
+  };
 
   // items granted beyond the starter set; only the server writes these
   app.get('/v1/buds/me/items', requirePlayer(store), async (c) =>
@@ -613,6 +741,75 @@ export function createApp(
 
   // ---------- accounts (signed in on the website) ----------
 
+  /** A bud of this account, or a 404 (another account's bud is never told apart from a missing one). */
+  const ownBud = async (c: Context, slug: string) => {
+    const user = c.get('user') as { id: string };
+    const owner = budSlugSchema.safeParse(slug).success ? await store.ownerOf(slug) : null;
+    if (owner !== user.id)
+      throw new HTTPException(404, { message: 'Nie ma takiego Buda na tym koncie' });
+    return (await store.getBySlug(slug))!;
+  };
+
+  app.put('/v1/account/buds/:slug/name', requireAuth(keys), async (c) =>
+    rename(c, (await ownBud(c, c.req.param('slug'))).slug),
+  );
+
+  /** Signs out every device of an account's bud (the website isn't one of them). */
+  app.post('/v1/account/buds/:slug/logout-all', requireAuth(keys), async (c) => {
+    const bud = await ownBud(c, c.req.param('slug'));
+    const signedOut = await store.removeTokens(bud.slug, null);
+    hooks.budGone(bud.slug);
+    return c.json<LogoutAllResponse>({ signedOut });
+  });
+
+  app.delete('/v1/account/buds/:slug', requireAuth(keys), async (c) => {
+    const bud = await ownBud(c, c.req.param('slug'));
+    const input = deleteBudRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success || !confirmsName(input.data.confirm, bud.name)) {
+      return c.json<ApiError>(
+        { error: { code: 'confirm_name', message: 'Wpisz imię Buda, żeby potwierdzić.' } },
+        400,
+      );
+    }
+    await removeBud(bud.slug);
+    return c.body(null, 204);
+  });
+
+  /** Everything about the account and its buds, to download (the GDPR's access and portability). */
+  app.get('/v1/account/export', requireAuth(keys), async (c) => {
+    const user = c.get('user');
+    const buds = await store.budsOfUser(user.id);
+    c.header('Content-Disposition', 'attachment; filename="buds-konto.json"');
+    return c.json<AccountExport>({
+      exportedAt: now().toISOString(),
+      email: user.email ?? null,
+      buds: await Promise.all(buds.map((b) => exportOf(b, user.email ?? null))),
+    });
+  });
+
+  /**
+   * Deletes the account: every bud on it, then the sign-in itself. The words DELETE_ACCOUNT_WORDS have to be sent,
+   * so no stray request can do it.
+   */
+  app.delete('/v1/account', requireAuth(keys), async (c) => {
+    const input = deleteAccountRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success) {
+      return c.json<ApiError>(
+        {
+          error: {
+            code: 'confirm_words',
+            message: `Wpisz ${DELETE_ACCOUNT_WORDS}, żeby potwierdzić.`,
+          },
+        },
+        400,
+      );
+    }
+    const user = c.get('user');
+    for (const bud of await store.budsOfUser(user.id)) await removeBud(bud.slug);
+    await store.deleteUser(user.id);
+    return c.body(null, 204);
+  });
+
   const accountBud = async (slug: string): Promise<AccountBud> => {
     const bud = (await store.getBySlug(slug))!;
     const [wallet, items, equipment, quests, caches] = await Promise.all([
@@ -699,7 +896,9 @@ export function createApp(
   app.get('/v1/auth/config', (c) => {
     const key = env.SUPABASE_PUBLISHABLE_KEY ?? env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? null;
     const url = env.SUPABASE_URL ?? null;
-    return c.json<AuthConfigResponse>({ enabled: !!(url && key), url, publishableKey: key });
+    // the website's address too: the game opens its privacy, terms and account pages
+    const site = env.WEB_ORIGIN && !env.WEB_ORIGIN.includes('localhost') ? env.WEB_ORIGIN : null;
+    return c.json<AuthConfigResponse>({ enabled: !!(url && key), url, publishableKey: key, site });
   });
 
   /**
@@ -1099,5 +1298,5 @@ export function createApp(
 
   /** The ends of live fights (fights.ts), for the live server attached to the same process. */
   const fights = createFights({ store, catalog, content, rivalry, land, fighterOf });
-  return Object.assign(app, { fights });
+  return Object.assign(app, { fights, hooks });
 }

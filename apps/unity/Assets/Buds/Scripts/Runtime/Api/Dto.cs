@@ -93,6 +93,8 @@ namespace Buds.Api
     [Serializable]
     public class AuthConfigDto
     {
+        /// <summary>The website (privacy, terms, the account page); empty on a local server.</summary>
+        public string site;
         public bool enabled;
         public string url;
         public string publishableKey;
@@ -434,6 +436,24 @@ namespace Buds.Api
         public InfluenceDto influence;
         public PvpResultDto pvp;
         public RaidResultDto raid;
+    }
+
+    [Serializable]
+    public class RenameRequest
+    {
+        public string name;
+    }
+
+    [Serializable]
+    public class DeleteBudRequest
+    {
+        public string confirm;
+    }
+
+    [Serializable]
+    public class LogoutAllDto
+    {
+        public int signedOut;
     }
 
     /// <summary>The Ciosy screen (packages/shared loadout.ts movesView): the five buttons and what can go on each.</summary>

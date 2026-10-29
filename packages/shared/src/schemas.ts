@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BUD_NAME_MAX, BUD_NAME_MIN } from './bud/constants';
 import { budLookSchema } from './bud/look';
+import { cleanChat } from './chat';
 
 export const healthResponseSchema = z.object({
   status: z.literal('ok'),
@@ -26,12 +27,25 @@ export type ApiError = z.infer<typeof apiErrorSchema>;
 
 // ---------- buds ----------
 
+/**
+ * A public name passes the chat's filter as it is and with its spaces and marks taken out too ("Ku rwa", "k.u.r.w.a"):
+ * a name is short, so gluing it together costs nothing and closes the easy way round.
+ */
+export function publicNameOk(name: string): boolean {
+  const spaced = name.replace(/\s+/gu, ' ').trim();
+  const glued = spaced.replace(/[\s.'_-]+/gu, '');
+  return cleanChat(spaced) === spaced && (glued.length < 2 || cleanChat(glued) === glued);
+}
+
 export const budNameSchema = z
   .string()
   .trim()
   .min(BUD_NAME_MIN, `Imię musi mieć co najmniej ${BUD_NAME_MIN} znaki`)
   .max(BUD_NAME_MAX, `Imię może mieć maksymalnie ${BUD_NAME_MAX} znaków`)
-  .regex(/^[\p{L}\p{N}][\p{L}\p{N} .'_-]*$/u, 'Tylko litery, cyfry, spacje i . _ -');
+  .regex(/^[\p{L}\p{N}][\p{L}\p{N} .'_-]*$/u, 'Tylko litery, cyfry, spacje i . _ -')
+  // the name is public (rankings, the street, the chat): the chat's filter keeps swears and contacts out of it
+  .refine((name) => publicNameOk(name), 'Tego imienia nie da się użyć')
+  .transform((name) => name.replace(/\s+/gu, ' '));
 
 export const createBudSchema = z.object({
   name: budNameSchema,

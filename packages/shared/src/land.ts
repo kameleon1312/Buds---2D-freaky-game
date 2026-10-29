@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { cleanChat } from './chat';
+import { publicNameOk } from './schemas';
 import type { Fighter } from './combat';
 import { PLOTS } from './plots';
 import { ROUTES } from './travel';
@@ -239,7 +239,7 @@ export const districtNameSchema = z
   .min(DISTRICT_NAME_MIN, `Nazwa musi mieć co najmniej ${DISTRICT_NAME_MIN} znaki`)
   .max(DISTRICT_NAME_MAX, `Nazwa może mieć najwyżej ${DISTRICT_NAME_MAX} znaki`)
   .regex(/^[\p{L}\p{N}][\p{L}\p{N} .'-]*$/u, "Tylko litery, cyfry, spacje i . ' -")
-  .refine((name) => cleanChat(name) === name.replace(/\s+/gu, ' '), 'Tej nazwy nie da się użyć')
+  .refine(publicNameOk, 'Tej nazwy nie da się użyć')
   .transform((name) => name.replace(/\s+/gu, ' '));
 
 // ---------- raids ----------

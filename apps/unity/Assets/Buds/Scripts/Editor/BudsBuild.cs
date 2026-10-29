@@ -53,6 +53,61 @@ namespace Buds.EditorTools
             Build(BuildTarget.Android, "Builds/Android/Buds-dev.apk", BuildOptions.Development);
         }
 
+        /// <summary>
+        /// The store build (docs/telefon.md): an Android App Bundle (.aab, what Google Play takes), IL2CPP for 64-bit ARM
+        /// (Play requires 64-bit), the newest installed target SDK, no development flags, HTTPS only, the production
+        /// API, quiet logs. Signed with the upload key from environment variables (never stored in the repo):
+        /// BUDS_KEYSTORE (path to the .keystore), BUDS_KEYSTORE_PASS, BUDS_KEY_ALIAS, BUDS_KEY_PASS; the version from
+        /// BUDS_VERSION (e.g. 1.0.0) and BUDS_VERSION_CODE (a whole number, higher with every upload).
+        /// </summary>
+        [MenuItem("Buds/Build/Android AAB (release)")]
+        public static void AndroidRelease()
+        {
+            string Env(string name) => Environment.GetEnvironmentVariable(name)?.Trim();
+            var keystore = Env("BUDS_KEYSTORE");
+            if (string.IsNullOrEmpty(keystore) || !File.Exists(keystore) || string.IsNullOrEmpty(Env("BUDS_KEYSTORE_PASS")) ||
+                string.IsNullOrEmpty(Env("BUDS_KEY_ALIAS")) || string.IsNullOrEmpty(Env("BUDS_KEY_PASS")))
+            {
+                Debug.LogError("[BudsBuild] release: set BUDS_KEYSTORE, BUDS_KEYSTORE_PASS, BUDS_KEY_ALIAS and BUDS_KEY_PASS (docs/telefon.md)");
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
+            }
+            // a release never carries a development server address
+            if (AssetDatabase.DeleteAsset(DevApiFile)) Debug.Log("[BudsBuild] release: the dev API file removed");
+            BudsSetup.ConfigureOrientation();
+            BudsIcons.Configure();
+
+            var android = UnityEditor.Build.NamedBuildTarget.Android;
+            PlayerSettings.SetScriptingBackend(android, ScriptingImplementation.IL2CPP);
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+            // low stripping: JsonUtility reads the DTOs' fields by reflection, nothing of them may be cut away
+            PlayerSettings.SetManagedStrippingLevel(android, ManagedStrippingLevel.Low);
+            PlayerSettings.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+            PlayerSettings.SetStackTraceLogType(LogType.Warning, StackTraceLogType.None);
+            if (!string.IsNullOrEmpty(Env("BUDS_VERSION"))) PlayerSettings.bundleVersion = Env("BUDS_VERSION");
+            if (int.TryParse(Env("BUDS_VERSION_CODE"), out var code) && code > 0) PlayerSettings.Android.bundleVersionCode = code;
+            EditorUserBuildSettings.buildAppBundle = true;
+
+            PlayerSettings.Android.useCustomKeystore = true;
+            PlayerSettings.Android.keystoreName = keystore;
+            PlayerSettings.Android.keystorePass = Env("BUDS_KEYSTORE_PASS");
+            PlayerSettings.Android.keyaliasName = Env("BUDS_KEY_ALIAS");
+            PlayerSettings.Android.keyaliasPass = Env("BUDS_KEY_PASS");
+            try
+            {
+                Build(BuildTarget.Android, "Builds/Android/Buds.aab", BuildOptions.None);
+            }
+            finally
+            {
+                // the passwords never stay in the editor's settings
+                PlayerSettings.Android.keystorePass = "";
+                PlayerSettings.Android.keyaliasPass = "";
+                PlayerSettings.Android.useCustomKeystore = false;
+                EditorUserBuildSettings.buildAppBundle = false;
+            }
+        }
+
         /// <summary>The PC's IPv4 address on the local network (Wi-Fi or Ethernet), or null.</summary>
         static string LanIp()
         {

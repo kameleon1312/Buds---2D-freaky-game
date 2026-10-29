@@ -61,6 +61,7 @@ namespace Buds.World
         {
             if (view.Map.IsInterior) return;
             var life = view.gameObject.AddComponent<WorldLife>();
+            life.enabled = !Core.GameSettings.Current.Economy; // the lighter graphics setting
             life.view = view;
             life.look = DistrictLook.For(view.Map.Id);
             foreach (var (name, at) in view.LifeSpots)

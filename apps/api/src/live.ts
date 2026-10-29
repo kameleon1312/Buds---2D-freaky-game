@@ -117,6 +117,10 @@ export type LiveServer = {
   stats(): { peers: number; rooms: Record<string, number> };
   /** A room's fight (tests look inside). */
   brawlOf(roomKey: string): Brawl | undefined;
+  /** A bud deleted or signed out everywhere: its connection goes now (it can't come back without a token). */
+  dropBud(slug: string): void;
+  /** A bud's name or look changed outside the game (the website): the room reads it again. */
+  refreshBud(slug: string): Promise<void>;
   close(): Promise<void>;
 };
 
@@ -796,6 +800,23 @@ export function attachLive(server: Server, store: BudStore, opts: LiveOptions): 
     },
     brawlOf(roomKey) {
       return rooms.get(roomKey)?.brawl;
+    },
+    dropBud(slug) {
+      const peer = bySlug.get(slug);
+      if (!peer) return;
+      leaveRoom(peer);
+      drop(peer, LIVE_CLOSE.unauthorized, 'Ten Bud nie jest już zalogowany na tym urządzeniu.');
+    },
+    async refreshBud(slug) {
+      const peer = bySlug.get(slug);
+      const bud = peer ? await store.getBySlug(slug) : null;
+      if (!peer?.player || !peer.room || !bud) return;
+      peer.bud = bud;
+      peer.player.name = bud.name;
+      peer.player.look = lookVersion(bud.look);
+      const unit = peer.room.brawl.units.get(slug);
+      if (unit) unit.name = bud.name;
+      toRoom(peer.room, { t: 'join', p: peer.player }, peer);
     },
     async close() {
       clearInterval(tick);

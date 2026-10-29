@@ -36,6 +36,9 @@ const live = attachLive(server as Server, store, {
   addressOf: (req) => clientIpOfRequest(req, env.CLIENT_IP_HEADER),
   fights: app.fights,
 });
+// a bud deleted or signed out everywhere leaves the room at once; a new name shows to everyone there
+app.hooks.budGone = (slug) => live.dropBud(slug);
+app.hooks.budChanged = (slug) => void live.refreshBud(slug).catch(() => {});
 
 // Render stops the old instance with SIGTERM on every deploy: say goodbye to everyone, so the game reconnects
 for (const signal of ['SIGTERM', 'SIGINT'] as const)

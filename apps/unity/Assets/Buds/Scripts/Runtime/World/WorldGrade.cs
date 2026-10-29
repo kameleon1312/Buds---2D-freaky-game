@@ -70,7 +70,8 @@ namespace Buds.World
         {
             if (!cam) return;
             var data = cam.GetUniversalAdditionalCameraData();
-            if (data) data.renderPostProcessing = true;
+            // the lighter graphics setting skips the grade (one full-screen pass less on a weak phone)
+            if (data) data.renderPostProcessing = !Core.GameSettings.Current.Economy;
             Ensure();
             var mood = For(map.DistrictId, map.IsInterior);
             var runner = volume.GetComponent<Blend>();

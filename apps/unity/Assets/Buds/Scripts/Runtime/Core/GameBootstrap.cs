@@ -37,6 +37,9 @@ namespace Buds.Core
         async void Start()
         {
             Application.targetFrameRate = 60;
+            // a store build logs only warnings and errors (no per-frame chatter, nothing a player shouldn't see)
+            if (!Debug.isDebugBuild) Debug.unityLogger.filterLogType = LogType.Warning;
+            SetUpSettings(); // the player's smoothness and graphics (GameBootstrap.Account)
             // before a world is loaded the camera only shows behind the UI (notch side): keep it dark, not green
             if (Camera.main) Camera.main.backgroundColor = UiKit.Surface900;
             // landscape only, either way round (also set in the player settings)
@@ -681,6 +684,11 @@ namespace Buds.Core
                 {
                     await LogoutDemo(Shot);
                     return; // the scene reloads; nothing after this runs
+                }
+                if (CommandLine.Has("-buds-account-demo") && session != null)
+                {
+                    await AccountDemo(Shot);
+                    return; // the bud is gone and the scene starts over
                 }
                 if (CommandLine.Has("-buds-tutorial-demo")) await TutorialDemo(Shot);
                 if (CommandLine.Has("-buds-quest-demo")) await QuestDemo(Shot);

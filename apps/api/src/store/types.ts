@@ -76,6 +76,19 @@ export interface BudStore extends RivalryStore, LandStore {
   addToken(slug: string, tokenHash: string): Promise<void>;
   /** Signs one device out: its token stops working (the bud and its other devices are untouched). */
   removeToken(tokenHash: string): Promise<void>;
+  /** Forgets every device token of the bud but `keep` (this device), or all of them. Returns how many went. */
+  removeTokens(slug: string, keep: string | null): Promise<number>;
+  /** How many devices are signed in as the bud. */
+  tokenCount(slug: string): Promise<number>;
+  /**
+   * A new name, at most once since `notSince` (null when it was renamed after that: too soon). Atomic: two renames
+   * at once can't both pass.
+   */
+  renameBud(slug: string, name: string, notSince: Date): Promise<BudRecord | null>;
+  /** Deletes a bud for good with everything it has (its crew is left properly first). */
+  deleteBud(slug: string): Promise<void>;
+  /** Deletes the sign-in of an account (its buds are deleted before, by the API). */
+  deleteUser(userId: string): Promise<void>;
   /** A new look for the bud (validated and checked against owned items by the API); the updated bud. */
   updateLook(slug: string, look: BudRecord['look']): Promise<BudRecord>;
   /** Short-lived code shown on the web and typed into the game to link a device. */

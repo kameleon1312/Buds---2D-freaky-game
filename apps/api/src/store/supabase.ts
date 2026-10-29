@@ -126,6 +126,54 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       return toRecord(data as BudRow);
     },
 
+    async removeTokens(slug, keep) {
+      let q = db
+        .from('bud_tokens')
+        .delete({ count: 'exact' })
+        .eq('bud_id', await idBySlug(slug));
+      if (keep) q = q.neq('token_hash', keep);
+      const { error, count } = await q;
+      if (error) throw error;
+      return count ?? 0;
+    },
+
+    async tokenCount(slug) {
+      const { error, count } = await db
+        .from('bud_tokens')
+        .select('token_hash', { count: 'exact', head: true })
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return count ?? 0;
+    },
+
+    async renameBud(slug, name, notSince) {
+      // one statement: renamed only when it wasn't renamed after notSince (the column is null for a bud never renamed)
+      const { data, error } = await db
+        .from('buds')
+        .update({ name, name_changed_at: new Date().toISOString() })
+        .eq('slug', slug)
+        .or(`name_changed_at.is.null,name_changed_at.lte.${notSince.toISOString()}`)
+        .select(COLUMNS)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? toRecord(data as BudRow) : null;
+    },
+
+    async deleteBud(slug) {
+      const id = await idBySlug(slug).catch(() => null);
+      if (!id) return;
+      // a leader hands the crew over (or closes it) the proper way before going
+      await this.leaveCrew(slug);
+      // every bud_* table, its tokens, its district and its market listings go with it (on delete cascade)
+      const { error } = await db.from('buds').delete().eq('id', id);
+      if (error) throw error;
+    },
+
+    async deleteUser(userId) {
+      const { error } = await db.auth.admin.deleteUser(userId);
+      if (error && error.status !== 404) throw error;
+    },
+
     async removeToken(tokenHash) {
       const { error } = await db.from('bud_tokens').delete().eq('token_hash', tokenHash);
       if (error) throw error;

@@ -1,4 +1,6 @@
 import {
+  DELETE_ACCOUNT_WORDS,
+  logoutAllResponseSchema,
   accountBudSchema,
   accountBudsResponseSchema,
   apiErrorSchema,
@@ -145,6 +147,80 @@ export function claimBud(accessToken: string, guestToken: string): Promise<Accou
     headers: { ...bearer(accessToken), 'Content-Type': 'application/json' },
     body: JSON.stringify({ token: guestToken }),
   });
+}
+
+// ---------- managing the account and its buds ----------
+
+/** A new name for an account's bud (once a week; the server filters it like every public name). */
+export function renameAccountBud(
+  accessToken: string,
+  slug: string,
+  name: string,
+): Promise<BudRecord> {
+  return request(`/v1/account/buds/${encodeURIComponent(slug)}/name`, budResponseSchema, {
+    method: 'PUT',
+    headers: { ...bearer(accessToken), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  }).then((r) => r.bud);
+}
+
+/** Signs out every device playing the bud (a lost phone). Returns how many. */
+export async function logoutBudDevices(accessToken: string, slug: string): Promise<number> {
+  const r = await request(
+    `/v1/account/buds/${encodeURIComponent(slug)}/logout-all`,
+    logoutAllResponseSchema,
+    { method: 'POST', headers: bearer(accessToken) },
+  );
+  return r.signedOut;
+}
+
+/** A request that answers 204 (nothing to read): throws the API's message otherwise. */
+async function noContent(path: string, init: RequestInit): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, init);
+  } catch {
+    throw new ApiRequestError('Brak połączenia z serwerem.', 0);
+  }
+  if (res.ok) return;
+  const body: unknown = await res.json().catch(() => null);
+  const message = apiErrorSchema.safeParse(body).data?.error.message;
+  throw new ApiRequestError(FRIENDLY[res.status] ?? message ?? 'Nieznany błąd.', res.status);
+}
+
+/** Deletes an account's bud for good; `confirm` is its name as the player typed it. */
+export function deleteAccountBud(
+  accessToken: string,
+  slug: string,
+  confirm: string,
+): Promise<void> {
+  return noContent(`/v1/account/buds/${encodeURIComponent(slug)}`, {
+    method: 'DELETE',
+    headers: { ...bearer(accessToken), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ confirm }),
+  });
+}
+
+/** Deletes the account with every bud on it (the words must be typed exactly). */
+export function deleteAccount(accessToken: string): Promise<void> {
+  return noContent('/v1/account', {
+    method: 'DELETE',
+    headers: { ...bearer(accessToken), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ confirm: DELETE_ACCOUNT_WORDS }),
+  });
+}
+
+/** Everything the game keeps about the account, as a JSON file. */
+export async function exportAccount(accessToken: string): Promise<Blob> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/v1/account/export`, { headers: bearer(accessToken) });
+  } catch {
+    throw new ApiRequestError('Brak połączenia z serwerem.', 0);
+  }
+  if (!res.ok)
+    throw new ApiRequestError(FRIENDLY[res.status] ?? 'Nie udało się pobrać danych.', res.status);
+  return res.blob();
 }
 
 export function accountPairCode(accessToken: string, slug: string): Promise<PairCodeResponse> {

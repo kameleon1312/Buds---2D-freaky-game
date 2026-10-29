@@ -20,6 +20,7 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const gems = new Map<string, number>(); // slug -> gem balance
   const gear = new Map<string, Map<SlotId, string>>(); // slug -> slot -> item
   const owners = new Map<string, string>(); // slug -> user id
+  const renamedAt = new Map<string, Date>(); // slug -> last rename
   const fights = new Map<string, { slug: string; state: FightState; finishedAt?: Date }>();
   const training = new Map<string, Map<string, number>>(); // slug -> skill -> training XP
   const trainedAt = new Map<string, Date>(); // "slug spot" -> last round
@@ -57,6 +58,58 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
 
     async addToken(slug, tokenHash) {
       tokens.set(tokenHash, slug);
+    },
+
+    async removeTokens(slug, keep) {
+      let removed = 0;
+      for (const [hash, owner] of [...tokens])
+        if (owner === slug && hash !== keep) {
+          tokens.delete(hash);
+          removed++;
+        }
+      return removed;
+    },
+
+    async tokenCount(slug) {
+      return [...tokens.values()].filter((s) => s === slug).length;
+    },
+
+    async renameBud(slug, name, notSince) {
+      const bud = buds.get(slug);
+      const last = renamedAt.get(slug);
+      if (!bud || (last && last > notSince)) return null;
+      bud.name = name;
+      renamedAt.set(slug, now());
+      return copy(bud);
+    },
+
+    async deleteBud(slug) {
+      await this.leaveCrew(slug);
+      buds.delete(slug);
+      owners.delete(slug);
+      renamedAt.delete(slug);
+      for (const [hash, owner] of [...tokens]) if (owner === slug) tokens.delete(hash);
+      for (const [code, p] of [...pairCodes]) if (p.slug === slug) pairCodes.delete(code);
+      for (const map of [
+        owned,
+        quests,
+        skills,
+        loadouts,
+        moveRanks,
+        caches,
+        coins,
+        gems,
+        gear,
+        training,
+        drinks,
+        buffs,
+      ])
+        map.delete(slug);
+      for (const [id, f] of [...fights]) if (f.slug === slug) fights.delete(id);
+    },
+
+    async deleteUser() {
+      // no sign-ins live in memory: the API deletes the buds itself
     },
 
     async removeToken(tokenHash) {

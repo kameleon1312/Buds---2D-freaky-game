@@ -15,6 +15,7 @@ import { accountPairCode, claimBud, getAccountBuds, getMyBud, linkBud } from '@/
 import { getPlayer } from '@/lib/player';
 import { authMessage, supabase, useSession } from '@/lib/supabase';
 import { plural } from '@/lib/plural';
+import { AccountSettings, BudManage } from './AccountManage';
 import { BudSprite } from './BudSprite';
 
 type Mode = 'login' | 'register' | 'reset';
@@ -274,7 +275,7 @@ function Dashboard({ email, token }: { email: string; token: string }) {
       )}
       <div className="bud-cards">
         {buds?.map((b) => (
-          <BudCard key={b.bud.slug} data={b} token={token} />
+          <BudCard key={b.bud.slug} data={b} token={token} onChanged={load} />
         ))}
       </div>
       {buds && buds.length > 0 && (
@@ -283,6 +284,7 @@ function Dashboard({ email, token }: { email: string; token: string }) {
           <Link href="/#kreator">Stwórz kolejnego Buda</Link>
         </p>
       )}
+      <AccountSettings token={token} />
     </div>
   );
 }
@@ -340,7 +342,15 @@ function LinkFromGame({ token, onLinked }: { token: string; onLinked: () => Prom
   );
 }
 
-function BudCard({ data, token }: { data: AccountBud; token: string }) {
+function BudCard({
+  data,
+  token,
+  onChanged,
+}: {
+  data: AccountBud;
+  token: string;
+  onChanged: () => Promise<void>;
+}) {
   const { bud } = data;
   const info = levelFromXp(bud.xp);
   const [code, setCode] = useState<string | null>(null);
@@ -425,6 +435,7 @@ function BudCard({ data, token }: { data: AccountBud; token: string }) {
         </Link>
       </div>
       {error && <p className="form-error">{error}</p>}
+      <BudManage bud={bud} token={token} onChanged={onChanged} />
     </article>
   );
 }

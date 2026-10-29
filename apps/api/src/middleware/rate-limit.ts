@@ -9,16 +9,27 @@ type Bucket = { count: number; resetAt: number };
  * Good enough for a single API instance; swap for Redis when scaling out.
  * `ipHeader` is the one header trusted for the client IP (CLIENT_IP_HEADER, see clientIp).
  */
+/** How many addresses a limiter remembers right now (tests check that old ones are forgotten). */
+export const rateLimitSize = (mw: MiddlewareHandler) =>
+  (mw as MiddlewareHandler & { size?: () => number }).size?.() ?? -1;
+
 export function rateLimit(
   limitPerMinute: number,
   windowMs = 60_000,
   ipHeader?: string,
 ): MiddlewareHandler {
   const buckets = new Map<string, Bucket>();
+  let sweptAt = Date.now();
 
-  return async (c, next) => {
+  const handler: MiddlewareHandler = async (c, next) => {
     const ip = clientIp(c, ipHeader);
     const now = Date.now();
+    // forget the windows that are over, once a window: every address that ever called would otherwise stay in
+    // memory for the life of the process (a slow leak, and an easy one to push with many addresses)
+    if (now - sweptAt >= windowMs) {
+      sweptAt = now;
+      for (const [key, b] of buckets) if (b.resetAt <= now) buckets.delete(key);
+    }
 
     let bucket = buckets.get(ip);
     if (!bucket || bucket.resetAt <= now) {
@@ -36,4 +47,5 @@ export function rateLimit(
     }
     await next();
   };
+  return Object.assign(handler, { size: () => buckets.size });
 }

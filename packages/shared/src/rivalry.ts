@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { DISTRICTS } from './districts';
+import { publicNameOk } from './schemas';
 import { ROOM_DOORS, TURFS } from './turfs';
 
 /**
@@ -160,12 +161,19 @@ export const crewNameSchema = z
   .trim()
   .min(3, 'Nazwa ekipy ma od 3 do 20 znaków')
   .max(20, 'Nazwa ekipy ma od 3 do 20 znaków')
-  .regex(/^[\p{L}\p{N} .'-]+$/u, 'Nazwa ekipy może mieć litery, cyfry, spacje i kropki');
+  .regex(/^[\p{L}\p{N} .'-]+$/u, 'Nazwa ekipy może mieć litery, cyfry, spacje i kropki')
+  // a crew's name and tag show in rankings and over heads: the same filter as every public name
+  .refine(publicNameOk, 'Tej nazwy nie da się użyć');
 export const crewTagSchema = z
   .string()
   .trim()
   .transform((s) => s.toUpperCase())
-  .pipe(z.string().regex(/^[A-Z0-9]{2,4}$/, 'Tag ma 2–4 litery lub cyfry'));
+  .pipe(
+    z
+      .string()
+      .regex(/^[A-Z0-9]{2,4}$/, 'Tag ma 2–4 litery lub cyfry')
+      .refine((tag) => publicNameOk(tag.toLowerCase()), 'Tego tagu nie da się użyć'),
+  );
 
 export const createCrewRequestSchema = z.object({ name: crewNameSchema, tag: crewTagSchema });
 

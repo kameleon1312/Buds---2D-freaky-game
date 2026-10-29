@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ownedItemSchema } from './catalog';
 import { characterStatsSchema, equipmentSchema } from './gear';
-import { budRecordSchema } from './schemas';
+import { budNameSchema, budRecordSchema } from './schemas';
 
 /**
  * Accounts (Supabase Auth, e-mail + password): a signed-in user owns buds, sees their private data (wallet, items,
@@ -42,8 +42,69 @@ export const authConfigResponseSchema = z.object({
   enabled: z.boolean(),
   url: z.string().nullable(),
   publishableKey: z.string().nullable(),
+  /** The website (privacy, terms, deleting the account), so the game links to the real pages. */
+  site: z.string().nullable().default(null),
 });
 export type AuthConfigResponse = z.infer<typeof authConfigResponseSchema>;
+
+// ---------- managing the account and the buds (docs/konto.md) ----------
+
+/** A bud can be renamed once in this many days (its name is public: no hiding behind a new one every hour). */
+export const RENAME_DAYS = 7;
+
+export const renameBudRequestSchema = z.object({ name: budNameSchema });
+export type RenameBudRequest = z.infer<typeof renameBudRequestSchema>;
+
+/**
+ * Deleting a bud for good: the player types its name, so a stray tap never does it. Everything it has goes with it
+ * (gear, coins, gems, progress, its district); purchases already made are not refunded by deleting.
+ */
+export const deleteBudRequestSchema = z.object({ confirm: z.string().min(1).max(40) });
+export type DeleteBudRequest = z.infer<typeof deleteBudRequestSchema>;
+
+/** Deleting the account: every bud on it and the sign-in itself. The words have to be typed. */
+export const DELETE_ACCOUNT_WORDS = 'USUŃ KONTO';
+export const deleteAccountRequestSchema = z.object({ confirm: z.literal(DELETE_ACCOUNT_WORDS) });
+export type DeleteAccountRequest = z.infer<typeof deleteAccountRequestSchema>;
+
+/** A typed name matches the bud's (case and spaces at the ends don't count). */
+export const confirmsName = (typed: string, name: string) =>
+  typed.trim().toLocaleLowerCase('pl') === name.trim().toLocaleLowerCase('pl');
+
+/** How many devices were signed out. */
+export const logoutAllResponseSchema = z.object({ signedOut: z.number().int().nonnegative() });
+export type LogoutAllResponse = z.infer<typeof logoutAllResponseSchema>;
+
+/**
+ * Everything the game keeps about a bud, for the player to download (the GDPR's right of access and portability):
+ * plain JSON, the same shapes the API answers with.
+ */
+export const budExportSchema = z.object({
+  exportedAt: z.string(),
+  bud: budRecordSchema,
+  account: z.object({ email: z.string().nullable() }).nullable(),
+  wallet: z.object({ coins: z.number().int(), gems: z.number().int() }),
+  items: z.array(ownedItemSchema),
+  equipment: equipmentSchema,
+  skills: z.array(z.object({ id: z.string(), rank: z.number().int() })),
+  training: z.array(z.object({ skill: z.string(), xp: z.number().int() })),
+  quests: z.array(z.string()),
+  caches: z.array(z.string()),
+  consumables: z.array(z.object({ itemId: z.string(), qty: z.number().int() })),
+  loadouts: z.record(z.string(), z.array(z.string().nullable())),
+  moveRanks: z.record(z.string(), z.number().int()),
+  crew: z.object({ tag: z.string(), name: z.string() }).nullable(),
+  land: z.unknown().nullable(),
+  devices: z.number().int(),
+});
+export type BudExport = z.infer<typeof budExportSchema>;
+
+export const accountExportSchema = z.object({
+  exportedAt: z.string(),
+  email: z.string().nullable(),
+  buds: z.array(budExportSchema),
+});
+export type AccountExport = z.infer<typeof accountExportSchema>;
 
 /** Links a guest bud: the guest token proves the browser created it. */
 export const claimBudRequestSchema = z.object({ token: z.string().min(16).max(200) });

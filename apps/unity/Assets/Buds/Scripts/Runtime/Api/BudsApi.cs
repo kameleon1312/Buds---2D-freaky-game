@@ -324,6 +324,42 @@ namespace Buds.Api
         public Awaitable<ConsumablesResponse> UseConsumable(string token, string itemId) =>
             Post<ConsumablesResponse>($"/v1/buds/me/consumables/{Uri.EscapeDataString(itemId)}/use", token, "{}");
 
+        // ---------- the bud itself: name, devices, data, deleting it ----------
+
+        /// <summary>A new name (once a week, the public name rules: the server checks).</summary>
+        public Awaitable<BudResponse> RenameBud(string token, string name) =>
+            Send<BudResponse>("PUT", "/v1/buds/me/name", token, JsonUtility.ToJson(new RenameRequest { name = name }));
+
+        /// <summary>Every other device of the bud signed out; this one stays.</summary>
+        public Awaitable<LogoutAllDto> SignOutOthers(string token) =>
+            Post<LogoutAllDto>("/v1/buds/me/logout-all", token, "{}");
+
+        /// <summary>Everything the game keeps about the bud, as the JSON the server sends (to copy out).</summary>
+        public async Awaitable<string> ExportBud(string token)
+        {
+            using var req = UnityWebRequest.Get($"{baseUrl}/v1/buds/me/export");
+            req.timeout = TimeoutSeconds;
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await Send(req);
+            if (req.result != UnityWebRequest.Result.Success) throw ToException(req);
+            return req.downloadHandler.text;
+        }
+
+        /// <summary>Deletes the bud for good; `confirm` is its name as the player typed it.</summary>
+        public async Awaitable DeleteBud(string token, string confirm)
+        {
+            using var req = new UnityWebRequest($"{baseUrl}/v1/buds/me", UnityWebRequest.kHttpVerbDELETE)
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(JsonUtility.ToJson(new DeleteBudRequest { confirm = confirm }))),
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+            await Send(req);
+            if (req.result != UnityWebRequest.Result.Success || req.responseCode >= 400) throw ToException(req);
+        }
+
         // ---------- ciosy ----------
 
         /// <summary>The five fight buttons of the weapon in hand, every move that could go on them, the upgrades.</summary>
