@@ -96,14 +96,18 @@ Konfetti nie ma.
 Każda umiejętność ma własną minigrę (`Quests/TrainingGames.cs`, ekran `TrainingScreen`). Wynik 0–5 trafia do tego
 samego endpointu `/v1/buds/me/training/:spotId`.
 
-| Umiejętność          | Minigra       | Na czym polega                                                                |
-| -------------------- | ------------- | ----------------------------------------------------------------------------- |
-| Spryt                | Skupienie     | zatrzymaj znacznik w zielonym polu                                            |
-| Walka                | Kombinacje    | wybij kolejność strzałek na czas                                              |
-| Flow                 | Rytm          | trafiaj nuty na 3 torach równo z linią; fraza liczy się od 3 z 4 nut          |
-| Graffiti             | Szablon       | trzymaj spray nad otworami, puszczaj nad maską (75% pokrycia, ≤ 20% zacieków) |
-| Surfing              | Równowaga     | kontruj falę, żeby deska została w zielonym polu                              |
-| Instynkt przetrwania | Tor przeszkód | skok nad płotkiem, ślizg pod belką                                            |
+| Umiejętność          | Minigra         | Na czym polega                                                                                                               |
+| -------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Spryt                | Trzy kubki      | uliczny cwaniak pokazuje kulkę i miesza kubki (więcej zamian, szybciej, potem 4 kubki); wskaż kubek z kulką                  |
+| Walka                | Sparing         | w ringu: unik od sierpowego, garda na prosty, cios, gdy rywal się odsłoni; runda liczy się bez przyjętego ciosu i z kontrą   |
+| Flow                 | Scena           | nuty na 3 torach, każda trafiona to słowo zwrotki nad sceną; tłum skacze; fraza liczy się od 3 z 4 nut, tempo rośnie z rangą |
+| Graffiti             | Mural z pamięci | mural w kolorach przez 5–3 s, potem tylko kontur: pomaluj pole po polu tymi samymi kolorami; liczy się tylko wierna kopia    |
+| Surfing              | Rekin           | deska na 5 torach, płetwy płyną na Buda (pierwsza fali zawsze w jego tor, łowcy skręcają); fala liczy się bez ugryzienia     |
+| Instynkt przetrwania | Ucieczka        | ucieczka przed psem: skok przez barierkę, ślizg pod belką; każde zahaczenie przybliża psa                                    |
+
+Grafiki scen (rekin, kubki, rękawica, scena, pies, przeszkody, murale jako pola do pokolorowania) są w
+`tools/world/art/training.ts`; `export-art.ts` zapisuje je do `Resources/Ui/Training` (murale: `Murals/<mural>-<pole>.png`
+i `murals.json` z punktami, w które celuje puszka), podgląd: `export-art.ts --fx-preview out.png training`.
 
 Każda minigra ma bota, który gra bezbłędnie. Używają go testy EditMode (bot wygrywa 5/5, bezczynność nie trenuje)
 i demo `-buds-training-demo`.

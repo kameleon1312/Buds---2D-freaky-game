@@ -24,13 +24,17 @@ namespace Buds.Tests
         }
 
         [Test]
-        public void EverySkillTrainsWithItsOwnGameAndOnlySprytKeepsTheTimingBar()
+        public void EverySkillTrainsWithItsOwnRealTask()
         {
             var kinds = new HashSet<string>();
             foreach (var s in Skills) kinds.Add(TrainingGames.KindFor(s));
             Assert.AreEqual(Skills.Length, kinds.Count);
-            Assert.AreEqual("timing", TrainingGames.KindFor("spryt"));
-            Assert.IsInstanceOf<TimingGame>(TrainingGames.For("spryt", 5, 1));
+            Assert.IsInstanceOf<BoxingGame>(TrainingGames.For("walka", 5, 1));
+            Assert.IsInstanceOf<RhythmGame>(TrainingGames.For("flow", 5, 1));
+            Assert.IsInstanceOf<MuralGame>(TrainingGames.For("graffiti", 5, 1));
+            Assert.IsInstanceOf<SharkGame>(TrainingGames.For("surfing", 5, 1));
+            Assert.IsInstanceOf<RunnerGame>(TrainingGames.For("przetrwanie", 5, 1));
+            Assert.IsInstanceOf<ShellGame>(TrainingGames.For("spryt", 5, 1));
         }
 
         [Test]
@@ -45,46 +49,169 @@ namespace Buds.Tests
         }
 
         [Test]
-        public void DoingNothingDoesNotTrain([Values(1, 7, 42, 1234)] int seed)
+        public void DoingNothingDoesNotTrainAndEveryGameEndsOnItsOwn([Values(1, 7, 42, 1234)] int seed)
         {
-            // (spryt's marker waits for a press: it has no clock, so it never ends on its own)
-            foreach (var s in new[] { "walka", "flow", "graffiti", "przetrwanie" })
+            foreach (var s in Skills)
             {
                 var g = TrainingGames.For(s, 5, seed);
                 Assert.AreEqual(0, PlayIdle(g), s);
                 Assert.IsTrue(g.Done, $"{s} must end on its own");
             }
-            // on the wave an idle board sometimes rides out a calm wave, never most of them
-            var balance = new BalanceGame(5, seed);
-            Assert.LessOrEqual(PlayIdle(balance), 2);
         }
 
         [Test]
-        public void AWrongDirectionBreaksTheCombo()
+        public void TheWrongAnswerToABlowGetsHit()
         {
-            var g = new ComboGame(5, 3);
-            var wrong = (g.Sequence[0] + 1) % 4;
-            g.Press(wrong);
-            Assert.AreEqual(1, g.Round);
-            Assert.AreEqual(0, g.Score);
+            var g = new BoxingGame(5, 3);
+            var blow = g.Moves[0];
+            Assert.AreNotEqual(BoxingGame.Punch, blow.Need);
+            g.Tick(blow.Time - blow.Windup + 0.01f);
+            Assert.AreSame(blow, g.Coming);
+            // dodging into the hook instead of away from it
+            g.Press(blow.Need == BoxingGame.Guard ? BoxingGame.DodgeLeft : BoxingGame.Guard);
+            g.Tick(blow.Windup);
+            Assert.AreEqual(-1, blow.State);
+            Assert.AreEqual(1, g.HitsTaken);
             Assert.AreEqual(-1, g.TakeFeedback());
-            Assert.AreEqual(0, g.TakeFeedback());
         }
 
         [Test]
-        public void CombosGrowAndTimeShrinks()
+        public void ACounterLandsOnlyWhileTheGuardIsDown()
         {
-            var g = new ComboGame(5, 3);
-            var firstLength = g.Sequence.Length;
-            var firstTime = g.TimeLimit;
-            for (var r = 0; r < 4; r++)
+            var g = new BoxingGame(5, 3);
+            BoxingGame.Move opening = null;
+            foreach (var m in g.Moves)
+                if (m.Need == BoxingGame.Punch)
+                {
+                    opening = m;
+                    break;
+                }
+            Assert.IsNotNull(opening);
+            g.Tick(opening.Time - 0.2f);
+            g.Press(BoxingGame.Punch); // too early: into the guard
+            Assert.AreEqual(0, opening.State);
+            g.Tick(0.3f);
+            g.Press(BoxingGame.Punch);
+            Assert.AreEqual(1, opening.State);
+            Assert.AreEqual(1, g.Counters);
+        }
+
+        [Test]
+        public void SparringRoundsSpeedUp()
+        {
+            var g = new BoxingGame(5, 8);
+            float first = 0, last = 0;
+            foreach (var m in g.Moves)
+                if (m.Need != BoxingGame.Punch)
+                {
+                    if (m.Round == 0) first = m.Windup;
+                    if (m.Round == 4) last = m.Windup;
+                }
+            Assert.Less(last, first);
+            Assert.GreaterOrEqual(last, 0.45f);
+        }
+
+        [Test]
+        public void TheMuralCountsOnlyAsAPerfectCopy()
+        {
+            var g = new MuralGame(5, 4);
+            Assert.AreEqual(MuralGame.Stage.Look, g.Phase);
+            Assert.AreEqual(3, g.Target.Length, "the first mural is the smallest");
+            g.Press(g.Target[0]); // no painting while it is shown
+            Assert.AreEqual(0, g.Current);
+            g.Tick(MuralGame.LookTime(0) + 0.01f);
+            Assert.AreEqual(MuralGame.Stage.Paint, g.Phase);
+            // a wrong colour, taken back, then the right ones
+            g.Press((g.Target[0] + 1) % MuralGame.Paints);
+            g.Press(MuralGame.Undo);
+            Assert.AreEqual(-1, g.Painted[0]);
+            foreach (var c in g.Target) g.Press(c);
+            Assert.AreEqual(1, g.Score);
+            Assert.AreEqual(1, g.TakeFeedback());
+            g.Tick(MuralGame.RevealTime + 0.01f);
+            Assert.AreEqual(1, g.Round);
+            Assert.GreaterOrEqual(g.Target.Length, 4);
+            Assert.Less(MuralGame.LookTime(4), MuralGame.LookTime(0));
+            Assert.GreaterOrEqual(MuralGame.LookTime(9), 3f);
+            // one field off spoils the copy
+            g.Tick(MuralGame.LookTime(1) + 0.01f);
+            for (var i = 0; i < g.Target.Length; i++) g.Press(i == 1 ? (g.Target[i] + 1) % MuralGame.Paints : g.Target[i]);
+            Assert.AreEqual(1, g.Score);
+            Assert.AreEqual(1, g.LastMistakes);
+        }
+
+        [Test]
+        public void EveryMuralsFieldsMatchItsArt()
+        {
+            var json = UnityEngine.Resources.Load<UnityEngine.TextAsset>("Ui/Training/murals").text;
+            foreach (var (id, fields) in MuralGame.Templates)
             {
-                foreach (var d in g.Sequence) g.Press(d);
-                g.Tick(1);
+                for (var i = 0; i < fields; i++)
+                    Assert.IsNotNull(UnityEngine.Resources.Load<UnityEngine.Texture2D>($"Ui/Training/Murals/{id}-{i}"), $"{id}-{i}");
+                Assert.IsNull(UnityEngine.Resources.Load<UnityEngine.Texture2D>($"Ui/Training/Murals/{id}-{fields}"), $"{id} has more fields");
+                StringAssert.Contains($"\"id\": \"{id}\"", json);
             }
-            Assert.Greater(g.Sequence.Length, firstLength);
-            Assert.Less(g.TimeLimit / g.Sequence.Length, firstTime / firstLength);
-            Assert.AreEqual(4, g.Score);
+        }
+
+        [Test]
+        public void TheSharkHuntsTheBudsLane()
+        {
+            var g = new SharkGame(5, 6);
+            var first = g.Sharks[0];
+            g.Tick(first.Time - SharkGame.Lead + 0.01f);
+            Assert.AreEqual(g.Lane, first.Lane, "the first fin of a wave heads for the bud");
+            g.Press(0);
+            g.Tick(SharkGame.Lead);
+            Assert.AreEqual(1, first.State);
+            // a hunter turns one lane towards the bud shortly before it arrives
+            SharkGame.Shark hunter = null;
+            foreach (var s in g.Sharks)
+                if (s.Hunter)
+                {
+                    hunter = s;
+                    break;
+                }
+            Assert.IsNotNull(hunter);
+            while (g.Clock < hunter.Time - SharkGame.TurnAt - 0.02f) g.Tick(Dt);
+            var before = Math.Abs(g.Lane - hunter.Lane);
+            g.Tick(0.05f);
+            Assert.IsTrue(hunter.Turned);
+            Assert.AreEqual(Math.Max(0, before - 1), Math.Abs(g.Lane - hunter.Lane));
+        }
+
+        [Test]
+        public void TheBoardStaysOnTheWater()
+        {
+            var g = new SharkGame(5, 1);
+            for (var i = 0; i < 9; i++) g.Press(0);
+            Assert.AreEqual(0, g.Lane);
+            for (var i = 0; i < 9; i++) g.Press(1);
+            Assert.AreEqual(SharkGame.Lanes - 1, g.Lane);
+        }
+
+        [Test]
+        public void TheCupWithTheBallIsFollowedThroughTheShuffle([Values(2, 5, 11)] int seed)
+        {
+            var g = new ShellGame(5, seed);
+            var cups = g.Cups;
+            var swaps = g.Swaps.Length;
+            var time = g.SwapTime;
+            while (g.Phase != ShellGame.Stage.Pick) g.Tick(Dt);
+            // every swap only exchanged two cups: still one cup per slot
+            var slots = new HashSet<int>();
+            for (var c = 0; c < g.Cups; c++) slots.Add(g.SlotOf[c]);
+            Assert.AreEqual(g.Cups, slots.Count);
+            g.Press((g.SlotOf[g.Ball] + 1) % g.Cups);
+            Assert.AreEqual(0, g.Score);
+            Assert.IsFalse(g.LastHit);
+            while (g.Round == 0) g.Tick(Dt);
+            while (g.Phase != ShellGame.Stage.Pick) g.Tick(Dt);
+            g.Press(g.SlotOf[g.Ball]);
+            Assert.AreEqual(1, g.Score);
+            Assert.Greater(g.Swaps.Length, swaps);
+            Assert.Less(g.SwapTime, time);
+            while (g.Round < 3) g.Bot(Dt);
+            Assert.Greater(g.Cups, cups, "a fourth cup later on");
         }
 
         [Test]
@@ -127,18 +254,6 @@ namespace Buds.Tests
             Assert.AreEqual(0, first.State);
             g.Press(first.Lane);
             Assert.AreEqual(1, first.State);
-        }
-
-        [Test]
-        public void SprayingTheWholeStripFailsOnOverspray()
-        {
-            var g = new StencilGame(5, 4);
-            g.Press(0);
-            for (var t = 0f; t < 5 && g.Round == 0; t += Dt) g.Tick(Dt);
-            Assert.AreEqual(1, g.Round);
-            Assert.AreEqual(0, g.Score);
-            Assert.AreEqual(1f, g.LastCovered, 0.001f);
-            Assert.Greater(g.LastOverspray, StencilGame.MaxOverspray);
         }
 
         [Test]

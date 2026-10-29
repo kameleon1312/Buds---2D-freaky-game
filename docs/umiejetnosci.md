@@ -36,8 +36,8 @@ Stanowiska treningowe są w `packages/shared/src/content/training.ts` (po 2–3 
 Startowej, każda umiejętność ma swoje miejsce). Na mapie stoi rekwizyt `trening-<look>` z limonkową chorągiewką
 (`tools/world/art/rides.ts`); `export-quests.ts` sprawdza, czy stoi na wolnym, osiągalnym polu.
 
-Przy stanowisku `E` otwiera mini-grę (`TimingGame` + `TrainingScreen`): złoty znacznik biega po pasku, trzeba go
-zatrzymać w zielonym polu. 5 rund, pole się zwęża, znacznik przyspiesza. Wynik (0–5 trafień) idzie na
+Przy stanowisku `E` otwiera mini-grę umiejętności (`Quests/TrainingGames.cs` + `TrainingScreen`, opis w
+[rywalizacja.md](rywalizacja.md)): każda to prawdziwe zadanie we własnej scenie. 5 rund. Wynik (0–5 udanych rund) idzie na
 `POST /v1/buds/me/training/:spotId`; serwer daje 8 XP za trafienie (×2 z napojem Skupienie), raz na
 `TRAINING_COOLDOWN_SECONDS` (90 s) dla każdego stanowiska (atomowa funkcja `train`). Odpowiedź mówi, czy wpadła nowa
 ranga i jakie perki się odblokowały. Jak przy zadaniach: to, czy gracz naprawdę stał przy stanowisku, sprawdzi dopiero

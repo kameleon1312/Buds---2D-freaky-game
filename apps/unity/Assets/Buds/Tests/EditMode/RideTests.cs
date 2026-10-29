@@ -99,38 +99,5 @@ namespace Buds.Tests
             Assert.AreEqual("specjalny", Content.Perk("cios-specjalny").move);
             Assert.IsNotNull(Content.Move("specjalny"));
         }
-
-        [Test]
-        public void TimingGameCountsHitsAndGetsHarder()
-        {
-            var g = new TimingGame(5, 7);
-            var width = g.ZoneWidth;
-            var speed = g.Speed;
-            g.SetMarker(g.ZoneCenter);
-            Assert.IsTrue(g.Press());
-            Assert.Less(g.ZoneWidth, width);
-            Assert.Greater(g.Speed, speed);
-            g.SetMarker(g.ZoneMax + 0.05f);
-            Assert.IsFalse(g.Press());
-            for (var i = 0; i < 3; i++)
-            {
-                g.SetMarker(g.ZoneCenter);
-                g.Press();
-            }
-            Assert.IsTrue(g.Done);
-            Assert.AreEqual(4, g.Score);
-            Assert.IsFalse(g.Press(), "no rounds after the last");
-        }
-
-        [Test]
-        public void TimingMarkerBouncesInsideTheBar()
-        {
-            var g = new TimingGame(5, 1);
-            for (var i = 0; i < 200; i++)
-            {
-                g.Tick(0.05f);
-                Assert.That(g.Marker, Is.InRange(0f, 1f));
-            }
-        }
     }
 }

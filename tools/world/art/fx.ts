@@ -83,7 +83,7 @@ function halftoneDots(
 }
 
 /** An impact burst with its sound: two-tone burst, halftone shade, ink outline and drop, the word on top. */
-function impact(
+export function impact(
   text: string,
   w: number,
   h: number,

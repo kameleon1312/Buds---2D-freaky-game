@@ -4,12 +4,14 @@
 // Usage (from apps/api, which has resvg):
 //   pnpm exec tsx ../../tools/world/export-art.ts                 # write PNGs + manifest
 //   pnpm exec tsx ../../tools/world/export-art.ts --preview out.png [filter]   # contact sheet only
+//   pnpm exec tsx ../../tools/world/export-art.ts --fx-preview out.png [training]   # effects (or training art)
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { ABILITY_ICONS } from './art/ability-icons';
 import { ICONS } from './art/icons';
 import { FX } from './art/fx';
+import { MURALS, TRAINING, muralRegion } from './art/training';
 import { ALL_PROPS } from './art/index';
 import { finish } from './art/finish';
 import { T } from './art/kit';
@@ -39,7 +41,32 @@ if (args[0] === '--fx-preview') {
   let rowH = 0;
   let body = '';
   const W = 1900;
-  for (const [name, p] of Object.entries(FX)) {
+  // "training": the training scenes' art and every mural painted in sample colours
+  const paints = ['#a3e635', '#ffc93c', '#4cc7ff', '#ff3d50', '#b45cff', '#f6f2e9'];
+  const set: Record<string, { w: number; h: number; body: string }> =
+    args[2] === 'training'
+      ? {
+          ...TRAINING,
+          ...Object.fromEntries(
+            Object.entries(MURALS).map(([id, regions]) => [
+              id,
+              {
+                w: regions.length && muralRegion(regions[0]!).w,
+                h: muralRegion(regions[0]!).h,
+                body: regions
+                  .map((r, i) =>
+                    muralRegion(r).body.replace(
+                      'fill="#ffffff"',
+                      `fill="${paints[(i * 2 + 1) % paints.length]}"`,
+                    ),
+                  )
+                  .join(''),
+              },
+            ]),
+          ),
+        }
+      : FX;
+  for (const [name, p] of Object.entries(set)) {
     if (x + p.w > W) {
       x = gap;
       y += rowH + gap + 24;
@@ -59,7 +86,7 @@ if (args[0] === '--fx-preview') {
     args[1]!,
     new Resvg(svg, { font: { ...SIGN_FONT, loadSystemFonts: true } }).render().asPng(),
   );
-  console.info(`preview of ${Object.keys(FX).length} effects → ${args[1]}`);
+  console.info(`preview of ${Object.keys(set).length} pictures → ${args[1]}`);
 } else if (args[0] === '--preview') {
   const filter = args[2];
   // a filter like "karuzela|mlyn" matches any of its parts
@@ -159,4 +186,35 @@ if (args[0] === '--fx-preview') {
   for (const [name, p] of Object.entries(FX))
     writeFileSync(`${fxDir}${name}.png`, new Resvg(svgOf(p), { font: SIGN_FONT }).render().asPng());
   console.info(`wrote ${Object.keys(FX).length} effects to ${fxDir}`);
+
+  // training scenes: Resources/Ui/Training/<name>.png, murals as one picture per region + where the can aims
+  const trDir = fileURLToPath(
+    new URL('../../apps/unity/Assets/Buds/Resources/Ui/Training/', import.meta.url),
+  );
+  mkdirSync(`${trDir}Murals`, { recursive: true });
+  for (const [name, p] of Object.entries(TRAINING))
+    writeFileSync(`${trDir}${name}.png`, new Resvg(svgOf(p), { font: SIGN_FONT }).render().asPng());
+  for (const [id, regions] of Object.entries(MURALS))
+    regions.forEach((r, i) =>
+      writeFileSync(
+        `${trDir}Murals/${id}-${i}.png`,
+        new Resvg(svgOf(muralRegion(r)), { font: SIGN_FONT }).render().asPng(),
+      ),
+    );
+  writeFileSync(
+    `${trDir}murals.json`,
+    JSON.stringify(
+      {
+        murals: Object.entries(MURALS).map(([id, regions]) => ({
+          id,
+          aims: regions.map((r) => ({ x: r.aim[0], y: r.aim[1] })),
+        })),
+      },
+      null,
+      2,
+    ) + '\n',
+  );
+  console.info(
+    `wrote ${Object.keys(TRAINING).length} training pictures and ${Object.keys(MURALS).length} murals to ${trDir}`,
+  );
 }

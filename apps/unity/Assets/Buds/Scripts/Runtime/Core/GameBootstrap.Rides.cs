@@ -167,15 +167,13 @@ namespace Buds.Core
                 activeTraining = null;
                 var skillName = Array.Find(quests.Content.skills, s => s.id == skill)?.name ?? skill;
                 trainingScreen.Open(spot, skillName, quests.Content.trainingMaxScore, sheet, trainedRanks.TryGetValue(skill, out var rank) ? rank : 0);
-                var mid = false;
+                var shots = 0;
                 for (var t = 0f; t < 60 && !trainingScreen.Finished; t += Time.deltaTime)
                 {
                     trainingScreen.BotTick(Time.deltaTime);
-                    if (!mid && trainingScreen.Game.Round >= 2)
-                    {
-                        mid = true;
-                        await shot($"t-{skill}-gra.png");
-                    }
+                    // one early in the game, one later (another stage of it, harder rounds)
+                    if (shots == 0 && t > 3.2f || shots == 1 && trainingScreen.Game.Round >= 3)
+                        await shot($"t-{skill}-gra{++shots}.png");
                     await Awaitable.NextFrameAsync();
                 }
                 await shot($"t-{skill}-wynik.png");

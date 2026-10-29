@@ -25,107 +25,171 @@ namespace Buds.Quests
 
     public static class TrainingGames
     {
-        /// <summary>The kind of mini-game a skill trains with.</summary>
+        /// <summary>The kind of mini-game a skill trains with: a real task for each skill.</summary>
         public static string KindFor(string skill) => skill switch
         {
-            "walka" => "combo",
-            "flow" => "rhythm",
-            "graffiti" => "stencil",
-            "surfing" => "balance",
-            "przetrwanie" => "runner",
-            _ => "timing", // spryt: focus, stop the marker in the zone
+            "walka" => "boxing", // sparring: dodge, block, counter
+            "flow" => "rhythm", // on stage: every note a word of the verse
+            "graffiti" => "mural", // a mural from memory
+            "surfing" => "shark", // out of the shark's way
+            "przetrwanie" => "runner", // away from the guard dog
+            _ => "shell", // spryt: the street hustler's cups
         };
 
         /// <param name="rank">The bud's rank in the skill: the rhythm's tempo follows it (a beginner gets a slow, wide beat).</param>
         public static ITrainingGame For(string skill, int rounds, int seed, int rank = 0) => KindFor(skill) switch
         {
-            "combo" => new ComboGame(rounds, seed),
+            "boxing" => new BoxingGame(rounds, seed),
             "rhythm" => new RhythmGame(rounds, seed, rank),
-            "stencil" => new StencilGame(rounds, seed),
-            "balance" => new BalanceGame(rounds, seed),
+            "mural" => new MuralGame(rounds, seed),
+            "shark" => new SharkGame(rounds, seed),
             "runner" => new RunnerGame(rounds, seed),
-            _ => new TimingGame(rounds, seed),
+            _ => new ShellGame(rounds, seed),
         };
     }
 
-    // ---------- walka: combos ----------
+    // ---------- walka: sparring ----------
 
     /// <summary>
-    /// Kombinacje: a combo of directions shows up, the player beats it out in order before time runs out. A wrong
-    /// direction or the clock ends the round. Longer combos and less time as the rounds go.
+    /// Sparing: the partner telegraphs every blow (a hook from one side or a straight) and now and then drops the
+    /// guard. Dodge away from a hook, block a straight, punch into an opening before it closes. A round counts when
+    /// nothing got through and at least one counter landed. Quicker wind-ups and longer rounds as it goes.
     /// </summary>
-    public sealed class ComboGame : ITrainingGame
+    public sealed class BoxingGame : ITrainingGame
     {
-        readonly Random rng;
+        public const int DodgeLeft = 0, Guard = 1, DodgeRight = 2, Punch = 3;
+        public const float DodgeTime = 0.42f, GuardTime = 0.45f, PunchTime = 0.22f;
+
+        public sealed class Move
+        {
+            /// <summary>When the blow lands, or when the partner opens up.</summary>
+            public float Time;
+            /// <summary>The answer it needs: DodgeLeft / Guard / DodgeRight against a blow, Punch into an opening.</summary>
+            public int Need;
+            public float Windup;
+            /// <summary>How long an opening stays open.</summary>
+            public float Open;
+            public int Round;
+            /// <summary>0 coming, 1 answered, -1 got through (or the opening was missed).</summary>
+            public int State;
+        }
+
+        readonly List<Move> moves = new();
+        readonly int[] size;
+        readonly int[] judged;
+        readonly int[] hits;
+        readonly int[] counters;
         int feedback;
         public int Rounds { get; }
         public int Round { get; private set; }
         public int Score { get; private set; }
         public bool Done => Round >= Rounds;
-        /// <summary>0 left, 1 up, 2 right, 3 down.</summary>
-        public int[] Sequence { get; private set; } = Array.Empty<int>();
-        public int Position { get; private set; }
-        public float TimeLeft { get; private set; }
-        public float TimeLimit { get; private set; }
-        /// <summary>A short pause after each combo so the result can be seen.</summary>
-        public float Pause { get; private set; }
-        float botWait;
+        public float Clock { get; private set; }
+        public IReadOnlyList<Move> Moves => moves;
+        /// <summary>What the bud is doing (-1 nothing) and for how much longer.</summary>
+        public int Action { get; private set; } = -1;
+        public float ActionLeft { get; private set; }
+        public int HitsTaken { get; private set; }
+        public int Counters { get; private set; }
+        public int Openings { get; }
 
-        public ComboGame(int rounds = 5, int seed = 0)
+        public BoxingGame(int rounds = 5, int seed = 0)
         {
             Rounds = Math.Max(1, rounds);
-            rng = new Random(seed);
-            NextCombo();
-        }
-
-        void NextCombo()
-        {
-            var length = 3 + Round / 2;
-            Sequence = new int[length];
-            for (var i = 0; i < length; i++)
+            size = new int[Rounds];
+            judged = new int[Rounds];
+            hits = new int[Rounds];
+            counters = new int[Rounds];
+            var rng = new Random(seed);
+            var t = 1.4f;
+            for (var r = 0; r < Rounds; r++)
             {
-                // never the same direction three times in a row: it should feel like a combo, not mashing
-                int d;
-                do d = rng.Next(4);
-                while (i >= 2 && d == Sequence[i - 1] && d == Sequence[i - 2]);
-                Sequence[i] = d;
+                var count = 3 + r / 2;
+                var windup = Math.Max(0.45f, 0.8f - 0.07f * r);
+                var open = Math.Max(0.42f, 0.62f - 0.04f * r);
+                for (var i = 0; i < count; i++)
+                {
+                    // every round ends on an opening, another may come after a blow (never two in a row)
+                    var punch = i == count - 1 || i > 0 && moves[^1].Need != Punch && rng.Next(3) == 0;
+                    var m = new Move { Round = r, Windup = windup, Open = open };
+                    if (punch)
+                    {
+                        m.Need = Punch;
+                        m.Time = t + 0.15f;
+                        t = m.Time + open + 0.4f;
+                    }
+                    else
+                    {
+                        m.Need = rng.Next(3);
+                        m.Time = t + windup;
+                        t = m.Time + 0.35f + (float)rng.NextDouble() * 0.25f;
+                    }
+                    moves.Add(m);
+                    size[r]++;
+                    if (punch) Openings++;
+                }
+                t += 0.9f; // a breath between rounds
             }
-            Position = 0;
-            TimeLimit = (1.0f + 0.55f * length) * (1 - 0.06f * Round);
-            TimeLeft = TimeLimit;
         }
 
-        void EndRound(bool hit)
+        /// <summary>The blow being wound up or the opening that is open now (null: nothing to answer).</summary>
+        public Move Coming
         {
-            if (hit) Score++;
-            feedback = hit ? 1 : -1;
-            Round++;
-            Pause = 0.45f;
-            if (!Done) NextCombo();
+            get
+            {
+                foreach (var m in moves)
+                    if (m.State == 0)
+                        return Clock >= (m.Need == Punch ? m.Time : m.Time - m.Windup) ? m : null;
+                return null;
+            }
+        }
+
+        void Judge(Move m, bool ok)
+        {
+            m.State = ok ? 1 : -1;
+            feedback = ok ? 1 : -1;
+            if (m.Need == Punch && ok)
+            {
+                counters[m.Round]++;
+                Counters++;
+            }
+            if (m.Need != Punch && !ok)
+            {
+                hits[m.Round]++;
+                HitsTaken++;
+            }
+            if (++judged[m.Round] < size[m.Round]) return;
+            if (hits[m.Round] == 0 && counters[m.Round] > 0) Score++;
+            Round = Math.Max(Round, m.Round + 1);
         }
 
         public void Tick(float dt)
         {
             if (Done) return;
-            if (Pause > 0)
+            Clock += dt;
+            ActionLeft = Math.Max(0, ActionLeft - dt);
+            if (ActionLeft <= 0) Action = -1;
+            foreach (var m in moves)
             {
-                Pause = Math.Max(0, Pause - dt);
-                return;
+                if (m.State != 0) continue;
+                if (m.Need != Punch && Clock >= m.Time) Judge(m, Action == m.Need);
+                else if (m.Need == Punch && Clock > m.Time + m.Open) Judge(m, false);
             }
-            TimeLeft -= dt;
-            if (TimeLeft <= 0) EndRound(false);
         }
 
+        /// <summary>0 dodge left, 1 guard, 2 dodge right, 3 punch; one at a time.</summary>
         public void Press(int action)
         {
-            if (Done || Pause > 0 || action < 0 || action > 3) return;
-            if (action != Sequence[Position])
-            {
-                EndRound(false);
-                return;
-            }
-            Position++;
-            if (Position >= Sequence.Length) EndRound(true);
+            if (Done || ActionLeft > 0 || action < 0 || action > 3) return;
+            Action = action;
+            ActionLeft = action switch { Punch => PunchTime, Guard => GuardTime, _ => DodgeTime };
+            if (action != Punch) return;
+            foreach (var m in moves)
+                if (m.State == 0 && m.Need == Punch && Clock >= m.Time && Clock <= m.Time + m.Open)
+                {
+                    Judge(m, true);
+                    break;
+                }
         }
 
         public void Release(int action)
@@ -142,10 +206,458 @@ namespace Buds.Quests
         public void Bot(float dt)
         {
             Tick(dt);
+            if (Done || ActionLeft > 0) return;
+            foreach (var m in moves)
+            {
+                if (m.State != 0) continue;
+                if (m.Need != Punch && m.Time - Clock <= 0.2f && m.Time > Clock) Press(m.Need);
+                else if (m.Need == Punch && Clock >= m.Time + 0.06f) Press(Punch);
+                break;
+            }
+        }
+    }
+
+    // ---------- graffiti: a mural from memory ----------
+
+    /// <summary>
+    /// Mural z pamięci: a mural shows in colour for a few seconds, then only its outline stays on the wall; paint
+    /// every field (in order, the background first) with the colour it had. A mural counts only as a perfect copy.
+    /// Bigger murals and less time to look as it goes; painting has its own clock.
+    /// </summary>
+    public sealed class MuralGame : ITrainingGame
+    {
+        /// <summary>The murals (art: tools/world/art/training.ts MURALS, same ids and field counts).</summary>
+        public static readonly (string id, int fields)[] Templates =
+        {
+            ("zachod", 3), ("kwiat", 4), ("gora", 4), ("twarz", 5), ("napis", 5), ("oko", 5), ("miasto", 6),
+        };
+
+        /// <summary>Spray colours; action Paints takes the last field back.</summary>
+        public const int Paints = 6;
+        public const int Undo = Paints;
+        public const float RevealTime = 1.6f;
+        static readonly int[] Sizes = { 3, 4, 4, 5, 6 };
+
+        public enum Stage
+        {
+            Look,
+            Paint,
+            Reveal,
+        }
+
+        readonly Random rng;
+        readonly HashSet<int> used = new();
+        int feedback;
+        public int Rounds { get; }
+        public int Round { get; private set; }
+        public int Score { get; private set; }
+        public bool Done => Round >= Rounds;
+        public Stage Phase { get; private set; }
+        public float PhaseLeft { get; private set; }
+        public float PhaseTime { get; private set; }
+        public int Template { get; private set; }
+        public int[] Target { get; private set; } = Array.Empty<int>();
+        public int[] Painted { get; private set; } = Array.Empty<int>();
+        /// <summary>The field the can is on.</summary>
+        public int Current { get; private set; }
+        public int LastMistakes { get; private set; }
+
+        public static float LookTime(int round) => Math.Max(3f, 5f - 0.5f * round);
+        public static float PaintTime(int fields) => 2.4f * fields + 2.5f;
+
+        public MuralGame(int rounds = 5, int seed = 0)
+        {
+            Rounds = Math.Max(1, rounds);
+            rng = new Random(seed);
+            NextMural();
+        }
+
+        void NextMural()
+        {
+            var want = Sizes[Math.Min(Round, Sizes.Length - 1)];
+            var pick = new List<int>();
+            for (var i = 0; i < Templates.Length; i++)
+                if (Templates[i].fields == want && !used.Contains(i)) pick.Add(i);
+            if (pick.Count == 0)
+                for (var i = 0; i < Templates.Length; i++)
+                    if (Templates[i].fields == want) pick.Add(i);
+            Template = pick[rng.Next(pick.Count)];
+            used.Add(Template);
+            var n = Templates[Template].fields;
+            Target = new int[n];
+            for (var i = 0; i < n; i++)
+            {
+                // never the colour of the field under it: every field must stand out
+                int c;
+                do c = rng.Next(Paints);
+                while (i > 0 && c == Target[i - 1]);
+                Target[i] = c;
+            }
+            Painted = new int[n];
+            for (var i = 0; i < n; i++) Painted[i] = -1;
+            Current = 0;
+            Phase = Stage.Look;
+            PhaseTime = PhaseLeft = LookTime(Round);
+        }
+
+        void Judge()
+        {
+            LastMistakes = 0;
+            for (var i = 0; i < Target.Length; i++)
+                if (Painted[i] != Target[i]) LastMistakes++;
+            var hit = LastMistakes == 0;
+            if (hit) Score++;
+            feedback = hit ? 1 : -1;
+            Phase = Stage.Reveal;
+            PhaseTime = PhaseLeft = RevealTime;
+        }
+
+        public void Tick(float dt)
+        {
+            if (Done) return;
+            PhaseLeft -= dt;
+            if (PhaseLeft > 0) return;
+            switch (Phase)
+            {
+                case Stage.Look:
+                    Phase = Stage.Paint;
+                    PhaseTime = PhaseLeft = PaintTime(Target.Length);
+                    break;
+                case Stage.Paint:
+                    Judge(); // out of time: what is on the wall is judged
+                    break;
+                default:
+                    Round++;
+                    if (!Done) NextMural();
+                    break;
+            }
+        }
+
+        /// <summary>0..5 sprays the field with that colour, 6 takes the last one back.</summary>
+        public void Press(int action)
+        {
+            if (Done || Phase != Stage.Paint) return;
+            if (action == Undo)
+            {
+                if (Current > 0) Painted[--Current] = -1;
+                return;
+            }
+            if (action < 0 || action >= Paints) return;
+            Painted[Current++] = action;
+            if (Current >= Target.Length) Judge();
+        }
+
+        public void Release(int action)
+        {
+        }
+
+        public int TakeFeedback()
+        {
+            var f = feedback;
+            feedback = 0;
+            return f;
+        }
+
+        float botWait;
+
+        public void Bot(float dt)
+        {
+            Tick(dt);
             botWait -= dt;
-            if (Done || Pause > 0 || botWait > 0) return;
-            Press(Sequence[Position]);
-            botWait = 0.18f;
+            if (Done || Phase != Stage.Paint || botWait > 0) return;
+            Press(Target[Current]);
+            botWait = 0.22f;
+        }
+    }
+
+    // ---------- surfing: the shark ----------
+
+    /// <summary>
+    /// Rekin: the bud rides the board across five lanes, fins come at it; slide left or right out of their way.
+    /// The first fin of every wave heads for the bud's lane, later hunters turn one lane towards it shortly before
+    /// they reach it. A wave counts when no shark bites. More fins, closer together, more hunters as it goes.
+    /// </summary>
+    public sealed class SharkGame : ITrainingGame
+    {
+        public const int Lanes = 5;
+        /// <summary>Seconds a fin is in view before it reaches the board.</summary>
+        public const float Lead = 1.8f;
+        /// <summary>A hunter turns this long before it arrives.</summary>
+        public const float TurnAt = 0.8f;
+
+        public sealed class Shark
+        {
+            public float Time;
+            /// <summary>-1 until it shows up.</summary>
+            public int Lane = -1;
+            /// <summary>The lane it came from when it turned.</summary>
+            public int From = -1;
+            public bool First;
+            public bool Hunter;
+            public bool Turned;
+            public int Wave;
+            /// <summary>0 coming, 1 dodged, -1 bit.</summary>
+            public int State;
+        }
+
+        readonly Random rng;
+        readonly List<Shark> sharks = new();
+        readonly int[] size;
+        readonly int[] judged;
+        readonly int[] bites;
+        int feedback;
+        public int Rounds { get; }
+        public int Round { get; private set; }
+        public int Score { get; private set; }
+        public bool Done => Round >= Rounds;
+        public float Clock { get; private set; }
+        public int Lane { get; private set; } = Lanes / 2;
+        public IReadOnlyList<Shark> Sharks => sharks;
+
+        public SharkGame(int rounds = 5, int seed = 0)
+        {
+            Rounds = Math.Max(1, rounds);
+            rng = new Random(seed);
+            size = new int[Rounds];
+            judged = new int[Rounds];
+            bites = new int[Rounds];
+            var t = Lead + 0.8f;
+            for (var w = 0; w < Rounds; w++)
+            {
+                var count = 3 + w / 2;
+                var gap = Math.Max(0.62f, 1.05f - 0.08f * w);
+                for (var i = 0; i < count; i++)
+                {
+                    sharks.Add(new Shark
+                    {
+                        Time = t,
+                        Wave = w,
+                        First = i == 0,
+                        Hunter = w >= 1 && i > 0 && rng.NextDouble() < 0.25 + 0.1 * w,
+                    });
+                    size[w]++;
+                    t += gap + (float)rng.NextDouble() * 0.25f;
+                }
+                t += 1.2f;
+            }
+        }
+
+        public void Tick(float dt)
+        {
+            if (Done) return;
+            Clock += dt;
+            foreach (var s in sharks)
+            {
+                if (s.State != 0) continue;
+                if (s.Lane < 0 && Clock >= s.Time - Lead)
+                {
+                    // it picks its lane as it shows up: the first of a wave heads straight for the bud
+                    s.Lane = s.First || rng.Next(3) == 0 ? Lane : rng.Next(Lanes);
+                    s.From = s.Lane;
+                }
+                if (s.Lane >= 0 && s.Hunter && !s.Turned && Clock >= s.Time - TurnAt)
+                {
+                    s.Turned = true;
+                    s.From = s.Lane;
+                    if (Lane != s.Lane) s.Lane += Math.Sign(Lane - s.Lane);
+                }
+                if (Clock < s.Time) continue;
+                var bit = s.Lane == Lane;
+                s.State = bit ? -1 : 1;
+                feedback = bit ? -1 : 1;
+                if (bit) bites[s.Wave]++;
+                if (++judged[s.Wave] < size[s.Wave]) continue;
+                if (bites[s.Wave] == 0) Score++;
+                Round = Math.Max(Round, s.Wave + 1);
+            }
+        }
+
+        /// <summary>0 one lane left, 1 one lane right.</summary>
+        public void Press(int action)
+        {
+            if (Done) return;
+            if (action == 0) Lane = Math.Max(0, Lane - 1);
+            else if (action == 1) Lane = Math.Min(Lanes - 1, Lane + 1);
+        }
+
+        public void Release(int action)
+        {
+        }
+
+        public int TakeFeedback()
+        {
+            var f = feedback;
+            feedback = 0;
+            return f;
+        }
+
+        bool Threat(int lane, float within)
+        {
+            foreach (var s in sharks)
+                if (s.State == 0 && s.Lane == lane && s.Time > Clock && s.Time - Clock <= within)
+                    return true;
+            return false;
+        }
+
+        public void Bot(float dt)
+        {
+            Tick(dt);
+            if (Done || !Threat(Lane, 0.3f)) return;
+            // out of the way, into a lane nothing reaches soon
+            var left = Lane > 0 && !Threat(Lane - 1, 0.7f);
+            var right = Lane < Lanes - 1 && !Threat(Lane + 1, 0.7f);
+            Press(left && (!right || Lane > Lanes / 2) ? 0 : right ? 1 : Lane > 0 ? 0 : 1);
+        }
+    }
+
+    // ---------- spryt: the cups ----------
+
+    /// <summary>
+    /// Trzy kubki: a street hustler shows the ball under a cup and shuffles; point at the cup with the ball. More
+    /// swaps, quicker, and a fourth cup later on. A round with no pick in time is lost.
+    /// </summary>
+    public sealed class ShellGame : ITrainingGame
+    {
+        public const float ShowTime = 1.2f;
+        public const float PickTime = 6f;
+        public const float RevealTime = 1.3f;
+
+        public enum Stage
+        {
+            Show,
+            Shuffle,
+            Pick,
+            Reveal,
+        }
+
+        readonly Random rng;
+        int feedback;
+        public int Rounds { get; }
+        public int Round { get; private set; }
+        public int Score { get; private set; }
+        public bool Done => Round >= Rounds;
+        public Stage Phase { get; private set; }
+        public float PhaseLeft { get; private set; }
+        public int Cups { get; private set; }
+        /// <summary>Where every cup stands (cup → slot).</summary>
+        public int[] SlotOf { get; } = new int[4];
+        /// <summary>The cup with the ball.</summary>
+        public int Ball { get; private set; }
+        /// <summary>The swaps of this round as pairs of slots.</summary>
+        public (int a, int b)[] Swaps { get; private set; } = Array.Empty<(int, int)>();
+        public int SwapIndex { get; private set; }
+        /// <summary>0..1 through the swap under way.</summary>
+        public float SwapProgress { get; private set; }
+        public float SwapTime { get; private set; }
+        /// <summary>The slot picked last (-1 none: time ran out).</summary>
+        public int Picked { get; private set; } = -1;
+        public bool LastHit { get; private set; }
+
+        public ShellGame(int rounds = 5, int seed = 0)
+        {
+            Rounds = Math.Max(1, rounds);
+            rng = new Random(seed);
+            NextRound();
+        }
+
+        public int CupAt(int slot)
+        {
+            for (var c = 0; c < Cups; c++)
+                if (SlotOf[c] == slot) return c;
+            return -1;
+        }
+
+        void NextRound()
+        {
+            Cups = Round < 3 ? 3 : 4;
+            for (var c = 0; c < SlotOf.Length; c++) SlotOf[c] = c;
+            Ball = rng.Next(Cups);
+            Swaps = new (int, int)[3 + 2 * Round];
+            for (var i = 0; i < Swaps.Length; i++)
+            {
+                var a = rng.Next(Cups);
+                var b = (a + 1 + rng.Next(Cups - 1)) % Cups;
+                Swaps[i] = (a, b);
+            }
+            SwapTime = Math.Max(0.24f, 0.52f - 0.07f * Round);
+            SwapIndex = 0;
+            SwapProgress = 0;
+            Picked = -1;
+            Phase = Stage.Show;
+            PhaseLeft = ShowTime;
+        }
+
+        public void Tick(float dt)
+        {
+            if (Done) return;
+            switch (Phase)
+            {
+                case Stage.Show:
+                    PhaseLeft -= dt;
+                    if (PhaseLeft <= 0) Phase = Stage.Shuffle;
+                    break;
+                case Stage.Shuffle:
+                    SwapProgress += dt / SwapTime;
+                    while (SwapProgress >= 1 && SwapIndex < Swaps.Length)
+                    {
+                        var (a, b) = Swaps[SwapIndex];
+                        int ca = CupAt(a), cb = CupAt(b);
+                        SlotOf[ca] = b;
+                        SlotOf[cb] = a;
+                        SwapIndex++;
+                        SwapProgress -= 1;
+                    }
+                    if (SwapIndex >= Swaps.Length)
+                    {
+                        SwapProgress = 0;
+                        Phase = Stage.Pick;
+                        PhaseLeft = PickTime;
+                    }
+                    break;
+                case Stage.Pick:
+                    PhaseLeft -= dt;
+                    if (PhaseLeft <= 0) Judge(-1);
+                    break;
+                default:
+                    PhaseLeft -= dt;
+                    if (PhaseLeft > 0) break;
+                    Round++;
+                    if (!Done) NextRound();
+                    break;
+            }
+        }
+
+        void Judge(int slot)
+        {
+            Picked = slot;
+            LastHit = slot >= 0 && CupAt(slot) == Ball;
+            if (LastHit) Score++;
+            feedback = LastHit ? 1 : -1;
+            Phase = Stage.Reveal;
+            PhaseLeft = RevealTime;
+        }
+
+        /// <summary>Points at the cup in that slot (0 = leftmost).</summary>
+        public void Press(int action)
+        {
+            if (!Done && Phase == Stage.Pick && action >= 0 && action < Cups) Judge(action);
+        }
+
+        public void Release(int action)
+        {
+        }
+
+        public int TakeFeedback()
+        {
+            var f = feedback;
+            feedback = 0;
+            return f;
+        }
+
+        public void Bot(float dt)
+        {
+            Tick(dt);
+            if (!Done && Phase == Stage.Pick) Press(SlotOf[Ball]);
         }
     }
 
@@ -267,265 +779,6 @@ namespace Buds.Quests
             foreach (var n in notes)
                 if (n.State == 0 && Math.Abs(n.Time - Clock) <= 0.03f)
                     Press(n.Lane);
-        }
-    }
-
-    // ---------- graffiti: stencil ----------
-
-    /// <summary>
-    /// Szablon: the can sweeps along a stencil once; hold to spray over the openings, let go over the mask. A strip
-    /// counts when most of the openings are painted and little paint lands on the mask. Faster each strip.
-    /// </summary>
-    public sealed class StencilGame : ITrainingGame
-    {
-        public const int Bins = 100;
-        public const float NeedCovered = 0.75f;
-        public const float MaxOverspray = 0.2f;
-
-        readonly Random rng;
-        int feedback;
-        public int Rounds { get; }
-        public int Round { get; private set; }
-        public int Score { get; private set; }
-        public bool Done => Round >= Rounds;
-        /// <summary>Openings of the stencil on the strip, as (from, to) in 0..1.</summary>
-        public List<(float from, float to)> Openings { get; } = new();
-        public bool[] Painted { get; } = new bool[Bins];
-        public float Marker { get; private set; }
-        public bool Holding { get; private set; }
-        public float Speed { get; private set; }
-        public float Pause { get; private set; }
-        /// <summary>The last strip's result, for the screen: share of openings painted and of the mask sprayed.</summary>
-        public float LastCovered { get; private set; }
-        public float LastOverspray { get; private set; }
-
-        public StencilGame(int rounds = 5, int seed = 0)
-        {
-            Rounds = Math.Max(1, rounds);
-            rng = new Random(seed);
-            NextStrip();
-        }
-
-        void NextStrip()
-        {
-            Openings.Clear();
-            Array.Clear(Painted, 0, Bins);
-            Marker = 0;
-            Speed = 0.42f + 0.07f * Round;
-            // 3 or 4 openings with masks between them, narrower later
-            var count = Round < 2 ? 3 : 4;
-            var x = 0.06f + (float)rng.NextDouble() * 0.04f;
-            for (var i = 0; i < count; i++)
-            {
-                var width = 0.1f + (float)rng.NextDouble() * (0.12f - 0.012f * Round);
-                Openings.Add((x, Math.Min(0.96f, x + width)));
-                x += width + 0.07f + (float)rng.NextDouble() * 0.07f;
-                if (x > 0.9f) break;
-            }
-        }
-
-        public bool InOpening(float at)
-        {
-            foreach (var (a, b) in Openings)
-                if (at >= a && at <= b) return true;
-            return false;
-        }
-
-        void Judge()
-        {
-            int open = 0, openPainted = 0, mask = 0, maskPainted = 0;
-            for (var i = 0; i < Bins; i++)
-            {
-                var at = (i + 0.5f) / Bins;
-                if (InOpening(at))
-                {
-                    open++;
-                    if (Painted[i]) openPainted++;
-                }
-                else
-                {
-                    mask++;
-                    if (Painted[i]) maskPainted++;
-                }
-            }
-            LastCovered = open > 0 ? openPainted / (float)open : 0;
-            LastOverspray = mask > 0 ? maskPainted / (float)mask : 0;
-            var hit = LastCovered >= NeedCovered && LastOverspray <= MaxOverspray;
-            if (hit) Score++;
-            feedback = hit ? 1 : -1;
-            Round++;
-            Pause = 0.7f;
-            Holding = false;
-        }
-
-        public void Tick(float dt)
-        {
-            if (Done) return;
-            if (Pause > 0)
-            {
-                Pause = Math.Max(0, Pause - dt);
-                if (Pause == 0) NextStrip();
-                return;
-            }
-            var from = Marker;
-            Marker = Math.Min(1, Marker + Speed * dt);
-            if (Holding)
-            {
-                // paint every bin the can passed over this frame
-                var a = (int)(from * Bins);
-                var b = Math.Min(Bins - 1, (int)(Marker * Bins));
-                for (var i = a; i <= b; i++) Painted[i] = true;
-            }
-            if (Marker >= 1) Judge();
-        }
-
-        public void Press(int action)
-        {
-            if (!Done && Pause <= 0) Holding = true;
-        }
-
-        public void Release(int action) => Holding = false;
-
-        public int TakeFeedback()
-        {
-            var f = feedback;
-            feedback = 0;
-            return f;
-        }
-
-        public void Bot(float dt)
-        {
-            // looks a little ahead, like a steady hand would
-            if (Pause <= 0)
-            {
-                var want = InOpening(Math.Min(1, Marker + Speed * dt * 0.5f));
-                if (want && !Holding) Press(0);
-                else if (!want && Holding) Release(0);
-            }
-            Tick(dt);
-        }
-    }
-
-    // ---------- surfing: balance ----------
-
-    /// <summary>
-    /// Równowaga: the wave pushes the board one way and the other; nudge it back (left / right) to keep it in the
-    /// steady band. A wave counts when the board stayed steady most of the time and never went over. Bigger waves later.
-    /// </summary>
-    public sealed class BalanceGame : ITrainingGame
-    {
-        public const float WaveLength = 4f;
-        public const float Band = 0.42f;
-        public const float NeedSteady = 0.72f;
-        const float Nudge = 0.55f;
-
-        readonly Random rng;
-        int feedback;
-        float force;
-        float forceTarget;
-        float forceTimer;
-        float steady;
-        bool fell;
-        public int Rounds { get; }
-        public int Round { get; private set; }
-        public int Score { get; private set; }
-        public bool Done => Round >= Rounds;
-        /// <summary>-1..1: how far the board leans (±1 = in the water).</summary>
-        public float Tilt { get; private set; }
-        public float Velocity { get; private set; }
-        public float WaveTime { get; private set; }
-        public float Pause { get; private set; }
-        public float SteadyShare => WaveTime > 0 ? steady / WaveTime : 1;
-        public bool Fell => fell;
-
-        public BalanceGame(int rounds = 5, int seed = 0)
-        {
-            Rounds = Math.Max(1, rounds);
-            rng = new Random(seed);
-            Pause = 0.6f;
-        }
-
-        public void Tick(float dt)
-        {
-            if (Done) return;
-            if (Pause > 0)
-            {
-                Pause = Math.Max(0, Pause - dt);
-                return;
-            }
-            // the wave: a push that changes every so often, stronger wave by wave
-            forceTimer -= dt;
-            if (forceTimer <= 0)
-            {
-                var strength = 0.8f + 0.2f * Round;
-                forceTarget = ((float)rng.NextDouble() * 2 - 1) * strength;
-                forceTimer = 0.55f + (float)rng.NextDouble() * 0.6f;
-            }
-            force += (forceTarget - force) * Math.Min(1, dt * 4);
-            // a leaning board wants to lean further; water damps it
-            Velocity += (force + Tilt * 1.4f) * dt;
-            Velocity *= (float)Math.Pow(0.35, dt);
-            Tilt += Velocity * dt;
-            if (Math.Abs(Tilt) < Band) steady += dt;
-            WaveTime += dt;
-            if (Math.Abs(Tilt) >= 1)
-            {
-                fell = true;
-                Tilt = Math.Sign(Tilt);
-                EndWave();
-                return;
-            }
-            if (WaveTime >= WaveLength) EndWave();
-        }
-
-        void EndWave()
-        {
-            var hit = !fell && SteadyShare >= NeedSteady;
-            if (hit) Score++;
-            feedback = hit ? 1 : -1;
-            Round++;
-            Tilt = 0;
-            Velocity = 0;
-            WaveTime = 0;
-            steady = 0;
-            fell = false;
-            force = 0;
-            forceTimer = 0;
-            Pause = 0.6f;
-        }
-
-        /// <summary>0 leans left, 1 leans right.</summary>
-        public void Press(int action)
-        {
-            if (Done || Pause > 0) return;
-            Velocity += action == 0 ? -Nudge : Nudge;
-        }
-
-        public void Release(int action)
-        {
-        }
-
-        public int TakeFeedback()
-        {
-            var f = feedback;
-            feedback = 0;
-            return f;
-        }
-
-        float botWait;
-
-        public void Bot(float dt)
-        {
-            Tick(dt);
-            botWait -= dt;
-            if (botWait > 0 || Pause > 0 || Done) return;
-            // where the board will be in a moment: lean against it
-            var ahead = Tilt + Velocity * 0.35f;
-            if (Math.Abs(ahead) > 0.12f)
-            {
-                Press(ahead > 0 ? 0 : 1);
-                botWait = 0.16f;
-            }
         }
     }
 
