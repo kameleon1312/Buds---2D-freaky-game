@@ -89,6 +89,12 @@ export interface BudStore extends RivalryStore, LandStore {
   deleteBud(slug: string): Promise<void>;
   /** Deletes the sign-in of an account (its buds are deleted before, by the API). */
   deleteUser(userId: string): Promise<void>;
+  /**
+   * Creates a sign-in (e-mail + password), confirmed at once; 'taken' when the e-mail already has an account, 'weak'
+   * when the password fails the project's own password rules.
+   * Nothing about the password is kept by the API.
+   */
+  createUser(email: string, password: string): Promise<'created' | 'taken' | 'weak'>;
   /** A new look for the bud (validated and checked against owned items by the API); the updated bud. */
   updateLook(slug: string, look: BudRecord['look']): Promise<BudRecord>;
   /** Short-lived code shown on the web and typed into the game to link a device. */

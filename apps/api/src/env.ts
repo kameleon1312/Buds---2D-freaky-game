@@ -11,6 +11,8 @@ const envSchema = z.object({
   SUPABASE_JWT_SECRET: z.string().min(32, 'SUPABASE_JWT_SECRET must be at least 32 chars'),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(120),
   CREATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(5),
+  /** New accounts per client address per hour (POST /v1/auth/signup). */
+  SIGNUP_LIMIT_PER_HOUR: z.coerce.number().int().positive().default(10),
   /** Look previews in the in-game creator (rendered on the server). */
   PREVIEW_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(40),
   /** How long a newly bought district is safe from raids (hours); lower it only on a test server. */

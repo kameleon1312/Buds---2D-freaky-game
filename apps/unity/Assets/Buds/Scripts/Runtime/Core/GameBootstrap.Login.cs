@@ -8,8 +8,9 @@ using UnityEngine;
 namespace Buds.Core
 {
     /// <summary>
-    /// Playing with the website account: e-mail + password straight to Supabase Auth (public settings from
-    /// GET /v1/auth/config), then the account's buds from the API. Picking one gets this device its own player token
+    /// Playing with the account: e-mail + password straight to Supabase Auth (public settings from
+    /// GET /v1/auth/config), then the account's buds from the API. A new account is opened on the game's server
+    /// (POST /v1/auth/signup, ready at once) and signed into right away. Picking one gets this device its own player token
     /// (POST /v1/account/buds/:slug/device), so from then on the game starts like any paired bud. A bud created while
     /// signed in goes onto the account.
     /// </summary>
@@ -28,7 +29,8 @@ namespace Buds.Core
         {
             HidePairing();
             api = new BudsApi(PlayerSession.ApiBaseUrl);
-            loginScreen ??= new LoginScreen(ui.FullScreen, ui.Root, (email, password) => _ = SignIn(email, password), slug => _ = PickAccountBud(slug),
+            loginScreen ??= new LoginScreen(ui.FullScreen, ui.Root, (email, password) => _ = SignIn(email, password),
+                (email, password, repeat) => _ = Register(email, password, repeat), slug => _ = PickAccountBud(slug),
                 () =>
                 {
                     loginScreen.Hide();
@@ -53,6 +55,41 @@ namespace Buds.Core
                 return;
             }
             loginScreen.ShowForm();
+        }
+
+        /// <summary>Opens a new account (checked here first, then by the server), then signs straight into it.</summary>
+        async Awaitable Register(string email, string password, string repeat)
+        {
+            if (signingIn) return;
+            email = email?.Trim().ToLowerInvariant();
+            var problem = AccountForm.Problem(email, password, repeat);
+            if (problem != null)
+            {
+                loginScreen.SetBusy(false, problem);
+                return;
+            }
+            signingIn = true;
+            loginScreen.SetBusy(true);
+            _ = WakeUpNote();
+            try
+            {
+                await api.SignUp(email, password);
+            }
+            catch (ApiException e)
+            {
+                loginScreen.SetBusy(false, e.Message);
+                signingIn = false;
+                return;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                loginScreen.SetBusy(false, LoginFailed);
+                signingIn = false;
+                return;
+            }
+            signingIn = false;
+            await SignIn(email, password);
         }
 
         async Awaitable SignIn(string email, string password)
@@ -186,6 +223,10 @@ namespace Buds.Core
                 await Awaitable.WaitForSecondsAsync(0.3f);
             }
             await OpenLogin();
+            loginScreen.SetMode(true);
+            await Register("zly-adres", "krotkie", "inne");
+            await Shot("l0-register.png");
+            loginScreen.SetMode(false);
             await Shot("l1-form.png");
             await SignIn(email, password + "-zle");
             await Shot("l2-wrong-password.png");

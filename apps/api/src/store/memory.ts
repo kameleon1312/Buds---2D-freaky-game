@@ -9,6 +9,7 @@ import type { BudStore } from './types.js';
 export function createMemoryStore(now: () => Date = () => new Date()): BudStore {
   const buds = new Map<string, BudRecord>();
   const tokens = new Map<string, string>(); // tokenHash -> slug
+  const accounts = new Set<string>(); // e-mails with a sign-in (createUser)
   const pairCodes = new Map<string, { slug: string; expiresAt: Date }>();
   const owned = new Map<string, OwnedItem[]>(); // slug -> granted items
   const quests = new Map<string, Set<string>>(); // slug -> completed quest ids
@@ -110,6 +111,13 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
 
     async deleteUser() {
       // no sign-ins live in memory: the API deletes the buds itself
+    },
+
+    async createUser(email) {
+      // local dev and tests: only which e-mails are taken (no one signs in against memory)
+      if (accounts.has(email)) return 'taken';
+      accounts.add(email);
+      return 'created';
     },
 
     async removeToken(tokenHash) {

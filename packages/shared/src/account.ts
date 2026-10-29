@@ -35,6 +35,37 @@ export type AccountBudsResponse = z.infer<typeof accountBudsResponseSchema>;
 export { redeemPairSchema as linkBudRequestSchema } from './schemas';
 
 /**
+ * Creating an account (website and game): the API creates the sign-in with the Supabase admin API, ready to use at
+ * once, so a new player never waits for a confirmation e-mail that the project's mailer may not deliver. The client
+ * signs in with the same e-mail and password right after. The password goes over TLS to the API and on to Supabase,
+ * never stored or logged here.
+ */
+export const PASSWORD_MIN = 8;
+/** bcrypt, which Supabase Auth uses, reads at most 72 bytes. */
+export const PASSWORD_MAX = 72;
+
+export const signUpRequestSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(254)
+    .pipe(z.email({ message: 'Sprawdź adres e-mail.' })),
+  password: z
+    .string()
+    .min(PASSWORD_MIN, { message: `Hasło musi mieć co najmniej ${PASSWORD_MIN} znaków.` })
+    .refine((p) => new TextEncoder().encode(p).length <= PASSWORD_MAX, {
+      message: 'Hasło jest za długie.',
+    }),
+  /** The privacy policy accepted (the form's checkbox). */
+  consent: z.literal(true, { message: 'Zaakceptuj zasady prywatności.' }),
+});
+export type SignUpRequest = z.infer<typeof signUpRequestSchema>;
+
+export const signUpResponseSchema = z.object({ email: z.string() });
+export type SignUpResponse = z.infer<typeof signUpResponseSchema>;
+
+/**
  * Signing in from the game: the public Supabase values (the game talks to Supabase Auth itself, so the password
  * never reaches the API). `enabled: false` when the server has no accounts configured.
  */

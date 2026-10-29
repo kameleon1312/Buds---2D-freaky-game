@@ -3,6 +3,25 @@
 Wszystko, co gracz może zrobić ze swoim kontem, swoim Budem i swoimi danymi: w grze, na stronie i przez API.
 Spełnia wymagania Google Play (usuwanie konta w aplikacji i na stronie) i RODO (wgląd, przeniesienie, usunięcie).
 
+## Zakładanie konta i logowanie
+
+Konto zakłada serwer gry: `POST /v1/auth/signup` (`signUpRequestSchema`: e-mail, hasło 8–72 bajtów, zgoda na zasady
+prywatności) tworzy logowanie przez admin API Supabase od razu potwierdzone (`email_confirm: true`), a strona albo
+gra loguje się zaraz potem tym samym e-mailem i hasłem (Supabase Auth, `signInWithPassword` /
+`/auth/v1/token`). Nowy gracz nie czeka więc na e-mail z potwierdzeniem: wbudowana poczta Supabase wysyła tylko do
+adresów członków zespołu projektu i ma limit kilku wiadomości na godzinę, więc rejestracja oparta na niej nie działała
+dla graczy („Coś poszło nie tak”). Zajęty e-mail to 409 `email_taken`, za słabe hasło według reguł projektu to 400
+`weak_password`. Limit: `SIGNUP_LIMIT_PER_HOUR` (10) nowych kont na adres IP na godzinę. Hasło przechodzi przez API
+tylko w drodze do Supabase: nie jest nigdzie zapisywane ani logowane.
+
+- **Strona** (`/konto`, `AccountPanel.tsx`): zakładki Zaloguj się / Załóż konto, po założeniu od razu panel konta.
+  Błędy logowania po polsku (`authMessage`: zły e-mail lub hasło, brak sieci, limit prób, poczta, wygasły link).
+- **Gra** (`LoginScreen`, `GameBootstrap.Login.cs`): „Nie masz konta? Załóż je” przełącza formularz (drugie hasło,
+  zgoda pod polami); `AccountForm.Problem` sprawdza to samo co serwer, zanim cokolwiek wyśle.
+- **Reset hasła** (`/konto` → Nie pamiętasz hasła?) nadal wysyła e-mail przez Supabase: żeby docierał do każdego
+  gracza, w panelu Supabase (Authentication → Emails → SMTP Settings) trzeba podpiąć własny serwer poczty (np. Resend,
+  Brevo). Bez tego dociera tylko do adresów członków zespołu projektu.
+
 ## W grze
 
 Twój Bud → Profil:
@@ -41,6 +60,7 @@ imienia, odmowę drugiej zmiany i ustawienia, a na końcu usuwa postać).
 
 | Trasa                                    | Kto              | Co robi                                                     |
 | ---------------------------------------- | ---------------- | ----------------------------------------------------------- |
+| `POST /v1/auth/signup`                   | każdy (limit)    | zakłada konto gotowe do logowania                           |
 | `PUT /v1/buds/me/name`                   | token urządzenia | nowe imię (raz na 7 dni)                                    |
 | `POST /v1/buds/me/logout-all`            | token urządzenia | wylogowuje pozostałe urządzenia                             |
 | `GET /v1/buds/me/export`                 | token urządzenia | wszystkie dane Buda (JSON)                                  |

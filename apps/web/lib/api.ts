@@ -11,6 +11,7 @@ import {
   leaderboardResponseSchema,
   pairCodeResponseSchema,
   rankingResponseSchema,
+  signUpResponseSchema,
   type BudRecord,
   type CreateBudInput,
   type CreateBudResponse,
@@ -165,6 +166,18 @@ export function renameAccountBud(
 }
 
 /** Signs out every device playing the bud (a lost phone). Returns how many. */
+/**
+ * Creates the account on the game's server (ready at once, no confirmation e-mail); sign in with the same e-mail and
+ * password right after.
+ */
+export async function signUp(email: string, password: string, consent: boolean): Promise<void> {
+  await request('/v1/auth/signup', signUpResponseSchema, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, consent }),
+  });
+}
+
 export async function logoutBudDevices(accessToken: string, slug: string): Promise<number> {
   const r = await request(
     `/v1/account/buds/${encodeURIComponent(slug)}/logout-all`,

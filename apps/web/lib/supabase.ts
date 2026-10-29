@@ -46,16 +46,33 @@ export function useSession(): Session | null | undefined {
   return session;
 }
 
-/** Supabase auth errors in Polish. */
-export function authMessage(message: string): string {
-  const m = message.toLowerCase();
+/** Supabase auth errors in Polish (by the error code when there is one, else by the message). */
+export function authMessage(message: string, code?: string): string {
+  const m = `${code ?? ''} ${message}`.toLowerCase();
+  if (m.includes('failed to fetch') || m.includes('networkerror') || m.includes('load failed'))
+    return 'Brak połączenia z serwerem logowania. Sprawdź internet i spróbuj ponownie.';
+  if (m.includes('invalid_credentials')) return 'Zły e-mail albo hasło.';
+  if (m.includes('over_email_send_rate_limit') || m.includes('email rate limit'))
+    return 'Wysłaliśmy już kilka e-maili. Odczekaj godzinę i spróbuj ponownie.';
+  if (m.includes('email_address_not_authorized') || m.includes('error sending'))
+    return 'Nie udało się wysłać e-maila. Spróbuj później albo napisz do nas.';
+  if (m.includes('same_password') || m.includes('should be different'))
+    return 'Nowe hasło musi się różnić od starego.';
+  if (m.includes('session_not_found') || m.includes('auth session missing'))
+    return 'Link wygasł. Poproś o nowy.';
   if (m.includes('invalid login')) return 'Zły e-mail albo hasło.';
   if (m.includes('not confirmed'))
     return 'Najpierw potwierdź e-mail: kliknij link z wiadomości od nas.';
   if (m.includes('already registered')) return 'To konto już istnieje. Zaloguj się.';
-  if (m.includes('password should be')) return 'Hasło jest za słabe: co najmniej 8 znaków.';
+  if (m.includes('password should be') || m.includes('weak_password'))
+    return 'Hasło jest za słabe: co najmniej 8 znaków.';
   if (m.includes('rate limit') || m.includes('too many'))
     return 'Za dużo prób. Odczekaj chwilę i spróbuj ponownie.';
-  if (m.includes('valid email') || m.includes('invalid email')) return 'Sprawdź adres e-mail.';
+  if (
+    m.includes('valid email') ||
+    m.includes('invalid email') ||
+    m.includes('email_address_invalid')
+  )
+    return 'Sprawdź adres e-mail.';
   return 'Coś poszło nie tak. Spróbuj ponownie.';
 }

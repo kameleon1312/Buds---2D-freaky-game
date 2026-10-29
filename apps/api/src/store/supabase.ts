@@ -174,6 +174,16 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       if (error && error.status !== 404) throw error;
     },
 
+    async createUser(email, password) {
+      // confirmed at once: the project's mailer is not trusted to deliver a confirmation before the player gives up
+      const { error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
+      if (!error) return 'created';
+      if (error.code === 'email_exists' || /already (been )?registered/i.test(error.message))
+        return 'taken';
+      if (error.code === 'weak_password') return 'weak';
+      throw error;
+    },
+
     async removeToken(tokenHash) {
       const { error } = await db.from('bud_tokens').delete().eq('token_hash', tokenHash);
       if (error) throw error;

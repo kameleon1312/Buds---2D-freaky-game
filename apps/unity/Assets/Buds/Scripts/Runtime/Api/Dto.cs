@@ -107,6 +107,14 @@ namespace Buds.Api
         public string password;
     }
 
+    [Serializable]
+    public class SignUpRequest
+    {
+        public string email;
+        public string password;
+        public bool consent;
+    }
+
     /// <summary>Supabase Auth's answer to a password sign-in (only what the game needs).</summary>
     [Serializable]
     public class SupabaseSessionDto

@@ -57,5 +57,18 @@ namespace Buds.Tests
             Assert.IsFalse(AccountScreen.Confirms("", "Szymon"));
             Assert.IsFalse(AccountScreen.Confirms("   ", ""));
         }
+
+        [Test]
+        public void TheNewAccountFormChecksWhatTheServerChecks()
+        {
+            Assert.IsNull(Buds.Api.AccountForm.Problem("ala@buds.pl", "dobre-haslo", "dobre-haslo"));
+            StringAssert.Contains("e-mail", Buds.Api.AccountForm.Problem("", "dobre-haslo", "dobre-haslo"));
+            foreach (var email in new[] { "ala", "ala@", "@buds.pl", "ala@buds", "ala@@buds.pl", "a la@buds.pl", "ala@buds." })
+                Assert.AreEqual("Sprawdź adres e-mail.", Buds.Api.AccountForm.Problem(email, "dobre-haslo", "dobre-haslo"), email);
+            StringAssert.Contains("co najmniej 8", Buds.Api.AccountForm.Problem("ala@buds.pl", "krotkie", "krotkie"));
+            var tooLong = new string('ą', 37); // 74 bytes
+            Assert.AreEqual("Hasło jest za długie.", Buds.Api.AccountForm.Problem("ala@buds.pl", tooLong, tooLong));
+            Assert.AreEqual("Hasła się różnią.", Buds.Api.AccountForm.Problem("ala@buds.pl", "dobre-haslo", "dobre-hasl0"));
+        }
     }
 }

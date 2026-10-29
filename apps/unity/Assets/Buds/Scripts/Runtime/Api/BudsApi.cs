@@ -450,6 +450,24 @@ namespace Buds.Api
             throw new ApiException(req.responseCode, SignInMessage(req.responseCode, req.downloadHandler?.text));
         }
 
+        /// <summary>
+        /// A new account on the game's server, ready at once (no confirmation e-mail); sign in right after with the
+        /// same e-mail and password. Opening the account means accepting the privacy policy (said on the form).
+        /// </summary>
+        public async Awaitable SignUp(string email, string password)
+        {
+            var body = JsonUtility.ToJson(new SignUpRequest { email = email, password = password, consent = true });
+            using var req = new UnityWebRequest($"{baseUrl}/v1/auth/signup", UnityWebRequest.kHttpVerbPOST)
+            {
+                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
+                downloadHandler = new DownloadHandlerBuffer(),
+                timeout = TimeoutSeconds,
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            await Send(req);
+            if (req.result != UnityWebRequest.Result.Success) throw ToException(req);
+        }
+
         /// <summary>Supabase Auth errors in Polish (same wording as the website).</summary>
         public static string SignInMessage(long status, string body)
         {

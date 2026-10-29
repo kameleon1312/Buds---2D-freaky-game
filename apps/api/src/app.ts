@@ -102,7 +102,9 @@ import {
   deleteAccountRequestSchema,
   deleteBudRequestSchema,
   renameBudRequestSchema,
+  signUpRequestSchema,
   type AccountExport,
+  type SignUpResponse,
   type BudExport,
   type LogoutAllResponse,
 } from '@buds/shared';
@@ -889,6 +891,41 @@ export function createApp(
         );
       }
       return c.json<AccountBud>(await accountBud(slug));
+    },
+  );
+
+  /**
+   * Creating an account (website and game): ready to sign in at once, no confirmation e-mail to wait for. Strictly
+   * limited per address, so it can't be used to mass-create accounts or to probe for taken e-mails.
+   */
+  app.post(
+    '/v1/auth/signup',
+    rateLimit(env.SIGNUP_LIMIT_PER_HOUR, 3_600_000, env.CLIENT_IP_HEADER),
+    async (c) => {
+      const input = signUpRequestSchema.safeParse(await c.req.json().catch(() => null));
+      if (!input.success) {
+        const message = input.error.issues[0]?.message ?? 'Sprawdź e-mail i hasło.';
+        return c.json<ApiError>({ error: { code: 'invalid_signup', message } }, 400);
+      }
+      const result = await store.createUser(input.data.email, input.data.password);
+      if (result === 'taken') {
+        return c.json<ApiError>(
+          { error: { code: 'email_taken', message: 'To konto już istnieje. Zaloguj się.' } },
+          409,
+        );
+      }
+      if (result === 'weak') {
+        return c.json<ApiError>(
+          {
+            error: {
+              code: 'weak_password',
+              message: 'Hasło jest za słabe: dodaj cyfry, wielkie litery albo znaki.',
+            },
+          },
+          400,
+        );
+      }
+      return c.json<SignUpResponse>({ email: input.data.email }, 201);
     },
   );
 

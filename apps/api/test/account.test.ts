@@ -215,6 +215,56 @@ describe('the account', () => {
   });
 });
 
+describe('creating an account', () => {
+  const form = { email: ' Nowy@Buds.Example ', password: 'dobre-haslo-1', consent: true };
+
+  it('makes a sign-in ready at once and never makes the same e-mail twice', async () => {
+    const { call } = setup();
+    const res = await call('POST', '/v1/auth/signup', undefined, form);
+    expect(res.status).toBe(201);
+    expect(await res.json()).toEqual({ email: 'nowy@buds.example' });
+    const again = await call('POST', '/v1/auth/signup', undefined, {
+      ...form,
+      email: 'nowy@buds.example',
+    });
+    expect(again.status).toBe(409);
+    expect(await err(again)).toBe('email_taken');
+  });
+
+  it('turns away a bad e-mail, a short or too long password and a missing consent', async () => {
+    const { call } = setup();
+    for (const body of [
+      { ...form, email: 'nie-email' },
+      { ...form, password: 'krotkie' },
+      { ...form, password: 'ą'.repeat(37) }, // 74 bytes: past what bcrypt reads
+      { ...form, consent: false },
+      { email: form.email, password: form.password },
+      null,
+    ]) {
+      const res = await call('POST', '/v1/auth/signup', undefined, body);
+      expect(res.status, JSON.stringify(body)).toBe(400);
+      expect(await err(res)).toBe('invalid_signup');
+    }
+  });
+
+  it('is limited per address', async () => {
+    const store = createMemoryStore();
+    const app = createApp(loadEnv({ SUPABASE_JWT_SECRET: SECRET, SIGNUP_LIMIT_PER_HOUR: '2' }), {
+      store,
+    });
+    const statuses: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const res = await app.request('/v1/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '10.9.9.9' },
+        body: JSON.stringify({ ...form, email: `gracz${i}@buds.example` }),
+      });
+      statuses.push(res.status);
+    }
+    expect(statuses).toEqual([201, 201, 429]);
+  });
+});
+
 describe('rate limits', () => {
   it('forget addresses whose window is over', async () => {
     const mw = rateLimit(5, 30);

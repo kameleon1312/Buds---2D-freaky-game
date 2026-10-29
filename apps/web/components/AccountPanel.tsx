@@ -11,7 +11,15 @@ import {
   moodLabel,
   type AccountBud,
 } from '@buds/shared';
-import { accountPairCode, claimBud, getAccountBuds, getMyBud, linkBud } from '@/lib/api';
+import {
+  ApiRequestError,
+  accountPairCode,
+  claimBud,
+  getAccountBuds,
+  getMyBud,
+  linkBud,
+  signUp,
+} from '@/lib/api';
 import { getPlayer } from '@/lib/player';
 import { authMessage, supabase, useSession } from '@/lib/supabase';
 import { plural } from '@/lib/plural';
@@ -71,21 +79,25 @@ function AuthForm() {
       if (!consent) return setError('Zaakceptuj zasady prywatności.');
     }
     setPending(true);
-    const redirect = `${window.location.origin}/konto`;
-    const { error: err, data } =
-      mode === 'login'
-        ? await s.auth.signInWithPassword({ email, password })
-        : mode === 'register'
-          ? await s.auth.signUp({ email, password, options: { emailRedirectTo: redirect } })
-          : await s.auth.resetPasswordForEmail(email, {
+    try {
+      if (mode === 'register') {
+        // the game's server creates the account ready to use, then this browser signs straight in
+        await signUp(email.trim(), password, consent);
+      }
+      const { error: err } =
+        mode === 'reset'
+          ? await s.auth.resetPasswordForEmail(email.trim(), {
               redirectTo: `${window.location.origin}/konto/nowe-haslo`,
-            });
-    setPending(false);
-    if (err) return setError(authMessage(err.message));
-    if (mode === 'register' && data && 'session' in data && !data.session)
-      setInfo('Gotowe! Wysłaliśmy ci e-mail z linkiem. Kliknij go, żeby potwierdzić konto.');
-    if (mode === 'reset')
-      setInfo('Jeśli to konto istnieje, wysłaliśmy link do ustawienia nowego hasła.');
+            })
+          : await s.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+      if (err) return setError(authMessage(err.message, err.code));
+      if (mode === 'reset')
+        setInfo('Jeśli to konto istnieje, wysłaliśmy link do ustawienia nowego hasła.');
+    } catch (err) {
+      setError(err instanceof ApiRequestError ? err.message : authMessage(String(err)));
+    } finally {
+      setPending(false);
+    }
   }
 
   const titles: Record<Mode, string> = {
