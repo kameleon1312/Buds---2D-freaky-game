@@ -1191,31 +1191,35 @@ function arm(pen: Pen, sx: number, hx: number, hy: number, { look, p }: Ctx) {
   } else {
     const thick = o === 'puchowka' ? 9 : 7.5;
     const end = o === 'puchowka' ? 7.2 : 6;
-    pen.shaded(limb(sx, 76, thick, wx, wy, end), p.top, -2, -2);
+    const sleeve = limb(sx, 76, thick, wx, wy, end);
+    pen.shaded(sleeve, p.top, -2, -2);
     const ex = sx + (wx - sx) * 0.5;
     const ey = 76 + (wy - 76) * 0.5;
-    const band = (t: number, r = 7, color = p.top[1], w = 1.1) =>
-      pen.line(sleeveBand(sx, 76, wx, wy, t, r), w, color);
-    if (o === 'puchowka') {
-      // quilted: a rounded baffle every few units
-      for (const t of [0.22, 0.42, 0.62, 0.8]) band(t, 7.6, p.top[1], 1.4);
-    } else {
-      pen.line(`M${r2(ex - 4)} ${r2(ey)} q4 2 8 0`, 1, p.top[1]); // a crease at the elbow
-    }
-    if (o === 'flanela') {
-      // the check runs down the sleeve too
-      band(0.2, 6.6, mix(p.top[1], '#1b1430', 0.2), 1.3);
-      band(0.4, 6.4, mix(p.top[1], '#1b1430', 0.2), 1.3);
-      band(0.6, 6.2, mix(p.top[1], '#1b1430', 0.2), 1.3);
-      pen.line(`M${sx} 76 L${r2(wx)} ${r2(wy)}`, 1.3, mix(p.top[1], '#1b1430', 0.2));
-    }
-    if (o === 'dresowka') {
-      // two stripes from shoulder to wrist
-      const dx = sx < 60 ? -2.8 : sx > 60 ? 2.8 : 2;
-      pen.line(`M${r2(sx + dx)} 72 L${r2(wx + dx)} ${r2(wy - 3)}`, 1.3, p.cap[0]);
-      pen.line(`M${r2(sx + dx * 2)} 73 L${r2(wx + dx * 2)} ${r2(wy - 3)}`, 1.3, p.cap[0]);
-    }
-    if (o === 'jeansowka') stitches(pen, sleeveBand(sx, 76, wx, wy, 0.16, 7));
+    // what is drawn on a sleeve stays on it, however the arm swings
+    pen.clipped(sleeve, (on) => {
+      const band = (t: number, r = 7, color = p.top[1], w = 1.1) =>
+        on.line(sleeveBand(sx, 76, wx, wy, t, r), w, color);
+      if (o === 'puchowka') {
+        // quilted: a rounded baffle every few units
+        for (const t of [0.22, 0.42, 0.62, 0.8]) band(t, 7.6, p.top[1], 1.4);
+      } else {
+        on.line(`M${r2(ex - 4)} ${r2(ey)} q4 2 8 0`, 1, p.top[1]); // a crease at the elbow
+      }
+      if (o === 'flanela') {
+        // the check runs down the sleeve too
+        band(0.2, 6.6, mix(p.top[1], '#1b1430', 0.2), 1.3);
+        band(0.4, 6.4, mix(p.top[1], '#1b1430', 0.2), 1.3);
+        band(0.6, 6.2, mix(p.top[1], '#1b1430', 0.2), 1.3);
+        on.line(`M${sx} 76 L${r2(wx)} ${r2(wy)}`, 1.3, mix(p.top[1], '#1b1430', 0.2));
+      }
+      if (o === 'dresowka') {
+        // two stripes from shoulder to wrist
+        const dx = sx < 60 ? -2.8 : sx > 60 ? 2.8 : 2;
+        on.line(`M${r2(sx + dx)} 72 L${r2(wx + dx)} ${r2(wy - 3)}`, 1.3, p.cap[0]);
+        on.line(`M${r2(sx + dx * 2)} 73 L${r2(wx + dx * 2)} ${r2(wy - 3)}`, 1.3, p.cap[0]);
+      }
+      if (o === 'jeansowka') stitches(on, sleeveBand(sx, 76, wx, wy, 0.16, 7));
+    });
     const cx = sx + (wx - sx) * 0.88;
     if (o === 'koszula' || o === 'flanela' || o === 'jeansowka') {
       // a shirt cuff with a button
@@ -1488,20 +1492,22 @@ function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
             `<circle cx="${x + 5.5}" cy="86" r="0.9" fill="${METAL}" stroke="${OUT}" stroke-width="0.5"/>`,
           );
         }
-        stitches(pen, 'M40 78 H56 M64 78 H80');
+        pen.clipped(shape, (on) => stitches(on, 'M40 78 H56 M64 78 H80'));
       } else {
         pen.shaded('M48 67 Q60 72 72 67 L72 71 Q60 76 48 71Z', [p.top[1], p.top[1]], 0, 0);
-        stitches(pen, 'M38 80 H82 M46 80 L44 106 M74 80 L76 106');
+        pen.clipped(shape, (on) => stitches(on, 'M38 80 H82 M46 80 L44 106 M74 80 L76 106'));
       }
       pen.flat(rr(hemX, 107, hemW, 7, 2), p.top[1]);
       stitches(pen, `M${hemX + 2} 108.6 H${hemX + hemW - 2}`);
       break;
     case 'puchowka':
       // a puffer: baffles across the body, each with a shadow and a bit of light, a stand-up collar
-      for (const y of [78, 88, 98, 107]) {
-        pen.line(`M${fem ? 38 : 36} ${y} Q60 ${y + 2.5} ${fem ? 82 : 84} ${y}`, 1.6, p.top[1]);
-        pen.line(`M${fem ? 44 : 42} ${y - 4} q6 -2 12 -1`, 1.1, mix(p.top[0], '#ffffff', 0.32));
-      }
+      pen.clipped(shape, (on) => {
+        for (const y of [78, 88, 98, 107]) {
+          on.line(`M${fem ? 38 : 36} ${y} Q60 ${y + 2.5} ${fem ? 82 : 84} ${y}`, 1.6, p.top[1]);
+          on.line(`M${fem ? 44 : 42} ${y - 4} q6 -2 12 -1`, 1.1, mix(p.top[0], '#ffffff', 0.32));
+        }
+      });
       pen.shaded(
         'M45 68 Q60 77 75 68 L74 61 Q60 67 46 61Z',
         [mix(p.top[0], '#ffffff', 0.1), p.top[1]],
@@ -1516,7 +1522,9 @@ function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
     case 'dresowka':
       // a track jacket: stand-up collar, zip, two stripes off the shoulders and a clean hem
       pen.shaded('M47 67 Q60 75 73 67 L72 62.5 Q60 69 48 62.5Z', [p.top[1], p.top[1]], 0, 0);
-      pen.line('M42 72 L48 112 M45 71 L51 112 M78 72 L72 112 M75 71 L69 112', 1.3, p.cap[0]);
+      pen.clipped(shape, (on) =>
+        on.line('M42 72 L48 112 M45 71 L51 112 M78 72 L72 112 M75 71 L69 112', 1.3, p.cap[0]),
+      );
       if (!back) {
         zip(pen, 60, 72, 112);
         pen.line('M50 96 L53 104 M70 96 L67 104', 1.3, OUT);
@@ -1541,7 +1549,7 @@ function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
       break;
     case 'ogrodniczki':
       if (back) {
-        pen.line('M47 70 L73 100 M73 70 L47 100', 3.4, p.pants[1]);
+        pen.clipped(shape, (on) => on.line('M47 70 L73 100 M73 70 L47 100', 3.4, p.pants[1]));
         pen.shaded(rr(45, 98, 30, 16, 4), p.pants, -2, -2);
         stitches(pen, 'M47 100 H73');
         pen.flat(rr(50, 103, 9, 8, 1.4), p.pants[1]);
@@ -1550,7 +1558,7 @@ function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
         pen.line('M49 67 Q60 76 71 67', 1.4);
         pen.shaded(rr(45, 80, 30, 34, 4), p.pants, -3, -2);
         stitches(pen, 'M47 82.5 H73 M47 82.5 V112 M73 82.5 V112');
-        pen.line('M47 82 L42 68 M73 82 L78 68', 3.4, p.pants[1]);
+        pen.clipped(shape, (on) => on.line('M47 82 L42 68 M73 82 L78 68', 3.4, p.pants[1]));
         pen.raw(
           `<rect x="46.6" y="81.4" width="6.8" height="5.6" rx="1.2" fill="#ffc93c" stroke="${OUT}" stroke-width="1"/><rect x="66.6" y="81.4" width="6.8" height="5.6" rx="1.2" fill="#ffc93c" stroke="${OUT}" stroke-width="1"/>`,
         );
@@ -1701,10 +1709,12 @@ function torsoSide(pen: Pen, ctx: Ctx) {
       pen.flat(rr(45, 107, 30, 7, 2), p.top[1]);
       break;
     case 'puchowka':
-      for (const y of [78, 88, 98, 107]) {
-        pen.line(`M45 ${y} Q60 ${y + 2.5} 75 ${y}`, 1.6, p.top[1]);
-        pen.line(`M49 ${y - 4} q6 -2 11 -1`, 1.1, mix(p.top[0], '#ffffff', 0.32));
-      }
+      pen.clipped(TORSO_SIDE, (on) => {
+        for (const y of [78, 88, 98, 107]) {
+          on.line(`M45 ${y} Q60 ${y + 2.5} 75 ${y}`, 1.6, p.top[1]);
+          on.line(`M49 ${y - 4} q6 -2 11 -1`, 1.1, mix(p.top[0], '#ffffff', 0.32));
+        }
+      });
       pen.shaded(
         'M47 68 Q58 75 69 68 L68 61 Q58 66 48 61Z',
         [mix(p.top[0], '#ffffff', 0.1), p.top[1]],
@@ -1715,7 +1725,7 @@ function torsoSide(pen: Pen, ctx: Ctx) {
     case 'dresowka':
       pen.shaded('M49 67 Q58 73 67 67 L65 63 Q58 68 51 63Z', [p.top[1], p.top[1]], 0, 0);
       pen.line('M47.5 72 V108', 1.6);
-      pen.line('M54 70 L55 108 M57 70 L58 108', 1.3, p.cap[0]);
+      pen.clipped(TORSO_SIDE, (on) => on.line('M54 70 L55 108 M57 70 L58 108', 1.3, p.cap[0]));
       ribbedHem(5);
       break;
     case 'jersey':
@@ -1724,7 +1734,7 @@ function torsoSide(pen: Pen, ctx: Ctx) {
           `<path d="M64 66 H80 V116 H66Z" fill="${p.cap[0]}"/><path d="M64 66 L66 116" stroke="${OUT}" stroke-width="1" fill="none"/>`,
         );
       });
-      pen.line('M49 67 L55 74', 2.4, p.cap[0]);
+      pen.clipped(TORSO_SIDE, (on) => on.line('M49 67 L55 74', 2.4, p.cap[0]));
       pen.raw(
         `<path d="M49 86 H60 V90 L54.5 102 H50 L55 90 H49Z" fill="${WHITE_TRIM}" stroke="${OUT}" stroke-width="1" stroke-linejoin="round"/>`,
       );
@@ -1732,7 +1742,7 @@ function torsoSide(pen: Pen, ctx: Ctx) {
     case 'ogrodniczki':
       pen.shaded(rr(46, 80, 22, 34, 4), p.pants, -3, -2);
       stitches(pen, 'M48 83 H66');
-      pen.line('M50 82 L50 68', 3.4, p.pants[1]);
+      pen.clipped(TORSO_SIDE, (on) => on.line('M50 82 L50 68', 3.4, p.pants[1]));
       pen.raw(
         `<rect x="46.8" y="81" width="6.6" height="5.4" rx="1.2" fill="#ffc93c" stroke="${OUT}" stroke-width="1"/>`,
       );

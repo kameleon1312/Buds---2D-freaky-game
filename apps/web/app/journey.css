@@ -316,6 +316,11 @@
   stroke-width: 4;
 }
 
+/* the line of the walked road changes all the time: on a layer of its own the rest of the page isn't redrawn */
+.trail-road-top {
+  will-change: transform;
+}
+
 .trail-marks rect {
   fill: var(--paper-100);
 }
@@ -342,13 +347,12 @@
   position: absolute;
   left: -38px;
   bottom: -10px;
-  display: none;
-}
-
-.trail-pose .bud-sprite {
   display: block;
   width: 76px;
-  height: auto;
+  height: 114px;
+  background-position: var(--pose-x, 0%) var(--pose-y, 0%);
+  background-repeat: no-repeat;
+  background-size: 300% 300%;
 }
 
 /* a little bob on every step */
@@ -359,18 +363,6 @@
 
 .trail-marker.is-flipped .trail-pose {
   transform: scaleX(-1);
-}
-
-.trail-marker[data-facing='down'][data-frame='0'] .trail-pose[data-facing='down'][data-frame='0'],
-.trail-marker[data-facing='down'][data-frame='1'] .trail-pose[data-facing='down'][data-frame='1'],
-.trail-marker[data-facing='down'][data-frame='2'] .trail-pose[data-facing='down'][data-frame='2'],
-.trail-marker[data-facing='side'][data-frame='0'] .trail-pose[data-facing='side'][data-frame='0'],
-.trail-marker[data-facing='side'][data-frame='1'] .trail-pose[data-facing='side'][data-frame='1'],
-.trail-marker[data-facing='side'][data-frame='2'] .trail-pose[data-facing='side'][data-frame='2'],
-.trail-marker[data-facing='up'][data-frame='0'] .trail-pose[data-facing='up'][data-frame='0'],
-.trail-marker[data-facing='up'][data-frame='1'] .trail-pose[data-facing='up'][data-frame='1'],
-.trail-marker[data-facing='up'][data-frame='2'] .trail-pose[data-facing='up'][data-frame='2'] {
-  display: block;
 }
 
 /* the finish at the end of the road */
@@ -606,10 +598,8 @@
 
   .trail-pose {
     left: -20px;
-  }
-
-  .trail-pose .bud-sprite {
     width: 40px;
+    height: 60px;
   }
 
   .gameplay-stage {
@@ -1607,7 +1597,7 @@
   translate: 32px 0;
 }
 
-.trail-marker.is-riding[data-facing='side'] .trail-board {
+.trail-marker.is-riding[data-side='1'] .trail-board {
   display: block;
 }
 

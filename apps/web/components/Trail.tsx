@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import Image from 'next/image';
-import type { BudLook, Facing, WalkFrame } from '@buds/shared';
+import { budSheetSvg, type BudLook, type Facing, type WalkFrame } from '@buds/shared';
 import { BudSprite } from '@/components/BudSprite';
 
 export type Biome = 'wyspa' | 'miasto' | 'noc' | 'pustkowie' | 'dystrykt' | 'razem';
@@ -42,19 +42,23 @@ export type TrailProp = {
 };
 
 const FACINGS: Facing[] = ['down', 'side', 'up'];
-const FRAMES: WalkFrame[] = [0, 1, 2];
 // walk cycle: stand, left foot, stand, right foot; one step every STRIDE px walked, but never quicker than
 // MIN_STEP ms a step, so a fast scroll is a brisk walk rather than flickering legs
 const CYCLE: WalkFrame[] = [0, 1, 0, 2];
 const STRIDE = 18;
 const MIN_STEP = 85;
-// how closely the bud follows the scroll (s): short enough to feel attached, long enough that a wheel notch is a
-// few steps instead of a jump
-const FOLLOW = 0.11;
+// how closely the bud follows the scroll (s): it only softens a wheel notch into a few steps...
+const FOLLOW = 0.045;
+// ...and it is never further than this many px of road behind, however fast the page goes
+const MAX_LAG = 48;
+// the height of the screen where the bud walks (0..1)
+const ANCHOR = 0.55;
 // the bud puts its feet together once it has not moved for this long (ms)
 const STAND = 120;
 // things along the road rise this many px of road before the walker gets to them
-const AHEAD = 190;
+const AHEAD = 300;
+// the road's points are measured this far apart (px)
+const SAMPLE = 8;
 // the ones who joined keep this far behind on the road
 const FOLLOW_GAP = 74;
 // a part of the world starts this far above the middle of the crossing that leads into it
@@ -90,19 +94,42 @@ function roundedPath(pts: [number, number][], radius: number) {
   return `${d} L ${fmt(...pts[pts.length - 1]!)}`;
 }
 
-/** The nine poses of a walker: only what the marker's data attributes point at is shown. */
-function Poses({ look }: { look: BudLook }) {
-  return (
-    <>
-      {FACINGS.map((f) =>
-        FRAMES.map((fr) => (
-          <span key={`${f}-${fr}`} className="trail-pose" data-facing={f} data-frame={fr}>
-            <BudSprite look={look} facing={f} frame={fr} height={96} />
-          </span>
-        )),
-      )}
-    </>
-  );
+/**
+ * A walker is one sprite sheet behind one small window; a step only moves the sheet. It starts as the vector drawing
+ * and is swapped for pixels of the exact size on screen, so walking redraws nothing.
+ */
+function Walker({ look }: { look: BudLook }) {
+  const pose = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = pose.current;
+    if (!el) return;
+    const url = `data:image/svg+xml,${encodeURIComponent(budSheetSvg(look))}`;
+    el.style.backgroundImage = `url("${url}")`;
+    const image = new window.Image();
+    image.onload = () => {
+      const scale = Math.min(3, window.devicePixelRatio || 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(el.offsetWidth * scale) * 3;
+      canvas.height = Math.round(el.offsetHeight * scale) * 3;
+      canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        if (blob && pose.current) el.style.backgroundImage = `url("${URL.createObjectURL(blob)}")`;
+      });
+    };
+    image.src = url;
+  }, [look]);
+  return <span className="trail-pose" ref={pose} />;
+}
+
+/** Shows one pose of a walker's sheet. */
+function setPose(marker: HTMLElement, facing: Facing, frame: WalkFrame) {
+  const key = `${facing}${frame}`;
+  if (marker.dataset.pose === key) return;
+  marker.dataset.pose = key;
+  marker.dataset.frame = String(frame);
+  marker.dataset.side = facing === 'side' ? '1' : '0';
+  marker.style.setProperty('--pose-x', `${frame * 50}%`);
+  marker.style.setProperty('--pose-y', `${FACINGS.indexOf(facing) * 50}%`);
 }
 
 function Prop({ prop, gap }: { prop: TrailProp; gap: number }) {
@@ -149,8 +176,9 @@ function Prop({ prop, gap }: { prop: TrailProp; gap: number }) {
  * ground of the page, the pavement and the asphalt change with it, and things from the game's art rise along the road
  * as the bud nears them (the island's palms, a town, the night street where a rival waits, a wasteland with someone in
  * the bushes, a district that gets built one building at a time, a crowd where two buds join in and walk along).
- * A bud walks it with the scroll: the scroll position maps onto a point of the street at one fixed ratio, and the bud
- * follows that point closely, stepping with the distance walked and standing still when the reader stops. Without
+ * A bud walks it with the scroll: along a stop it stands exactly at the same height of the screen, 1:1 with the page,
+ * and it takes each crossing over the scroll of the gap between two stops, so the same scroll is always the same place
+ * of the story, either way. It steps with the distance walked and stands still when the reader stops. Without
  * JavaScript every stop is simply shown and there is no road.
  */
 export function Trail({
@@ -175,11 +203,12 @@ export function Trail({
     const trail = root.current;
     if (!trail) return;
     const svg = trail.querySelector<SVGSVGElement>('.trail-road')!;
-    const paths = Array.from(svg.querySelectorAll<SVGPathElement>('.trail-road-path'));
+    const top = trail.querySelector<SVGSVGElement>('.trail-road-top')!;
+    const paths = Array.from(trail.querySelectorAll<SVGPathElement>('.trail-road-path'));
     const segPave = svg.querySelector<SVGGElement>('.segs-pave')!;
     const segBase = svg.querySelector<SVGGElement>('.segs-base')!;
-    const marks = svg.querySelector<SVGGElement>('.trail-marks')!;
-    const done = svg.querySelector<SVGPathElement>('.trail-road-done')!;
+    const marks = top.querySelector<SVGGElement>('.trail-marks')!;
+    const done = top.querySelector<SVGPathElement>('.trail-road-done')!;
     const marker = trail.querySelector<HTMLDivElement>('.trail-marker-me')!;
     const followers = Array.from(trail.querySelectorAll<HTMLDivElement>('.trail-marker-friend'));
     const goal = trail.querySelector<HTMLDivElement>('.trail-goal')!;
@@ -196,6 +225,12 @@ export function Trail({
     let total = 0;
     let startY = 0;
     let endY = 1;
+    // where on the road the bud is when the page's height y is at the anchor: pairs of (y, length), y growing
+    let keys: { y: number; len: number }[] = [];
+    let anchorY = document.documentElement.clientHeight * ANCHOR;
+    let seenW = window.innerWidth;
+    let seenH = window.innerHeight;
+    let dashed = -1;
     let current = -1;
     let raf = 0;
     let last = 0;
@@ -209,6 +244,16 @@ export function Trail({
 
     /** Points along the road, measured once per layout: asking the path each time is slow. */
     let samples: { x: number; y: number; len: number }[] = [];
+
+    /** A point of the road at a length, from the samples. */
+    const pointAt = (len: number) => {
+      const at = Math.min(samples.length - 1, Math.max(0, len / SAMPLE));
+      const i = Math.min(samples.length - 2, Math.floor(at));
+      const a = samples[i]!;
+      const b = samples[i + 1] ?? a;
+      const t = at - i;
+      return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+    };
 
     /** The road's length nearest to a point of the page. */
     const nearest = (x: number, y: number) => {
@@ -268,9 +313,11 @@ export function Trail({
       pts.push([lastNode.x, endY]);
       const d = roundedPath(pts, radius);
 
-      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      svg.setAttribute('width', `${w}`);
-      svg.setAttribute('height', `${h}`);
+      for (const layer of [svg, top]) {
+        layer.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        layer.setAttribute('width', `${w}`);
+        layer.setAttribute('height', `${h}`);
+      }
       paths.forEach((p) => p.setAttribute('d', d));
       // a zebra crossing on the street just before every stop
       const half = narrow ? 11 : 18;
@@ -291,10 +338,20 @@ export function Trail({
       total = done.getTotalLength();
       done.style.strokeDasharray = `${total} ${total}`;
       samples = [];
-      for (let len = 0; len <= total; len += 10) {
-        const p = done.getPointAtLength(len);
+      for (let len = 0; len <= total + SAMPLE; len += SAMPLE) {
+        const p = done.getPointAtLength(Math.min(total, len));
         samples.push({ x: p.x, y: p.y, len });
       }
+      dashed = -1;
+      // along a stop the road runs straight down, one to one with the page; a crossing is spread over its gap
+      keys = [{ y: startY, len: 0 }];
+      for (const n of nodes) {
+        keys.push(
+          { y: n.top, len: nearest(n.x, n.top) },
+          { y: n.bottom, len: nearest(n.x, n.bottom) },
+        );
+      }
+      keys.push({ y: endY, len: total });
 
       // every part of the world fills the whole width of the page, from the middle of one crossing to the next
       const fullLeft = -box.left;
@@ -359,9 +416,14 @@ export function Trail({
     /** The point on the street for the current scroll position: one fixed ratio from start to finish. */
     const targetLength = () => {
       const box = trail.getBoundingClientRect();
-      const y = window.innerHeight * 0.55 - box.top;
-      const t = Math.min(1, Math.max(0, (y - startY) / (endY - startY)));
-      return t * total;
+      const y = anchorY - box.top;
+      if (y <= startY) return 0;
+      for (let i = 1; i < keys.length; i++) {
+        const a = keys[i - 1]!;
+        const b = keys[i]!;
+        if (y <= b.y) return a.len + ((b.len - a.len) * (y - a.y)) / Math.max(1, b.y - a.y);
+      }
+      return total;
     };
 
     const draw = (now: number) => {
@@ -372,6 +434,8 @@ export function Trail({
       const prev = current;
       if (prev < 0 || reduce) current = target;
       else current += (target - current) * (1 - Math.exp(-dt / FOLLOW));
+      if (Math.abs(target - current) > MAX_LAG)
+        current = target - Math.sign(target - current) * MAX_LAG;
       if (Math.abs(target - current) < 0.3) current = target;
       const delta = prev < 0 ? 0 : current - prev;
 
@@ -379,8 +443,8 @@ export function Trail({
         lastMove = now;
         // face along the street, the way the bud is going; turning only once the bend is clearly sideways or
         // clearly straight again, so it doesn't flicker between poses halfway round a corner
-        const ahead = done.getPointAtLength(Math.min(total, current + 6));
-        const behind = done.getPointAtLength(Math.max(0, current - 6));
+        const ahead = pointAt(current + 6);
+        const behind = pointAt(current - 6);
         const dir = delta < 0 ? -1 : 1;
         const dx = (ahead.x - behind.x) * dir;
         const dy = (ahead.y - behind.y) * dir;
@@ -403,13 +467,16 @@ export function Trail({
       const riding = current >= rideFrom && current < rideTo;
       const frame = standing || riding ? 0 : CYCLE[step % CYCLE.length]!;
 
-      const p = done.getPointAtLength(current);
-      marker.style.transform = `translate(${p.x}px, ${p.y}px)`;
-      marker.dataset.facing = facing;
-      marker.dataset.frame = String(frame);
+      const p = pointAt(current);
+      marker.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
+      setPose(marker, facing, frame);
       marker.classList.toggle('is-flipped', flip);
       marker.classList.toggle('is-riding', riding);
-      done.style.strokeDashoffset = `${total - current}`;
+      // the walked line lives on its own layer and is redrawn only when it has grown visibly
+      if (Math.abs(current - dashed) >= 2 || current === target) {
+        dashed = current;
+        done.style.strokeDashoffset = `${total - current}`;
+      }
 
       // the two from the crowd walk along behind once they have joined
       followers.forEach((f, i) => {
@@ -417,15 +484,18 @@ export function Trail({
         const on = current >= joinLen && at > 0;
         f.classList.toggle('is-on', on);
         if (!on) return;
-        const fp = done.getPointAtLength(at);
-        const a = done.getPointAtLength(Math.min(total, at + 6));
-        const b = done.getPointAtLength(Math.max(0, at - 6));
+        const fp = pointAt(at);
+        const a = pointAt(at + 6);
+        const b = pointAt(at - 6);
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const side = Math.abs(dx) > Math.abs(dy);
-        f.style.transform = `translate(${fp.x}px, ${fp.y}px)`;
-        f.dataset.facing = side ? 'side' : dy > 0 ? 'down' : 'up';
-        f.dataset.frame = String(standing ? 0 : CYCLE[(step + i + 1) % CYCLE.length]!);
+        f.style.transform = `translate3d(${fp.x}px, ${fp.y}px, 0)`;
+        setPose(
+          f,
+          side ? 'side' : dy > 0 ? 'down' : 'up',
+          standing ? 0 : CYCLE[(step + i + 1) % CYCLE.length]!,
+        );
         f.classList.toggle('is-flipped', side && dx > 0);
       });
 
@@ -446,6 +516,18 @@ export function Trail({
       if (!raf) raf = requestAnimationFrame(draw);
     };
 
+    // a phone's address bar sliding away is not a new screen: the bud must not jump because of it
+    const resized = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w !== seenW || Math.abs(h - seenH) > 120) {
+        seenW = w;
+        seenH = h;
+        anchorY = document.documentElement.clientHeight * ANCHOR;
+      }
+      update();
+    };
+
     trail.classList.add('is-live');
     layout();
     // only a real change of size is worth working the whole road out again
@@ -459,11 +541,11 @@ export function Trail({
     });
     ro.observe(trail);
     window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    window.addEventListener('resize', resized);
     return () => {
       ro.disconnect();
       window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      window.removeEventListener('resize', resized);
       cancelAnimationFrame(raf);
     };
     // stops and scenes are constants of the page
@@ -491,6 +573,8 @@ export function Trail({
         <path className="trail-road-path trail-road-base" />
         <g className="segs-base" />
         <path className="trail-road-path trail-road-dash" />
+      </svg>
+      <svg className="trail-road trail-road-top" aria-hidden>
         <path className="trail-road-path trail-road-done" />
         <g className="trail-marks" />
       </svg>
@@ -503,19 +587,13 @@ export function Trail({
       </div>
 
       {friends.map((look, i) => (
-        <div
-          key={i}
-          className="trail-marker trail-marker-friend"
-          aria-hidden
-          data-facing="down"
-          data-frame="0"
-        >
-          {live && <Poses look={look} />}
+        <div key={i} className="trail-marker trail-marker-friend" aria-hidden data-frame="0">
+          {live && <Walker look={look} />}
         </div>
       ))}
-      <div className="trail-marker trail-marker-me" aria-hidden data-facing="down" data-frame="0">
+      <div className="trail-marker trail-marker-me" aria-hidden data-frame="0">
         <Image className="trail-board" src="/world/tr-deska.png" alt="" width={68} height={184} />
-        {live && <Poses look={walker} />}
+        {live && <Walker look={walker} />}
       </div>
 
       <ol className="trail-stops">

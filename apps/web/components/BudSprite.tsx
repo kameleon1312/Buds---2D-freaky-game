@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import {
   VIEW_H,
   VIEW_W,
@@ -44,7 +45,12 @@ export function BudSprite({
   crop,
 }: Props) {
   const box = crop ? CROPS[crop] : { x: 0, y: 0, w: VIEW_W, h: VIEW_H };
-  const markup = budFrameMarkup(look, facing, frame);
+  // clip ids are the drawing's own, so the same bud twice on a page would share them; a clip inside a hidden copy
+  // then does nothing and the colours run out of the outline. Every sprite gets ids of its own.
+  const own = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const markup = budFrameMarkup(look, facing, frame)
+    .replace(/<clipPath id="/g, `<clipPath id="${own}-`)
+    .replace(/url\(#/g, `url(#${own}-`);
   return (
     <svg
       viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`}
