@@ -79,7 +79,7 @@ describe('POST /v1/buds', () => {
     [{ name: 'A', look }],
     [{ name: '<script>', look }],
     [{ name: 'Ola', look: { ...look, skin: 42 } }],
-    [{ name: 'Ola', look: { ...look, hair: 'dredy' } }],
+    [{ name: 'Ola', look: { ...look, hair: 'lysy' } }],
     [{ name: 'Ola' }],
   ])('rejects invalid input %j', async (body) => {
     const res = await makeApp().request('/v1/buds', post(body));

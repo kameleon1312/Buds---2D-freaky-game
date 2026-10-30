@@ -25,6 +25,32 @@ const ICONS_ITEMS: Record<string, Icon> = {
       flat(rr(24, 38, 16, 9, 3), '#7cc01a', LINE, 2) +
       stroke('M29 22v8M35 22v8', LINE, 2),
   },
+  'outfit-jeansowka': {
+    body:
+      shirt(['#4a78b8', '#34588c']) +
+      flat(rr(22, 28, 8, 7, 1), '#34588c', LINE, 2) +
+      flat(rr(34, 28, 8, 7, 1), '#34588c', LINE, 2) +
+      stroke('M32 18V50', LINE, 2) +
+      stroke('M22 24H42', '#e3b04b', 1.5),
+  },
+  'outfit-puchowka': {
+    body:
+      shirt(['#ff9a1f', '#d97a0b']) +
+      stroke('M18 26Q32 29 46 26M18 34Q32 37 46 34M18 42Q32 45 46 42', LINE, 2) +
+      stroke('M32 16V50', LINE, 2.5),
+  },
+  'outfit-dresowka': {
+    body:
+      shirt(['#ff3d50', '#bd1c31']) +
+      stroke('M32 16V50', LINE, 2.5) +
+      stroke('M23 18L25 50M27 18L28 50M41 18L39 50M37 18L36 50', '#f6f2e9', 1.8),
+  },
+  'outfit-jersey': {
+    body:
+      shirt(['#3fb39b', '#2a8a76']) +
+      flat('M25 26H39V30L33 44H27L33 31H25Z', '#f6f2e9', LINE, 1.8) +
+      stroke('M26 16L32 22L38 16', '#ffc93c', 3),
+  },
   'outfit-koszula': {
     body:
       shirt(['#f6f2e9', '#d8cfbf']) +

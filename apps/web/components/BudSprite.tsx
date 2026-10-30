@@ -17,12 +17,21 @@ type Props = {
   flip?: boolean;
   className?: string;
   label?: string;
-  /** show only the head (faces in picker thumbnails) */
-  crop?: 'head';
+  /** show only a part (picker thumbnails) */
+  crop?: BudCrop;
 };
 
-// head + tallest hair (afro, bun) fits in this square
-const HEAD_BOX = { x: 16, y: -6, w: 128, h: 132 };
+export type BudCrop = 'head' | 'hair' | 'face' | 'torso' | 'legs' | 'feet';
+
+// what each crop shows, in the frame's units; head + tallest hair (afro, bun) fits in the first
+const CROPS: Record<BudCrop, { x: number; y: number; w: number; h: number }> = {
+  head: { x: 16, y: -6, w: 128, h: 132 },
+  hair: { x: 24, y: 10, w: 112, h: 100 },
+  face: { x: 38, y: 50, w: 84, h: 72 },
+  torso: { x: 18, y: 120, w: 124, h: 82 },
+  legs: { x: 30, y: 166, w: 100, h: 66 },
+  feet: { x: 30, y: 192, w: 100, h: 40 },
+};
 
 export function BudSprite({
   look,
@@ -34,13 +43,14 @@ export function BudSprite({
   label,
   crop,
 }: Props) {
-  const box = crop === 'head' ? HEAD_BOX : { x: 0, y: 0, w: VIEW_W, h: VIEW_H };
+  const box = crop ? CROPS[crop] : { x: 0, y: 0, w: VIEW_W, h: VIEW_H };
   const markup = budFrameMarkup(look, facing, frame);
   return (
     <svg
       viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`}
       width={Math.round((height * box.w) / box.h)}
       height={height}
+      preserveAspectRatio="xMidYMid meet"
       role="img"
       aria-label={label ?? 'Bud'}
       className={['bud-sprite', className].filter(Boolean).join(' ')}

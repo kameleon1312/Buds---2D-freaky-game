@@ -26,3 +26,23 @@ płci, a kreatory pokazują katalog wybranej płci.
   i przeciwników).
 - Tworzenie Buda w grze: `CreatorScreen` czyta opcje z `GET /v1/look/options`, podgląd renderuje serwer, a
   `POST /v1/buds` zwraca token, więc telefon jest od razu połączony.
+
+## Detale i garderoba
+
+Oprócz fryzury, góry, nóg i butów Bud ma pola opcjonalne (stary zapis bez nich wygląda tak samo jak wcześniej):
+
+| Pole        | Co zmienia                                                                      |
+| ----------- | ------------------------------------------------------------------------------- |
+| `eyes`      | kolor tęczówki (`EYE_COLORS`)                                                   |
+| `mark`      | cecha twarzy: piegi, rumieńce, pieprzyk, blizna, zarost, wąsy, broda            |
+| `glasses`   | okulary, lenonki, przeciwsłoneczne, sportowe                                    |
+| `print`     | nadruk na górze: paski, pas, odznaka, błyskawica, gwiazda, moro                 |
+| `accessory` | łańcuch, plecak, nerka, szalik, zegarek                                         |
+| `accent`    | kolor wykończeń, nadruków, czapek i dodatków; `-1` albo brak dobiera go do góry |
+
+Każde ubranie jest narysowane w `vector.ts` ze szwami, ściągaczami, kieszeniami, zamkami i guzikami, w widoku z przodu,
+z boku i z tyłu. Po zmianie generatora: `tools/export-guest-sheet.ts` (Bud gościa) i `tools/world/export-quests.ts`
+(mieszkańcy i rywale). Nowe ubranie potrzebuje ikony w `tools/world/art/icons.ts` (sprawdza to `export-quests.ts`).
+
+Kreator na stronie (`Creator.tsx`) pokazuje każdą opcję jako obrazek na tym właśnie Budzie (`BudSprite` z `crop`), ma
+gotowe zestawy, obracanie, losowanie i cofanie. Kreator w grze (`CreatorScreen`) czyta te same listy z `GET /v1/look/options`.

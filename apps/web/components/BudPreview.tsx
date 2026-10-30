@@ -17,10 +17,13 @@ export function BudPreview({
   look,
   height = 240,
   name,
+  spin = null,
 }: {
   look: BudLook;
   height?: number;
   name?: string;
+  /** turned by hand: stands this way (0 front, 1 and 3 sides, 2 back); null turns and walks by itself */
+  spin?: number | null;
 }) {
   const [tick, setTick] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -38,8 +41,9 @@ export function BudPreview({
     return () => clearTimeout(id);
   }, [look]);
 
-  const turn = paused ? TURN[0]! : TURN[Math.floor(tick / 16) % TURN.length]!;
-  const frame = paused ? 0 : WALK[tick % WALK.length]!;
+  const held = spin !== null;
+  const turn = held ? TURN[spin]! : paused ? TURN[0]! : TURN[Math.floor(tick / 16) % TURN.length]!;
+  const frame = held || paused ? 0 : WALK[tick % WALK.length]!;
 
   return (
     <BudSprite

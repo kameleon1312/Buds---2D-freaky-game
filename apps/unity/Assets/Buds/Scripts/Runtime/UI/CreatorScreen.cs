@@ -15,7 +15,7 @@ namespace Buds.UI
     public sealed class CreatorScreen
     {
         const float PreviewDelay = 0.3f;
-        static readonly string[] Tabs = { "Postać", "Włosy", "Góra", "Nogi", "Buty" };
+        static readonly string[] Tabs = { "Postać", "Włosy", "Twarz", "Góra", "Nogi", "Buty", "Dodatki" };
 
         readonly Func<BudLookDto, Awaitable<Texture2D>> preview;
         readonly Action<string, BudLookDto> onCreate;
@@ -30,6 +30,7 @@ namespace Buds.UI
         readonly Text error;
         static Sprite disc;
         LookOptionsDto data;
+        ScrollRect optionsScroll;
         int tab;
         Facing facing = Facing.Down;
         BudSheet sheet;
@@ -86,12 +87,23 @@ namespace Buds.UI
             for (var i = 0; i < Tabs.Length; i++)
             {
                 var index = i;
-                tabButtons[i] = UiKit.Button("Tab" + i, body, Tabs[i], new Vector2(128, 56), () => ShowTab(index), UiKit.Tone.Rep, 24);
-                UiKit.Place((RectTransform)tabButtons[i].transform, new Vector2(0, 1), new Vector2(404 + i * 136, 0), new Vector2(128, 56),
+                tabButtons[i] = UiKit.Button("Tab" + i, body, Tabs[i], new Vector2(92, 56), () => ShowTab(index), UiKit.Tone.Rep, 19);
+                UiKit.Place((RectTransform)tabButtons[i].transform, new Vector2(0, 1), new Vector2(404 + i * 97, 0), new Vector2(92, 56),
                     new Vector2(0, 1));
             }
-            options = UiKit.Rect("Options", body);
-            UiKit.Place(options, new Vector2(0, 1), new Vector2(404, -72), new Vector2(672, 440), new Vector2(0, 1));
+            // the options scroll: the catalogs have grown past what fits at once
+            var optionsView = UiKit.Rect("OptionsView", body);
+            UiKit.Place(optionsView, new Vector2(0, 1), new Vector2(404, -72), new Vector2(672, 440), new Vector2(0, 1));
+            optionsView.gameObject.AddComponent<RectMask2D>();
+            var hit = optionsView.gameObject.AddComponent<Image>();
+            hit.color = Color.clear;
+            options = UiKit.Rect("Options", optionsView);
+            UiKit.Place(options, new Vector2(0, 1), Vector2.zero, new Vector2(672, 440), new Vector2(0, 1));
+            optionsScroll = optionsView.gameObject.AddComponent<ScrollRect>();
+            optionsScroll.content = options;
+            optionsScroll.horizontal = false;
+            optionsScroll.movementType = ScrollRect.MovementType.Clamped;
+            optionsScroll.scrollSensitivity = 30;
 
             // name and the one gold action
             var nameLabel = UiKit.Label("NameLabel", body, "Imię", 22, UiKit.InkSoft, true, TextAnchor.LowerLeft);
@@ -238,6 +250,12 @@ namespace Buds.UI
                 pantsColor = random.Next(g.legs.colors.Length),
                 shoes = Pick(g.shoes.styles).id,
                 shoesColor = random.Next(g.shoes.colors.Length),
+                eyes = random.Next(Math.Max(1, data.eyes?.Length ?? 1)),
+                mark = g.marks != null && random.Next(10) >= 6 ? Pick(g.marks).id : "brak",
+                glasses = data.glasses != null && random.Next(4) == 0 ? Pick(data.glasses).id : "brak",
+                print = data.prints != null && random.Next(2) == 0 ? Pick(data.prints).id : "gladka",
+                accessory = data.accessories != null && random.Next(2) == 0 ? Pick(data.accessories).id : "brak",
+                accent = data.accents != null ? random.Next(data.accents.Length) : -1,
             };
             Changed();
         }
@@ -284,30 +302,47 @@ namespace Buds.UI
             var g = data.For(Look.gender);
             if (g == null) return;
             var y = 0f;
+            var same = index == shownTab;
             switch (index)
             {
                 case 0:
                     y = Chips("Kim jest", data.genders, Look.gender, id => Set(l => SwitchGender(l, id)), y, 2);
                     y = Chips("Nastrój", g.moods, Look.mood, id => Set(l => l.mood = id), y, 3);
-                    Swatches("Karnacja", data.skins, Look.skin, i => Set(l => l.skin = i), y);
+                    y = Swatches("Karnacja", data.skins, Look.skin, i => Set(l => l.skin = i), y);
                     break;
                 case 1:
+                    y = Swatches("Kolor włosów", g.hair.colors, Look.hairColor, i => Set(l => l.hairColor = i), y);
                     y = Chips("Fryzura", g.hair.styles, Look.hair, id => Set(l => l.hair = id), y, 4);
-                    Swatches("Kolor włosów", g.hair.colors, Look.hairColor, i => Set(l => l.hairColor = i), y);
                     break;
                 case 2:
-                    y = Chips("Góra", g.top.styles, Look.outfit, id => Set(l => l.outfit = id), y, 3);
-                    Swatches("Kolor góry", g.top.colors, Look.outfitColor, i => Set(l => l.outfitColor = i), y);
+                    if (data.eyes != null) y = Swatches("Kolor oczu", data.eyes, Look.eyes, i => Set(l => l.eyes = i), y);
+                    if (g.marks != null) y = Chips("Cecha", g.marks, Look.mark, id => Set(l => l.mark = id), y, 4);
+                    if (data.glasses != null) y = Chips("Okulary", data.glasses, Look.glasses, id => Set(l => l.glasses = id), y, 3);
                     break;
                 case 3:
-                    y = Chips("Nogi", g.legs.styles, Look.pants, id => Set(l => l.pants = id), y, 3);
-                    Swatches("Kolor", g.legs.colors, Look.pantsColor, i => Set(l => l.pantsColor = i), y);
+                    y = Swatches("Kolor góry", g.top.colors, Look.outfitColor, i => Set(l => l.outfitColor = i), y);
+                    y = Chips("Góra", g.top.styles, Look.outfit, id => Set(l => l.outfit = id), y, 3);
+                    if (data.prints != null) y = Chips("Nadruk", data.prints, Look.print, id => Set(l => l.print = id), y, 4);
                     break;
                 case 4:
+                    y = Swatches("Kolor", g.legs.colors, Look.pantsColor, i => Set(l => l.pantsColor = i), y);
+                    y = Chips("Nogi", g.legs.styles, Look.pants, id => Set(l => l.pants = id), y, 3);
+                    break;
+                case 5:
+                    y = Swatches("Kolor butów", g.shoes.colors, Look.shoesColor, i => Set(l => l.shoesColor = i), y);
                     y = Chips("Buty", g.shoes.styles, Look.shoes, id => Set(l => l.shoes = id), y, 3);
-                    Swatches("Kolor butów", g.shoes.colors, Look.shoesColor, i => Set(l => l.shoesColor = i), y);
+                    break;
+                case 6:
+                    if (data.accents != null)
+                        y = Swatches("Kolor dodatków i czapki", data.accents, Look.accent, i => Set(l => l.accent = i), y);
+                    if (data.accessories != null)
+                        y = Chips("Dodatek", data.accessories, Look.accessory, id => Set(l => l.accessory = id), y, 3);
                     break;
             }
+            // as tall as what was laid out; another tab starts from its top, a change in this one stays where it was
+            options.sizeDelta = new Vector2(672, Mathf.Max(440, -y));
+            if (!same) options.anchoredPosition = Vector2.zero;
+            shownTab = index;
         }
 
         /// <summary>The other gender's catalog: keep every part it has, otherwise take its first pick.</summary>
@@ -321,6 +356,7 @@ namespace Buds.UI
             look.outfit = Keep(g.top.styles, look.outfit);
             look.pants = Keep(g.legs.styles, look.pants);
             look.shoes = Keep(g.shoes.styles, look.shoes);
+            if (g.marks != null) look.mark = Keep(g.marks, look.mark);
         }
 
         float Chips(string title, OptionDto[] items, string selected, Action<string> pick, float y, int columns)
@@ -341,7 +377,9 @@ namespace Buds.UI
             return y - ((items.Length + columns - 1) / columns) * 64 - 10;
         }
 
-        void Swatches(string title, string[] colors, int selected, Action<int> pick, float y)
+        int shownTab = -1;
+
+        float Swatches(string title, string[] colors, int selected, Action<int> pick, float y)
         {
             Title(title, y);
             y -= 38;
@@ -361,6 +399,7 @@ namespace Buds.UI
                 button.targetGraphic = ring;
                 button.onClick.AddListener(() => pick(index));
             }
+            return y - ((colors.Length + 8) / 9) * 70 - 8;
         }
 
         void Title(string text, float y)

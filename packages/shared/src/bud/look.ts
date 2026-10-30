@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import {
+  ACCESSORIES,
+  EYE_COLORS,
+  FACE_MARKS,
+  FACE_MARKS_BY_GENDER,
   GENDERS,
+  GLASSES,
   HAIR_BY_GENDER,
   HAIR_COLORS,
   HAIR_STYLES,
@@ -11,6 +16,7 @@ import {
   PANTS,
   PANTS_BY_GENDER,
   PANTS_COLORS,
+  PRINTS,
   SHOES,
   SHOES_BY_GENDER,
   SHOES_COLORS,
@@ -41,6 +47,19 @@ export const budLookSchema = z.object({
   pantsColor: index(PANTS_COLORS),
   shoes: z.enum(SHOES).default('trampki'),
   shoesColor: index(SHOES_COLORS).default(0),
+  // the finer details: left out, a bud looks as it always did
+  eyes: index(EYE_COLORS).optional(),
+  mark: z.enum(FACE_MARKS).optional(),
+  glasses: z.enum(GLASSES).optional(),
+  print: z.enum(PRINTS).optional(),
+  accessory: z.enum(ACCESSORIES).optional(),
+  /** Trims, prints, hats and accessories: an index of OUTFIT_COLORS; -1 or left out picks one to go with the top. */
+  accent: z
+    .number()
+    .int()
+    .min(-1)
+    .max(OUTFIT_COLORS.length - 1)
+    .optional(),
 });
 export type BudLook = z.infer<typeof budLookSchema>;
 export type BudLookInput = z.input<typeof budLookSchema>;
@@ -65,5 +84,11 @@ export function randomLook(gender?: Gender, random: () => number = Math.random):
     pantsColor: pickIndex(PANTS_COLORS, random),
     shoes: pick(SHOES_BY_GENDER[g], random),
     shoesColor: pickIndex(SHOES_COLORS, random),
+    eyes: pickIndex(EYE_COLORS, random),
+    mark: random() < 0.6 ? 'brak' : pick(FACE_MARKS_BY_GENDER[g], random),
+    glasses: random() < 0.75 ? 'brak' : pick(GLASSES, random),
+    print: random() < 0.5 ? 'gladka' : pick(PRINTS, random),
+    accessory: random() < 0.5 ? 'brak' : pick(ACCESSORIES, random),
+    accent: pickIndex(OUTFIT_COLORS, random),
   };
 }

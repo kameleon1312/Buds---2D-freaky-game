@@ -1,6 +1,6 @@
 /*
- * The landing page as a journey through Buds: scroll reveals, the world in numbers, the winding road a bud walks as
- * the reader scrolls, a phone frame for screenshots, the growth cards, the gallery of places, the compact creator and
+ * The landing page as a journey through Buds: the street of the hero, scroll reveals, the winding road a bud walks as
+ * the reader scrolls through every part of the world, a phone frame for screenshots, the growth cards, the gallery of places, the compact creator and
  * the centred sign-in card. Design-system rules hold: hard lips and drops, outlines, no soft shadows; motion uses
  * only transform and opacity, eases out long and short (nothing bounces or flies far), and stops with reduced motion.
  */
@@ -47,178 +47,9 @@
   transform: none;
 }
 
-/* ---------- the world in numbers ---------- */
-.world-stats-band {
-  margin-top: calc(var(--space-6) * -1);
-}
-
-.world-stats {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.world-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: var(--space-4) var(--space-2);
-  text-align: center;
-  background: var(--surface-800);
-  border: var(--stroke-ui) solid var(--outline);
-  border-radius: var(--radius-m);
-  box-shadow: 0 4px 0 var(--surface-700);
-}
-
-.world-stat strong {
-  font-family: var(--font-display), sans-serif;
-  font-weight: 900;
-  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
-  line-height: 1;
-  color: var(--buds-400);
-  font-variant-numeric: tabular-nums;
-}
-
-.world-stat > span {
-  font-weight: 700;
-  font-size: 0.92rem;
-  color: var(--text-on-dark-muted);
-}
-
-/* ---------- how a bud grows ---------- */
-.growth {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-6);
-}
-
-.growth-card {
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-3) var(--space-3) var(--space-4);
-  transition: transform 0.45s var(--ease-answer);
-}
-
-.growth-card:hover {
-  transform: translateY(-3px);
-}
-
-.growth-shot {
-  overflow: hidden;
-  aspect-ratio: 1200 / 521;
-  margin-bottom: var(--space-3);
-  border: var(--stroke-ui) solid var(--outline);
-  border-radius: 12px;
-  background: var(--surface-900);
-}
-
-.growth-shot img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.001);
-  transition: transform 1.4s var(--ease-arrive);
-}
-
-.growth-card:hover .growth-shot img {
-  transform: scale(1.035);
-}
-
-.growth-card h3 {
-  margin: 0 0 var(--space-2);
-  font-size: 1.25rem;
-}
-
-.growth-card p {
-  margin: 0;
-  line-height: 1.5;
-}
-
 /* the hero's picture drifts a touch slower than the page */
 .parallax {
   will-change: transform;
-}
-
-.eyebrow {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display), sans-serif;
-  font-weight: 800;
-  font-size: 0.85rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--buds-400);
-}
-
-.eyebrow-dark {
-  color: var(--buds-600);
-}
-
-/* ---------- hero ---------- */
-.journey .hero {
-  position: relative;
-  min-height: min(calc(100svh - 72px), 860px);
-  align-content: center;
-  padding-bottom: 72px;
-}
-
-.journey .crew::after {
-  display: none;
-}
-
-.crew-sun {
-  position: absolute;
-  right: 12%;
-  top: 9%;
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-pill);
-  background: #f9e6c6;
-  animation: sun-rise 6s ease-in-out infinite alternate;
-}
-
-.crew-cloud {
-  position: absolute;
-  height: 18px;
-  border-radius: var(--radius-pill);
-  background: #fbf3e4;
-  opacity: 0.9;
-  animation: cloud-drift 26s linear infinite;
-}
-
-.crew-cloud-a {
-  top: 12%;
-  width: 90px;
-}
-
-.crew-cloud-b {
-  top: 24%;
-  width: 60px;
-  animation-duration: 34s;
-  animation-delay: -14s;
-}
-
-@keyframes cloud-drift {
-  from {
-    transform: translateX(-120px);
-  }
-  to {
-    transform: translateX(720px);
-  }
-}
-
-@keyframes sun-rise {
-  from {
-    transform: translateY(6px);
-  }
-  to {
-    transform: translateY(-6px);
-  }
 }
 
 /* ---------- a landscape phone around a screenshot ---------- */
@@ -402,47 +233,6 @@
   }
 }
 
-/* ---------- compact creator: fits one screen ---------- */
-.journey .creator {
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-  gap: var(--space-6);
-  padding: var(--space-6);
-  align-items: start;
-}
-
-.journey .creator-preview {
-  position: sticky;
-  top: var(--space-4);
-}
-
-.journey .creator-preview .stage {
-  max-height: 300px;
-}
-
-.journey .creator-name {
-  font-size: 1.6rem;
-}
-
-.journey .creator-fields {
-  gap: var(--space-3);
-}
-
-.creator-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-2);
-}
-
-.creator-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  height: 320px;
-  overflow-y: auto;
-  padding: var(--space-1) var(--space-2) var(--space-1) 0;
-  animation: copy-in 0.45s var(--ease-arrive) both;
-}
-
 /* ---------- account: the sign-in card in the middle of the screen ---------- */
 .auth-center {
   min-height: min(calc(100svh - 72px - 120px), 760px);
@@ -475,8 +265,8 @@
 /* ---------- the winding road ---------- */
 .trail {
   position: relative;
-  margin-top: var(--space-8);
-  padding: 120px 0 180px;
+  margin-top: var(--space-6);
+  padding: 360px 0 460px;
 }
 
 .trail-road {
@@ -550,14 +340,14 @@
 
 .trail-pose {
   position: absolute;
-  left: -32px;
+  left: -38px;
   bottom: -10px;
   display: none;
 }
 
 .trail-pose .bud-sprite {
   display: block;
-  width: 64px;
+  width: 76px;
   height: auto;
 }
 
@@ -593,12 +383,16 @@
 
 /* the finish hangs off the end of the street towards the middle of the page */
 .trail-goal .btn {
-  translate: -22px 12px;
+  position: absolute;
+  left: -22px;
+  top: 12px;
+  width: max-content;
   white-space: nowrap;
 }
 
 .trail-goal[data-side='right'] .btn {
-  translate: calc(-100% + 22px) 12px;
+  left: auto;
+  right: -22px;
 }
 
 /* a ground shadow under the walker */
@@ -621,7 +415,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 260px;
+  gap: 410px;
 }
 
 /* the street runs down one side of a stop: number on the street, then the screenshot, then the story */
@@ -667,23 +461,13 @@
   grid-area: copy;
 }
 
-.stop-kicker {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display), sans-serif;
-  font-weight: 800;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--buds-400);
-}
-
 .stop-copy h3 {
   margin: 0 0 var(--space-3);
   font-size: clamp(1.5rem, 3vw, 2rem);
   line-height: 1.1;
 }
 
-.stop-copy > p:not(.stop-kicker) {
+.stop-copy > p {
   margin: 0 0 var(--space-4);
   color: var(--text-on-dark-muted);
   font-size: 1.05rem;
@@ -772,7 +556,7 @@
 /* ---------- small screens ---------- */
 @media (max-width: 760px) {
   .trail {
-    padding: 64px 0 160px;
+    padding: 250px 0 340px;
   }
 
   .trail-road-curb {
@@ -800,7 +584,7 @@
   }
 
   .trail-stops {
-    gap: 120px;
+    gap: 240px;
   }
 
   .stop,
@@ -828,39 +612,8 @@
     width: 40px;
   }
 
-  .gameplay-stage,
-  .journey .creator,
-  .growth {
+  .gameplay-stage {
     grid-template-columns: 1fr;
-  }
-
-  /* three a row, the last ones centred under them */
-  .world-stats {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .world-stats .world-stat {
-    flex: 0 1 calc((100% - 2 * var(--space-3)) / 3);
-  }
-
-  .world-stats-band {
-    margin-top: 0;
-  }
-
-  .journey .creator-preview {
-    position: static;
-  }
-
-  .creator-panel {
-    height: auto;
-    max-height: 420px;
-  }
-
-  .journey .hero {
-    min-height: auto;
-    padding-bottom: 88px;
   }
 }
 
@@ -875,12 +628,1145 @@
   .trail.is-live .stop .stop-copy,
   .trail.is-live .stop .stop-fact,
   .stop-node,
-  .growth-card,
-  .growth-shot img {
+  .growth-art {
     transition: none;
   }
 
   .parallax {
     transform: none !important;
+  }
+}
+
+/* ---------- hero: a real street of the game, the crew on its pavement ---------- */
+.hero-town {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: max(calc(100svh - 72px), 720px);
+  overflow: hidden;
+  background: #79c6e4;
+}
+
+.hero-town .hero-copy {
+  position: relative;
+  z-index: 2;
+  padding-top: clamp(28px, 6vh, 72px);
+  padding-bottom: var(--space-6);
+  width: 100%;
+}
+
+.hero-town h1 {
+  margin: 0;
+  max-width: 13ch;
+  font-size: clamp(3rem, 8.4vw, 6.6rem);
+  line-height: 0.98;
+  color: var(--paper-100);
+  -webkit-text-stroke: 8px var(--outline);
+  paint-order: stroke fill;
+  text-shadow: 0 7px 0 var(--outline);
+}
+
+.hero-town .lead {
+  max-width: 34rem;
+  margin: var(--space-4) 0 var(--space-6);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.hero-sun {
+  position: absolute;
+  right: 11%;
+  top: 9%;
+  width: clamp(70px, 9vw, 130px);
+  aspect-ratio: 1;
+  border-radius: var(--radius-pill);
+  background: #fff0c9;
+  box-shadow: 0 0 0 clamp(12px, 2vw, 26px) rgba(255, 240, 201, 0.35);
+}
+
+.hero-cloud {
+  position: absolute;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: #f4fbfe;
+  animation: hero-cloud 70s linear infinite;
+}
+
+.hero-cloud::before {
+  content: '';
+  position: absolute;
+  left: 22%;
+  bottom: 40%;
+  width: 46%;
+  height: 170%;
+  border-radius: var(--radius-pill);
+  background: inherit;
+}
+
+.hero-cloud-a {
+  top: 5%;
+  width: 150px;
+}
+
+.hero-cloud-b {
+  top: 11%;
+  width: 96px;
+  animation-duration: 95s;
+  animation-delay: -40s;
+}
+
+.hero-cloud-c {
+  top: 3%;
+  width: 70px;
+  animation-duration: 120s;
+  animation-delay: -80s;
+}
+
+@keyframes hero-cloud {
+  from {
+    transform: translateX(-20vw);
+  }
+  to {
+    transform: translateX(120vw);
+  }
+}
+
+.hero-scene {
+  position: relative;
+  margin-top: auto;
+}
+
+.hero-street {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: -8px;
+}
+
+.hero-street img {
+  flex: none;
+  display: block;
+  height: auto;
+}
+
+.hero-pavement {
+  position: relative;
+  z-index: 1;
+  height: 92px;
+  border-top: var(--stroke-ui) solid var(--outline);
+  background: repeating-linear-gradient(90deg, #d8d1c1 0 118px, #bfb8a8 118px 121px);
+}
+
+.hero-lamp {
+  position: absolute;
+  bottom: 54px;
+  width: 74px;
+  height: auto;
+}
+
+.hero-lamp-a {
+  left: 9%;
+}
+
+.hero-lamp-b {
+  right: 12%;
+}
+
+.hero-tree {
+  position: absolute;
+  bottom: 50px;
+  right: 3%;
+  width: 150px;
+  height: auto;
+}
+
+.hero-crew {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  translate: -50% 0;
+  gap: clamp(0px, 1.6vw, 26px);
+}
+
+/* each one sways on its own beat, standing around rather than posing */
+.hero-bud {
+  animation: hero-idle 3.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.7s);
+  transform-origin: 50% 92%;
+}
+
+@keyframes hero-idle {
+  50% {
+    transform: translateY(-3px) rotate(0.7deg);
+  }
+}
+
+.hero-road {
+  position: relative;
+  z-index: 3;
+  height: 92px;
+  overflow: hidden;
+  border-top: var(--stroke-ui) solid var(--outline);
+  background: var(--surface-700);
+}
+
+.hero-road::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 58%;
+  height: 5px;
+  background: repeating-linear-gradient(90deg, var(--paper-100) 0 44px, transparent 44px 90px);
+}
+
+.hero-car {
+  position: absolute;
+  left: 0;
+  bottom: 12px;
+  width: 170px;
+  height: auto;
+  animation: hero-car 17s linear infinite;
+}
+
+@keyframes hero-car {
+  from {
+    transform: translateX(-200px);
+  }
+  to {
+    transform: translateX(110vw);
+  }
+}
+
+.journey .section {
+  padding-top: clamp(48px, 8vw, 96px);
+}
+
+.journey .section-title {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.04;
+  margin-top: 0;
+}
+
+/* ---------- how a bud grows: pictures pinned at different sizes, something steps out of each ---------- */
+.growth {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 48px) var(--space-6);
+  margin-top: var(--space-8);
+}
+
+.growth-card {
+  position: relative;
+}
+
+.growth-ekwipunek {
+  grid-column: 1 / span 7;
+}
+
+.growth-pojazdy {
+  grid-column: 8 / span 5;
+  align-self: end;
+}
+
+.growth-trening {
+  grid-column: 3 / span 8;
+}
+
+.growth-shot {
+  overflow: hidden;
+  aspect-ratio: 1200 / 521;
+  margin-bottom: var(--space-4);
+  border: 3px solid var(--outline);
+  border-radius: var(--radius-l);
+  background: var(--surface-900);
+  box-shadow: 0 8px 0 var(--surface-700);
+  rotate: -0.7deg;
+}
+
+.growth-pojazdy .growth-shot {
+  rotate: 1deg;
+}
+
+.growth-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.growth-art {
+  position: absolute;
+  right: -12px;
+  top: -30px;
+  width: clamp(84px, 11vw, 130px);
+  height: auto;
+  rotate: 8deg;
+  transition: transform 0.5s var(--ease-answer);
+}
+
+.growth-card:hover .growth-art {
+  transform: translateY(-6px) rotate(-4deg);
+}
+
+.growth-card h3 {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+}
+
+.growth-card p {
+  margin: 0;
+  max-width: 44rem;
+  color: var(--text-on-dark-muted);
+  line-height: 1.55;
+}
+
+/* ---------- the dressing room ---------- */
+.journey .creator {
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: var(--space-6);
+  padding: 0;
+  margin-top: var(--space-6);
+  align-items: start;
+}
+
+.journey .creator-preview {
+  position: sticky;
+  top: 84px;
+  gap: var(--space-4);
+}
+
+.dressing {
+  position: relative;
+  height: 430px;
+  overflow: hidden;
+  border: 3px solid var(--outline);
+  border-radius: var(--radius-l);
+  background: #79c6e4;
+  box-shadow: 0 8px 0 var(--surface-700);
+}
+
+.dressing-shop {
+  position: absolute;
+  left: 50%;
+  bottom: 62px;
+  width: 112%;
+  max-width: none;
+  height: auto;
+  translate: -50% 0;
+}
+
+.dressing-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 70px;
+  border-top: var(--stroke-ui) solid var(--outline);
+  background: repeating-linear-gradient(90deg, #d8d1c1 0 90px, #bfb8a8 90px 93px);
+}
+
+.dressing-bud {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  translate: -50% 0;
+  animation: bud-hop 0.32s var(--ease-answer);
+  transform-origin: 50% 92%;
+}
+
+.dressing-bud .bud-sprite {
+  display: block;
+}
+
+@keyframes bud-hop {
+  0% {
+    transform: scale(1.04, 0.96);
+  }
+  45% {
+    transform: translateY(-9px) scale(0.98, 1.03);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.dressing-bubble {
+  position: absolute;
+  z-index: 2;
+  left: 12px;
+  top: 12px;
+  max-width: 62%;
+  margin: 0;
+  padding: 7px 12px;
+  font-weight: 800;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  color: var(--ink);
+  background: var(--paper-100);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: 12px 12px 12px 2px;
+  animation: copy-in 0.35s var(--ease-arrive) both;
+}
+
+.dressing-turn {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  bottom: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.turn {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0 0 3px;
+  font: inherit;
+  font-weight: 900;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--rep-400);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--lip-rep);
+  cursor: pointer;
+}
+
+.turn:active {
+  translate: 0 2px;
+  box-shadow: 0 2px 0 var(--rep-600);
+}
+
+.turn:focus-visible,
+.tile:focus-visible,
+.creator-tab:focus-visible,
+.nameplate-input:focus-visible {
+  outline: 3px solid var(--gold-400);
+  outline-offset: 2px;
+}
+
+/* the name on a sticker, the mood tag stuck on its corner */
+.nameplate {
+  position: relative;
+  display: block;
+  rotate: -0.8deg;
+}
+
+.nameplate-input {
+  width: 100%;
+  padding: 14px 16px 12px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper-100);
+  border: 3px solid var(--outline);
+  border-radius: var(--radius-m);
+  box-shadow: var(--drop-panel);
+}
+
+.nameplate-input::placeholder {
+  color: #9b9486;
+}
+
+.nameplate-mood {
+  position: absolute;
+  right: -6px;
+  top: -14px;
+  padding: 2px 10px;
+  font-weight: 800;
+  font-size: 0.78rem;
+  color: var(--ink);
+  background: var(--buds-400);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-pill);
+  rotate: 3deg;
+}
+
+.creator-quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.journey .creator-fields {
+  gap: var(--space-3);
+  padding: var(--space-4);
+  color: var(--ink);
+  background: var(--paper-100);
+  border: 3px solid var(--outline);
+  border-radius: var(--radius-l);
+  box-shadow: var(--drop-panel);
+}
+
+.creator-tabs {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.creator-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 5px 2px 4px;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.72rem;
+  color: var(--ink);
+  background: var(--paper-300);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-answer);
+}
+
+.creator-tab .bud-sprite {
+  width: auto;
+  height: 34px;
+  max-width: 100%;
+}
+
+.creator-tab[aria-selected='true'] {
+  background: var(--buds-400);
+  box-shadow: var(--lip-buds);
+  transform: translateY(-2px);
+}
+
+.creator-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 452px;
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-2) var(--space-2) 2px;
+  animation: copy-in 0.3s var(--ease-arrive) both;
+}
+
+.tiles {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.tiles-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tiles-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.tiles-6 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 3px 5px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.74rem;
+  line-height: 1.12;
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper-300);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease-answer),
+    background-color 0.2s var(--ease-answer);
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+}
+
+.tile[aria-pressed='true'] {
+  background: var(--buds-400);
+  box-shadow: var(--lip-buds);
+  transform: translateY(-2px);
+}
+
+.tile-pic {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tile-pic .bud-sprite {
+  max-width: 100%;
+  height: auto;
+}
+
+.tile-label {
+  min-height: 2.2em;
+  display: grid;
+  place-items: center;
+}
+
+.swatch-auto {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: var(--paper-300);
+}
+
+.journey .swatch {
+  width: 34px;
+  height: 34px;
+}
+
+/* ---------- every part of the world along the road ---------- */
+.biome {
+  position: absolute;
+  z-index: 0;
+  display: none;
+}
+
+.trail.is-live .biome {
+  display: block;
+}
+
+/* the ground of the next part comes over the last in a wave or a saw */
+.biome::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -22px;
+  height: 23px;
+  background-color: inherit;
+  mask-repeat: repeat-x;
+  mask-size: 64px 23px;
+  mask-position: bottom;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='23'%3E%3Cpath d='M0 23V12Q16 -6 32 12T64 12V23Z'/%3E%3C/svg%3E");
+}
+
+.biome-wyspa {
+  background-color: #2f9fc4;
+}
+
+/* the island itself, under the palms; shallow water round its shore */
+.biome-island {
+  position: absolute;
+  z-index: 1;
+  left: calc(50% - 600px);
+  top: 90px;
+  width: 960px;
+  height: 300px;
+  border-radius: 46% 54% 50% 50% / 58% 52% 48% 42%;
+  background: #f0dfb2;
+  box-shadow:
+    0 0 0 4px #fff7e0,
+    0 0 0 24px #58c2e0;
+}
+
+.biome-miasto {
+  background-color: #454c61;
+}
+
+.biome-noc {
+  background-color: #1f1838;
+}
+
+.biome-noc::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='23'%3E%3Cpath d='M0 23L16 3L32 23L48 3L64 23Z'/%3E%3C/svg%3E");
+}
+
+.biome-pustkowie {
+  background-color: #8c7145;
+}
+
+.biome-dystrykt {
+  background-color: #3c7445;
+}
+
+.biome-razem {
+  background-color: #33374a;
+}
+
+.biome-razem::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='23'%3E%3Cpath d='M0 23V3H32V13H64V23Z'/%3E%3C/svg%3E");
+}
+
+/* what the page's ground is made of */
+.biome-wyspa::after,
+.biome-miasto::after,
+.biome-noc::after,
+.biome-pustkowie::after,
+.biome-dystrykt::after,
+.biome-razem::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.biome-wyspa::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='130'%3E%3Cpath d='M20 34q14 -9 28 0t28 0M136 96q14 -9 28 0t28 0' fill='none' stroke='%2358c2e0' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.biome-miasto::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cpath d='M0 0H120M0 30H120M30 0V30M90 30V60' stroke='%233d4356' stroke-width='3'/%3E%3C/svg%3E");
+}
+
+.biome-noc::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='190'%3E%3Cpath d='M30 40h3v3h-3zM120 110h3v3h-3zM210 30h2v2h-2zM70 160h2v2h-2zM180 150h3v3h-3z' fill='%23a59bd8'/%3E%3C/svg%3E");
+}
+
+.biome-pustkowie::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Cpath d='M26 40l10 3M36 43l-3 8M140 100l12 2M152 102l5 -6M90 130h9M170 26h7' fill='none' stroke='%23745b35' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.biome-dystrykt::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='120'%3E%3Cpath d='M24 30l4 -9l4 9M120 86l4 -9l4 9M78 62l3 -7l3 7' fill='none' stroke='%234e9158' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.biome-razem::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='180'%3E%3Cpath d='M30 30l5 5m0 -5l-5 5M170 120l5 5m0 -5l-5 5M100 150h7' fill='none' stroke='%23474c63' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* the road's own ground: drawn over the plain street on its stretch */
+.trail-road .seg {
+  stroke-linecap: butt;
+}
+
+.seg-pave {
+  stroke-width: 72;
+}
+
+.seg-base {
+  stroke-width: 44;
+}
+
+.seg-pave.seg-wyspa {
+  stroke: #f0dfb2;
+}
+
+.seg-base.seg-wyspa {
+  stroke: #d8b878;
+}
+
+.seg-pave.seg-miasto {
+  stroke: var(--paper-300);
+}
+
+.seg-base.seg-miasto {
+  stroke: var(--surface-700);
+}
+
+.seg-pave.seg-noc {
+  stroke: #54497a;
+}
+
+.seg-base.seg-noc {
+  stroke: #15112a;
+}
+
+.seg-pave.seg-pustkowie {
+  stroke: #bea26d;
+}
+
+.seg-base.seg-pustkowie {
+  stroke: #6d5634;
+}
+
+.seg-pave.seg-dystrykt {
+  stroke: #dcd5ba;
+}
+
+.seg-base.seg-dystrykt {
+  stroke: #4c5248;
+}
+
+.seg-pave.seg-razem {
+  stroke: var(--paper-100);
+}
+
+.seg-base.seg-razem {
+  stroke: var(--surface-800);
+}
+
+/* ---------- things along the road ---------- */
+.trail-back,
+.trail-front {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  pointer-events: none;
+}
+
+.trail.is-live .trail-back,
+.trail.is-live .trail-front {
+  display: block;
+}
+
+.prop {
+  position: absolute;
+  translate: -50% -100%;
+  opacity: 0;
+  transform: translateY(16px) scale(0.84);
+  transform-origin: 50% 100%;
+  transition:
+    opacity 0.35s var(--ease-answer),
+    transform 0.55s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.prop.is-up {
+  opacity: 1;
+  transform: none;
+}
+
+.prop img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.prop-bud {
+  display: block;
+  transition:
+    transform 0.4s var(--ease-answer),
+    opacity 0.3s var(--ease-answer);
+  transform-origin: 50% 92%;
+}
+
+.prop-bud .bud-sprite {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.prop-say {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: max-content;
+  max-width: 190px;
+  margin: 0 0 2px;
+  padding: 5px 10px;
+  translate: -50% 0;
+  font-weight: 800;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper-100);
+  border: var(--stroke-ui) solid var(--outline);
+  border-radius: 10px;
+}
+
+/* the rival goes down as the walker reaches it; the word bursts and is gone, the K.O. stays */
+.prop-word,
+.prop-ko {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  opacity: 0;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.prop .prop-word {
+  width: 170px;
+}
+
+.prop .prop-ko {
+  width: 130px;
+  bottom: 62%;
+  transform: rotate(-6deg);
+}
+
+.prop-fight.is-met .prop-bud {
+  transform: translate(30px, 8px) rotate(86deg);
+}
+
+.prop-fight.is-met .prop-word,
+.prop-ambush.is-met .prop-word {
+  animation: word-burst 0.85s var(--ease-arrive) both;
+}
+
+.prop-fight.is-met .prop-ko {
+  opacity: 1;
+  transition: opacity 0.3s 0.55s;
+}
+
+@keyframes word-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-10deg);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1.12) rotate(4deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* someone in the bushes: hidden until the walker is on top of them */
+.prop-ambush .prop-bud {
+  transform: translateY(58%);
+  opacity: 0;
+}
+
+.prop-ambush.is-met .prop-bud {
+  transform: translateY(-12%);
+  opacity: 1;
+}
+
+/* two from the crowd leave it and come along */
+.prop-join.is-met {
+  opacity: 0;
+  transition-duration: 0.2s;
+}
+
+/* ---------- the finish ---------- */
+.trail-goal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 0;
+}
+
+.trail-goal[data-side='right'] {
+  align-items: flex-end;
+}
+
+.trail-goal-tag {
+  position: absolute;
+  left: -22px;
+  bottom: 62px;
+  width: 340px;
+  max-width: none;
+  height: auto;
+  opacity: 0;
+  transform: translateY(18px) scale(0.8) rotate(-3deg);
+  transition:
+    opacity 0.3s var(--ease-answer),
+    transform 0.6s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.trail-goal[data-side='right'] .trail-goal-tag {
+  left: auto;
+  right: -22px;
+}
+
+.trail-goal.is-reached .trail-goal-tag {
+  opacity: 1;
+  transform: rotate(-3deg);
+}
+
+/* ---------- the walkers ---------- */
+.trail-marker-friend {
+  display: none;
+}
+
+.trail-marker-friend.is-on {
+  display: block;
+}
+
+.trail-board {
+  position: absolute;
+  left: -46px;
+  bottom: -14px;
+  width: 26px;
+  height: auto;
+  max-width: none;
+  display: none;
+  rotate: 90deg;
+  transform-origin: 50% 50%;
+  translate: 32px 0;
+}
+
+.trail-marker.is-riding[data-facing='side'] .trail-board {
+  display: block;
+}
+
+.trail-marker.is-riding .trail-pose {
+  translate: 0 -8px;
+}
+
+/* the stops: a paper story beside the phone, the ground of the world around them */
+.stop-copy {
+  padding: var(--space-4) var(--space-4) var(--space-4);
+  color: var(--ink);
+  background: var(--paper-100);
+  border: 3px solid var(--outline);
+  border-radius: var(--radius-l);
+  box-shadow: var(--drop-panel);
+}
+
+.stop-copy h3 {
+  color: var(--ink);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.stop-copy > p {
+  color: var(--ink-soft) !important;
+}
+
+.stop-fact {
+  background: #fff7dc;
+  box-shadow: none;
+}
+
+@media (max-width: 960px) {
+  .journey .creator {
+    grid-template-columns: 1fr;
+  }
+
+  .journey .creator-preview {
+    position: static;
+  }
+
+  .growth-ekwipunek,
+  .growth-pojazdy,
+  .growth-trening {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero-town {
+    height: auto;
+    min-height: 720px;
+  }
+
+  .hero-town h1 {
+    -webkit-text-stroke-width: 6px;
+    text-shadow: 0 5px 0 var(--outline);
+  }
+
+  .hero-street img {
+    scale: 0.72;
+    margin: 0 -34px;
+    transform-origin: 50% 100%;
+  }
+
+  .hero-street {
+    transform-origin: 50% 100%;
+  }
+
+  .hero-crew .bud-sprite {
+    width: auto;
+    height: 136px;
+  }
+
+  .hero-crew {
+    gap: 0;
+  }
+
+  /* three fit on a phone's pavement */
+  .hero-bud:nth-child(n + 4) {
+    display: none;
+  }
+
+  .hero-pavement {
+    height: 72px;
+  }
+
+  .hero-road {
+    height: 62px;
+  }
+
+  .hero-tree,
+  .hero-lamp-a {
+    display: none;
+  }
+
+  .hero-car {
+    width: 110px;
+    bottom: 6px;
+  }
+
+  .dressing {
+    height: 390px;
+  }
+
+  .biome-island {
+    left: 8%;
+    width: 110%;
+    top: 40px;
+    height: 230px;
+  }
+
+  .creator-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .tiles-5,
+  .tiles-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tiles-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .creator-panel {
+    height: auto;
+    max-height: 480px;
+  }
+
+  .seg-pave {
+    stroke-width: 42;
+  }
+
+  .seg-base {
+    stroke-width: 26;
+  }
+
+  .prop {
+    scale: 0.72;
+    transform-origin: 50% 100%;
+  }
+
+  .trail-goal-tag {
+    width: 240px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cloud,
+  .hero-bud,
+  .hero-car,
+  .dressing-bud {
+    animation: none;
+  }
+
+  .prop,
+  .prop-bud,
+  .trail-goal-tag {
+    transition: none;
   }
 }

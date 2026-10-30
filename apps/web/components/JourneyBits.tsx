@@ -173,51 +173,6 @@ export function GameplayTabs({ shots }: { shots: Shot[] }) {
 }
 
 /**
- * A number that counts up to its value the first time it comes on screen (an ease-out over about a second), then stays.
- * Readers who asked for less motion, and the page without JavaScript, see the value at once.
- */
-export function CountUp({ value, suffix = '' }: { value: number; suffix?: string }) {
-  const [ref, onScreen] = useOnScreen<HTMLSpanElement>('0px 0px -10% 0px');
-  const [shown, setShown] = useState<number | null>(null);
-  const started = useRef(false);
-  const frame = useRef(0);
-
-  // once started it runs to the end, even if the number scrolls away meanwhile (a fast glide past it)
-  useEffect(() => () => cancelAnimationFrame(frame.current), []);
-  useEffect(() => {
-    if (!onScreen || started.current) return;
-    started.current = true;
-    if (reducedMotion()) {
-      setShown(value);
-      return;
-    }
-    const start = performance.now();
-    const duration = 1100;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - (1 - t) ** 4;
-      setShown(Math.round(value * eased));
-      if (t < 1) frame.current = requestAnimationFrame(tick);
-    };
-    frame.current = requestAnimationFrame(tick);
-  }, [onScreen, value]);
-
-  return (
-    <span ref={ref} className="count-up">
-      {/* the real value is in the page for search engines and screen readers from the start */}
-      <span className="visually-hidden">
-        {value}
-        {suffix}
-      </span>
-      <span aria-hidden>
-        {shown ?? 0}
-        {suffix}
-      </span>
-    </span>
-  );
-}
-
-/**
  * Its content drifts a little slower than the page while the hero scrolls away (a few pixels of depth, transform only),
  * and not at all with reduced motion.
  */

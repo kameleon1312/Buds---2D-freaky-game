@@ -18,6 +18,14 @@ namespace Buds.Api
         public int pantsColor;
         public string shoes = "trampki";
         public int shoesColor;
+        // the finer details; a stored bud without them looks as it always did
+        public int eyes;
+        public string mark = "brak";
+        public string glasses = "brak";
+        public string print = "gladka";
+        public string accessory = "brak";
+        /// <summary>Trims, prints, hats and accessories: a colour of the top's palette; -1 picks one to go with the top.</summary>
+        public int accent = -1;
 
         public BudLookDto Clone() => (BudLookDto)MemberwiseClone();
     }
@@ -46,6 +54,7 @@ namespace Buds.Api
         public PartDto top;
         public PartDto legs;
         public PartDto shoes;
+        public OptionDto[] marks;
     }
 
     /// <summary>GET /v1/look/options: everything the creator offers (the lists live in packages/shared).</summary>
@@ -54,6 +63,11 @@ namespace Buds.Api
     {
         public OptionDto[] genders;
         public string[] skins;
+        public string[] eyes;
+        public OptionDto[] glasses;
+        public OptionDto[] prints;
+        public OptionDto[] accessories;
+        public string[] accents;
         public GenderOptionsDto[] byGender;
 
         public GenderOptionsDto For(string gender) => Array.Find(byGender ?? Array.Empty<GenderOptionsDto>(), g => g.gender == gender);

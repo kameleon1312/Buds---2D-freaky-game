@@ -80,6 +80,9 @@ export const HAIR_STYLES = [
   'buzz',
   'loki',
   'kitki',
+  'dredy',
+  'undercut',
+  'koczki',
 ] as const;
 export type HairStyle = (typeof HAIR_STYLES)[number];
 
@@ -100,12 +103,16 @@ export const HAIR_LABELS: Record<HairStyle, string> = {
   buzz: 'Na zero',
   loki: 'Loki',
   kitki: 'Kitki',
+  dredy: 'Dredy',
+  undercut: 'Undercut',
+  koczki: 'Koczki',
 };
 
 /** The standard catalog of each gender, in the order the creators show it. Validation accepts any style. */
 export const HAIR_BY_GENDER: Record<Gender, readonly HairStyle[]> = {
   on: [
     'krotkie',
+    'undercut',
     'buzz',
     'daszek',
     'jezyk',
@@ -115,6 +122,7 @@ export const HAIR_BY_GENDER: Record<Gender, readonly HairStyle[]> = {
     'grzywka',
     'afro',
     'loki',
+    'dredy',
     'dlugie',
     'kucyk',
   ],
@@ -123,11 +131,13 @@ export const HAIR_BY_GENDER: Record<Gender, readonly HairStyle[]> = {
     'dlugie',
     'loki',
     'kitki',
+    'koczki',
     'warkocze',
     'kok',
     'bob',
     'grzywka',
     'afro',
+    'dredy',
     'daszek',
     'czapka',
     'sluchawki',
@@ -162,6 +172,10 @@ export const OUTFITS = [
   'kamizelka',
   'flanela',
   'sukienka',
+  'jeansowka',
+  'puchowka',
+  'dresowka',
+  'jersey',
 ] as const;
 export type Outfit = (typeof OUTFITS)[number];
 
@@ -176,6 +190,10 @@ export const OUTFIT_LABELS: Record<Outfit, string> = {
   kamizelka: 'Kamizelka',
   flanela: 'Flanela',
   sukienka: 'Sukienka',
+  jeansowka: 'Katana',
+  puchowka: 'Puchówka',
+  dresowka: 'Dresówka',
+  jersey: 'Koszulka klubowa',
 };
 
 export const OUTFITS_BY_GENDER: Record<Gender, readonly Outfit[]> = {
@@ -183,6 +201,10 @@ export const OUTFITS_BY_GENDER: Record<Gender, readonly Outfit[]> = {
     'bluza',
     'tshirt',
     'kurtka',
+    'jeansowka',
+    'dresowka',
+    'puchowka',
+    'jersey',
     'flanela',
     'koszula',
     'polo',
@@ -195,6 +217,10 @@ export const OUTFITS_BY_GENDER: Record<Gender, readonly Outfit[]> = {
     'tshirt',
     'sukienka',
     'kurtka',
+    'jeansowka',
+    'dresowka',
+    'puchowka',
+    'jersey',
     'sweter',
     'koszula',
     'polo',
@@ -230,6 +256,8 @@ export const PANTS = [
   'chinosy',
   'legginsy',
   'spodnica',
+  'szerokie',
+  'rurki',
 ] as const;
 export type Pants = (typeof PANTS)[number];
 
@@ -241,11 +269,13 @@ export const PANTS_LABELS: Record<Pants, string> = {
   chinosy: 'Chinosy',
   legginsy: 'Legginsy',
   spodnica: 'Spódnica',
+  szerokie: 'Szerokie',
+  rurki: 'Rurki z dziurami',
 };
 
 export const PANTS_BY_GENDER: Record<Gender, readonly Pants[]> = {
-  on: ['jeansy', 'dresy', 'bojowki', 'chinosy', 'szorty'],
-  ona: ['jeansy', 'legginsy', 'spodnica', 'dresy', 'szorty', 'bojowki'],
+  on: ['jeansy', 'szerokie', 'dresy', 'bojowki', 'rurki', 'chinosy', 'szorty'],
+  ona: ['jeansy', 'rurki', 'legginsy', 'spodnica', 'szerokie', 'dresy', 'szorty', 'bojowki'],
 };
 
 export const PANTS_COLORS = [
@@ -262,7 +292,16 @@ export const PANTS_COLORS = [
 ] as const;
 
 /** Feet. */
-export const SHOES = ['trampki', 'wysokie', 'glany', 'sandaly', 'mokasyny', 'kozaki'] as const;
+export const SHOES = [
+  'trampki',
+  'wysokie',
+  'glany',
+  'sandaly',
+  'mokasyny',
+  'kozaki',
+  'biegowe',
+  'kalosze',
+] as const;
 export type Shoes = (typeof SHOES)[number];
 
 export const SHOES_LABELS: Record<Shoes, string> = {
@@ -272,11 +311,13 @@ export const SHOES_LABELS: Record<Shoes, string> = {
   sandaly: 'Sandały',
   mokasyny: 'Mokasyny',
   kozaki: 'Kozaki',
+  biegowe: 'Biegówki',
+  kalosze: 'Kalosze',
 };
 
 export const SHOES_BY_GENDER: Record<Gender, readonly Shoes[]> = {
-  on: ['trampki', 'wysokie', 'glany', 'mokasyny', 'sandaly'],
-  ona: ['trampki', 'wysokie', 'kozaki', 'glany', 'sandaly', 'mokasyny'],
+  on: ['trampki', 'biegowe', 'wysokie', 'glany', 'mokasyny', 'kalosze', 'sandaly'],
+  ona: ['trampki', 'biegowe', 'wysokie', 'kozaki', 'glany', 'kalosze', 'sandaly', 'mokasyny'],
 };
 
 export const SHOES_COLORS = [
@@ -291,6 +332,90 @@ export const SHOES_COLORS = [
   '#ff7aa8',
   '#c9b593',
 ] as const;
+
+/** Eye colours (the iris); the first is what a bud has when nothing was chosen. */
+export const EYE_COLORS = [
+  '#4a2c17',
+  '#1f6fb2',
+  '#2f8a4e',
+  '#6b7585',
+  '#a8701f',
+  '#7b3fb0',
+] as const;
+
+/** What's on the top: a print in the accent colour. */
+export const PRINTS = [
+  'gladka',
+  'paski',
+  'pas',
+  'odznaka',
+  'blyskawica',
+  'gwiazda',
+  'moro',
+] as const;
+export type TopPrint = (typeof PRINTS)[number];
+
+export const PRINT_LABELS: Record<TopPrint, string> = {
+  gladka: 'Gładka',
+  paski: 'Paski',
+  pas: 'Pas',
+  odznaka: 'Odznaka',
+  blyskawica: 'Błyskawica',
+  gwiazda: 'Gwiazda',
+  moro: 'Moro',
+};
+
+/** A detail of the face. */
+export const FACE_MARKS = [
+  'brak',
+  'piegi',
+  'rumience',
+  'pieprzyk',
+  'blizna',
+  'zarost',
+  'wasy',
+  'broda',
+] as const;
+export type FaceMark = (typeof FACE_MARKS)[number];
+
+export const FACE_MARK_LABELS: Record<FaceMark, string> = {
+  brak: 'Bez',
+  piegi: 'Piegi',
+  rumience: 'Rumieńce',
+  pieprzyk: 'Pieprzyk',
+  blizna: 'Blizna',
+  zarost: 'Zarost',
+  wasy: 'Wąsy',
+  broda: 'Broda',
+};
+
+export const FACE_MARKS_BY_GENDER: Record<Gender, readonly FaceMark[]> = {
+  on: FACE_MARKS,
+  ona: ['brak', 'piegi', 'rumience', 'pieprzyk', 'blizna'],
+};
+
+export const GLASSES = ['brak', 'okulary', 'lenonki', 'przeciwsloneczne', 'sportowe'] as const;
+export type Glasses = (typeof GLASSES)[number];
+
+export const GLASSES_LABELS: Record<Glasses, string> = {
+  brak: 'Bez',
+  okulary: 'Okulary',
+  lenonki: 'Lenonki',
+  przeciwsloneczne: 'Przeciwsłoneczne',
+  sportowe: 'Sportowe',
+};
+
+export const ACCESSORIES = ['brak', 'lancuch', 'plecak', 'nerka', 'szalik', 'zegarek'] as const;
+export type Accessory = (typeof ACCESSORIES)[number];
+
+export const ACCESSORY_LABELS: Record<Accessory, string> = {
+  brak: 'Bez',
+  lancuch: 'Łańcuch',
+  plecak: 'Plecak',
+  nerka: 'Nerka',
+  szalik: 'Szalik',
+  zegarek: 'Zegarek',
+};
 
 export const BUD_NAME_MIN = 2;
 export const BUD_NAME_MAX = 16;

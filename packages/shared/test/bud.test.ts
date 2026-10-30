@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ACCESSORIES,
+  EYE_COLORS,
+  FACE_MARKS,
   FACINGS,
+  GLASSES,
+  PRINTS,
   GENDERS,
   HAIR_STYLES,
   MOODS,
@@ -62,6 +67,34 @@ function numbers(markup: string): number[] {
 }
 
 describe('budFrameMarkup', () => {
+  it('draws every finer detail in every view', () => {
+    const details: Partial<BudLook>[] = [
+      ...FACE_MARKS.map((mark) => ({ mark })),
+      ...GLASSES.map((glasses) => ({ glasses })),
+      ...PRINTS.flatMap((print) => OUTFITS.map((outfit) => ({ print, outfit }))),
+      ...ACCESSORIES.map((accessory) => ({ accessory })),
+      ...EYE_COLORS.map((_, eyes) => ({ eyes })),
+      { accent: 0 },
+      { accent: -1 },
+    ];
+    for (const d of details)
+      for (const facing of FACINGS) {
+        const m = budFrameMarkup({ ...base, ...d }, facing, 0);
+        expect(m, JSON.stringify(d)).not.toMatch(/NaN|undefined|@@/);
+        expect(budLookSchema.safeParse({ ...base, ...d }).success).toBe(true);
+      }
+  });
+
+  it('a look stored before the finer details still parses and stays the same', () => {
+    const parsed = budLookSchema.parse(base);
+    expect(parsed.mark).toBeUndefined();
+    expect(budFrameMarkup(parsed)).toBe(budFrameMarkup(base));
+    // what the game sends for a bud with no accent chosen
+    expect(budLookSchema.safeParse({ ...base, accent: -1, mark: 'brak' }).success).toBe(true);
+    expect(budLookSchema.safeParse({ ...base, accent: 99 }).success).toBe(false);
+    expect(budLookSchema.safeParse({ ...base, glasses: 'monokl' }).success).toBe(false);
+  });
+
   // every style of every part, in every facing and step: thousands of frames
   it('produces well-formed markup for every option, facing and step', { timeout: 60_000 }, () => {
     for (const look of everyCombination()) {
@@ -149,7 +182,7 @@ describe('look', () => {
 
   it('rejects out-of-range colours', () => {
     expect(budLookSchema.safeParse({ ...base, skin: 99 }).success).toBe(false);
-    expect(budLookSchema.safeParse({ ...base, hair: 'dredy' }).success).toBe(false);
+    expect(budLookSchema.safeParse({ ...base, hair: 'lysy' }).success).toBe(false);
   });
 
   it('labels agree with gender', () => {
