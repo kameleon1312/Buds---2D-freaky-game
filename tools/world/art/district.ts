@@ -50,7 +50,7 @@ type Puff = { base: string; dark: string; light: string; line: string };
 
 /** How a style dresses the same buildings. */
 type Style = {
-  id: 'las' | 'tropik' | 'dwor' | 'zlom';
+  id: 'las' | 'tropik' | 'dwor' | 'zlom' | 'lampion';
   /** The main facade, the second material (podiums, blocks), trims and parapets, the dark frame. */
   wall: Tone;
   wall2: Tone;
@@ -127,6 +127,29 @@ const STYLES: Style[] = [
     paving: ['#c9765a', '#a65a40'],
     stone: ['#e6dcc6', '#c4b89e'],
     fence: ['#3a3e48', '#24272e'],
+  },
+  {
+    id: 'lampion',
+    wall: ['#efd9ae', '#cdb486'],
+    wall2: ['#c93a2c', '#9a261d'],
+    trim: ['#f4c430', '#c9941a'],
+    dark: ['#2f4f4c', '#1f3836'],
+    accent: ['#d43a2c', '#a4261d'],
+    accentLine: '#5c130d',
+    panels: [
+      ['#d43a2c', '#a4261d'],
+      ['#f4c430', '#c9941a'],
+      ['#2f6f6a', '#1f4f4c'],
+      ['#f6a8c4', '#d97da3'],
+    ],
+    glass: ['#ffe7a8', '#e8c978'],
+    glassDark: ['#5a3a2a', '#40281c'],
+    canopy: ['#2f6f6a', '#1f4f4c'],
+    box: ['#a4261d', '#7a1913'],
+    leaf: { base: '#f6a8c4', dark: '#d97da3', light: '#fcd2e0', line: '#8f3f64' },
+    paving: ['#a58f80', '#7d6a5e'],
+    stone: ['#cfc6b4', '#a79e8e'],
+    fence: ['#a4261d', '#7a1913'],
   },
   {
     id: 'zlom',

@@ -204,6 +204,68 @@ for (const q of CONTENT.quests) {
           problems.push(`${q.id}: ${s.item} at (${p.x},${p.y}) can't be reached`);
   }
 }
+// a step against the clock can be done on foot on a phone (the stick never runs), from where the last step ended
+const WALK_TILES_PER_SECOND = 3.8;
+const stepsBetween = (district: string, from: [number, number], to: [number, number]) => {
+  const m = mapOf(district);
+  const seen = new Map<string, number>([[from.join(), 0]]);
+  const queue: [number, number][] = [from];
+  for (let i = 0; i < queue.length; i++) {
+    const [x, y] = queue[i]!;
+    if (x === to[0] && y === to[1]) return seen.get(`${x},${y}`)!;
+    for (const [dx, dy] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      const k = `${x + dx},${y + dy}`;
+      if (seen.has(k) || !walkable(m, x + dx, y + dy)) continue;
+      seen.set(k, seen.get(`${x},${y}`)! + 1);
+      queue.push([x + dx, y + dy]);
+    }
+  }
+  return Infinity;
+};
+for (const q of CONTENT.quests) {
+  const giver = CONTENT.npcs.find((n) => n.id === q.giver)!;
+  let at: [number, number] = [giver.x, giver.y + 1];
+  for (const s of q.steps) {
+    if (s.kind === 'reach') {
+      if (s.seconds) {
+        const need = stepsBetween(q.district, at, [s.x, s.y]) / WALK_TILES_PER_SECOND;
+        if (need > s.seconds)
+          problems.push(
+            `${q.id}: "${s.label}" takes ${Math.ceil(need)} s on foot, ${s.seconds} s given`,
+          );
+      }
+      at = [s.x, s.y];
+    } else if (s.kind === 'collect') {
+      // the nearest item next, each time
+      const left = [...s.spots];
+      let need = 0;
+      while (left.length) {
+        left.sort(
+          (a, b) =>
+            Math.abs(a.x - at[0]) +
+            Math.abs(a.y - at[1]) -
+            Math.abs(b.x - at[0]) -
+            Math.abs(b.y - at[1]),
+        );
+        const p = left.shift()!;
+        need += stepsBetween(q.district, at, [p.x, p.y]);
+        at = [p.x, p.y];
+      }
+      if (s.seconds && need / WALK_TILES_PER_SECOND > s.seconds)
+        problems.push(
+          `${q.id}: "${s.label}" takes ${Math.ceil(need / WALK_TILES_PER_SECOND)} s on foot, ${s.seconds} s given`,
+        );
+    } else if (s.kind === 'talk' || s.kind === 'ask' || s.kind === 'game') {
+      const n = CONTENT.npcs.find((x) => x.id === s.npc);
+      if (n && n.district === q.district) at = [n.x, n.y + 1];
+    }
+  }
+}
 // art: every collectible has a world sprite, every ownable item and skill an icon
 for (const q of CONTENT.quests)
   for (const s of q.steps)
@@ -223,12 +285,22 @@ if (problems.length) {
 // ---------- JSON for Unity (JsonUtility can't do unions: steps are flattened) ----------
 const flatStep = (s: Quest['steps'][number]) => ({
   kind: s.kind,
-  npc: s.kind === 'talk' ? s.npc : '',
-  text: s.kind === 'talk' ? s.text : '',
+  npc: s.kind === 'talk' || s.kind === 'ask' || s.kind === 'game' ? s.npc : '',
+  text: s.kind === 'talk' || s.kind === 'ask' || s.kind === 'game' ? s.text : '',
+  seconds: (s.kind === 'reach' || s.kind === 'collect') && s.seconds ? s.seconds : 0,
+  back: s.kind === 'reach' || s.kind === 'collect' || s.kind === 'ask' ? s.back : 0,
+  late: (s.kind === 'reach' || s.kind === 'collect') && s.late ? s.late : '',
+  hidden: s.kind === 'collect' && s.hidden,
+  hint: s.kind === 'collect' && s.hint ? s.hint : '',
+  answers: s.kind === 'ask' ? s.answers : [],
+  correct: s.kind === 'ask' ? s.correct : 0,
+  wrong: s.kind === 'ask' || s.kind === 'game' ? s.wrong : '',
+  skill: s.kind === 'game' ? s.skill : '',
+  score: s.kind === 'game' ? s.score : 0,
   x: s.kind === 'reach' ? s.x : 0,
   y: s.kind === 'reach' ? s.y : 0,
   radius: s.kind === 'reach' ? s.radius : 0,
-  label: s.kind === 'talk' ? '' : s.label,
+  label: s.kind === 'talk' || s.kind === 'ask' ? '' : s.label,
   item: s.kind === 'collect' ? s.item : '',
   enemy: s.kind === 'duel' ? s.enemy : '',
   spots: s.kind === 'collect' ? s.spots : [],

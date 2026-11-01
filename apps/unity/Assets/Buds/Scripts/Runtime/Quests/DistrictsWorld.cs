@@ -13,8 +13,9 @@ namespace Buds.Quests
     /// cleared shows the crew's digger and stumps, cleared ones are paved in the style's paving with a kerb and fenced
     /// along the plot's edge, the gate left open. A free plot is a small clearing by the road with a board for sale; a
     /// bought one has its sign, its buildings (colliders and cast shadows; a building site with a crane while something
-    /// new goes up). The bud's own district also shows bubbles over producers worth collecting and the ghost of a
-    /// building being placed. Lives under the map (goes with it); the art is loaded per style without an atlas, before
+    /// new goes up). The bud's own district also shows bubbles over producers worth collecting, and while a building is
+    /// being placed: its ghost standing on the ground, the state of the cells under it, a grid and where it would fit.
+    /// Lives under the map (goes with it); the art is loaded per style without an atlas, before
     /// the districts are made; plots are rebuilt one a frame when their land changes.
     /// </summary>
     public sealed class DistrictsWorld : MonoBehaviour
@@ -55,11 +56,19 @@ namespace Buds.Quests
         readonly HashSet<int> solid = new();
         readonly Queue<PlotView> rebuild = new();
         double othersOffset;
-        GameObject ghost;
-        SpriteRenderer ghostBody;
-        SpriteRenderer ghostShade;
         float nextRefresh;
-        static Sprite white;
+        GameObject planRoot;
+        SpriteRenderer ghostBody;
+        SpriteRenderer planCells;
+        SpriteRenderer planDots;
+        Texture2D planCellsTex;
+        Texture2D planDotsTex;
+        const int DotPixels = 8;
+        static readonly Color32 CellGood = new(164, 230, 53, 110);
+        static readonly Color32 CellBad = new(255, 61, 80, 170);
+        static readonly Color32 CellDoor = new(255, 201, 60, 230);
+        static readonly Color32 GridLine = new(20, 20, 26, 46);
+        static readonly Color32 FitDot = new(164, 230, 53, 255);
 
         public string Route { get; private set; }
 
@@ -84,6 +93,16 @@ namespace Buds.Quests
         int Sectors => Mathf.Max(1, rules.sectors);
 
         /// <summary>The world point at the bottom-middle of a map cell (where props stand).</summary>
+        /// <summary>Where a plot's middle is in the world.</summary>
+        public Vector3 PlotCentre(PlotData p) => Ground(p.x + rules.plotSize / 2, p.y + rules.plotSize / 2);
+
+        /// <summary>The plot-local cell under a point of the ground (it may lie off the plot).</summary>
+        public Vector2Int LocalCell(PlotData p, Vector3 ground)
+        {
+            var o = world.transform.position;
+            return new Vector2Int(Mathf.FloorToInt(ground.x - o.x) - p.x, H - 1 - Mathf.FloorToInt(ground.y - o.y) - p.y);
+        }
+
         Vector3 Ground(float x, float y) => world.transform.position + new Vector3(x + 0.5f, H - 1 - y + 0.1f, 0);
 
         static double LocalMs => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -101,6 +120,7 @@ namespace Buds.Quests
             ["tropik"] = new[] { "palm-a", "palm-b", "palm-c", "palm-a", "hibiskus", "bush-b", "rock-a", "paproc" },
             ["dwor"] = new[] { "tree-c", "tree-c", "tree-a", "tree-c", "bush-a", "siano", "bush-b", "bush-a" },
             ["zlom"] = new[] { "zlom", "wrak-a", "drzewo-suche", "zlom", "opony", "smieci", "rock-dark", "opony" },
+            ["lampion"] = new[] { "ct-bambus-a", "ct-bambus-b", "ct-wisnia", "ct-bambus-a", "bush-a", "rock-a", "ct-bambus-b", "paproc" },
         };
 
         /// <summary>What stays of a sector being cleared (stumps, tyres), scattered behind the crew.</summary>
@@ -252,7 +272,7 @@ namespace Buds.Quests
                 {
                     var kind = rules.Building(b.kind);
                     if (kind == null) continue;
-                    var f = new RectInt(b.x - (kind.w - 1) / 2, b.y - kind.h + 1, kind.w, kind.h);
+                    var f = Land.Footprint(kind, b.x, b.y, b.rot);
                     for (var y = f.yMin; y < f.yMax; y++)
                     for (var x = f.xMin; x < f.xMax; x++)
                         solid.Add((p.y + y) * W + p.x + x);
@@ -440,6 +460,11 @@ namespace Buds.Quests
                     joint = new Color32(0xe6, 0xd6, 0xbc, 0xff);
                     kerbColor = new Color32(0x8f, 0x86, 0x78, 0xff);
                     break;
+                case "lampion":
+                    face = new Color32(0xa5, 0x8f, 0x80, 0xff);
+                    joint = new Color32(0x7d, 0x6a, 0x5e, 0xff);
+                    kerbColor = new Color32(0xa4, 0x26, 0x1d, 0xff);
+                    break;
                 case "zlom":
                     face = new Color32(0x86, 0x8b, 0x93, 0xff);
                     joint = new Color32(0x5c, 0x60, 0x68, 0xff);
@@ -461,6 +486,10 @@ namespace Buds.Quests
                     case "dwor":
                         // bricks 32×16 px, every other row shifted half a brick
                         j = y % 16 < 2 || (x + (y / 16 % 2) * 16) % 32 < 2;
+                        break;
+                    case "lampion":
+                        // fans of stone: tiles 32×32 px with a curved joint
+                        j = y % 32 < 2 || (x % 32 - 16) * (x % 32 - 16) + (y % 32 - 32) * (y % 32 - 32) is > 560 and < 640;
                         break;
                     case "tropik":
                         // tiles 32×32 px, offset rows, softer joints
@@ -497,9 +526,12 @@ namespace Buds.Quests
             var kind = rules.Building(b.kind);
             if (kind == null) return;
             var sprite = Land.SpriteFor(b, now, style, kind);
-            var at = Ground(view.Plot.x + b.x, view.Plot.y + b.y);
+            // it stands on the south edge of its footprint, in the middle, however it is turned
+            var f = Land.Footprint(kind, b.x, b.y, b.rot);
+            var at = Ground(view.Plot.x + f.xMin + (f.width - 1) / 2f, view.Plot.y + f.yMax - 1);
             v.Root.transform.position = at;
-            if (v.Sprite != sprite)
+            var key = sprite + "/" + b.rot;
+            if (v.Sprite != key)
             {
                 // a new look (finished building, the town hall grown): body, collider and shadow made again
                 for (var i = v.Root.transform.childCount - 1; i >= 0; i--) Destroy(v.Root.transform.GetChild(i).gameObject);
@@ -510,12 +542,25 @@ namespace Buds.Quests
                 body.transform.SetParent(holder, false);
                 body.sprite = s;
                 body.sortingOrder = WorldView.SortOrderFor(at.y);
+                // turned to the side or away the drawing fits the footprint's new width and looks the other way
+                body.flipX = b.rot >= 2;
+                holder.localScale = new Vector3(f.width / (float)kind.w, 1, 1);
                 if (s) CastShadow.Attach(v.Root.transform, body, holder);
                 // the footprint is solid (the cells, not the drawing)
                 var box = v.Root.AddComponent<BoxCollider2D>();
-                box.size = new Vector2(kind.w, kind.h);
-                box.offset = new Vector2(0, kind.h / 2f - 0.1f);
-                v.Sprite = sprite;
+                box.size = new Vector2(f.width, f.height);
+                box.offset = new Vector2(0, f.height / 2f - 0.1f);
+                // a mat in front of the door says which way it looks
+                if (b.rot != 0 && Art("wycieraczka") is { } mat)
+                {
+                    var door = Land.DoorCell(b.x, b.y, b.rot);
+                    var flat = new GameObject("Mat").AddComponent<SpriteRenderer>();
+                    flat.transform.SetParent(v.Root.transform, false);
+                    flat.transform.position = Ground(view.Plot.x + door.x, view.Plot.y + door.y);
+                    flat.sprite = mat;
+                    flat.sortingOrder = -90;
+                }
+                v.Sprite = key;
                 v.Bubble = null;
                 v.BubbleFor = null;
             }
@@ -602,10 +647,11 @@ namespace Buds.Quests
                 var kind = rules.Building(b.kind);
                 if (kind == null) continue;
                 // distance from the feet to the footprint's rectangle (world units)
-                var minX = origin.x + own.Plot.x + b.x - (kind.w - 1) / 2f;
-                var maxX = minX + kind.w;
-                var minY = origin.y + H - 1 - (own.Plot.y + b.y);
-                var maxY = minY + kind.h;
+                var f = Land.Footprint(kind, b.x, b.y, b.rot);
+                var minX = origin.x + own.Plot.x + f.xMin;
+                var maxX = minX + f.width;
+                var minY = origin.y + H - 1 - (own.Plot.y + f.yMax - 1);
+                var maxY = minY + f.height;
                 var dx = Mathf.Max(minX - feet.x, 0, feet.x - maxX);
                 var dy = Mathf.Max(minY - feet.y, 0, feet.y - maxY);
                 var d = Mathf.Sqrt(dx * dx + dy * dy);
@@ -618,38 +664,106 @@ namespace Buds.Quests
 
         // ---------- placing a building ----------
 
-        /// <summary>The ghost of a building at a plot-local cell of the bud's own plot (green: it fits); null kind hides it.</summary>
-        public void ShowGhost(string kindId, Vector2Int anchor, bool fits)
+        void PreparePlan(PlotData p)
         {
-            var kind = kindId != null ? rules.Building(kindId) : null;
-            if (kind == null || own == null || !own.Has)
+            var n = rules.plotSize;
+            if (!planRoot)
             {
-                if (ghost) ghost.SetActive(false);
-                return;
-            }
-            if (!ghost)
-            {
-                ghost = new GameObject("Ghost");
-                ghost.transform.SetParent(transform, false);
-                white ??= Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4);
-                ghostShade = new GameObject("Footprint").AddComponent<SpriteRenderer>();
-                ghostShade.transform.SetParent(ghost.transform, false);
-                ghostShade.sprite = white;
-                ghostShade.sortingOrder = -94;
-                var stand = WorldView.Stand(ghost.transform);
-                ghostBody = new GameObject("Sprite").AddComponent<SpriteRenderer>();
+                planRoot = new GameObject("Plan");
+                planRoot.transform.SetParent(transform, false);
+                var stand = WorldView.Stand(planRoot.transform);
+                ghostBody = new GameObject("Ghost").AddComponent<SpriteRenderer>();
                 ghostBody.transform.SetParent(stand, false);
+                planDotsTex = new Texture2D(n * DotPixels, n * DotPixels, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+                planDots = new GameObject("Grid").AddComponent<SpriteRenderer>();
+                planDots.sprite = Sprite.Create(planDotsTex, new Rect(0, 0, n * DotPixels, n * DotPixels), Vector2.zero, DotPixels);
+                planDots.sortingOrder = -92;
+                planCellsTex = new Texture2D(n, n, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+                planCells = new GameObject("Cells").AddComponent<SpriteRenderer>();
+                planCells.sprite = Sprite.Create(planCellsTex, new Rect(0, 0, n, n), Vector2.zero, 1);
+                planCells.sortingOrder = -91;
+                foreach (var r in new[] { planDots, planCells }) r.transform.SetParent(transform, false);
             }
-            ghost.SetActive(true);
-            var map = own.ToMap(anchor.x, anchor.y);
-            ghost.transform.position = Ground(map.x, map.y);
+            // the plot's south-west corner: both pictures lie flat over its cells
+            var corner = world.transform.position + new Vector3(p.x, H - (p.y + n), 0);
+            planDots.transform.position = corner;
+            planCells.transform.position = corner;
+            planRoot.SetActive(true);
+            planDots.gameObject.SetActive(true);
+            planCells.gameObject.SetActive(true);
+        }
+
+        /// <summary>The building as it would stand, however it is turned: its own art, in full colour where it may go.</summary>
+        public void ShowGhost(Land land, BuildingData kind, int x, int y, int rot, bool fits)
+        {
+            PreparePlan(land.Plot);
+            var f = Land.Footprint(kind, x, y, rot);
+            var at = Ground(land.Plot.x + f.xMin + (f.width - 1) / 2f, land.Plot.y + f.yMax - 1);
+            planRoot.transform.position = at;
             var look = kind.id == Land.Hall ? $"dz-{style}-ratusz-1" : $"dz-{style}-{kind.id}";
             ghostBody.sprite = Art(look) ?? Art("dz-budowa");
-            ghostBody.color = fits ? new Color(0.75f, 1f, 0.75f, 0.7f) : new Color(1f, 0.55f, 0.55f, 0.6f);
-            ghostBody.sortingOrder = WorldView.SortOrderFor(ghost.transform.position.y) + 1;
-            ghostShade.color = fits ? new Color(0.64f, 0.9f, 0.21f, 0.35f) : new Color(1f, 0.24f, 0.31f, 0.35f);
-            ghostShade.transform.localScale = new Vector3(kind.w, kind.h, 1);
-            ghostShade.transform.localPosition = new Vector3(0, kind.h / 2f - 0.1f, 0);
+            ghostBody.flipX = rot >= 2;
+            ghostBody.transform.parent.localScale = new Vector3(f.width / (float)kind.w, 1, 1);
+            ghostBody.color = fits ? new Color(1, 1, 1, 0.8f) : new Color(1f, 0.55f, 0.55f, 0.65f);
+            ghostBody.sortingOrder = WorldView.SortOrderFor(at.y) + 1;
+        }
+
+        /// <summary>The cells under the building, green or red each on its own, and the one before its door.</summary>
+        public void SetPlanCells(Land land, BuildingData kind, int x, int y, int rot)
+        {
+            var n = rules.plotSize;
+            var px = new Color32[n * n];
+            bool Free(int cx, int cy) =>
+                cx >= 1 && cy >= 1 && cx < n - 1 && cy < n - 1 && land.Claimed(cx, cy) && land.BuildingAt(cx, cy) == null && !land.InGateClear(cx, cy);
+            void Paint(int cx, int cy, Color32 c)
+            {
+                if (cx >= 0 && cy >= 0 && cx < n && cy < n) px[(n - 1 - cy) * n + cx] = c;
+            }
+            var f = Land.Footprint(kind, x, y, rot);
+            for (var cy = f.yMin; cy < f.yMax; cy++)
+            for (var cx = f.xMin; cx < f.xMax; cx++)
+                Paint(cx, cy, Free(cx, cy) ? CellGood : CellBad);
+            var door = Land.DoorCell(x, y, rot);
+            Paint(door.x, door.y, Free(door.x, door.y) ? CellDoor : CellBad);
+            planCellsTex.SetPixels32(px);
+            planCellsTex.Apply(false);
+        }
+
+        /// <summary>A grid over the plot, and a dot on every cell the building's middle could go to.</summary>
+        public void SetPlanDots(Land land, Func<int, int, bool> fits)
+        {
+            var n = rules.plotSize;
+            var size = n * DotPixels;
+            var px = new Color32[size * size];
+            for (var y = 0; y < n; y++)
+            for (var x = 0; x < n; x++)
+            {
+                var ok = fits(x, y);
+                for (var py = 0; py < DotPixels; py++)
+                for (var ox = 0; ox < DotPixels; ox++)
+                {
+                    Color32 c = default;
+                    if (land.Claimed(x, y) && (ox == 0 || py == 0)) c = GridLine;
+                    if (ok && ox is >= 3 and <= 4 && py is >= 3 and <= 4) c = FitDot;
+                    px[(size - 1 - (y * DotPixels + py)) * size + x * DotPixels + ox] = c;
+                }
+            }
+            planDotsTex.SetPixels32(px);
+            planDotsTex.Apply(false);
+        }
+
+        public void HidePlan()
+        {
+            if (!planRoot) return;
+            planRoot.SetActive(false);
+            planDots.gameObject.SetActive(false);
+            planCells.gameObject.SetActive(false);
+        }
+
+        void OnDestroy()
+        {
+            if (planCellsTex) Destroy(planCellsTex);
+            if (planDotsTex) Destroy(planDotsTex);
         }
     }
 }

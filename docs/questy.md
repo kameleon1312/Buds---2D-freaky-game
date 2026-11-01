@@ -51,8 +51,32 @@ Zadanie: Zakupy dla sąsiadki
 - nagroda: 50 XP
 ```
 
-Rodzaje kroków, które gra już obsługuje: **porozmawiaj z X**, **idź do miejsca**, **zbierz N przedmiotów**.
-Kolejne (np. walka, mini-gra freestyle, graffiti, przynieś przedmiot z ekwipunku) dojdą razem z tymi systemami.
+Rodzaje kroków, które gra obsługuje: **porozmawiaj z X**, **idź do miejsca**, **zbierz N przedmiotów**, **pokonaj
+przeciwnika**, a oprócz tego kroki, które sprawiają, że zadanie stawia opór:
+
+| Co                      | W treści                                             | Jak działa                                                                                                   |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Pytanie                 | `kind: 'ask'`, `answers`, `correct`, `wrong`, `back` | NPC pyta o coś, co padło wcześniej. Zła odpowiedź cofa zadanie o `back` kroków, żeby usłyszeć to jeszcze raz |
+| Mini-gra                | `kind: 'game'`, `skill`, `score`, `wrong`            | Mini-gra treningowa u NPC. Liczy się wynik co najmniej `score` z 5, bez XP treningu i bez czekania           |
+| Na czas                 | `seconds`, `back`, `late` przy `reach` i `collect`   | Zegar w panelu zadań. Po spóźnieniu zadanie cofa się, a zegar rusza dopiero po powrocie do zleceniodawcy     |
+| Ukryte przedmioty       | `hidden: true`, `hint` przy `collect`                | Bez pinezki, widać je dopiero z ~3 pól. `hint` w panelu mówi, gdzie szukać                                   |
+| Nie daj się znokautować | `fragile: '...'` przy zadaniu                        | Nokaut w trakcie cofa zadanie do pierwszego kroku                                                            |
+
+`export-quests.ts` sprawdza, czy każdy limit czasu da się przejść pieszo na telefonie (bez biegu), a `contentProblems`
+pilnuje odpowiedzi, kroków wstecz i podpowiedzi.
+
+## Przepustki
+
+Do kolejnych miast nie wystarczy poziom: `gateQuest` w `districts.ts` (lustrzane `GateQuest` w `Districts.cs`) to zadanie,
+które daje przepustkę lub list. Bez niego strażnik zawraca z drogi, a przewoźnik nie sprzeda biletu (serwer też to
+sprawdza: `ferryBlocker`, `quest_needed`).
+
+| Dokąd       | Zadanie             | U kogo            |
+| ----------- | ------------------- | ----------------- |
+| Las Palmas  | Przepustka na Wydmy | Wiktor            |
+| Dwór Carski | Zaproszenie na Dwór | Profesor Kowalski |
+| Los Karkos  | Tajemnica dworu     | Hrabina Eleonora  |
+| Chinatown   | List do Chinatown   | Hrabina Eleonora  |
 
 ## Technicznie (dla programisty)
 

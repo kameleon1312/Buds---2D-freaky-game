@@ -1,3 +1,4 @@
+using Buds.Characters;
 using System;
 using Buds.Quests;
 using Buds.UI;
@@ -7,6 +8,126 @@ namespace Buds.Core
 {
     public sealed partial class GameBootstrap
     {
+        /// <summary>
+        /// Autopilot (-buds-plan-demo, a guest will do): Chinatown's places, then a made-up district on Ryżowy Trakt with
+        /// turned buildings and its plan from above (fits, in the wild, turned), then the bud on a board in every facing.
+        /// Nothing is sent. The real thing against a server: -buds-land-demo.
+        /// </summary>
+        async Awaitable PlanDemo(Func<string, Awaitable> shot)
+        {
+            async Awaitable Wait(float s) => await Awaitable.WaitForSecondsAsync(s);
+            // Chinatown, walked through
+            LoadDistrict("chinatown", null);
+            await Wait(2f);
+            foreach (var (name, x, y) in new[]
+                     {
+                         ("ct1-brama", 64, 18), ("ct2-ulica", 64, 34), ("ct3-plac", 64, 73), ("ct4-targ", 100, 60), ("ct5-pagoda", 64, 106),
+                         ("ct6-staw", 86, 97), ("ct7-dojo", 24, 68), ("ct8-gaj", 110, 28), ("ct9-magazyny", 150, 70), ("ct10-port", 60, 114),
+                     })
+            {
+                Teleport(x, y);
+                await Wait(1f);
+                await shot(name + ".png");
+            }
+
+            // the wasteland, a made-up district on it with turned buildings, and its plan from above
+            LoadDistrict("pustkowie-ryzowe", "dwor-carski");
+            for (var t = 0f; t < 8 && !districtsWorld; t += 0.1f) await Wait(0.1f);
+            var rules = land.Rules;
+            var plot = rules.PlotsOn(world.Map.Id)[0];
+            var at = Land.HallSpot(plot.gate, rules.sector, rules.sectors);
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            land.Apply(new LandViewDto
+            {
+                land = new LandStateDto
+                {
+                    plot = plot.id,
+                    name = "Nowa Dzielnica",
+                    sectors = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Union(Land.StartSectors(plot.gate, rules.sectors), new[] { 6, 7, 8, 11, 12, 13, 16, 17, 18, 21, 22, 23 })),
+                    resources = new LandResourcesDto { beton = 9000, stal = 9000, energia = 9000, zywnosc = 9000 },
+                    buildings = new[]
+                    {
+                        new LandBuildingDto { id = 1, kind = Land.Hall, x = at.x, y = at.y, level = 5, readyAt = now, collectedAt = now },
+                        new LandBuildingDto { id = 2, kind = "magazyn", x = at.x + 8, y = at.y + 5, rot = 1, level = 1, readyAt = now, collectedAt = now },
+                        new LandBuildingDto { id = 3, kind = "szklarnia", x = at.x + 7, y = at.y - 4, rot = 3, level = 1, readyAt = now, collectedAt = now },
+                    },
+                    nextId = 4,
+                    shieldUntil = 0,
+                },
+                now = now,
+                storage = rules.baseStorage,
+            }, now);
+            if (districtsWorld) districtsWorld.Redraw();
+            var spot = land.ToMap(at.x, at.y + 2);
+            Teleport(spot.x, spot.y);
+            await Wait(2f);
+            await shot("plan0-swiat.png");
+            OpenMap();
+            await Wait(0.3f);
+            await shot("mapa1-calosc.png");
+            mapScreen.ZoomBy(2.2f, Vector2.zero);
+            await Wait(0.3f);
+            await shot("mapa2-blizej.png");
+            mapScreen.CentreOnBud();
+            await Wait(0.3f);
+            await shot("mapa3-bud.png");
+            mapScreen.Hide();
+            LoadDistrict("chinatown", null);
+            await Wait(1.5f);
+            foreach (var (x, y) in new[] { (64, 18), (64, 40), (64, 70), (100, 60) })
+            {
+                Teleport(x, y);
+                await Wait(0.3f);
+            }
+            OpenMap();
+            await Wait(0.3f);
+            await shot("mapa4-chinatown.png");
+            mapScreen.CentreOnBud();
+            await Wait(0.3f);
+            await shot("mapa5-chinatown-blisko.png");
+            mapScreen.Hide();
+            LoadDistrict("pustkowie-ryzowe", "dwor-carski");
+            for (var t = 0f; t < 8 && !districtsWorld; t += 0.1f) await Wait(0.1f);
+            districtsWorld.Redraw();
+            await Wait(1f);
+            spot = land.ToMap(at.x, at.y + 2);
+            Teleport(spot.x, spot.y);
+            await Wait(0.5f);
+            ui.ShowBuilding(true);
+            landPlanner.Open(land, "iglica", 20, districtsWorld, Camera.main!.GetComponent<FollowCamera>(), (_, _) => { }, null, () => ui.ShowBuilding(false));
+            await Wait(1.5f);
+            await shot("plan1.png");
+            landPlanner.MoveForDemo(new Vector2Int(3, 3));
+            await Wait(0.3f);
+            await shot("plan2-dzicz.png");
+            landPlanner.Fit();
+            landPlanner.Rotate();
+            await Wait(0.3f);
+            await shot("plan3-obrot.png");
+            landPlanner.Hide();
+            ui.ShowAnswers("Strażniczka Mei", "Co wraca jak fala?", new[] { "Dług", "Przysługa", "Kłamstwo" }, null);
+            await Wait(0.3f);
+            await shot("pytanie.png");
+            ui.HideDialog();
+
+            // on a board: sideways whichever way it rolls
+            rideArt ??= LoadRideArt();
+            player.SetRide(new BudController.RideLook
+            {
+                Kind = "deskorolka",
+                Side = rideArt.Get(Rides.SpriteFor("deskorolka", Facing.Side)),
+                Front = rideArt.Get(Rides.SpriteFor("deskorolka", Facing.Down)),
+                Back = rideArt.Get(Rides.SpriteFor("deskorolka", Facing.Up)),
+            });
+            foreach (var (name, dir) in new[] { ("deska-dol", Vector2.down), ("deska-gora", Vector2.up), ("deska-bok", Vector2.right) })
+            {
+                player.Motor.Face(dir, true);
+                await Wait(0.3f);
+                await shot(name + ".png");
+            }
+            player.SetRide(null);
+        }
+
         /// <summary>
         /// Autopilot (-buds-land-demo, a paired bud with coins for a plot): onto Leśne Ostępy, to the gate of a free plot,
         /// buys it under a name, looks at the window's four tabs, shows a building's ghost, puts up a vertical farm and a
@@ -72,14 +193,19 @@ namespace Buds.Core
             await shot("d7-napady.png");
             landScreen.Hide();
 
-            // a building's ghost in front of the bud (on this small start it doesn't fit there yet), then two built
+            // the plan from above: turned, dragged into the wild (red), fitted, then two built, the first one turned
             StartPlacing("szklarnia");
-            var spot = land.ToMap(hallAt.x - 5, hallAt.y + 5);
-            Teleport(spot.x, spot.y);
-            await Awaitable.WaitForSecondsAsync(0.6f);
-            await shot("d8-podglad.png");
-            StopPlacing();
-            await BuildLand("szklarnia", new Vector2Int(hallAt.x - 5, hallAt.y + 4));
+            await Awaitable.WaitForSecondsAsync(0.5f);
+            await shot("d8-plan.png");
+            landPlanner.MoveForDemo(new Vector2Int(2, 2));
+            await Awaitable.WaitForSecondsAsync(0.3f);
+            await shot("d8b-plan-zle.png");
+            landPlanner.Fit();
+            landPlanner.Rotate();
+            await Awaitable.WaitForSecondsAsync(0.3f);
+            await shot("d8c-plan-obrot.png");
+            landPlanner.Hide();
+            await BuildLand("szklarnia", new Vector2Int(hallAt.x - 5, hallAt.y + 4), 1);
             await BuildLand("farma-solarna", new Vector2Int(hallAt.x + 5, hallAt.y + 4));
 
             // the forest at the district's edge: the hint, the offer, the crew

@@ -236,13 +236,23 @@ TT#TT
         }
 
         [Test]
-        public void TheStartDistrictLinksToEveryOtherDistrict()
+        public void EveryDistrictCanBeWalkedToFromTheStart()
         {
-            // every road out of the city crosses a wasteland that ends in another district
-            var map = MapFormat.Load(Districts.Start);
-            foreach (var d in Districts.All)
-                if (d.Id != Districts.Start)
-                    Assert.IsNotNull(map.Exits.Find(e => Districts.FarEnd(e.DistrictId, Districts.Start) == d.Id), d.Id);
+            // every road crosses a wasteland that ends in another district; Chinatown lies past Dwór Carski
+            var seen = new System.Collections.Generic.HashSet<string> { Districts.Start };
+            var open = new System.Collections.Generic.Queue<string>();
+            open.Enqueue(Districts.Start);
+            while (open.Count > 0)
+            {
+                var city = open.Dequeue();
+                foreach (var e in MapFormat.Load(city).Exits)
+                {
+                    var far = Districts.FarEnd(e.DistrictId, city);
+                    if (far != null && seen.Add(far)) open.Enqueue(far);
+                }
+            }
+            foreach (var d in Districts.All) Assert.IsTrue(seen.Contains(d.Id), d.Id);
+            Assert.IsNull(MapFormat.Load(Districts.Start).Exits.Find(e => Districts.FarEnd(e.DistrictId, Districts.Start) == "chinatown"));
         }
     }
 

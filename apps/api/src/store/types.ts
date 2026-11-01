@@ -6,6 +6,7 @@ import type {
   ItemSource,
   OwnedItem,
   SlotId,
+  ExploredMap,
 } from '@buds/shared';
 
 export type BuyResult = { status: 'ok' | 'owned' | 'poor'; coins: number };
@@ -113,6 +114,10 @@ export interface BudStore extends RivalryStore, LandStore {
    * already completed (then nothing changes).
    */
   completeQuest(slug: string, questId: string, xp: number): Promise<number | null>;
+  /** The land each map's fog has lifted from for this bud (explored.ts). */
+  explored(slug: string): Promise<ExploredMap[]>;
+  /** Adds cells to what the bud has seen of a map, atomically (never takes any away); returns all of it. */
+  mergeExplored(slug: string, map: string, seen: string): Promise<string>;
   /** Skill ranks (skills never upgraded are absent). */
   skills(slug: string): Promise<{ id: string; rank: number }[]>;
   /** Fight loadouts (loadout.ts), one per weapon kind: five ability ids or null. */

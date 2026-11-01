@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { exploredMapSchema } from './explored';
 import { ownedItemSchema } from './catalog';
 import { characterStatsSchema, equipmentSchema } from './gear';
 import { budNameSchema, budRecordSchema } from './schemas';
@@ -126,6 +127,7 @@ export const budExportSchema = z.object({
   moveRanks: z.record(z.string(), z.number().int()),
   crew: z.object({ tag: z.string(), name: z.string() }).nullable(),
   land: z.unknown().nullable(),
+  explored: z.array(exploredMapSchema),
   devices: z.number().int(),
 });
 export type BudExport = z.infer<typeof budExportSchema>;

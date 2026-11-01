@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Buds.World;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Buds.UI
@@ -22,8 +23,10 @@ namespace Buds.UI
     /// <summary>
     /// "Mapa" (M or the HUD button): the district drawn from its own ground colours, dark where the bud hasn't been
     /// yet. On it: the bud, doors, found caches, numbered pins for quest targets (tap one to read it) and place names
-    /// laid out so they never overlap (MapLabels). Beside it, in fixed sections one under another: how much is
-    /// explored, the legend and the numbered list of targets.
+    /// laid out so they never overlap (MapLabels). The picture is the land in detail (roofs, crowns, ground, MapPicture.Detailed)
+    /// under a soft fog that lifts where the bud has been; it zooms from the whole map to single streets (wheel, pinch,
+    /// + and -) and is dragged about (MapView). Beside it, in fixed sections one under another: how much is explored, how
+    /// many places were found, the legend and the numbered list of targets.
     /// </summary>
     public sealed class MapScreen
     {
@@ -36,6 +39,17 @@ namespace Buds.UI
         readonly GameObject root;
         readonly Text title;
         readonly RawImage picture;
+        readonly RawImage fogImage;
+        readonly Text placesLine;
+        const int DetailScale = 8;
+        string detailFor;
+        Texture2D fogTexture;
+        MapScreenData shown;
+        MapView view;
+        /// <summary>The zoom the markers were last laid out for: between layouts they just follow the picture.</summary>
+        float laidOutZoom = 1;
+        float layOutAt = -1;
+        float pinchFrom;
         readonly RectTransform markers;
         readonly RectTransform pins;
         readonly Text explored;
@@ -69,10 +83,18 @@ namespace Buds.UI
             UiKit.Place(frameRt, new Vector2(0, 1), Vector2.zero, new Vector2(MapW + 16, MapH + 16), new Vector2(0, 1));
             frame.raycastTarget = true;
             frame.gameObject.AddComponent<Button>().onClick.AddListener(() => OpenPin(-1));
+            frame.gameObject.AddComponent<MapSurface>().Screen = this;
+            var viewport = UiKit.Rect("Viewport", frame.transform);
+            UiKit.Place(viewport, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(MapW, MapH));
+            viewport.gameObject.AddComponent<RectMask2D>();
             picture = new GameObject("Picture", typeof(RectTransform)).AddComponent<RawImage>();
-            picture.transform.SetParent(frame.transform, false);
+            picture.transform.SetParent(viewport, false);
             picture.raycastTarget = false;
             UiKit.Place(picture.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(MapW, MapH));
+            fogImage = new GameObject("Fog", typeof(RectTransform)).AddComponent<RawImage>();
+            fogImage.transform.SetParent(picture.transform, false);
+            fogImage.raycastTarget = false;
+            UiKit.Stretch(fogImage.rectTransform);
             markers = UiKit.Rect("Markers", picture.transform);
             UiKit.Stretch(markers);
             pins = UiKit.Rect("Pins", picture.transform);
@@ -84,6 +106,18 @@ namespace Buds.UI
             bubbleText = UiKit.Label("Text", bubbleBox.transform, "", 20, UiKit.TextOnDark, false, TextAnchor.MiddleLeft);
             UiKit.Stretch(bubbleText.rectTransform, 14, 8, 14, 8);
             bubble.gameObject.SetActive(false);
+
+            // zoom: over the map's corner, out of the way of the pins
+            var pad = UiKit.Rect("Zoom", frame.transform);
+            UiKit.Place(pad, new Vector2(1, 1), new Vector2(-10, -10), new Vector2(64, 204), new Vector2(1, 1));
+            void ZoomButton(string name, string text, float y, Action act)
+            {
+                var b = UiKit.Button(name, pad, text, new Vector2(62, 60), act, UiKit.Tone.Rep, 28);
+                UiKit.Place((RectTransform)b.transform, new Vector2(0.5f, 1), new Vector2(0, y), new Vector2(62, 60), new Vector2(0.5f, 1));
+            }
+            ZoomButton("ZoomIn", "+", 0, () => ZoomBy(1.6f, Vector2.zero));
+            ZoomButton("ZoomOut", "-", -68, () => ZoomBy(1 / 1.6f, Vector2.zero));
+            ZoomButton("OnMe", "Ja", -136, CentreOnBud);
 
             // ---------- side column: fixed sections from the top ----------
             var side = UiKit.Rect("Side", body);
@@ -101,7 +135,7 @@ namespace Buds.UI
             }
             explored = Row("Explored", 26, UiKit.Ink, true, 36);
             cachesLine = Row("Caches", 26, UiKit.Ink, true, 36);
-            Row("CachesHint", 19, UiKit.InkSoft, false, 50).text = "Skrytki widać z bliska, Spryt pomaga je wypatrzyć.";
+            placesLine = Row("Places", 26, UiKit.Ink, true, 36);
             y += 18;
 
             (string, Color, float)[] keys =
@@ -126,7 +160,7 @@ namespace Buds.UI
             targetRows = UiKit.Rect("Targets", side);
             Top(targetRows, y, MaxTargetRows * 56 + 30);
 
-            var close = UiKit.Label("Close", side, UiKit.Mobile ? "" : "M lub Esc: zamknij", 20, UiKit.InkSoft, false,
+            var close = UiKit.Label("Close", side, UiKit.Mobile ? "Dwa palce: przybliż i oddal" : "Kółko: przybliż · przeciągnij mapę · M: zamknij", 18, UiKit.InkSoft, false,
                 TextAnchor.LowerRight);
             UiKit.Stretch(close.rectTransform, 0, -4, 0, 0);
             root.SetActive(false);
@@ -148,22 +182,168 @@ namespace Buds.UI
             var district = Districts.Get(map.Id);
             title.text = "Mapa · " + (district?.Name ?? map.Name);
 
-            if (texture) UnityEngine.Object.Destroy(texture);
-            texture = new Texture2D(map.Width, map.Height, TextureFormat.RGBA32, false)
+            // the land in detail is drawn once per map; only the fog over it changes
+            if (detailFor != map.Id)
             {
-                filterMode = FilterMode.Point,
+                if (texture) UnityEngine.Object.Destroy(texture);
+                texture = new Texture2D(map.Width * DetailScale, map.Height * DetailScale, TextureFormat.RGBA32, true)
+                {
+                    filterMode = FilterMode.Trilinear,
+                    wrapMode = TextureWrapMode.Clamp,
+                };
+                var entries = Manifest();
+                texture.SetPixels32(MapPicture.Detailed(map, DetailScale, name => entries.TryGetValue(name, out var e) && !e.flat ? e.foot ?? new[] { 1, 1 } : null));
+                texture.Apply(true);
+                picture.texture = texture;
+                detailFor = map.Id;
+                // keep the map's proportions inside the frame
+                var scale = Mathf.Min(MapW / map.Width, MapH / map.Height);
+                view = new MapView(new Vector2(MapW, MapH), new Vector2(map.Width * scale, map.Height * scale));
+            }
+            if (fogTexture) UnityEngine.Object.Destroy(fogTexture);
+            fogTexture = new Texture2D(map.Width, map.Height, TextureFormat.RGBA32, false)
+            {
+                filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Clamp,
             };
-            texture.SetPixels32(MapPicture.Pixels(map, data.Fog));
-            texture.Apply();
-            picture.texture = texture;
-            // keep the map's proportions inside the frame
-            var scale = Mathf.Min(MapW / map.Width, MapH / map.Height);
-            picture.rectTransform.sizeDelta = new Vector2(map.Width * scale, map.Height * scale);
+            fogTexture.SetPixels32(MapPicture.FogPixels(map.Width, map.Height, data.Fog));
+            fogTexture.Apply();
+            fogImage.texture = fogTexture;
+            shown = data;
+            ApplyView();
+            LayOut();
 
+            // side column
+            var percent = data.Fog != null ? Mathf.RoundToInt(data.Fog.Explored(map) * 100) : 100;
+            var places = MapPicture.Places(map, data.Fog);
+            explored.text = $"Odkryto: {percent}%";
+            placesLine.text = $"Miejsca: {places.seen} / {places.total}";
+            cachesLine.text = $"Skrytki: {data.CachesFound} / {data.CachesTotal}";
+            targetsTitle.text = data.Targets.Count == 0 ? "Brak celów w tej dzielnicy" : $"Cele zadań ({data.Targets.Count})";
+            Clear(targetRows);
+            for (var i = 0; i < data.Targets.Count && i < MaxTargetRows; i++) TargetRow(i, data.Targets[i].label);
+            if (data.Targets.Count > MaxTargetRows)
+            {
+                var more = UiKit.Label("More", targetRows, $"+{data.Targets.Count - MaxTargetRows}: dotknij pinezki na mapie", 18,
+                    UiKit.InkSoft, false, TextAnchor.UpperLeft);
+                Top(more.rectTransform, MaxTargetRows * 56, 30);
+            }
+
+            OpenPin(-1);
+            root.SetActive(true);
+            root.transform.SetAsLastSibling();
+        }
+
+        static Dictionary<string, PropArt.Entry> manifest;
+
+        static Dictionary<string, PropArt.Entry> Manifest()
+        {
+            if (manifest != null) return manifest;
+            manifest = new Dictionary<string, PropArt.Entry>();
+            foreach (var e in PropArt.LoadManifest().props) manifest[e.name] = e;
+            return manifest;
+        }
+
+        // ---------- zoom and drag ----------
+
+        void ApplyView()
+        {
+            picture.rectTransform.sizeDelta = view.PictureSize;
+            picture.rectTransform.anchoredPosition = view.Pan;
+            // between two layouts the markers' spots follow the picture's growth
+            var follow = view.Zoom / laidOutZoom;
+            markers.localScale = pins.localScale = new Vector3(follow, follow, 1);
+        }
+
+        internal void ZoomBy(float factor, Vector2 point)
+        {
+            if (view == null) return;
+            view.ZoomAt(factor, point);
+            ApplyView();
+            layOutAt = Time.unscaledTime + 0.12f;
+        }
+
+        internal void DragBy(Vector2 by)
+        {
+            if (view == null) return;
+            view.PanBy(by);
+            ApplyView();
+        }
+
+        /// <summary>The bud's place in the middle of the frame, a street's worth of detail around it.</summary>
+        public void CentreOnBud()
+        {
+            if (view == null || shown == null) return;
+            if (view.Zoom < 3) view.ZoomAt(3 / view.Zoom, Vector2.zero);
+            var map = shown.Map;
+            var fit = view.PictureSize / view.Zoom;
+            view.CentreOn(new Vector2(shown.Player.x / map.Width * fit.x - fit.x / 2, fit.y / 2 - shown.Player.y / map.Height * fit.y));
+            ApplyView();
+            layOutAt = Time.unscaledTime;
+        }
+
+        /// <summary>Every frame while open: two fingers, the + and - keys, and laying the markers out once the zoom settles.</summary>
+        public void Tick()
+        {
+            var touch = UnityEngine.InputSystem.Touchscreen.current;
+            if (touch != null)
+            {
+                var a = touch.touches[0];
+                var b = touch.touches[1];
+                if (a.press.isPressed && b.press.isPressed)
+                {
+                    var gap = Vector2.Distance(a.position.ReadValue(), b.position.ReadValue());
+                    if (pinchFrom > 0 && gap > 0) ZoomBy(gap / pinchFrom, Vector2.zero);
+                    pinchFrom = gap;
+                }
+                else pinchFrom = 0;
+            }
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            if (kb != null)
+            {
+                if (kb.equalsKey.wasPressedThisFrame || kb.numpadPlusKey.wasPressedThisFrame) ZoomBy(1.6f, Vector2.zero);
+                if (kb.minusKey.wasPressedThisFrame || kb.numpadMinusKey.wasPressedThisFrame) ZoomBy(1 / 1.6f, Vector2.zero);
+            }
+            if (layOutAt >= 0 && Time.unscaledTime >= layOutAt)
+            {
+                layOutAt = -1;
+                LayOut();
+            }
+        }
+
+        /// <summary>Takes the frame's drags and the mouse wheel.</summary>
+        sealed class MapSurface : MonoBehaviour, IDragHandler, IScrollHandler
+        {
+            public MapScreen Screen;
+
+            public void OnDrag(PointerEventData e)
+            {
+                // two fingers are a pinch, not a drag
+                if (UnityEngine.InputSystem.Touchscreen.current is { } t && t.touches[1].press.isPressed) return;
+                var canvas = GetComponentInParent<Canvas>();
+                Screen.DragBy(e.delta / (canvas ? canvas.scaleFactor : 1));
+            }
+
+            public void OnScroll(PointerEventData e)
+            {
+                var rt = (RectTransform)transform;
+                var factor = e.scrollDelta.y > 0 ? 1.25f : e.scrollDelta.y < 0 ? 1 / 1.25f : 1;
+                if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, e.position, e.enterEventCamera, out var point))
+                    Screen.ZoomBy(factor, point - rt.rect.center);
+            }
+        }
+
+        /// <summary>Doors, caches, the bud, pins and names at the current zoom.</summary>
+        void LayOut()
+        {
+            var data = shown;
+            if (data == null) return;
+            var map = data.Map;
+            laidOutZoom = view.Zoom;
+            markers.localScale = pins.localScale = Vector3.one;
+            var open = openPin;
             Clear(markers);
             Clear(pins);
-            Clear(targetRows);
             bool Seen(int x, int y) => data.Fog == null || data.Fog.IsSeen(x, y);
 
             // markers first: names are laid out around them
@@ -191,23 +371,7 @@ namespace Buds.UI
             }
 
             PlaceNames(map, data, obstacles, Seen);
-
-            // side column
-            var percent = data.Fog != null ? Mathf.RoundToInt(data.Fog.Explored(map) * 100) : 100;
-            explored.text = $"Odkryto: {percent}%";
-            cachesLine.text = $"Skrytki: {data.CachesFound} / {data.CachesTotal}";
-            targetsTitle.text = data.Targets.Count == 0 ? "Brak celów w tej dzielnicy" : $"Cele zadań ({data.Targets.Count})";
-            for (var i = 0; i < data.Targets.Count && i < MaxTargetRows; i++) TargetRow(i, data.Targets[i].label);
-            if (data.Targets.Count > MaxTargetRows)
-            {
-                var more = UiKit.Label("More", targetRows, $"+{data.Targets.Count - MaxTargetRows}: dotknij pinezki na mapie", 18,
-                    UiKit.InkSoft, false, TextAnchor.UpperLeft);
-                Top(more.rectTransform, MaxTargetRows * 56, 30);
-            }
-
-            OpenPin(-1);
-            root.SetActive(true);
-            root.transform.SetAsLastSibling();
+            OpenPin(open);
         }
 
         public void Hide() => root.SetActive(false);
@@ -232,7 +396,7 @@ namespace Buds.UI
 
             foreach (var e in map.Exits)
             {
-                var name = Districts.Get(e.DistrictId)?.Name ?? e.DistrictId;
+                var name = Districts.NameOf(e.DistrictId);
                 Add(new Vector2((e.X0 + e.X1 + 1) / 2f, (e.Y0 + e.Y1 + 1) / 2f), "Do: " + name, 19, UiKit.Gold400, 3000);
             }
             foreach (var z in map.Zones)
@@ -249,7 +413,7 @@ namespace Buds.UI
                 if (seen((int)at.x, (int)at.y)) Add(at, "wkrótce", 15, UiKit.TextOnDarkMuted, 0);
             }
 
-            var size = picture.rectTransform.sizeDelta;
+            var size = view.PictureSize;
             var bounds = new Rect(-size.x / 2 + 4, -size.y / 2 + 4, size.x - 8, size.y - 8);
             var spots = MapLabels.Place(labels, bounds, obstacles);
             for (var i = 0; i < texts.Count; i++)
@@ -308,13 +472,19 @@ namespace Buds.UI
                 return;
             }
             var (at, label) = shownTargets[index];
+            // zoomed in, the pin comes into the frame first
+            if (view.Zoom > 1)
+            {
+                view.CentreOn(at / view.Zoom);
+                ApplyView();
+            }
             bubbleText.text = $"<b>{index + 1}.</b> {label}";
             const float w = 340;
             var settings = bubbleText.GetGenerationSettings(new Vector2(w - 28, 0));
             var h = Mathf.Max(48, bubbleText.cachedTextGeneratorForLayout.GetPreferredHeight(bubbleText.text, settings) /
                 bubbleText.pixelsPerUnit + 18);
             // beside the pin, on the side with more room, kept inside the picture
-            var size = picture.rectTransform.sizeDelta;
+            var size = view.PictureSize;
             var x = at.x + (at.x < 0 ? PinSize / 2 + 10 + w / 2 : -(PinSize / 2 + 10 + w / 2));
             x = Mathf.Clamp(x, -size.x / 2 + w / 2 + 4, size.x / 2 - w / 2 - 4);
             var y = Mathf.Clamp(at.y, -size.y / 2 + h / 2 + 4, size.y / 2 - h / 2 - 4);
@@ -331,7 +501,7 @@ namespace Buds.UI
         /// <summary>Map coordinates (y down) to a position on the picture (y up, from its centre).</summary>
         Vector2 At(WorldMap map, Vector2 cell)
         {
-            var size = picture.rectTransform.sizeDelta;
+            var size = view.PictureSize;
             return new Vector2(cell.x / map.Width * size.x - size.x / 2, size.y / 2 - cell.y / map.Height * size.y);
         }
 

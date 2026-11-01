@@ -17,6 +17,12 @@ Rejestr (nazwy, progi poziomu, status): `packages/shared/src/districts.ts`, lust
 Kolejność progów rośnie z trudnością: Miasto Ziomków uczy podstaw, Las Palmas to spokojna eksploracja,
 Dwór Carski wymaga myślenia i pierwszych walk, Los Karkos to sprawdzian dla doświadczonych.
 
+Za Dworem Carskim, Ryżowym Traktem na południe, leży **Chinatown** (poziom 9 i list od Hrabiny Eleonory): Brama Smoka,
+Ulica Lampionów, Plac Smoka, Nocny Targ, Uliczki Rzemieślników z dojo, Ogród Pagody ze stawem i herbaciarnią, Gaj
+Bambusowy, Wiśniowe Wzgórze, Stare Magazyny i Port Lampionów. Mapa w `tools/world/maps/chinatown.ts`, grafika w
+`tools/world/art/chinatown.ts`, treść w `packages/shared/src/content/chinatown.ts`. Jej zadania kończą się sprawą Pana
+Zhao.
+
 ## Stan
 
 Wszystkie dzielnice są zbudowane jako mapy 176 × 132 pól (`apps/unity/Assets/Buds/Resources/Maps/*.txt`) z grafiką

@@ -203,12 +203,21 @@ export const LAS_PALMAS: {
       xp: 180,
       minLevel: 3,
       intro:
-        'Szukam miejsca na zawody surfingowe. Sprawdź trzy plaże i powiedz mi, gdzie fala jest najlepsza.',
+        'Szukam miejsca na zawody surfingowe. Sprawdź trzy plaże, a potem pokaż mi na fali, że wiesz, o czym mówisz.',
       done: 'Rafa! Wiedziałam. Zawody robimy tam.',
       steps: [
         { kind: 'reach', x: 18, y: 63, radius: 1, label: 'Plaża przy pomoście' },
         { kind: 'reach', x: 20, y: 74, radius: 1, label: 'Plaża Aloha' },
         { kind: 'reach', x: 40, y: 18, radius: 2, label: 'Plaża przy rafie' },
+        {
+          kind: 'game',
+          npc: 'mia',
+          skill: 'surfing',
+          score: 3,
+          label: 'Popłyń z Mią przed rekinem: 3 z 5',
+          text: 'Rafa to rafa, ale rekin nie pyta. Pokaż, że umiesz uciekać na fali.',
+          wrong: 'Rekin był szybszy. Odetchnij i na deskę jeszcze raz.',
+        },
       ],
     },
     {
@@ -224,6 +233,13 @@ export const LAS_PALMAS: {
       steps: [
         { kind: 'reach', x: 108, y: 37, radius: 1, label: 'Schody świątyni' },
         {
+          kind: 'talk',
+          npc: 'profesor',
+          text: 'Na schodach jest napis: maskę złoży ten, kto idzie od słońca ku wodzie. Zapamiętaj to, proszę, bo będę pytać.',
+        },
+        {
+          hidden: true,
+          hint: 'Odłamki leżą w dżungli i widać je dopiero z bliska.',
           kind: 'collect',
           item: 'odlamek',
           label: 'Odłamki maski',
@@ -232,6 +248,15 @@ export const LAS_PALMAS: {
             { x: 114, y: 44 },
             { x: 118, y: 29 },
           ],
+        },
+        {
+          kind: 'ask',
+          npc: 'profesor',
+          text: 'Jak szedł ten, kto złożył maskę?',
+          answers: ['Od wody ku słońcu', 'Od słońca ku wodzie', 'Od świątyni ku plaży'],
+          correct: 1,
+          wrong: 'Nie, nie, nie! Dobrze, że nie piszesz książek. Posłuchaj jeszcze raz.',
+          back: 2,
         },
       ],
     },
@@ -266,12 +291,16 @@ export const LAS_PALMAS: {
       xp: 220,
       minLevel: 4,
       requires: ['sieci-rybaka'],
-      intro: 'Przy odpływie na rafie widać perły. Idź na rafę i przynieś dwie.',
+      intro:
+        'Przy odpływie na rafie widać perły, ale woda szybko wraca. Idź na rafę i przynieś dwie, zanim je zaleje.',
       done: 'Perły! A to muszla, która przynosi szczęście. Weź ją.',
       rewardItem: 'muszla-szczescia',
       steps: [
         { kind: 'reach', x: 44, y: 19, radius: 3, label: 'Rafa' },
         {
+          seconds: 40,
+          back: 1,
+          late: 'Przypływ zakrył rafę. Wróć na nią i spróbuj przy następnym odpływie.',
           kind: 'collect',
           item: 'perla',
           label: 'Perły',
@@ -279,6 +308,35 @@ export const LAS_PALMAS: {
             { x: 36, y: 19 },
             { x: 52, y: 21 },
           ],
+        },
+      ],
+    },
+    {
+      id: 'zaproszenie-na-dwor',
+      title: 'Zaproszenie na Dwór',
+      district: 'las-palmas',
+      giver: 'profesor',
+      xp: 320,
+      minLevel: 4,
+      requires: ['aloha'],
+      intro:
+        'Hrabina zaprasza mnie na dwór, a ja mam wykopaliska. Pojedziesz za mnie. Ale bez listu polecającego straż na Starym Gościńcu nikogo nie przepuści. List ma Kahu, tylko że chce go oddać komuś, kto uwolni lagunę od pirata.',
+      done: 'List jest twój. Pokłoń się Hrabinie ode mnie. I nie dotykaj waz.',
+      steps: [
+        {
+          kind: 'talk',
+          npc: 'kahu',
+          text: 'List? Dam. Najpierw pirat z laguny, bo przez niego łodzie nie wypływają. Wróć potem do Profesora. Aha, pieczęć na liście jest zielona, nie zapomnij mu powiedzieć.',
+        },
+        { kind: 'duel', enemy: 'pirat-z-laguny', label: 'Pokonaj pirata z laguny' },
+        {
+          kind: 'ask',
+          npc: 'profesor',
+          text: 'Jakiego koloru jest pieczęć? Muszę wiedzieć, czy to prawdziwy list.',
+          answers: ['Czerwona', 'Zielona', 'Złota'],
+          correct: 1,
+          wrong: 'Fałszywka! Idź do Kahu po właściwy list i słuchaj uważniej.',
+          back: 2,
         },
       ],
     },

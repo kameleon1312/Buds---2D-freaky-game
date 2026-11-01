@@ -31,9 +31,11 @@ namespace Buds.Quests
     {
         public int id;
         public string kind;
-        /// <summary>Plot-local cell of the anchor (the middle of the bottom row).</summary>
+        /// <summary>Plot-local cell of the anchor (the middle of the row its door is on).</summary>
         public int x;
         public int y;
+        /// <summary>Quarter turns clockwise seen from above: the door looks south, west, north, east.</summary>
+        public int rot;
         public int level;
         /// <summary>Ms since epoch (the server's clock) when it (or its last upgrade) is done.</summary>
         public double readyAt;
@@ -165,6 +167,7 @@ namespace Buds.Quests
         public string kind;
         public int x;
         public int y;
+        public int rot;
     }
 
     [Serializable]
@@ -357,10 +360,60 @@ namespace Buds.Quests
 
         // ---------- cells ----------
 
-        public RectInt Footprint(BuildingData kind, int x, int y) =>
-            new(x - (kind.w - 1) / 2, y - kind.h + 1, kind.w, kind.h);
+        /// <summary>The cells a building covers: it turns round its anchor (land.ts footprint).</summary>
+        public static RectInt Footprint(BuildingData kind, int x, int y, int rot = 0)
+        {
+            var side = (kind.w - 1) / 2;
+            return rot switch
+            {
+                1 => new RectInt(x, y - side, kind.h, kind.w),
+                2 => new RectInt(x - side, y, kind.w, kind.h),
+                3 => new RectInt(x - kind.h + 1, y - side, kind.h, kind.w),
+                _ => new RectInt(x - side, y - kind.h + 1, kind.w, kind.h),
+            };
+        }
+
+        /// <summary>The cell in front of a building's door (land.ts doorCell).</summary>
+        public static Vector2Int DoorCell(int x, int y, int rot = 0) => rot switch
+        {
+            1 => new Vector2Int(x - 1, y),
+            2 => new Vector2Int(x, y - 1),
+            3 => new Vector2Int(x + 1, y),
+            _ => new Vector2Int(x, y + 1),
+        };
+
+        /// <summary>The anchor that keeps a building's middle where it is when it turns to <paramref name="rot"/>.</summary>
+        public static Vector2Int AnchorForCentre(BuildingData kind, Vector2Int centre, int rot)
+        {
+            // CentreOf rounds towards the far edge: from the near edge it is depth / 2, from the far one what is left
+            var near = kind.h / 2;
+            var far = kind.h - 1 - near;
+            return rot switch
+            {
+                1 => new Vector2Int(centre.x - near, centre.y),
+                2 => new Vector2Int(centre.x, centre.y - near),
+                3 => new Vector2Int(centre.x + far, centre.y),
+                _ => new Vector2Int(centre.x, centre.y + far),
+            };
+        }
+
+        /// <summary>The cell in the middle of a footprint (a plan's handle on the building).</summary>
+        public static Vector2Int CentreOf(RectInt f) => new(f.xMin + f.width / 2, f.yMin + f.height / 2);
 
         bool Inside(int x, int y) => x >= 1 && y >= 1 && x < Size - 1 && y < Size - 1;
+
+        /// <summary>The first cell inside the gate (land.ts gateCells).</summary>
+        static Vector2Int GateInside(string gate, int size)
+        {
+            var c = (size - 1) / 2;
+            return gate switch
+            {
+                "n" => new Vector2Int(c, 1),
+                "w" => new Vector2Int(1, c),
+                "e" => new Vector2Int(size - 2, c),
+                _ => new Vector2Int(c, size - 2),
+            };
+        }
 
         /// <summary>The cells of the gate in the fence (plot-local).</summary>
         public static Vector2Int[] GateCells(string gate, int size)
@@ -389,7 +442,7 @@ namespace Buds.Quests
             };
         }
 
-        bool InGateClear(int x, int y)
+        public bool InGateClear(int x, int y)
         {
             var c = Centre;
             var last = Size - 1;
@@ -415,7 +468,7 @@ namespace Buds.Quests
                 {
                     var kind = Rules.Building(b.kind);
                     if (kind == null) continue;
-                    var f = Footprint(kind, b.x, b.y);
+                    var f = Footprint(kind, b.x, b.y, b.rot);
                     for (var y = f.yMin; y < f.yMax; y++)
                     for (var x = f.xMin; x < f.xMax; x++)
                         set.Add(y * Size + x);
@@ -430,7 +483,7 @@ namespace Buds.Quests
             foreach (var b in State.buildings)
             {
                 var kind = Rules.Building(b.kind);
-                if (kind != null && Footprint(kind, b.x, b.y).Contains(new Vector2Int(x, y))) return b;
+                if (kind != null && Footprint(kind, b.x, b.y, b.rot).Contains(new Vector2Int(x, y))) return b;
             }
             return null;
         }
@@ -465,31 +518,105 @@ namespace Buds.Quests
 
         /// <summary>
         /// Why a building can't go here (a land.ts problem code), or null; plot-local anchor. The server checks the same,
-        /// and also that nothing gets walled in.
+        /// and also that nothing gets walled in (<see cref="WallsIn"/>).
         /// </summary>
-        public string PlacementProblem(string kindId, int x, int y, int budLevel)
+        public string PlacementProblem(string kindId, int x, int y, int budLevel, int rot = 0)
         {
             var kind = Rules.Building(kindId);
             if (kind == null) return "unknown_building";
             if (Count(kind.id) >= Limit(kind)) return "too_many";
             var first = kind.levels[0];
             if (budLevel < first.player) return "level_too_low";
-            var f = Footprint(kind, x, y);
-            for (var cy = f.yMin; cy <= f.yMax; cy++)
+            // the whole building and the cell in front of its door
+            var f = Footprint(kind, x, y, rot);
+            var door = DoorCell(x, y, rot);
+            if (!Inside(door.x, door.y) || !Claimed(door.x, door.y)) return "outside";
+            for (var cy = f.yMin; cy < f.yMax; cy++)
             for (var cx = f.xMin; cx < f.xMax; cx++)
-            {
-                if (cy == f.yMax && cx != x) continue; // the cell in front of the door too
                 if (!Inside(cx, cy) || !Claimed(cx, cy)) return "outside";
-            }
             var blocked = Blocked();
-            for (var cy = f.yMin; cy <= f.yMax; cy++)
+            if (InGateClear(door.x, door.y)) return "gate";
+            if (blocked.Contains(door.y * Size + door.x)) return "occupied";
+            for (var cy = f.yMin; cy < f.yMax; cy++)
             for (var cx = f.xMin; cx < f.xMax; cx++)
             {
-                if (cy == f.yMax && cx != x) continue; // only the cell in front of the door below
                 if (InGateClear(cx, cy)) return "gate";
                 if (blocked.Contains(cy * Size + cx)) return "occupied";
             }
             return CanAfford(first) ? null : "poor";
+        }
+
+        /// <summary>
+        /// Whether a new building here would shut off the way from the gate to its own door or another's (land.ts
+        /// allReachable): the plan says so before the server has to.
+        /// </summary>
+        public bool WallsIn(BuildingData kind, int x, int y, int rot)
+        {
+            var blocked = new HashSet<int>(Blocked());
+            var f = Footprint(kind, x, y, rot);
+            for (var cy = f.yMin; cy < f.yMax; cy++)
+            for (var cx = f.xMin; cx < f.xMax; cx++)
+                blocked.Add(cy * Size + cx);
+            bool Walkable(int cx, int cy)
+            {
+                var inGate = Array.Exists(GateCells(Plot.gate, Size), g => g.x == cx && g.y == cy);
+                if (!inGate && !(Inside(cx, cy) && Claimed(cx, cy))) return false;
+                return !blocked.Contains(cy * Size + cx);
+            }
+            var start = GateInside(Plot.gate, Size);
+            if (!Walkable(start.x, start.y)) return true;
+            var seen = new HashSet<int> { start.y * Size + start.x };
+            var open = new Stack<Vector2Int>();
+            open.Push(start);
+            while (open.Count > 0)
+            {
+                var c = open.Pop();
+                foreach (var d in new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+                {
+                    var n = c + d;
+                    if (!Walkable(n.x, n.y) || !seen.Add(n.y * Size + n.x)) continue;
+                    open.Push(n);
+                }
+            }
+            bool Open(Vector2Int door) => seen.Contains(door.y * Size + door.x);
+            if (!Open(DoorCell(x, y, rot))) return true;
+            foreach (var b in State.buildings)
+                if (!Open(DoorCell(b.x, b.y, b.rot))) return true;
+            return false;
+        }
+
+        /// <summary>Everything the plan needs to know about a spot: a problem code, "walls_in", or null when it fits.</summary>
+        public string PlanProblem(string kindId, int x, int y, int budLevel, int rot)
+        {
+            var problem = PlacementProblem(kindId, x, y, budLevel, rot);
+            if (problem != null) return problem;
+            return WallsIn(Rules.Building(kindId), x, y, rot) ? "walls_in" : null;
+        }
+
+        /// <summary>
+        /// The spot nearest to a wish that fits exactly, with the wished turn if it can be had, else any other: "Dopasuj".
+        /// Null when nothing fits anywhere on the land held (or the only trouble is cost or limits).
+        /// </summary>
+        public (Vector2Int anchor, int rot)? NearestFit(string kindId, Vector2Int centre, int budLevel, int rot)
+        {
+            var kind = Rules.Building(kindId);
+            if (kind == null) return null;
+            (Vector2Int, int)? best = null;
+            var bestScore = float.MaxValue;
+            for (var r = 0; r < 4; r++)
+            for (var y = 0; y < Size; y++)
+            for (var x = 0; x < Size; x++)
+            {
+                // "poor" says the place itself is right: the plan still shows it, the server won't pay for it
+                var problem = PlanProblem(kindId, x, y, budLevel, r);
+                if (problem != null && problem != "poor") continue;
+                var c = CentreOf(Footprint(kind, x, y, r));
+                var score = (c - centre).sqrMagnitude + (r == rot ? 0 : 0.5f);
+                if (score >= bestScore) continue;
+                bestScore = score;
+                best = (new Vector2Int(x, y), r);
+            }
+            return best;
         }
 
         // ---------- production ----------
@@ -586,7 +713,7 @@ namespace Buds.Quests
             "outside" => "Tu jeszcze nie da się budować: najpierw oczyść ten teren.",
             "occupied" => "To miejsce jest zajęte.",
             "gate" => "Przy bramie musi zostać wolne przejście.",
-            "walls_in" => "Tak postawiony budynek zamknąłby drogę do innych.",
+            "walls_in" => "Tak postawiony budynek zamknąłby drogę do drzwi. Obróć go albo przesuń.",
             "level_too_low" => "Na to potrzebujesz wyższego poziomu.",
             "hall_too_low" => "Najpierw ulepsz ratusz.",
             "max_level" => "To już najwyższy poziom.",

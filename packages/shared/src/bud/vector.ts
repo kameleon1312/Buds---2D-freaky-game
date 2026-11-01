@@ -262,7 +262,19 @@ const STRANDS: Partial<Record<HairStyle, string>> = {
   koczki: 'M48 20 Q54 18 59 22 M61 22 Q66 18 72 20',
 };
 
-function backHair(pen: Pen, style: HairStyle, hair: Pair, facing: Facing) {
+/** The hair a headpiece sits on (anything else under a hat is the short cut). */
+const HAIR_UNDER: Partial<Record<HairStyle, HairStyle>> = {
+  kwiat: 'dlugie',
+  szpilki: 'kok',
+  slomkowy: 'krotkie',
+  kapelusz: 'krotkie',
+  cylinder: 'krotkie',
+  bandana: 'krotkie',
+  kucharska: 'krotkie',
+};
+
+function backHair(pen: Pen, worn: HairStyle, hair: Pair, facing: Facing) {
+  const style = HAIR_UNDER[worn] ?? worn;
   if (facing === 'side') {
     switch (style) {
       case 'dlugie':
@@ -359,7 +371,93 @@ function backHair(pen: Pen, style: HairStyle, hair: Pair, facing: Facing) {
 
 function headwear(pen: Pen, style: HairStyle, p: BudPalette, facing: Facing) {
   const side = facing === 'side';
+  const cx = side ? 58 : 60;
   switch (style) {
+    case 'slomkowy': {
+      // a wide straw brim, a low crown with a band, the weave in rings
+      const straw: Pair = ['#e9cf8a', '#c9a55c'];
+      pen.shaded(`M${cx - 39} 29 Q${cx} 12 ${cx + 39} 29 Q${cx} 43 ${cx - 39} 29Z`, straw, -2, -2);
+      pen.line(`M${cx - 31} 31 Q${cx} 39 ${cx + 31} 31`, 1, straw[1]);
+      pen.shaded(
+        `M${cx - 20} 28 Q${cx - 20} 6 ${cx} 6 Q${cx + 20} 6 ${cx + 20} 28 Q${cx} 34 ${cx - 20} 28Z`,
+        straw,
+        -2,
+        -2,
+      );
+      pen.line(`M${cx - 13} 13 Q${cx} 9 ${cx + 13} 13`, 1, straw[1]);
+      return pen.line(`M${cx - 20} 25 Q${cx} 31 ${cx + 20} 25`, 3.4, p.cap[0]);
+    }
+    case 'kapelusz': {
+      // a ranger's felt hat: a dented crown over a firm brim
+      const felt: Pair = ['#7d6240', '#5b452c'];
+      pen.shaded(`M${cx - 35} 30 Q${cx} 18 ${cx + 35} 30 Q${cx} 41 ${cx - 35} 30Z`, felt, -2, -2);
+      pen.shaded(
+        `M${cx - 20} 29 L${cx - 17} 9 Q${cx} 15 ${cx + 17} 9 L${cx + 20} 29 Q${cx} 35 ${cx - 20} 29Z`,
+        felt,
+        -2,
+        -2,
+      );
+      return pen.line(`M${cx - 20} 26 Q${cx} 32 ${cx + 20} 26`, 3, p.cap[1]);
+    }
+    case 'cylinder': {
+      const silk: Pair = ['#34353f', '#20212a'];
+      pen.shaded(`M${cx - 33} 27 Q${cx} 20 ${cx + 33} 27 Q${cx} 37 ${cx - 33} 27Z`, silk, -1, -1);
+      pen.shaded(
+        `M${cx - 20} 28 L${cx - 22} -6 Q${cx} -11 ${cx + 22} -6 L${cx + 20} 28 Q${cx} 33 ${cx - 20} 28Z`,
+        silk,
+        -2,
+        -2,
+      );
+      return pen.line(`M${cx - 20} 23 Q${cx} 28 ${cx + 20} 23`, 4, p.cap[0]);
+    }
+    case 'bandana': {
+      pen.shaded(
+        side
+          ? 'M33 34 Q32 11 58 11 Q85 11 85 37 Q60 26 33 34Z'
+          : 'M34 34 Q33 11 60 11 Q87 11 86 34 Q60 25 34 34Z',
+        p.cap,
+        -2,
+        -2,
+      );
+      pen.line(
+        side ? 'M42 22 l3 2 M56 17 l3 2 M70 22 l3 2' : 'M44 22 l3 2 M60 17 l3 2 M74 22 l3 2',
+        1.4,
+        WHITE_TRIM,
+      );
+      // the knot and its two ends, at the back
+      if (facing === 'down') return pen;
+      return side
+        ? pen.shaded('M84 34 L97 30 L95 38 L99 45 L85 40Z', p.cap, -1, -1)
+        : pen.shaded('M54 30 L66 30 L72 44 L60 37 L48 44Z', p.cap, -1, -1);
+    }
+    case 'kwiat': {
+      // a big flower over one ear
+      const [fx, fy] = side ? [70, 26] : facing === 'up' ? [36, 28] : [82, 28];
+      for (const [dx, dy] of [
+        [0, -5.4],
+        [5.2, -1.6],
+        [3.2, 4.4],
+        [-3.2, 4.4],
+        [-5.2, -1.6],
+      ] as const)
+        pen.shaded(circ(fx + dx, fy + dy, 4), p.cap, -1, -1);
+      return pen.shaded(circ(fx, fy, 2.6), ['#ffc93c', '#e3a22c'], 0, 0);
+    }
+    case 'szpilki':
+      // two lacquered pins through the bun
+      pen.line('M43 2 L78 15', 3.6, OUT).line('M43 2 L78 15', 1.8, p.cap[0]);
+      return pen.line('M77 2 L42 15', 3.6, OUT).line('M77 2 L42 15', 1.8, p.cap[0]);
+    case 'kucharska': {
+      const cloth: Pair = ['#fbf8f0', '#d9d4c6'];
+      pen.shaded(
+        `M${cx - 20} 28 Q${cx - 33} 8 ${cx - 15} 4 Q${cx} -7 ${cx + 15} 4 Q${cx + 33} 8 ${cx + 20} 28Z`,
+        cloth,
+        -2,
+        -2,
+      );
+      pen.line(`M${cx - 8} 8 V20 M${cx + 8} 8 V20`, 1.1, cloth[1]);
+      return pen.shaded(rr(cx - 23, 24, 46, 10, 3), cloth, 0, -1);
+    }
     case 'czapka': {
       const dome = side ? 'M31 36 Q29 7 58 7 Q87 7 86 36Z' : 'M32 36 Q30 7 60 7 Q90 7 88 36Z';
       pen.shaded(dome, p.cap, -4, -3);
@@ -403,6 +501,11 @@ function headwear(pen: Pen, style: HairStyle, p: BudPalette, facing: Facing) {
 }
 
 function frontHair(pen: Pen, style: HairStyle, p: BudPalette, facing: Facing) {
+  const under = HAIR_UNDER[style];
+  if (under) {
+    frontHair(pen, under, p, facing);
+    return headwear(pen, style, p, facing);
+  }
   if (style === 'czapka') {
     // a little hair peeks out under the beanie
     if (facing === 'side') pen.shaded('M76 36 Q86 40 84 52 Q80 46 74 44Z', p.hair, -1, -1);
@@ -752,7 +855,16 @@ function sideFace(pen: Pen, look: BudLook, p: BudPalette) {
 
 type Ctx = { look: BudLook; p: BudPalette; frame: WalkFrame };
 
-const SHORT_SLEEVES: readonly Outfit[] = ['tshirt', 'polo', 'sukienka', 'kamizelka', 'jersey'];
+const SHORT_SLEEVES: readonly Outfit[] = [
+  'tshirt',
+  'polo',
+  'sukienka',
+  'kamizelka',
+  'jersey',
+  'hawajska',
+  'bezrekawnik',
+  'qipao',
+];
 /** The thread of denim and workwear, always a warm yellow. */
 const STITCH = '#e3b04b';
 const WHITE_TRIM = '#f6f2e9';
@@ -910,6 +1022,45 @@ function leg(
 
 /** The hem of a skirt or a dress, over the hips (drawn after the legs, under the torso). */
 function skirt(pen: Pen, look: BudLook, p: BudPalette, side: boolean) {
+  if (look.outfit === 'surdut') {
+    // a frock coat's skirts, open down the front (in a side view, the tail behind)
+    if (side) {
+      pen.shaded('M56 104 H76 L83 133 H62Z', p.top, -2, -2);
+      return pen.line('M71 110 L74 132', 1.1, p.top[1]);
+    }
+    pen.shaded('M38 104 H57 L54 133 H31Z', p.top, -2, -2);
+    return pen.shaded('M63 104 H82 L89 133 H66Z', p.top, -2, -2);
+  }
+  if (look.outfit === 'qipao' || look.outfit === 'suknia') {
+    // long to the ankles: only the shoes show under it
+    const ball = look.outfit === 'suknia';
+    const shape = side
+      ? ball
+        ? 'M46 104 H74 L88 143 Q60 150 32 143Z'
+        : 'M46 104 H74 L78 143 Q60 148 42 143Z'
+      : ball
+        ? 'M38 104 H82 L100 143 Q60 152 20 143Z'
+        : 'M38 104 H82 L85 143 Q60 149 35 143Z';
+    pen.shaded(shape, p.top, -3, -2);
+    pen.clipped(shape, (on) => {
+      if (ball) {
+        // folds, and a ruffle along the hem
+        on.line(
+          side
+            ? 'M52 112 L44 143 M60 112 V146 M68 112 L76 143'
+            : 'M46 112 L33 144 M54 112 L49 147 M60 112 V148 M66 112 L71 147 M74 112 L87 144',
+          1.1,
+          p.top[1],
+        );
+        on.line(side ? 'M35 137 Q60 145 85 137' : 'M24 137 Q60 147 96 137', 2.4, p.cap[0]);
+      } else {
+        // a band along the hem, and the slit a qipao has on one side
+        on.line(side ? 'M43 138 Q60 143 77 138' : 'M37 138 Q60 145 83 138', 2.2, p.cap[0]);
+        on.line(side ? 'M72 118 L75 140' : 'M76 118 L80 140', 1.2, p.top[1]);
+      }
+    });
+    return;
+  }
   const dress = look.outfit === 'sukienka';
   if (!dress && look.pants !== 'spodnica') return;
   const tone = dress ? p.top : p.pants;
@@ -1181,7 +1332,7 @@ function arm(pen: Pen, sx: number, hx: number, hy: number, { look, p }: Ctx) {
     const ex = sx + (hx - sx) * 0.35;
     pen.shaded(limb(ex, 84, 5.5, wx, wy, 5), p.skin, -2, -2);
     // a vest shows the T-shirt underneath at the shoulder
-    const sleeve: Pair = o === 'kamizelka' ? p.cap : p.top;
+    const sleeve: Pair = o === 'kamizelka' ? p.cap : o === 'bezrekawnik' ? p.skin : p.top;
     pen.shaded(limb(sx, 76, 8, ex, 87, 7), sleeve, -2, -2);
     if (o === 'jersey' || o === 'polo') {
       // a contrast band round the sleeve's end
@@ -1221,7 +1372,11 @@ function arm(pen: Pen, sx: number, hx: number, hy: number, { look, p }: Ctx) {
       if (o === 'jeansowka') stitches(on, sleeveBand(sx, 76, wx, wy, 0.16, 7));
     });
     const cx = sx + (wx - sx) * 0.88;
-    if (o === 'koszula' || o === 'flanela' || o === 'jeansowka') {
+    if (o === 'surdut' || o === 'tangzhuang' || o === 'suknia') {
+      // a turned-back cuff in the accent colour
+      pen.flat(limb(cx, wy - 3, end + 0.5, wx, wy, end + 0.5), p.cap[0]);
+      pen.line(sleeveBand(sx, 76, wx, wy, 0.84, end + 0.5), 1, p.cap[1]);
+    } else if (o === 'koszula' || o === 'flanela' || o === 'jeansowka') {
       // a shirt cuff with a button
       pen.flat(limb(cx, wy - 3, 6.2, wx, wy, 6.2), mix(p.top[0], '#ffffff', 0.2));
       pen.raw(
@@ -1251,6 +1406,36 @@ function arm(pen: Pen, sx: number, hx: number, hy: number, { look, p }: Ctx) {
 }
 
 /** A woven check, clipped to the shape: dark bars both ways and a thin light line in between (flannel). */
+/** Big tropical flowers and leaves scattered over a shirt (always the same, clipped by the caller). */
+function flowers(pen: Pen, x0: number, width: number, p: BudPalette) {
+  const spots = [
+    [0.18, 76],
+    [0.72, 74],
+    [0.42, 88],
+    [0.12, 100],
+    [0.82, 94],
+    [0.56, 106],
+  ] as const;
+  spots.forEach(([t, y], i) => {
+    const x = x0 + width * t;
+    if (i % 3 === 2) {
+      // a leaf
+      const d = `M${r2(x - 5)} ${y + 3} Q${r2(x)} ${y - 6} ${r2(x + 5)} ${y - 3} Q${r2(x + 2)} ${y + 5} ${r2(x - 5)} ${y + 3}Z`;
+      pen.flat(d, mix(p.top[1], '#1b5a3a', 0.55));
+      return;
+    }
+    for (const [dx, dy] of [
+      [0, -3],
+      [2.9, -0.9],
+      [1.8, 2.5],
+      [-1.8, 2.5],
+      [-2.9, -0.9],
+    ] as const)
+      pen.flat(circ(x + dx, y + dy, 2.1), p.cap[0]);
+    pen.flat(circ(x, y, 1.3), '#ffc93c');
+  });
+}
+
 function plaid(pen: Pen, shape: string, x0: number, x1: number, tone: Pair) {
   pen.clipped(shape, (c) => {
     const bars: string[] = [];
@@ -1274,7 +1459,20 @@ function plaid(pen: Pen, shape: string, x0: number, x1: number, tone: Pair) {
 function topPrint(pen: Pen, shape: string, ctx: Ctx, view: Facing) {
   const { look, p } = ctx;
   const print = look.print ?? 'gladka';
-  if (print === 'gladka' || ['flanela', 'ogrodniczki', 'kamizelka'].includes(look.outfit)) return;
+  if (
+    print === 'gladka' ||
+    [
+      'flanela',
+      'ogrodniczki',
+      'kamizelka',
+      'hawajska',
+      'tangzhuang',
+      'qipao',
+      'surdut',
+      'suknia',
+    ].includes(look.outfit)
+  )
+    return;
   const side = view === 'side';
   const cx = side ? 54 : 60;
   const accent = p.cap[0] === p.top[0] ? mix(p.top[0], '#ffffff', 0.55) : p.cap[0];
@@ -1566,6 +1764,83 @@ function torsoFront(pen: Pen, ctx: Ctx, back: boolean) {
         stitches(pen, 'M53.6 93 H66.4 M53.6 93 V100.4 M66.4 93 V100.4 M53.6 100.4 H66.4');
       }
       break;
+    case 'hawajska':
+      pen.clipped(shape, (on) => flowers(on, hemX - 2, hemW + 4, p));
+      if (back) {
+        pen.shaded('M48 67 Q60 72 72 67 L72 71 Q60 76 48 71Z', [p.top[1], p.top[1]], 0, 0);
+        break;
+      }
+      // an open camp collar and a button line
+      pen.shaded('M60 76 L50 66 L46 72 L54 84Z', collarLight, -1, -1);
+      pen.shaded('M60 76 L70 66 L74 72 L66 84Z', collarLight, -1, -1);
+      pen.line('M60 76 V113', 1.2, p.top[1]);
+      buttons([84, 94, 104], WHITE_TRIM, 60);
+      break;
+    case 'bezrekawnik':
+      if (!back) pen.line('M49 67 Q60 80 71 67', 1.6);
+      else pen.line('M49 67 Q60 73 71 67', 1.4);
+      // the shoulders are bare at the armholes
+      pen.line('M42 72 Q47 82 43 92 M78 72 Q73 82 77 92', 1.1, p.top[1]);
+      stitches(pen, `M${hemX + 2} 111.5 H${hemX + hemW - 2}`, p.top[1], 0.8);
+      break;
+    case 'tangzhuang':
+    case 'qipao': {
+      // a stand-up collar with a piped edge
+      pen.shaded(rr(48, 64, 24, 8, 3), [p.top[1], p.top[1]], 0, 0);
+      pen.line('M48 71 H72', 1.3, p.cap[0]);
+      if (back) {
+        if (o === 'tangzhuang') ribbedHem(4);
+        break;
+      }
+      const knots = (ys: number[], x: number) => {
+        // frog closures: a little corded bar and a ball
+        for (const y of ys) {
+          pen.line(`M${x - 4.5} ${y} H${x + 4.5}`, 2.4, OUT);
+          pen.line(`M${x - 4.5} ${y} H${x + 4.5}`, 1.2, p.cap[0]);
+        }
+      };
+      if (o === 'tangzhuang') {
+        pen.line('M60 72 V113', 1.3, p.top[1]);
+        knots([79, 87, 95, 103], 60);
+        pen.line(`M${hemX + 1} 111.5 H${hemX + hemW - 1}`, 1.5, p.cap[0]);
+      } else {
+        // the closure runs across the chest to the armpit
+        pen.line('M60 72 Q60 80 75 84', 1.8, p.cap[0]);
+        knots([77], 63);
+        knots([83], 71);
+        pen.flat(rr(hemX + 1, 101, hemW - 2, 2.4, 1), p.top[1]);
+      }
+      break;
+    }
+    case 'surdut':
+      if (back) {
+        pen.shaded('M48 67 Q60 72 72 67 L72 72 Q60 77 48 72Z', [p.top[1], p.top[1]], 0, 0);
+        pen.line('M60 90 V113', 1.2, p.top[1]);
+        pen.raw(
+          `<circle cx="55" cy="101" r="1.5" fill="${STITCH}" stroke="${OUT}" stroke-width="0.7"/><circle cx="65" cy="101" r="1.5" fill="${STITCH}" stroke="${OUT}" stroke-width="0.7"/>`,
+        );
+        break;
+      }
+      // a white shirt and cravat at the neck, wide lapels, two rows of gilt buttons, a belt seam
+      pen.shaded('M52 67 H68 L60 84Z', [WHITE_TRIM, '#d9d4c6'], 0, 0);
+      pen.shaded(rr(56, 69, 8, 6, 2), p.cap, 0, 0);
+      pen.shaded('M50 66 L60 84 L54 90 L44 72Z', collarLight, -1, -1);
+      pen.shaded('M70 66 L60 84 L66 90 L76 72Z', collarLight, -1, -1);
+      buttons([92, 100, 108], STITCH, 54);
+      buttons([92, 100, 108], STITCH, 66);
+      pen.line(`M${hemX + 1} 104 H${hemX + hemW - 1}`, 1, p.top[1]);
+      break;
+    case 'suknia':
+      if (!back) {
+        // a high lace collar and a row of pearls
+        pen.line('M49 67 Q60 77 71 67', 3, WHITE_TRIM);
+        pen.line('M49 67 Q60 77 71 67', 0.9, p.top[1]);
+        buttons([82, 89, 96], WHITE_TRIM, 60);
+      }
+      // a sash at the waist
+      pen.flat(rr(hemX + 1, 100, hemW - 2, 6, 2), p.cap[0]);
+      pen.line(`M${hemX + 1} 103 H${hemX + hemW - 1}`, 0.8, p.cap[1]);
+      break;
     case 'koszula':
     case 'flanela':
       if (back) {
@@ -1677,6 +1952,44 @@ function torsoSide(pen: Pen, ctx: Ctx) {
     pen.line(ribs(46, 74, 114 - h + 1, 113.4), 0.7, mix(color, '#1b1430', 0.32));
   };
   switch (o) {
+    case 'hawajska':
+      pen.clipped(TORSO_SIDE, (on) => flowers(on, 44, 32, p));
+      pen.shaded(
+        'M48 66 L56 72 L52 77 L45 70Z',
+        [mix(p.top[0], '#ffffff', 0.15), p.top[1]],
+        -1,
+        -1,
+      );
+      break;
+    case 'bezrekawnik':
+      pen.line('M50 67 Q54 72 60 69', 1.4);
+      stitches(pen, 'M46 111.5 H74', p.top[1], 0.8);
+      break;
+    case 'tangzhuang':
+    case 'qipao':
+      pen.shaded(rr(46, 64, 22, 8, 3), [p.top[1], p.top[1]], 0, 0);
+      pen.line('M46 71 H68', 1.3, p.cap[0]);
+      pen.line('M45.5 72 V113', 1.4, p.cap[0]);
+      for (const y of [80, 89, 98])
+        pen.line(`M45 ${y} H52`, 2.4, OUT).line(`M45 ${y} H52`, 1.2, p.cap[0]);
+      break;
+    case 'surdut':
+      pen.shaded(
+        'M46 67 L54 84 L47 90 L44 72Z',
+        [mix(p.top[0], '#ffffff', 0.15), p.top[1]],
+        -1,
+        -1,
+      );
+      pen.flat(rr(45, 68, 6, 8, 2), WHITE_TRIM);
+      pen.line('M45 104 H75', 1, p.top[1]);
+      pen.raw(
+        `<circle cx="49" cy="94" r="1.3" fill="${STITCH}" stroke="${OUT}" stroke-width="0.7"/><circle cx="49" cy="101" r="1.3" fill="${STITCH}" stroke="${OUT}" stroke-width="0.7"/><circle cx="49" cy="108" r="1.3" fill="${STITCH}" stroke="${OUT}" stroke-width="0.7"/>`,
+      );
+      break;
+    case 'suknia':
+      pen.clipped(TORSO_SIDE, (on) => on.line('M47 68 Q53 75 60 70', 3, WHITE_TRIM));
+      pen.flat(rr(45, 100, 30, 6, 2), p.cap[0]);
+      break;
     case 'bluza':
       pen.shaded('M64 66 Q84 62 80 84 Q73 75 64 76Z', p.top, -2, -2);
       pen.line('M66 70 Q74 72 77 80', 1, p.top[1]);

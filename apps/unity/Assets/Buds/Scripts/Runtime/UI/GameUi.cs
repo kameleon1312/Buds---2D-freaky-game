@@ -36,6 +36,7 @@ namespace Buds.UI
         Text dialogBody;
         Text dialogMore;
         GameObject choiceRow;
+        RectTransform answerRow;
         Text acceptLabel;
         Text declineLabel;
         Action onAccept;
@@ -58,13 +59,23 @@ namespace Buds.UI
 
         /// <summary>The HUD is up (in the world, not on the pairing or loading screen).</summary>
         public bool HudVisible => hud && hud.activeSelf;
+
+        /// <summary>While a building is being placed the plate, the buttons and the stick give the view to the plot.</summary>
+        public void ShowBuilding(bool on)
+        {
+            if (hud) hud.SetActive(!on);
+            if (stickBase) stickBase.gameObject.SetActive(!on);
+            if (stickKnob) stickKnob.gameObject.SetActive(!on);
+            foreach (var b in topRow)
+                if (b) b.gameObject.SetActive(!on);
+        }
         readonly RectTransform safe;
         /// <summary>The action button or the dialog was tapped (acts like E).</summary>
         public event Action Tapped;
         GameObject budButton;
         GameObject mapButton;
         Image fade;
-        public bool ChoiceOpen => DialogOpen && choiceRow.activeSelf;
+        public bool ChoiceOpen => DialogOpen && (choiceRow.activeSelf || answerRow.gameObject.activeSelf);
 
         public GameUi()
         {
@@ -310,6 +321,15 @@ namespace Buds.UI
             choiceRow = row.gameObject;
             choiceRow.SetActive(false);
 
+            // answers to a question, a column of them over the bottom of the window
+            var column = UiKit.Rect("Answers", body);
+            column.anchorMin = new Vector2(0, 0);
+            column.anchorMax = new Vector2(1, 0);
+            column.pivot = new Vector2(0.5f, 0);
+            column.anchoredPosition = new Vector2(0, 4);
+            answerRow = column;
+            column.gameObject.SetActive(false);
+
             dialog = rt.gameObject;
             dialogRect = rt;
             dialogContent = body;
@@ -327,9 +347,9 @@ namespace Buds.UI
         /// Sizes the dialog to its text: the text gets the whole width and ends above the bottom row (the hint or the
         /// buttons), and the window grows up to the screen height, so nothing is ever hidden behind the buttons.
         /// </summary>
-        void LayoutDialog(bool choice)
+        void LayoutDialog(bool choice, float row = ChoiceRow)
         {
-            var bottom = choice ? ChoiceRow : MoreRow;
+            var bottom = choice ? row : MoreRow;
             var body = dialogBody.rectTransform;
             body.offsetMin = new Vector2(body.offsetMin.x, bottom);
             // the window's frame (head, padding) around the content
@@ -350,6 +370,7 @@ namespace Buds.UI
             dialogTitle.text = title;
             dialogBody.text = text;
             choiceRow.SetActive(false);
+            answerRow.gameObject.SetActive(false);
             dialogMore.gameObject.SetActive(true);
             onAccept = onDecline = null;
             dialog.SetActive(true);
@@ -368,6 +389,29 @@ namespace Buds.UI
             choiceRow.SetActive(true);
             dialogMore.gameObject.SetActive(false);
             LayoutDialog(true);
+        }
+
+        /// <summary>A question with its answers, one button each: the choice goes to <paramref name="chosen"/>; closing cancels.</summary>
+        public void ShowAnswers(string title, string text, string[] answers, Action<int> chosen)
+        {
+            ShowDialog(title, text);
+            for (var i = answerRow.childCount - 1; i >= 0; i--) UnityEngine.Object.Destroy(answerRow.GetChild(i).gameObject);
+            const float tall = 62;
+            answerRow.sizeDelta = new Vector2(0, answers.Length * (tall + 8));
+            for (var i = 0; i < answers.Length; i++)
+            {
+                var index = i;
+                var b = UiKit.Button("Answer", answerRow, answers[i], new Vector2(560, tall), () =>
+                {
+                    HideDialog();
+                    chosen?.Invoke(index);
+                }, UiKit.Tone.Rep, 26);
+                UiKit.Place((RectTransform)b.transform, new Vector2(0.5f, 1), new Vector2(0, -i * (tall + 8)), new Vector2(560, tall), new Vector2(0.5f, 1));
+            }
+            answerRow.gameObject.SetActive(true);
+            onDecline = () => { };
+            dialogMore.gameObject.SetActive(false);
+            LayoutDialog(true, answers.Length * (tall + 8) + 14);
         }
 
         public void ChooseAccept()
@@ -426,8 +470,11 @@ namespace Buds.UI
         /// Puts a picture button into the top-right row (slot 0 in the corner): one low strip, so the whole right side
         /// of the screen is left to the world (and to the phone joystick).
         /// </summary>
-        static void TopRow(Button button, int slot)
+        readonly List<Button> topRow = new();
+
+        void TopRow(Button button, int slot)
         {
+            if (!topRow.Contains(button)) topRow.Add(button);
             UiKit.Place((RectTransform)button.transform, new Vector2(1, 1), new Vector2(-RowRight - slot * RowStep, -20),
                 new Vector2(IconSize, IconSize), new Vector2(1, 1));
             button.transform.SetAsFirstSibling(); // under panels opened later

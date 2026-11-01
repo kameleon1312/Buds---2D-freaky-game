@@ -2,7 +2,8 @@
 
 ## Pustkowia między miastami
 
-Każda droga z Miasta Ziomków prowadzi przez pustkowie do następnego miasta (`packages/shared/src/travel.ts`
+Każda droga z Miasta Ziomków prowadzi przez pustkowie do następnego miasta, a z Dworu Carskiego Ryżowy Trakt prowadzi
+dalej do Chinatown (`packages/shared/src/travel.ts`
 `ROUTES`, mapy z `tools/world/maps/routes.ts`, 150×96 pól; po obu stronach drogi leżą działki pod dystrykty graczy,
 `docs/dystrykty.md`):
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Buds.World
 {
     public sealed class District
@@ -7,6 +8,8 @@ namespace Buds.World
         public int UnlockLevel;
         public bool Open; // false = designed, map not built yet
         public string Blurb;
+        /// <summary>The quest that brings the pass or letter needed here on top of the level (districts.ts gateQuest).</summary>
+        public string GateQuest;
     }
 
     /// <summary>Mirror of packages/shared/src/districts.ts — keep ids, names and levels identical.</summary>
@@ -18,9 +21,10 @@ namespace Buds.World
         {
             new() { Id = "miasto-ziomkow", Name = "Miasto Ziomków", UnlockLevel = 1, Open = true, Blurb = "Tu zaczynasz. Codzienne życie, freestyle i graffiti pod nosem policji." },
             new() { Id = "dzika-puszcza", Name = "Dzika Puszcza", UnlockLevel = 2, Open = true, Blurb = "Las bez końca na zachód od miasta: rzeka, jezioro, obozowisko i rozbójnicy w ruinach." },
-            new() { Id = "las-palmas", Name = "Las Palmas", UnlockLevel = 3, Open = true, Blurb = "Tropiki: plaże, ocean, hawajskie chatki i egzotyczne zwierzaki." },
-            new() { Id = "dwor-carski", Name = "Dwór Carski", UnlockLevel = 5, Open = true, Blurb = "Cegła, dworek i zagadki. Nieuczciwi urzędnicy w cylindrach." },
-            new() { Id = "los-karkos", Name = "Los Karkos", UnlockLevel = 7, Open = true, Blurb = "Niebezpiecznie. Opuszczone bloki, zaczepki i trening przetrwania." },
+            new() { Id = "las-palmas", Name = "Las Palmas", UnlockLevel = 3, Open = true, GateQuest = "przepustka-na-wydmy", Blurb = "Tropiki: plaże, ocean, hawajskie chatki i egzotyczne zwierzaki." },
+            new() { Id = "dwor-carski", Name = "Dwór Carski", UnlockLevel = 5, Open = true, GateQuest = "zaproszenie-na-dwor", Blurb = "Cegła, dworek i zagadki. Nieuczciwi urzędnicy w cylindrach." },
+            new() { Id = "los-karkos", Name = "Los Karkos", UnlockLevel = 7, Open = true, GateQuest = "tajemnica-dworu", Blurb = "Niebezpiecznie. Opuszczone bloki, zaczepki i trening przetrwania." },
+            new() { Id = "chinatown", Name = "Chinatown", UnlockLevel = 9, Open = true, GateQuest = "list-do-chinatown", Blurb = "Za Dworem Carskim: lampiony, nocny targ, pagoda i dojo. Tu pamięta się każdą przysługę." },
         };
 
         /// <summary>
@@ -41,6 +45,7 @@ namespace Buds.World
             ("pustkowie-wydmy", "Wydmy", "las-palmas", "miasto-ziomkow"),
             ("pustkowie-gosciniec", "Stary Gościniec", "miasto-ziomkow", "dwor-carski"),
             ("pustkowie-nieuzytki", "Nieużytki", "miasto-ziomkow", "los-karkos"),
+            ("pustkowie-ryzowe", "Ryżowy Trakt", "dwor-carski", "chinatown"),
         };
 
         public static bool IsRoute(string id) => System.Array.Exists(Routes, r => r.Id == id);
@@ -82,6 +87,14 @@ namespace Buds.World
             var d = Get(id);
             return d != null && d.Open && level >= d.UnlockLevel;
         }
+
+        /// <summary>Who gives the pass to a city, in words, and whether the bud has it (no gate: it has).</summary>
+        public static bool HasPass(District d, ICollection<string> completed) =>
+            d == null || string.IsNullOrEmpty(d.GateQuest) || completed.Contains(d.GateQuest);
+
+        /// <summary>What the road says when the level is enough but the pass is missing.</summary>
+        public static string NoPassReason(District d, string questTitle, string giverName) =>
+            $"{d.Blurb}\nStraż nie przepuści cię bez przepustki. Zadanie „{questTitle}” u: {giverName}.";
 
         /// <summary>What the road sign says when you can't go in yet.</summary>
         public static string ClosedReason(District d, int level) =>

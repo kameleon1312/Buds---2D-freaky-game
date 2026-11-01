@@ -26,6 +26,10 @@ namespace Buds.Core
         string fogMapId;
         bool fogDirty;
         float fogSavedAt;
+        float fogSentAt;
+        bool fogUnsent;
+        bool fogSending;
+        Dictionary<string, string> fogOnServer; // null until the server has answered
         Vector2Int lastCell = new(-1, -1);
         Door nearbyDoor;
         CacheData nearbyCache;
@@ -33,6 +37,8 @@ namespace Buds.Core
         bool travelling;
         bool openingCache;
         int sprytRank;
+
+        const float FogSendSeconds = 30;
 
         string GuestCachesKey => "buds.caches.guest";
         string FogKey(string mapId) => $"buds.fog.{session?.Slug ?? "guest"}.{mapId}";
@@ -43,7 +49,67 @@ namespace Buds.Core
         {
             caches = new CacheLog(quests.Content);
             if (session == null) caches.Restore(PlayerPrefs.GetString(GuestCachesKey, ""));
-            else _ = SyncCaches();
+            else
+            {
+                _ = SyncCaches();
+                _ = SyncFog();
+            }
+        }
+
+        /// <summary>What other devices uncovered joins what this one has, then the difference goes back up.</summary>
+        async Awaitable SyncFog()
+        {
+            try
+            {
+                var known = new Dictionary<string, string>();
+                foreach (var m in await api.GetExplored(session.Token)) known[m.map] = m.seen;
+                fogOnServer = known;
+                TakeFogFromServer();
+            }
+            catch (ApiException e)
+            {
+                Debug.LogWarning($"Could not load the explored map: {e.Message}");
+            }
+        }
+
+        /// <summary>The map in hand against the server's copy: takes what it lacks, sends what the server lacks.</summary>
+        void TakeFogFromServer()
+        {
+            if (fog == null || fogMapId == null || fogOnServer == null) return;
+            fogOnServer.TryGetValue(fogMapId, out var there);
+            if (fog.Merge(there)) fogDirty = true;
+            if (fog.Save() != there) fogUnsent = true;
+            SaveFog();
+            SendFog();
+        }
+
+        /// <summary>Never in the way: a lost request just stays unsent, and the device still has it all.</summary>
+        void SendFog()
+        {
+            if (session == null || fog == null || !fogUnsent || fogSending) return;
+            _ = SendFogNow(fogMapId, fog.Save());
+        }
+
+        async Awaitable SendFogNow(string mapId, string seen)
+        {
+            fogSending = true;
+            fogSentAt = Time.time;
+            fogUnsent = false;
+            try
+            {
+                var answer = await api.SaveExplored(session.Token, mapId, seen);
+                if (fogOnServer != null) fogOnServer[mapId] = answer.seen;
+                if (mapId == fogMapId && fog.Merge(answer.seen)) fogDirty = true;
+            }
+            catch (ApiException e)
+            {
+                if (mapId == fogMapId) fogUnsent = true;
+                Debug.LogWarning($"Could not save the explored map: {e.Message}");
+            }
+            finally
+            {
+                fogSending = false;
+            }
         }
 
         /// <summary>
@@ -77,9 +143,12 @@ namespace Buds.Core
             else if (districtMap == null || districtMap.Id != map.Outside) districtMap = MapFormat.Load(map.Outside);
             if (fogMapId == districtMap.Id) return;
             SaveFog();
+            SendFog();
+            fogUnsent = false;
             fog = Exploration.Load(districtMap.Width, districtMap.Height, PlayerPrefs.GetString(FogKey(districtMap.Id), ""));
             fogMapId = districtMap.Id;
             lastCell = new Vector2Int(-1, -1);
+            TakeFogFromServer();
         }
 
         void SaveFog()
@@ -93,7 +162,11 @@ namespace Buds.Core
 
         void OnApplicationPause(bool paused)
         {
-            if (paused) SaveFog();
+            if (paused)
+            {
+                SaveFog();
+                SendFog();
+            }
             LivePause(paused);
         }
 
@@ -108,8 +181,13 @@ namespace Buds.Core
             if (!map.IsInterior && cell != lastCell && fog != null)
             {
                 lastCell = cell;
-                if (fog.Reveal(cell.x, cell.y)) fogDirty = true;
+                if (fog.Reveal(cell.x, cell.y))
+                {
+                    fogDirty = true;
+                    fogUnsent = true;
+                }
                 if (fogDirty && Time.time - fogSavedAt > 5) SaveFog();
+                if (fogUnsent && Time.time - fogSentAt > FogSendSeconds) SendFog();
             }
 
             var (x, y) = FeetOnMap();
@@ -255,6 +333,7 @@ namespace Buds.Core
             if (mapScreen == null) return false;
             if (mapScreen.IsOpen)
             {
+                mapScreen.Tick();
                 if (input.MapPressed || input.CancelPressed) mapScreen.Hide();
                 return mapScreen.IsOpen;
             }

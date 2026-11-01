@@ -200,6 +200,16 @@ export function dworCarski(): MapCanvas {
   });
   m.rect([62, 72, 65, 75], { g: 'gravel' });
 
+  // the road south, past the park and through the wood to Chinatown
+  m.rect([62, 93, 65, H - 1], { g: 'cobble' });
+  m.sign(
+    67,
+    H - 7,
+    'Do Chinatown',
+    'Ryżowy Trakt. Od poziomu 9, a straż przepuści tylko z listem od Hrabiny.',
+  );
+  m.exit([62, H - 1, 65, H - 1], 'pustkowie-ryzowe');
+
   // exit north
   m.sign(70, 3, 'Do Miasta Ziomków', 'Droga powrotna do miasta.');
   m.exit([62, 0, 65, 0], 'pustkowie-gosciniec');

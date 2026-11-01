@@ -155,6 +155,42 @@ export const THEMES: Record<string, Theme> = {
     ],
     zones: ['Rogatki Miasta', 'Stary Gościniec', 'Sady Dworskie'],
   },
+  'pustkowie-ryzowe': {
+    base: '#8fc765',
+    land: 'grass',
+    patch: 'water',
+    road: 'gravel',
+    margin: ['ct-bambus-a', 'ct-bambus-b', 'ct-wisnia', 'bush-a'],
+    dotted: ['ct-bambus-a', 'ct-wisnia', 'siano', 'rock-a', 'ct-lampion', 'pien'],
+    ring: ['ct-bambus-a', 'ct-bambus-b', 'bush-a', 'ct-bambus-a'],
+    density: 0.035,
+    ground: [
+      {
+        name: 'gravel',
+        kinds: 'gravel',
+        radius: 1,
+        bands: [
+          [0.45, '#a39a86'],
+          [0.5, '#c0b7a2'],
+        ],
+      },
+      {
+        name: 'paddy',
+        kinds: 'water',
+        radius: 1.1,
+        bands: [
+          [0.44, '#5d9a62'],
+          [0.5, '#a7dcc0'],
+          [0.56, '#6fbfa8'],
+        ],
+      },
+    ],
+    scatter: [
+      { ground: 'grass', chance: 0.06, props: 'tuft|tuft|flowers-a' },
+      { ground: 'gravel', chance: 0.05, props: 'pebbles' },
+    ],
+    zones: ['Dworskie Miedze', 'Ryżowe Tarasy', 'Rogatki Chinatown'],
+  },
   'pustkowie-nieuzytki': {
     base: '#9c9779',
     land: 'dirt',

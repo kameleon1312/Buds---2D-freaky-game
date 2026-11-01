@@ -307,6 +307,8 @@ export const DZIKA_PUSZCZA: {
       done: 'Piękne okazy. Ususzę je na zimę, a ty weź trochę na drogę.',
       steps: [
         {
+          hidden: true,
+          hint: 'Grzyby chowają się na polanie. Widać je dopiero z bliska.',
           kind: 'collect',
           item: 'grzyb',
           label: 'Grzyby',
@@ -407,8 +409,9 @@ export const DZIKA_PUSZCZA: {
       minLevel: 6,
       requires: ['rozbojnicy-ze-wzgorza'],
       intro:
-        'Czas zakończyć tę sprawę. Ich herszt siedzi w Ruinach Strażnicy. Uważaj na jego strzelca przy szlaku.',
+        'Czas zakończyć tę sprawę. Ich herszt siedzi w Ruinach Strażnicy. Uważaj na jego strzelca przy szlaku. Jeśli padniesz po drodze, zamkną szlak i zaczniesz od początku.',
       done: 'Herszt pokonany, puszcza znów jest bezpieczna. Gdyby nie ty, dalej liczyłbym ukradzione drzewa.',
+      fragile: 'Padłeś w drodze do ruin. Rozbójnicy znów zamknęli szlak, zacznij od strzelca.',
       steps: [
         { kind: 'duel', enemy: 'rozbojnik-z-proca', label: 'Pokonaj strzelca przy szlaku' },
         { kind: 'reach', x: 140, y: 99, radius: 2, label: 'Ruiny Strażnicy' },

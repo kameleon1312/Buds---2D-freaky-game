@@ -83,6 +83,14 @@ export const HAIR_STYLES = [
   'dredy',
   'undercut',
   'koczki',
+  // worn by the people of the cities (content/wardrobe.ts), not in the creators' catalogs
+  'slomkowy',
+  'kapelusz',
+  'cylinder',
+  'bandana',
+  'kwiat',
+  'szpilki',
+  'kucharska',
 ] as const;
 export type HairStyle = (typeof HAIR_STYLES)[number];
 
@@ -106,7 +114,25 @@ export const HAIR_LABELS: Record<HairStyle, string> = {
   dredy: 'Dredy',
   undercut: 'Undercut',
   koczki: 'Koczki',
+  slomkowy: 'Słomkowy kapelusz',
+  kapelusz: 'Kapelusz',
+  cylinder: 'Cylinder',
+  bandana: 'Bandana',
+  kwiat: 'Kwiat we włosach',
+  szpilki: 'Kok ze szpilkami',
+  kucharska: 'Czapka kucharska',
 };
+
+/** Worn only by the people of the cities (content/wardrobe.ts): never in the catalog, so a player's look can't have them. */
+export const CITY_HAIR: readonly HairStyle[] = [
+  'slomkowy',
+  'kapelusz',
+  'cylinder',
+  'bandana',
+  'kwiat',
+  'szpilki',
+  'kucharska',
+];
 
 /** The standard catalog of each gender, in the order the creators show it. Validation accepts any style. */
 export const HAIR_BY_GENDER: Record<Gender, readonly HairStyle[]> = {
@@ -176,6 +202,13 @@ export const OUTFITS = [
   'puchowka',
   'dresowka',
   'jersey',
+  // worn by the people of the cities (content/wardrobe.ts), not in the creators' catalogs
+  'hawajska',
+  'bezrekawnik',
+  'tangzhuang',
+  'qipao',
+  'surdut',
+  'suknia',
 ] as const;
 export type Outfit = (typeof OUTFITS)[number];
 
@@ -194,7 +227,23 @@ export const OUTFIT_LABELS: Record<Outfit, string> = {
   puchowka: 'Puchówka',
   dresowka: 'Dresówka',
   jersey: 'Koszulka klubowa',
+  hawajska: 'Koszula hawajska',
+  bezrekawnik: 'Bezrękawnik',
+  tangzhuang: 'Bluza ze stójką',
+  qipao: 'Suknia ze stójką',
+  surdut: 'Surdut',
+  suknia: 'Suknia balowa',
 };
+
+/** Worn only by the people of the cities, like `CITY_HAIR`. */
+export const CITY_OUTFITS: readonly Outfit[] = [
+  'hawajska',
+  'bezrekawnik',
+  'tangzhuang',
+  'qipao',
+  'surdut',
+  'suknia',
+];
 
 export const OUTFITS_BY_GENDER: Record<Gender, readonly Outfit[]> = {
   on: [

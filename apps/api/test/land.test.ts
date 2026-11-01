@@ -209,6 +209,23 @@ describe('dystrykty', () => {
     expect(state.buildings.length).toBe(1 + ok);
   });
 
+  it('a building can be put down turned, and only by a quarter', async () => {
+    const { bud, store } = await setup();
+    const ala = await bud('Ala');
+    await ala.grant(LEVEL_3, PRICE);
+    await ala.call('POST', '/v1/land', { plot: 'ostepy-1', name: 'Nowa Huta' });
+    expect(
+      (await ala.call('POST', '/v1/land/build', { kind: 'szklarnia', ...A, rot: 7 })).status,
+    ).toBe(400);
+    const res = await ala.call('POST', '/v1/land/build', { kind: 'szklarnia', ...A, rot: 1 });
+    expect(res.status).toBe(200);
+    const state = (await store.getLand(ala.slug))!.state as { buildings: { rot?: number }[] };
+    expect(state.buildings.at(-1)!.rot).toBe(1);
+    const seen = await ala.call('GET', '/v1/districts/pustkowie-ostepy');
+    const districts = (await seen.json()) as { districts: { buildings: { rot: number }[] }[] };
+    expect(districts.districts[0]!.buildings.at(-1)!.rot).toBe(1);
+  });
+
   it('raids from level 6: shield, rest after a try, a duel against the fortified owner, loot or a log', async () => {
     const { app, bud, json, store, wait, now } = await setup();
     const ala = await bud('Ala');

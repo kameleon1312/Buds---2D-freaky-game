@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { HAIR_STYLES, OUTFITS, OUTFIT_LABELS, HAIR_LABELS } from './bud/constants';
+import {
+  CITY_HAIR,
+  CITY_OUTFITS,
+  HAIR_STYLES,
+  OUTFITS,
+  OUTFIT_LABELS,
+  HAIR_LABELS,
+} from './bud/constants';
 import type { BudLook } from './bud/look';
 import {
   gearBonusSchema,
@@ -117,7 +124,7 @@ export const headwearItemId = (hair: BudLook['hair']) => `headwear-${hair}`;
 
 const EARNED: readonly CatalogItem[] = [
   // starter set: everything the website creator offers today
-  ...OUTFITS.map((o): CatalogItem => ({
+  ...OUTFITS.filter((o) => !CITY_OUTFITS.includes(o)).map((o): CatalogItem => ({
     id: outfitItemId(o),
     kind: 'outfit',
     name: OUTFIT_LABELS[o],
@@ -311,7 +318,8 @@ export const catalogItem = (id: string, catalog: readonly CatalogItem[] = CATALO
 /** Catalog items a look uses (outfit, headwear). */
 export function lookItemIds(look: BudLook): string[] {
   const ids = [outfitItemId(look.outfit)];
-  if ((HEADWEAR as readonly string[]).includes(look.hair)) ids.push(headwearItemId(look.hair));
+  if ((HEADWEAR as readonly string[]).includes(look.hair) || CITY_HAIR.includes(look.hair))
+    ids.push(headwearItemId(look.hair));
   return ids;
 }
 

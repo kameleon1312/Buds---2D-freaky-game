@@ -185,6 +185,7 @@ namespace Buds.Core
         /// <summary>Sends the score; returns the line the screen shows (XP, a new rank, unlocked abilities).</summary>
         async Awaitable<string> FinishTraining(int score)
         {
+            if (questGame != null) return FinishQuestGame(score);
             var spot = activeTraining;
             if (spot == null) return "";
             var content = quests.Content;

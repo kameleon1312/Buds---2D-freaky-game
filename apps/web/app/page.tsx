@@ -388,10 +388,17 @@ const SHOTS: Shot[] = [
     src: '/screens/los-karkos.png',
   },
   {
+    id: 'chinatown',
+    label: 'Chinatown',
+    title: 'Lampiony za Dworem Carskim',
+    text: 'Nocny targ, pagoda i dojo. Żeby tu wejść, trzeba zdobyć list od Hrabiny, a potem dotrzeć Ryżowym Traktem.',
+    src: '/screens/chinatown.png',
+  },
+  {
     id: 'pustkowia',
     label: 'Pustkowia',
     title: 'Między miastami',
-    text: 'Leśne Ostępy, Wydmy, Stary Gościniec i Nieużytki. Droga, zasadzki w krzakach i działki, na których rosną dystrykty graczy.',
+    text: 'Leśne Ostępy, Wydmy, Stary Gościniec, Nieużytki i Ryżowy Trakt. Droga, zasadzki w krzakach i działki, na których rosną dystrykty graczy.',
     src: '/screens/pustkowia.png',
   },
   {

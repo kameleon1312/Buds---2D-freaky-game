@@ -24,6 +24,10 @@ namespace Buds.Quests
             public string id;
             public int step;
             public List<int> collected = new();
+            /// <summary>The clock of a step against time (not saved: after a restart the step starts afresh).</summary>
+            [NonSerialized] public float left = -1;
+            /// <summary>Failed against the clock: nothing moves until the bud has been back to the quest's giver.</summary>
+            [NonSerialized] public bool again;
         }
 
         [Serializable]
@@ -115,11 +119,106 @@ namespace Buds.Quests
             return null;
         }
 
+        /// <summary>The active "ask" or "game" step waiting at this NPC, with its quest, or null.</summary>
+        public (QuestData quest, StepData step)? WaitingAt(string npcId)
+        {
+            foreach (var a in active)
+            {
+                var step = CurrentStep(a.id);
+                if (step is { kind: "ask" or "game" } && step.npc == npcId) return (content.Quest(a.id), step);
+            }
+            return null;
+        }
+
+        /// <summary>An answer to an "ask" step: right moves on; wrong goes back. True when it was right.</summary>
+        public bool Answer(string questId, int answer)
+        {
+            var a = State(questId);
+            var step = CurrentStep(questId);
+            if (a == null || step is not { kind: "ask" }) return false;
+            if (answer == step.correct)
+            {
+                Advance(a);
+                return true;
+            }
+            GoBack(a, step.back);
+            return false;
+        }
+
+        /// <summary>A mini-game's score for a "game" step: enough moves on (true), less leaves it to be tried again.</summary>
+        public bool GameScore(string questId, int score)
+        {
+            var a = State(questId);
+            var step = CurrentStep(questId);
+            if (a == null || step is not { kind: "game" } || score < step.score) return false;
+            Advance(a);
+            return true;
+        }
+
+        /// <summary>
+        /// The clocks of steps against time: returns the words for each step that ran out (the quest has gone back).
+        /// A clock starts on its first tick after the step begins.
+        /// </summary>
+        public List<string> Tick(float seconds)
+        {
+            var late = new List<string>();
+            foreach (var a in active.ToArray())
+            {
+                var step = CurrentStep(a.id);
+                if (step == null || step.seconds <= 0 || a.again)
+                {
+                    a.left = -1;
+                    continue;
+                }
+                if (a.left < 0) a.left = step.seconds;
+                a.left -= seconds;
+                if (a.left > 0) continue;
+                late.Add(string.IsNullOrEmpty(step.late) ? "Za późno! Spróbuj jeszcze raz." : step.late);
+                GoBack(a, step.back);
+                // back on a step against the clock: it starts only from the giver, or it would run out again and again
+                a.again = CurrentStep(a.id) is { seconds: > 0 };
+            }
+            return late;
+        }
+
+        /// <summary>Seconds left on the clock of a quest's current step (-1: no clock).</summary>
+        public float TimeLeft(string questId)
+        {
+            var a = State(questId);
+            var step = CurrentStep(questId);
+            return a != null && step is { seconds: > 0 } ? (a.left < 0 ? step.seconds : a.left) : -1;
+        }
+
+        /// <summary>The bud was knocked out: fragile quests under way go back to their first step. Their words, for the player.</summary>
+        public List<string> KnockedOut()
+        {
+            var said = new List<string>();
+            foreach (var a in active)
+            {
+                var q = content.Quest(a.id);
+                if (string.IsNullOrEmpty(q.fragile) || (a.step == 0 && a.collected.Count == 0)) continue;
+                said.Add(q.fragile);
+                a.step = 0;
+                a.collected.Clear();
+                a.left = -1;
+            }
+            if (said.Count > 0) Changed?.Invoke();
+            return said;
+        }
+
         /// <summary>Talking to an NPC who is the current "talk" step of an active quest: advances it, returns their line.</summary>
         public string TalkTo(string npcId)
         {
             foreach (var a in active)
             {
+                if (a.again && content.Quest(a.id).giver == npcId)
+                {
+                    a.again = false;
+                    a.left = -1;
+                    Changed?.Invoke();
+                    return "Dobrze. Jeszcze raz, od tej chwili liczę czas.";
+                }
+                if (a.again) continue;
                 var step = CurrentStep(a.id);
                 if (step is not { kind: "talk" } || step.npc != npcId) continue;
                 Advance(a);
@@ -136,7 +235,7 @@ namespace Buds.Quests
             {
                 var q = content.Quest(a.id);
                 var step = CurrentStep(a.id);
-                if (q.district != district || step is not { kind: "reach" }) continue;
+                if (a.again || q.district != district || step is not { kind: "reach" }) continue;
                 if (Mathf.Abs(x - step.x) > step.radius || Mathf.Abs(y - step.y) > step.radius) continue;
                 Advance(a);
                 any = true;
@@ -180,7 +279,7 @@ namespace Buds.Quests
             {
                 var q = content.Quest(a.id);
                 var step = CurrentStep(a.id);
-                if (q.district != district || step is not { kind: "collect" }) continue;
+                if (a.again || q.district != district || step is not { kind: "collect" }) continue;
                 for (var i = 0; i < step.spots.Length; i++)
                     if (!a.collected.Contains(i)) yield return (q, step, i);
             }
@@ -208,6 +307,15 @@ namespace Buds.Quests
         {
             a.step++;
             a.collected.Clear();
+            a.left = -1;
+            Changed?.Invoke();
+        }
+
+        void GoBack(ActiveState a, int steps)
+        {
+            a.step = Mathf.Max(0, a.step - steps);
+            a.collected.Clear();
+            a.left = -1;
             Changed?.Invoke();
         }
 
@@ -215,7 +323,8 @@ namespace Buds.Quests
         {
             if (TurnInAt(npcId) != null) return NpcMarker.TurnIn;
             foreach (var a in active)
-                if (CurrentStep(a.id) is { kind: "talk" } step && step.npc == npcId)
+                if ((a.again && content.Quest(a.id).giver == npcId) ||
+                    (!a.again && CurrentStep(a.id) is { kind: "talk" or "ask" or "game" } step && step.npc == npcId))
                     return NpcMarker.TurnIn;
             if (OfferFrom(npcId) != null) return NpcMarker.Offer;
             foreach (var a in active)
@@ -231,12 +340,17 @@ namespace Buds.Quests
             var a = State(questId);
             if (q == null || a == null) return "";
             if (IsReady(questId)) return $"Wróć do: {content.Npc(q.giver)?.name ?? q.giver}";
+            if (a.again) return $"Spróbuj jeszcze raz: wróć do {content.Npc(q.giver)?.name ?? q.giver}";
             var step = q.steps[a.step];
+            var clock = TimeLeft(questId) is var left and >= 0 ? $" · {Mathf.CeilToInt(left)} s" : "";
             return step.kind switch
             {
                 "talk" => $"Porozmawiaj: {content.Npc(step.npc)?.name ?? step.npc}",
-                "reach" => $"Idź do: {step.label}",
-                "collect" => $"Zbierz: {step.label} {a.collected.Count}/{step.spots.Length}",
+                "ask" => $"Odpowiedz: {content.Npc(step.npc)?.name ?? step.npc}",
+                "game" => $"{step.label} ({content.Npc(step.npc)?.name ?? step.npc})",
+                "reach" => $"Idź do: {step.label}{clock}",
+                "collect" => $"Zbierz: {step.label} {a.collected.Count}/{step.spots.Length}{clock}" +
+                             (step.hidden && !string.IsNullOrEmpty(step.hint) ? $"\n{step.hint}" : ""),
                 "duel" => step.label,
                 _ => step.label ?? "",
             };
@@ -247,11 +361,11 @@ namespace Buds.Quests
         {
             var q = content.Quest(questId);
             if (q == null || State(questId) == null) return null;
-            if (IsReady(questId)) return NpcCell(q.giver);
+            if (IsReady(questId) || State(questId).again) return NpcCell(q.giver);
             var step = CurrentStep(questId);
             return step.kind switch
             {
-                "talk" => NpcCell(step.npc),
+                "talk" or "ask" or "game" => NpcCell(step.npc),
                 "reach" => (q.district, step.x, step.y),
                 "duel" => EnemyCell(step.enemy),
                 _ => null,

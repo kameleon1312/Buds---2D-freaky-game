@@ -35,12 +35,13 @@ namespace Buds.Core
             {
                 if (p.district == port.district) continue;
                 var d = Districts.Get(p.district);
-                var open = Districts.CanEnter(p.district, level);
+                var hasPass = Districts.HasPass(d, quests.Completed);
+                var open = Districts.CanEnter(p.district, level) && hasPass;
                 trips.Add(new FerryScreen.Trip
                 {
                     PortId = p.id,
                     Label = $"{Districts.NameOf(p.district)} · {Coins(p.fare)}",
-                    Detail = open ? p.name : $"Od poziomu {d?.UnlockLevel} (masz {level})",
+                    Detail = open ? p.name : hasPass ? $"Od poziomu {d?.UnlockLevel} (masz {level})" : $"Potrzebna przepustka: {quests.Content.Quest(d.GateQuest)?.title}",
                     Open = open,
                 });
             }

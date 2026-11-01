@@ -7,6 +7,26 @@ import type { TrainingSpotInput } from '../training';
  */
 export const TRAINING_SPOTS: TrainingSpotInput[] = [
   {
+    id: 'trening-ct-worek',
+    district: 'chinatown',
+    x: 18,
+    y: 70,
+    skill: 'walka',
+    name: 'Worek Starego Wei',
+    look: 'worek',
+    hint: 'Sparing: uciekaj od rękawicy, prosty blokuj, a gdy rywal się odsłoni, kontruj.',
+  },
+  {
+    id: 'trening-ct-szachy',
+    district: 'chinatown',
+    x: 100,
+    y: 53,
+    skill: 'spryt',
+    name: 'Kubki na Nocnym Targu',
+    look: 'szachy',
+    hint: 'Uliczny kuglarz przekłada kubki: patrz na ręce, wskaż, gdzie jest kulka.',
+  },
+  {
     id: 'trening-wyspa-worek',
     district: 'wyspa-startowa',
     x: 51,

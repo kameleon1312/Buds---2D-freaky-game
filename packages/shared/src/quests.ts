@@ -4,10 +4,13 @@ import { budLookSchema } from './bud/look';
 import { cacheProblems, cacheSchema } from './caches';
 import { enemySchema } from './combat';
 import { catalogItem } from './catalog';
+import { DISTRICTS } from './districts';
 import { DWOR_CARSKI } from './content/dwor-carski';
 import { DZIKA_PUSZCZA } from './content/dzika-puszcza';
+import { CHINATOWN } from './content/chinatown';
 import { LAS_PALMAS } from './content/las-palmas';
 import { LOCALS } from './content/locals';
+import { dressed } from './content/wardrobe';
 import { LOS_KARKOS } from './content/los-karkos';
 import { MIASTO_ZIOMKOW } from './content/miasto-ziomkow';
 import { NEW_PLACES } from './content/new-places';
@@ -47,6 +50,16 @@ export const npcSchema = z.object({
 export type Npc = z.infer<typeof npcSchema>;
 export type NpcInput = z.input<typeof npcSchema>;
 
+/**
+ * A step against the clock: `seconds` from when the step begins. Too late, and the quest goes `back` that many steps
+ * (0: this one again), with `late` said in a toast.
+ */
+const timed = {
+  seconds: z.number().int().min(5).max(600).optional(),
+  back: z.number().int().min(0).max(7).default(0),
+  late: z.string().min(1).optional(),
+};
+
 export const questStepSchema = z.discriminatedUnion('kind', [
   /** Walk up to an NPC and talk. `text` is what they say. */
   z.object({ kind: z.literal('talk'), npc: id, text: z.string().min(1) }),
@@ -55,6 +68,7 @@ export const questStepSchema = z.discriminatedUnion('kind', [
     kind: z.literal('reach'),
     radius: z.number().int().min(1).max(6),
     label: z.string().min(1),
+    ...timed,
   }),
   /** Win a duel against this opponent (from the same district). */
   z.object({ kind: z.literal('duel'), enemy: id, label: z.string().min(1) }),
@@ -64,6 +78,33 @@ export const questStepSchema = z.discriminatedUnion('kind', [
     item: id,
     label: z.string().min(1),
     spots: z.array(cell).min(1).max(12),
+    /** Not on the map, seen only from close by; `hint` in the quest log says where to look. */
+    hidden: z.boolean().default(false),
+    hint: z.string().min(1).optional(),
+    ...timed,
+  }),
+  /**
+   * An NPC asks something answered earlier in the quest: a wrong answer sends the quest `back` that many steps (to hear
+   * it again), saying `wrong`.
+   */
+  z.object({
+    kind: z.literal('ask'),
+    npc: id,
+    text: z.string().min(1),
+    answers: z.array(z.string().min(1).max(40)).min(2).max(4),
+    correct: z.number().int().min(0).max(3),
+    wrong: z.string().min(1),
+    back: z.number().int().min(0).max(7).default(0),
+  }),
+  /** A training mini-game played at an NPC: a score of at least `score` of 5 moves on, less says `wrong`. */
+  z.object({
+    kind: z.literal('game'),
+    npc: id,
+    skill: z.string().min(2).max(20),
+    score: z.number().int().min(1).max(5),
+    label: z.string().min(1),
+    text: z.string().min(1),
+    wrong: z.string().min(1),
   }),
 ]);
 export type QuestStep = z.infer<typeof questStepSchema>;
@@ -85,6 +126,8 @@ export const questSchema = z.object({
   steps: z.array(questStepSchema).min(1).max(8),
   /** Catalog item granted with the XP (optional). */
   rewardItem: id.optional(),
+  /** Knocked out while on this quest: back to its first step, with these words. */
+  fragile: z.string().min(1).optional(),
 });
 export type Quest = z.infer<typeof questSchema>;
 export type QuestInput = z.input<typeof questSchema>;
@@ -107,15 +150,17 @@ export const CONTENT: DistrictContent = (() => {
     LAS_PALMAS,
     DWOR_CARSKI,
     LOS_KARKOS,
+    CHINATOWN,
     DZIKA_PUSZCZA,
     NEW_PLACES,
     ROUTES_CONTENT,
   ];
   return districtContentSchema.parse({
-    npcs: [...all.flatMap((c) => c.npcs), ...LOCALS],
+    // everyone wears what people wear in their city
+    npcs: [...all.flatMap((c) => c.npcs), ...LOCALS].map(dressed),
     quests: all.flatMap((c) => c.quests),
     caches: all.flatMap((c) => c.caches),
-    enemies: all.flatMap((c) => c.enemies),
+    enemies: all.flatMap((c) => c.enemies).map(dressed),
     training: [...TRAINING_SPOTS, ...DZIKA_PUSZCZA.training],
   });
 })();
@@ -158,7 +203,9 @@ export function contentProblems(content: DistrictContent): string[] {
   const stay = new Set(
     content.quests.flatMap((q) => [
       q.giver,
-      ...q.steps.flatMap((s) => (s.kind === 'talk' ? [s.npc] : [])),
+      ...q.steps.flatMap((s) =>
+        s.kind === 'talk' || s.kind === 'ask' || s.kind === 'game' ? [s.npc] : [],
+      ),
     ]),
   );
   for (const n of content.npcs)
@@ -170,16 +217,22 @@ export function contentProblems(content: DistrictContent): string[] {
       problems.push(`${q.id}: giver ${q.giver} lives in another district`);
     for (const r of q.requires)
       if (!questIds.has(r)) problems.push(`${q.id}: requires unknown quest ${r}`);
-    for (const s of q.steps) {
-      if (s.kind === 'talk' && !npcIds.has(s.npc))
+    q.steps.forEach((s, i) => {
+      if ((s.kind === 'talk' || s.kind === 'ask' || s.kind === 'game') && !npcIds.has(s.npc))
         problems.push(`${q.id}: talks to unknown npc ${s.npc}`);
+      if (s.kind === 'ask' && s.correct >= s.answers.length)
+        problems.push(`${q.id}: the right answer is not among the answers`);
+      if ((s.kind === 'ask' || s.kind === 'reach' || s.kind === 'collect') && s.back > i)
+        problems.push(`${q.id}: step ${i} goes back further than the quest has steps`);
+      if (s.kind === 'collect' && s.hidden && !s.hint)
+        problems.push(`${q.id}: hidden items need a hint`);
       if (s.kind === 'duel') {
         const foe = content.enemies.find((e) => e.id === s.enemy);
         if (!foe) problems.push(`${q.id}: duel with unknown enemy ${s.enemy}`);
         else if (foe.district !== q.district)
           problems.push(`${q.id}: ${s.enemy} lives in another district`);
       }
-    }
+    });
     if (q.rewardItem && !catalogItem(q.rewardItem))
       problems.push(`${q.id}: reward ${q.rewardItem} is not in the catalog`);
   }
@@ -196,6 +249,15 @@ export function contentProblems(content: DistrictContent): string[] {
     return ok;
   };
   for (const q of content.quests) if (!visit(q.id)) problems.push(`${q.id}: circular requirements`);
+  // the quests that open the next city can be done before it is needed
+  for (const d of DISTRICTS) {
+    const gate = 'gateQuest' in d ? d.gateQuest : undefined;
+    if (!gate) continue;
+    const q = questIds.has(gate) ? questById(gate, content) : undefined;
+    if (!q) problems.push(`${d.id}: gate quest ${gate} doesn't exist`);
+    else if (q.minLevel > d.unlockLevel)
+      problems.push(`${d.id}: gate quest ${gate} needs a higher level than the city`);
+  }
   problems.push(...cacheProblems(content.caches));
   problems.push(...trainingProblems(content.training));
   const enemyIds = new Set<string>();

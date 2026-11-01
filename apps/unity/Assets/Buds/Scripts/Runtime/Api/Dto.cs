@@ -287,6 +287,19 @@ namespace Buds.Api
     }
 
     [Serializable]
+    public class ExploredMapDto
+    {
+        public string map;
+        public string seen;
+    }
+
+    [Serializable]
+    public class ExploredResponse
+    {
+        public ExploredMapDto[] maps;
+    }
+
+    [Serializable]
     public class CachesResponse
     {
         public string[] opened;

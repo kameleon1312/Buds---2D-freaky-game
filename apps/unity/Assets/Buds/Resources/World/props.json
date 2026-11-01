@@ -3622,6 +3622,186 @@
       ]
     },
     {
+      "name": "dz-lampion-ratusz-1",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-ratusz-2",
+      "pivotX": 0.4997,
+      "pivotY": 0.0253,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-ratusz-3",
+      "pivotX": 0.5005,
+      "pivotY": 0.0147,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-apartamentowiec",
+      "pivotX": 0.4994,
+      "pivotY": 0.0205,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-szklarnia",
+      "pivotX": 0.4994,
+      "pivotY": 0.0278,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-farma-solarna",
+      "pivotX": 0.4994,
+      "pivotY": 0.0417,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-betoniarnia",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-recykling",
+      "pivotX": 0.5003,
+      "pivotY": 0.0275,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-magazyn",
+      "pivotX": 0.4994,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-skwer",
+      "pivotX": 0.5003,
+      "pivotY": 0.0385,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-fontanna",
+      "pivotX": 0.5003,
+      "pivotY": 0.0357,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-pomnik",
+      "pivotX": 0.5003,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "dz-lampion-iglica",
+      "pivotX": 0.4998,
+      "pivotY": 0.0099,
+      "flat": false,
+      "foot": [
+        5,
+        4
+      ]
+    },
+    {
+      "name": "dz-lampion-tablica",
+      "pivotX": 0.5,
+      "pivotY": 0.05,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-lampion-wycinka",
+      "pivotX": 0.5005,
+      "pivotY": 0.0504,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "dz-lampion-plot-post",
+      "pivotX": 0.5,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-lampion-plot-h",
+      "pivotX": 0.0556,
+      "pivotY": 0.1364,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "dz-lampion-plot-v",
+      "pivotX": 0.5,
+      "pivotY": 0.0556,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
       "name": "dz-zlom-ratusz-1",
       "pivotX": 0.4997,
       "pivotY": 0.0384,
@@ -3836,6 +4016,236 @@
       "pivotX": 0.5015,
       "pivotY": 0.0976,
       "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-lampion",
+      "pivotX": 0.5,
+      "pivotY": 0.1667,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "item-zwoj",
+      "pivotX": 0.5,
+      "pivotY": 0.1667,
+      "flat": true,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-brama",
+      "pivotX": 0.5002,
+      "pivotY": 0.0192,
+      "flat": false,
+      "foot": [
+        9,
+        1
+      ]
+    },
+    {
+      "name": "ct-sklep-a",
+      "pivotX": 0.4998,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "ct-sklep-b",
+      "pivotX": 0.4998,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "ct-sklep-c",
+      "pivotX": 0.4999,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        7,
+        3
+      ]
+    },
+    {
+      "name": "ct-herbaciarnia",
+      "pivotX": 0.4999,
+      "pivotY": 0.0227,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "ct-pagoda",
+      "pivotX": 0.5,
+      "pivotY": 0.0115,
+      "flat": false,
+      "foot": [
+        7,
+        5
+      ]
+    },
+    {
+      "name": "ct-dojo",
+      "pivotX": 0.4999,
+      "pivotY": 0.0253,
+      "flat": false,
+      "foot": [
+        7,
+        4
+      ]
+    },
+    {
+      "name": "ct-stragan-makaron",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "ct-stragan-owoce",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "ct-stragan-herbata",
+      "pivotX": 0.4997,
+      "pivotY": 0.0384,
+      "flat": false,
+      "foot": [
+        3,
+        2
+      ]
+    },
+    {
+      "name": "ct-lampion",
+      "pivotX": 0.5015,
+      "pivotY": 0.0454,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-girlanda",
+      "pivotX": 0.5004,
+      "pivotY": 0.031,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-lew",
+      "pivotX": 0.4987,
+      "pivotY": 0.0552,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-smok",
+      "pivotX": 0.5,
+      "pivotY": 0.0227,
+      "flat": false,
+      "foot": [
+        5,
+        3
+      ]
+    },
+    {
+      "name": "ct-bambus-a",
+      "pivotX": 0.5009,
+      "pivotY": 0.0247,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-bambus-b",
+      "pivotX": 0.5009,
+      "pivotY": 0.0216,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-wisnia",
+      "pivotX": 0.5006,
+      "pivotY": 0.0278,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-mostek",
+      "pivotX": 0.4996,
+      "pivotY": 0.0456,
+      "flat": false,
+      "foot": [
+        5,
+        1
+      ]
+    },
+    {
+      "name": "ct-kadzidlo",
+      "pivotX": 0.5015,
+      "pivotY": 0.0705,
+      "flat": false,
+      "foot": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "ct-beben",
+      "pivotX": 0.5006,
+      "pivotY": 0.0454,
+      "flat": false,
+      "foot": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "ct-koi",
+      "pivotX": 0.5009,
+      "pivotY": 0.0976,
+      "flat": true,
       "foot": [
         1,
         1

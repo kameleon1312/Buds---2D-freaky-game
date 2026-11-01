@@ -91,6 +91,10 @@ import {
   MOVE_UPGRADE_PROBLEM_TEXT,
   kitProblem,
   loadoutRequestSchema,
+  exploredFits,
+  exploredRequestSchema,
+  type ExploredMap,
+  type ExploredResponse,
   moveUpgradeProblem,
   movesView,
   rankCost,
@@ -342,6 +346,7 @@ export function createApp(
       moveRanks,
       crew,
       land,
+      explored,
       devices,
     ] = await Promise.all([
       store.wallet(slug),
@@ -356,6 +361,7 @@ export function createApp(
       store.moveRanks(slug),
       store.crewOf(slug),
       store.getLand(slug),
+      store.explored(slug),
       store.tokenCount(slug),
     ]);
     return {
@@ -374,6 +380,7 @@ export function createApp(
       moveRanks,
       crew,
       land: land?.state ?? null,
+      explored,
       devices,
     };
   };
@@ -532,10 +539,22 @@ export function createApp(
     const input = ferryRequestSchema.safeParse(await c.req.json().catch(() => null));
     if (!input.success) throw new HTTPException(400, { message: 'Zły kurs' });
     const bud = c.get('bud');
-    const blocker = ferryBlocker(input.data.from, input.data.to, levelFromXp(bud.xp).level);
+    const completed = new Set(await store.completedQuests(bud.slug));
+    const blocker = ferryBlocker(
+      input.data.from,
+      input.data.to,
+      levelFromXp(bud.xp).level,
+      completed,
+    );
     if (blocker === 'unknown_port' || blocker === 'same_port')
       throw new HTTPException(404, { message: 'Nie ma takiego kursu' });
     const to = portById(input.data.to)!;
+    if (blocker === 'quest_needed') {
+      return c.json<ApiError>(
+        { error: { code: 'quest_needed', message: 'Bez listu nikogo tam nie wozimy' } },
+        403,
+      );
+    }
     if (blocker === 'level_too_low') {
       const need = districtById(to.district)?.unlockLevel ?? 1;
       return c.json<ApiError>(
@@ -652,6 +671,25 @@ export function createApp(
     });
     return budFighter(bud.name, bud.xp, stats, weapon, { perks, buffs, kit, ranks: moveRanks });
   };
+
+  // ---------- the map's fog, kept with the bud and so with its account on every device (explored.ts) ----------
+
+  app.get('/v1/buds/me/explored', requirePlayer(store), async (c) =>
+    c.json<ExploredResponse>({ maps: await store.explored(c.get('bud').slug) }),
+  );
+
+  /** Adds what was seen on a map to what the server has. It earns nothing, so nothing here needs believing. */
+  app.put('/v1/buds/me/explored/:map', requirePlayer(store), async (c) => {
+    const map = c.req.param('map');
+    const input = exploredRequestSchema.safeParse(await c.req.json().catch(() => null));
+    if (!input.success || !exploredFits(map, input.data.seen))
+      return c.json<ApiError>(
+        { error: { code: 'invalid_input', message: 'Nieznana mapa albo zły zapis' } },
+        400,
+      );
+    const seen = await store.mergeExplored(c.get('bud').slug, map, input.data.seen);
+    return c.json<ExploredMap>({ map, seen });
+  });
 
   // ---------- ciosy: the bud's own fight buttons and their upgrades (loadout.ts) ----------
 

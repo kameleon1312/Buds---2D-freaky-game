@@ -40,9 +40,10 @@ namespace Buds.World
                 case "pustkowie-wydmy": return "las-palmas";
                 case "pustkowie-gosciniec": return "dwor-carski";
                 case "pustkowie-nieuzytki": return "los-karkos";
+                case "pustkowie-ryzowe": return "chinatown";
                 case "wyspa-startowa": return "las-palmas";
             }
-            foreach (var d in new[] { "miasto-ziomkow", "las-palmas", "dzika-puszcza", "dwor-carski", "los-karkos" })
+            foreach (var d in new[] { "miasto-ziomkow", "las-palmas", "dzika-puszcza", "dwor-carski", "los-karkos", "chinatown" })
                 if (mapId == d || mapId.StartsWith(d + "-"))
                     return d;
             return "miasto-ziomkow";
@@ -75,6 +76,14 @@ namespace Buds.World
                         WaterTint = new Color(0.92f, 0.96f, 1f), Macro = 0.12f, Desat = 0.14f, LeafRate = 1f,
                         Butterflies = 6, CloudShade = 0.075f,
                         Extra = new[] { ("lawn", 0.008f, "roze|flowers-c"), ("lawn2", 0.006f, "roze") },
+                    };
+                case "chinatown":
+                    return new DistrictLook
+                    {
+                        Id = id, WebLow = 0.97f, WebHigh = 1.09f, Glint = 0.42f, Flow = 0.7f,
+                        WaterTint = new Color(0.86f, 0.98f, 0.94f), Macro = 0.13f, Desat = 0.09f, LeafRate = 0.9f, Butterflies = 5,
+                        CloudShade = 0.07f,
+                        Extra = new[] { ("lawn", 0.008f, "flowers-a|flowers-c"), ("grass", 0.006f, "flowers-a|tuft") },
                     };
                 case "los-karkos":
                     return new DistrictLook

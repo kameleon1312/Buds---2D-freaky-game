@@ -49,12 +49,11 @@ namespace Buds.Characters
         public static bool DrawnOverBud(string kind, Facing facing) => facing != Facing.Side && ShapeOf(kind) != "deskorolka";
 
         /// <summary>
-        /// How the rider stands for a ride's facing. On a skateboard the bud stands across the board like a real
-        /// skater: rolling sideways it shows its front over the board's profile, rolling towards the camera or away it
-        /// shows its side over the board seen end-on. On anything with handlebars or a seat it faces where it goes.
+        /// How the rider stands for a ride's facing. On a skateboard the bud always shows its side, whichever way it
+        /// rolls. On anything with handlebars or a seat it faces where it goes.
         /// </summary>
         public static Facing RiderFacing(string kind, Facing facing) =>
-            ShapeOf(kind) == "deskorolka" ? facing == Facing.Side ? Facing.Down : Facing.Side : facing;
+            ShapeOf(kind) == "deskorolka" ? Facing.Side : facing;
 
         /// <summary>Rides steer freely in every direction (on foot the bud walks up/down/left/right).</summary>
         public static bool FreeSteering(string kind) => kind != null;

@@ -8,7 +8,7 @@ namespace Buds.UI
 {
     /// <summary>
     /// The district's screens: a bar at the top of the screen while the bud is on its plot (the four resources and how
-    /// much fits, a skyline button that opens the window, a cancel button while a building is being placed), the window
+    /// much fits, a skyline button that opens the window), the window
     /// with four tabs: Budynki (what can be put up, what it costs, why not), Teren (the district's rank and prestige, its
     /// cleared land, what clearing the next piece asks for, the crew at work), Skup (resources sold for coins) and Napady
     /// (defence, shield, what is safe, who raided), its name with "Zmień nazwę", and the naming window (buying a plot
@@ -23,7 +23,6 @@ namespace Buds.UI
         readonly GameObject bar;
         readonly Text[] amounts = new Text[4];
         readonly Text cap;
-        readonly GameObject cancel;
         readonly GameObject root;
         readonly Text title;
         readonly Text status;
@@ -45,7 +44,6 @@ namespace Buds.UI
 
         public Action<string> OnBuild;
         public Action<string, int> OnSell;
-        public Action OnCancelPlacing;
         public Action OnOpen;
         public Action OnRename;
 
@@ -80,10 +78,6 @@ namespace Buds.UI
             cap = UiKit.Label("Cap", box.transform, "", 15, UiKit.TextOnDarkMuted, false, TextAnchor.MiddleRight);
             UiKit.Place(cap.rectTransform, new Vector2(1, 0.5f), new Vector2(-12, 0), new Vector2(70, 30), new Vector2(1, 0.5f));
             bar = barRt.gameObject;
-            var stop = UiKit.Button("CancelPlacing", hudRoot, "Anuluj  [Esc]", new Vector2(190, 50), () => OnCancelPlacing?.Invoke(), UiKit.Tone.Alert, 20);
-            UiKit.Place((RectTransform)stop.transform, new Vector2(0.5f, 1), new Vector2(0, -GameUi.UnderPlate - 66), new Vector2(190, 50), new Vector2(0.5f, 1));
-            cancel = stop.gameObject;
-            cancel.SetActive(false);
             bar.SetActive(false);
 
             // ---------- the window ----------
@@ -201,14 +195,8 @@ namespace Buds.UI
         public void ShowBar(bool on)
         {
             bar.SetActive(on);
-            if (!on)
-            {
-                cancel.SetActive(false);
-                Hide();
-            }
+            if (!on) Hide();
         }
-
-        public void SetPlacing(bool on) => cancel.SetActive(on);
 
         /// <summary>The bar's numbers: what the land holds of each resource and how much fits.</summary>
         public void UpdateBar(Land l)

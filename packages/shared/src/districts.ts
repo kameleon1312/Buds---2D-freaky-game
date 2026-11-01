@@ -10,6 +10,8 @@ export type District = {
   unlockLevel: number;
   /** `open` = playable now; `soon` = designed, map not built yet. */
   status: 'open' | 'soon';
+  /** The quest whose end brings the pass or letter a bud needs to come here (on top of the level). */
+  gateQuest?: string;
   blurb: string;
 };
 
@@ -33,6 +35,7 @@ export const DISTRICTS = [
     name: 'Las Palmas',
     unlockLevel: 3,
     status: 'open',
+    gateQuest: 'przepustka-na-wydmy',
     blurb: 'Tropiki: plaże, ocean, hawajskie chatki i egzotyczne zwierzaki.',
   },
   {
@@ -40,6 +43,7 @@ export const DISTRICTS = [
     name: 'Dwór Carski',
     unlockLevel: 5,
     status: 'open',
+    gateQuest: 'zaproszenie-na-dwor',
     blurb: 'Cegła, dworek i zagadki. Nieuczciwi urzędnicy w cylindrach.',
   },
   {
@@ -47,7 +51,17 @@ export const DISTRICTS = [
     name: 'Los Karkos',
     unlockLevel: 7,
     status: 'open',
+    gateQuest: 'tajemnica-dworu',
     blurb: 'Niebezpiecznie. Opuszczone bloki, zaczepki i trening przetrwania.',
+  },
+  {
+    id: 'chinatown',
+    name: 'Chinatown',
+    unlockLevel: 9,
+    status: 'open',
+    gateQuest: 'list-do-chinatown',
+    blurb:
+      'Za Dworem Carskim: lampiony, nocny targ, pagoda i dojo. Tu pamięta się każdą przysługę.',
   },
 ] as const satisfies readonly District[];
 
@@ -74,4 +88,10 @@ export const districtById = (id: string): District | undefined =>
 export const canEnterDistrict = (id: string, level: number): boolean => {
   const d = districtById(id);
   return !!d && d.status === 'open' && level >= d.unlockLevel;
+};
+
+/** The quest still standing between a bud and this city, or null. */
+export const missingGateQuest = (id: string, completed: ReadonlySet<string>): string | null => {
+  const gate = districtById(id)?.gateQuest;
+  return gate && !completed.has(gate) ? gate : null;
 };

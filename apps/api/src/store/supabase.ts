@@ -244,6 +244,28 @@ export function createSupabaseStore(url: string, serviceRoleKey: string): BudSto
       }));
     },
 
+    async explored(slug) {
+      const { data, error } = await db
+        .from('bud_explored')
+        .select('map_id, seen')
+        .eq('bud_id', await idBySlug(slug));
+      if (error) throw error;
+      return (data as { map_id: string; seen: string }[]).map((r) => ({
+        map: r.map_id,
+        seen: r.seen,
+      }));
+    },
+
+    async mergeExplored(slug, map, seen) {
+      const { data, error } = await db.rpc('merge_explored', {
+        p_bud: await idBySlug(slug),
+        p_map: map,
+        p_seen: seen,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+
     async loadouts(slug) {
       const { data, error } = await db
         .from('bud_loadouts')

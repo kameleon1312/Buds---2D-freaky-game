@@ -282,12 +282,15 @@ export function createLand({
     });
 
     app.post('/v1/land/build', player, async (c) => {
-      const input = await body<{ kind: BuildingId; x: number; y: number }>(c, buildRequestSchema);
+      const input = await body<{ kind: BuildingId; x: number; y: number; rot?: number }>(
+        c,
+        buildRequestSchema,
+      );
       const lvl = level(c.get('bud'));
       return change(c, (land, at) => {
-        const p = placementProblem(land, input.kind, input.x, input.y, lvl);
+        const p = placementProblem(land, input.kind, input.x, input.y, lvl, input.rot ?? 0);
         if (p) return p;
-        const next = build(land, input.kind, input.x, input.y, at);
+        const next = build(land, input.kind, input.x, input.y, at, input.rot ?? 0);
         return next === 'walls_in' ? 'walls_in' : { land: next };
       });
     });

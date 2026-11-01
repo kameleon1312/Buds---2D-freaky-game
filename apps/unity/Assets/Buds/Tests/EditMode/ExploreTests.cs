@@ -240,6 +240,22 @@ namespace Buds.Tests
                 Assert.AreEqual(fog.IsSeen(x, y), copy.IsSeen(x, y));
         }
 
+        [Test]
+        public void ADeviceTakesWhatAnotherOneUncoveredAndLosesNothing()
+        {
+            var here = new Exploration(20, 10);
+            here.Reveal(3, 3, 1);
+            var there = new Exploration(20, 10);
+            there.Reveal(15, 7, 1);
+            Assert.IsTrue(here.Merge(there.Save()));
+            Assert.IsTrue(here.IsSeen(3, 3));
+            Assert.IsTrue(here.IsSeen(15, 7));
+            Assert.IsFalse(here.IsSeen(10, 5));
+            Assert.IsFalse(here.Merge(there.Save()), "nothing new the second time");
+            Assert.IsFalse(here.Merge("AAAA"), "another size adds nothing");
+            Assert.IsFalse(here.Merge(null));
+        }
+
         [TestCase(null)]
         [TestCase("")]
         [TestCase("not base64!")]
@@ -273,6 +289,39 @@ namespace Buds.Tests
             var px = MapPicture.Pixels(map, fog);
             Assert.AreEqual(MapPicture.Unknown, px[0]);
             Assert.AreEqual((Color32)Color.green, px[1]);
+        }
+
+        [Test]
+        public void TheMapPictureDrawsTheLandAndTheFogHidesOnlyWhatWasntSeen()
+        {
+            var map = MapFormat.Parse("[district]\nbase = #000000\n[legend]\n. = grass\n[ground]\nroad : grass : 0.8 : 0.45 #00ff00\n[grid]\n...\n");
+            var px = MapPicture.Detailed(map, 4, _ => null);
+            Assert.AreEqual(3 * 4 * 1 * 4, px.Length);
+            Assert.Greater(px[0].g, 240, "the ground's colour");
+            var fog = new Exploration(3, 1);
+            fog.Reveal(1, 0, 0);
+            var over = MapPicture.FogPixels(3, 1, fog);
+            Assert.AreEqual(255, over[0].a);
+            Assert.AreEqual(0, over[1].a, "where the bud has been the land shows");
+        }
+
+        [Test]
+        public void ZoomKeepsThePointUnderTheFingerAndThePictureOverTheFrame()
+        {
+            var view = new MapView(new Vector2(100, 100), new Vector2(100, 75));
+            Assert.AreEqual(Vector2.zero, view.Pan);
+            view.PanBy(new Vector2(50, 50));
+            Assert.AreEqual(Vector2.zero, view.Pan, "at the whole map there is nowhere to drag it");
+            view.ZoomAt(2, new Vector2(20, 10));
+            Assert.AreEqual(2, view.Zoom);
+            Assert.AreEqual(new Vector2(-20, -10), view.Pan, "the point stays under the finger");
+            view.PanBy(new Vector2(1000, 1000));
+            Assert.AreEqual(new Vector2(50, 25), view.Pan, "no gap beyond the map's edge");
+            view.ZoomAt(100, Vector2.zero);
+            Assert.AreEqual(MapView.MaxZoom, view.Zoom);
+            view.ZoomAt(0.001f, Vector2.zero);
+            Assert.AreEqual(1, view.Zoom);
+            Assert.AreEqual(Vector2.zero, view.Pan);
         }
 
         [TestCase(1, "1 moneta")]

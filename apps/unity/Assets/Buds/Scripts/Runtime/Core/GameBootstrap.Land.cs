@@ -16,8 +16,8 @@ namespace Buds.Core
     /// fortified by the district, from the raid level); the bud's own opens its window. On its own plot: walk up to a
     /// building and press E (collect what it made or the rent, or see its card with the upgrade), walk up to the wild
     /// land at the district's edge and press E to have it cleared, open the skyline button (B) to put up something new:
-    /// its ghost stands in front of the bud (green where it fits) until E puts it there. Every change is asked of the
-    /// server, which works it all out.
+    /// the camera rises over the plot (<see cref="LandPlanner"/>) and it is dragged, turned and fitted exactly on the
+    /// ground before anything is paid. Every change is asked of the server, which works it all out.
     /// </summary>
     public sealed partial class GameBootstrap
     {
@@ -31,8 +31,7 @@ namespace Buds.Core
         Land land;
         DistrictsWorld districtsWorld;
         LandScreen landScreen;
-        /// <summary>The building kind being placed (null: not placing).</summary>
-        string placing;
+        LandPlanner landPlanner;
         bool landBusy;
         int landCoins = -1;
         LandBuildingDto nearbyBuilding;
@@ -54,9 +53,9 @@ namespace Buds.Core
                 OnBuild = StartPlacing,
 
                 OnSell = (r, n) => _ = SellResource(r, n),
-                OnCancelPlacing = StopPlacing,
                 OnRename = AskRename,
             };
+            landPlanner = new LandPlanner(ui.Root);
         }
 
         /// <summary>Whether the current map has plots (a wasteland).</summary>
@@ -65,7 +64,7 @@ namespace Buds.Core
         /// <summary>Called when a map is set up: a wasteland's districts are drawn, the bar comes and goes.</summary>
         void LandMapChanged()
         {
-            StopPlacing();
+            landPlanner?.Hide();
             nearbyBuilding = null;
             nearbyPlot = null;
             nearbySector = -1;
@@ -120,7 +119,6 @@ namespace Buds.Core
         void OpenLandScreen(int tab = LandScreen.TabBuildings)
         {
             if (land == null || !land.Has || OtherScreenOpen()) return;
-            StopPlacing();
             landScreen.Open(land, level, landCoins, tab);
             if (landCoins < 0) _ = LoadLandCoins();
         }
@@ -142,6 +140,11 @@ namespace Buds.Core
         bool UpdateLandScreen(PlayerInput input)
         {
             if (landScreen == null) return false;
+            if (landPlanner.IsOpen)
+            {
+                landPlanner.Tick(input);
+                return true;
+            }
             if (landScreen.IsOpen)
             {
                 if (input.CancelPressed) landScreen.Hide();
@@ -154,26 +157,17 @@ namespace Buds.Core
 
         // ---------- placing a building ----------
 
+        /// <summary>The view rises over the plot, from anywhere on its wasteland: the building is put down there, then paid for.</summary>
         void StartPlacing(string kind)
         {
-            placing = kind;
-            landScreen?.SetPlacing(true);
-            var name = land.Rules.Building(kind)?.name ?? kind;
-            ui.ShowToast($"Podejdź tam, gdzie ma stanąć: {name}", 3f);
-        }
-
-        void StopPlacing()
-        {
-            placing = null;
-            landScreen?.SetPlacing(false);
-            if (districtsWorld) districtsWorld.ShowGhost(null, default, false);
-        }
-
-        /// <summary>The plot-local cell the building being placed would stand on: its door right in front of (north of) the bud.</summary>
-        Vector2Int PlacingAnchor(Vector2Int cell)
-        {
-            var local = land.ToLocal(cell);
-            return new Vector2Int(local.x, local.y - 2);
+            if (!districtsWorld || !world || world.Map.Id != land.Plot.route)
+            {
+                ui.ShowToast($"Budujesz na miejscu: idź na {Districts.NameOf(land.Plot.route)}.", 3f);
+                return;
+            }
+            ui.ShowBuilding(true);
+            landPlanner.Open(land, kind, level, districtsWorld, Camera.main!.GetComponent<FollowCamera>(),
+                (anchor, rot) => _ = BuildLand(kind, anchor, rot), () => OpenLandScreen(), () => ui.ShowBuilding(false));
         }
 
         // ---------- every frame on a wasteland ----------
@@ -187,34 +181,8 @@ namespace Buds.Core
             if (!districtsWorld || land == null) return false;
             if (Time.time > districtsRefreshAt) _ = RefreshDistricts(false);
             var onOwn = OnOwnPlot(cell);
-            landScreen.ShowBar(onOwn || placing != null);
+            landScreen.ShowBar(onOwn);
             if (land.Has) landScreen.UpdateBar(land);
-            if (placing != null)
-            {
-                if (!onOwn)
-                {
-                    districtsWorld.ShowGhost(null, default, false);
-                    ui.SetHint("Wejdź na swoją działkę, żeby budować.");
-                    if (input.CancelPressed) StopPlacing();
-                    return true;
-                }
-                var anchor = PlacingAnchor(cell);
-                var problem = land.PlacementProblem(placing, anchor.x, anchor.y, level);
-                districtsWorld.ShowGhost(placing, anchor, problem == null);
-                var name = land.Rules.Building(placing)?.name;
-                ui.SetHint(problem == null ? $"Postaw: {name}  [E]" : Land.ProblemText(problem));
-                if (input.CancelPressed)
-                {
-                    StopPlacing();
-                    return true;
-                }
-                if (input.InteractPressed && !ui.DialogOpen)
-                {
-                    if (problem == null) _ = BuildLand(placing, anchor);
-                    else ui.ShowToast(Land.ProblemText(problem), 2.5f);
-                }
-                return true;
-            }
 
             var now = land.Now;
             // at the wild edge the land comes first, unless the bud stands right at a building
@@ -268,6 +236,7 @@ namespace Buds.Core
         {
             "tropik" => "zarośla",
             "dwor" => "stary sad",
+            "lampion" => "bambus",
             "zlom" => "złomowisko",
             _ => "las",
         };
@@ -276,6 +245,7 @@ namespace Buds.Core
         {
             "tropik" => "Oczyść zarośla",
             "dwor" => "Wykarczuj sad",
+            "lampion" => "Wytnij bambus",
             "zlom" => "Uprzątnij złom",
             _ => "Wytnij las",
         };
@@ -531,14 +501,10 @@ namespace Buds.Core
             }
         }
 
-        async Awaitable BuildLand(string kind, Vector2Int anchor)
+        async Awaitable BuildLand(string kind, Vector2Int anchor, int rot = 0)
         {
             var name = land.Rules.Building(kind)?.name ?? kind;
-            await LandCall(() => api.Build(session.Token, kind, anchor.x, anchor.y), _ =>
-            {
-                StopPlacing();
-                return $"Budowa ruszyła: {name}";
-            });
+            await LandCall(() => api.Build(session.Token, kind, anchor.x, anchor.y, rot), _ => $"Budowa ruszyła: {name}");
         }
 
         async Awaitable UpgradeLand(int id) =>

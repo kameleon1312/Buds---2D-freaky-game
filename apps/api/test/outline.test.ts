@@ -4,7 +4,8 @@ import {
   ACCESSORIES,
   FACINGS,
   GENDERS,
-  OUTFITS_BY_GENDER,
+  HAIR_STYLES,
+  OUTFITS,
   budSvg,
   type BudLook,
 } from '@buds/shared';
@@ -49,16 +50,17 @@ function pixelsOutsideOutline(look: BudLook, facing: (typeof FACINGS)[number]) {
 }
 
 describe('the outline', () => {
-  it('holds every colour in, for every top and accessory in every view', () => {
+  it('holds every colour in, for every top, hairstyle, hat and accessory in every view', () => {
     const looks: BudLook[] = GENDERS.flatMap((gender) => [
-      ...OUTFITS_BY_GENDER[gender].map((outfit) => ({ ...base, gender, outfit })),
+      ...OUTFITS.map((outfit) => ({ ...base, gender, outfit })),
+      ...HAIR_STYLES.map((hair) => ({ ...base, gender, hair })),
       ...ACCESSORIES.map((accessory) => ({ ...base, gender, accessory })),
     ]);
     const leaks: string[] = [];
     for (const look of looks)
       for (const facing of FACINGS)
         if (pixelsOutsideOutline(look, facing) > 0)
-          leaks.push(`${look.gender} ${look.outfit} ${look.accessory} ${facing}`);
+          leaks.push(`${look.gender} ${look.outfit} ${look.hair} ${look.accessory} ${facing}`);
     expect(leaks).toEqual([]);
-  }, 120_000);
+  }, 240_000);
 });

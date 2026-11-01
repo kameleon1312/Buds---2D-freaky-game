@@ -19,4 +19,8 @@ export const PLOTS: readonly Plot[] = [
   { id: 'nieuzytki-2', route: 'pustkowie-nieuzytki', x: 50, y: 66, gate: 'n' },
   { id: 'nieuzytki-3', route: 'pustkowie-nieuzytki', x: 80, y: 9, gate: 's' },
   { id: 'nieuzytki-4', route: 'pustkowie-nieuzytki', x: 108, y: 64, gate: 'n' },
+  { id: 'ryzowe-1', route: 'pustkowie-ryzowe', x: 61, y: 21, gate: 'w' },
+  { id: 'ryzowe-2', route: 'pustkowie-ryzowe', x: 11, y: 38, gate: 'e' },
+  { id: 'ryzowe-3', route: 'pustkowie-ryzowe', x: 53, y: 66, gate: 'w' },
+  { id: 'ryzowe-4', route: 'pustkowie-ryzowe', x: 14, y: 96, gate: 'e' },
 ];

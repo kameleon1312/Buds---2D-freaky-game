@@ -76,6 +76,8 @@ przekazuje ją dalej), potem kasuje wiersz `buds`; wszystkie tabele `bud_*`, tok
 znikają kaskadowo. Serwer gry na żywo od razu rozłącza usuniętego albo wylogowanego Buda (`hooks.budGone` →
 `live.dropBud`), a nowe imię pokazuje innym w pokoju (`hooks.budChanged` → `live.refreshBud`). Kształty żądań i
 odpowiedzi są w `packages/shared/src/account.ts`, migracja to `20261029000000_account.sql` (`buds.name_changed_at`).
+Eksport zawiera też odkryty teren mapy (`explored`).
+
 Testy: `apps/api/test/account.test.ts`.
 
 ## Bezpieczeństwo

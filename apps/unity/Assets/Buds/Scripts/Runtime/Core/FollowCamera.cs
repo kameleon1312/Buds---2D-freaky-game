@@ -5,7 +5,8 @@ namespace Buds.Core
     /// <summary>
     /// 2.5D camera: a perspective camera tilted by WorldView.Tilt, looking north across the flat ground, far enough
     /// away that about the same number of tiles shows on any screen (OrthoSizeFor). It follows a point on the ground
-    /// smoothly and keeps that point inside the map.
+    /// smoothly and keeps that point inside the map. While building it rises over the plot instead (<see cref="Overview"/>):
+    /// the same world, from higher up and more from above.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public sealed class FollowCamera : MonoBehaviour
@@ -30,6 +31,13 @@ namespace Buds.Core
         float size; // half the visible height on the ground at the focus, in tiles
         float distance;
         Vector3 focus;
+        // what is shown now, easing towards the normal view or the overview
+        float viewSize;
+        float viewTilt = World.WorldView.Tilt;
+        bool overview;
+        Vector3 overviewAt;
+        float overviewSize;
+        float overviewTilt;
 
         void Awake()
         {
@@ -48,7 +56,33 @@ namespace Buds.Core
         /// <summary>The bud's feet, a bit north: the point the camera looks at (the bud stands up from its feet).</summary>
         Vector3 FocusOf(Vector3 target) => new(target.x, target.y + 0.6f, 0);
 
-        void Place() => transform.position = focus + Shake() - transform.forward * distance;
+        void Place()
+        {
+            transform.rotation = Quaternion.Euler(-viewTilt, 0, 0);
+            transform.position = focus + Shake() - transform.forward * DistanceFor(viewSize > 0 ? viewSize : size, FieldOfView);
+        }
+
+        /// <summary>Looks at a point of the ground from higher up: half the visible height, degrees from straight overhead.</summary>
+        public void Overview(Vector3 at, float halfHeight, float tilt)
+        {
+            overview = true;
+            overviewAt = at;
+            overviewSize = halfHeight;
+            overviewTilt = tilt;
+        }
+
+        /// <summary>Back to following the bud.</summary>
+        public void EndOverview() => overview = false;
+
+        /// <summary>The point of the flat ground under a point of the screen.</summary>
+        public bool GroundAt(Vector2 screen, out Vector3 ground)
+        {
+            var ray = cam.ScreenPointToRay(screen);
+            ground = default;
+            if (!new Plane(Vector3.forward, Vector3.zero).Raycast(ray, out var along)) return false;
+            ground = ray.GetPoint(along);
+            return true;
+        }
 
         /// <summary>How hard the view shakes now (0…1): a blow lands, it fades in a fraction of a second.</summary>
         float trauma;
@@ -84,6 +118,9 @@ namespace Buds.Core
             Resize();
             if (!target) return;
             focus = Clamp(FocusOf(target.position));
+            overview = false;
+            viewSize = size;
+            viewTilt = World.WorldView.Tilt;
             Place();
         }
 
@@ -100,7 +137,13 @@ namespace Buds.Core
         {
             Resize();
             if (!target) return;
-            focus = Vector3.Lerp(focus, Clamp(FocusOf(target.position)), 1 - Mathf.Exp(-smoothing * Time.deltaTime));
+            var ease = 1 - Mathf.Exp(-(overview ? 5f : 7f) * Time.unscaledDeltaTime);
+            if (viewSize <= 0) viewSize = size;
+            viewSize = Mathf.Lerp(viewSize, overview ? overviewSize : size, ease);
+            viewTilt = Mathf.Lerp(viewTilt, overview ? overviewTilt : World.WorldView.Tilt, ease);
+            focus = overview
+                ? Vector3.Lerp(focus, overviewAt, ease)
+                : Vector3.Lerp(focus, Clamp(FocusOf(target.position)), 1 - Mathf.Exp(-smoothing * Time.deltaTime));
             trauma = Mathf.Max(0, trauma - Time.unscaledDeltaTime * 2.6f);
             Place();
         }

@@ -587,6 +587,7 @@ namespace Buds.Core
             if (Body(e.v) is { } fallen) combatFx?.KnockOut(fallen.head);
             if (e.v == Me)
             {
+                foreach (var said in quests.KnockedOut()) ui.ShowToast(said, 4.5f);
                 Haptics.Tap(120);
                 followCam?.Kick(0.6f);
                 chaseId = null;

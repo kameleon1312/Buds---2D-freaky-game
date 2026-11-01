@@ -159,8 +159,8 @@ namespace Buds.Api
         public Awaitable<FightResponse> StartRaid(string token, string plot) =>
             Post<FightResponse>("/v1/land/raids", token, JsonUtility.ToJson(new Quests.RaidRequest { plot = plot }));
 
-        public Awaitable<Quests.LandResponse> Build(string token, string kind, int x, int y) =>
-            Post<Quests.LandResponse>("/v1/land/build", token, JsonUtility.ToJson(new Quests.BuildRequest { kind = kind, x = x, y = y }));
+        public Awaitable<Quests.LandResponse> Build(string token, string kind, int x, int y, int rot = 0) =>
+            Post<Quests.LandResponse>("/v1/land/build", token, JsonUtility.ToJson(new Quests.BuildRequest { kind = kind, x = x, y = y, rot = rot }));
 
         public Awaitable<Quests.LandResponse> UpgradeBuilding(string token, int id) =>
             Post<Quests.LandResponse>($"/v1/land/buildings/{id}/upgrade", token, "{}");
@@ -200,6 +200,14 @@ namespace Buds.Api
             await Send(req);
             return Parse<SkillsResponse>(req);
         }
+
+        /// <summary>What this bud has seen of every map, whichever device it walked there on.</summary>
+        public async Awaitable<ExploredMapDto[]> GetExplored(string token) =>
+            (await Get<ExploredResponse>("/v1/buds/me/explored", token)).maps ?? Array.Empty<ExploredMapDto>();
+
+        /// <summary>Adds what was seen on a map; the answer is everything the server now has for it.</summary>
+        public Awaitable<ExploredMapDto> SaveExplored(string token, string mapId, string seen) =>
+            Send<ExploredMapDto>("PUT", $"/v1/buds/me/explored/{Uri.EscapeDataString(mapId)}", token, $"{{\"seen\":\"{seen}\"}}");
 
         /// <summary>Ids of the caches this bud has opened.</summary>
         public async Awaitable<string[]> GetOpenedCaches(string token) =>

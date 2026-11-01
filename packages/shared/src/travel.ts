@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { canEnterDistrict, districtById } from './districts';
+import { canEnterDistrict, districtById, missingGateQuest } from './districts';
 
 /**
  * Travel between the cities. On foot: every road out of Miasto Ziomków runs through a wasteland (pustkowie) to the
@@ -58,6 +58,15 @@ export const ROUTES = [
     levels: [6, 12],
     blurb: 'Gruz, złom i martwe drzewa. Najgroźniejsza droga w okolicy.',
   },
+  {
+    id: 'pustkowie-ryzowe',
+    name: 'Ryżowy Trakt',
+    axis: 'v',
+    a: 'dwor-carski',
+    b: 'chinatown',
+    levels: [8, 12],
+    blurb: 'Tarasy pól ryżowych i bambus za Dworem Carskim. W zaroślach czekają przemytnicy.',
+  },
 ] as const satisfies readonly Route[];
 
 export type RouteId = (typeof ROUTES)[number]['id'];
@@ -103,6 +112,7 @@ export const PORTS = [
   { id: 'port-palmas', district: 'las-palmas', name: 'Przystań Jachtowa', x: 103, y: 118 },
   { id: 'port-dwor', district: 'dwor-carski', name: 'Przystań Dworska', x: 48, y: 105 },
   { id: 'port-karkos', district: 'los-karkos', name: 'Port Przemytników', x: 50, y: 115 },
+  { id: 'port-chinatown', district: 'chinatown', name: 'Port Lampionów', x: 58, y: 116 },
 ] as const satisfies readonly Port[];
 
 export type PortId = (typeof PORTS)[number]['id'];
@@ -118,12 +128,14 @@ export function ferryBlocker(
   fromId: string,
   toId: string,
   level: number,
-): 'unknown_port' | 'same_port' | 'level_too_low' | null {
+  completed: ReadonlySet<string> = new Set(),
+): 'unknown_port' | 'same_port' | 'level_too_low' | 'quest_needed' | null {
   const from = portById(fromId);
   const to = portById(toId);
   if (!from || !to) return 'unknown_port';
   if (from.id === to.id || from.district === to.district) return 'same_port';
   if (!canEnterDistrict(to.district, level)) return 'level_too_low';
+  if (missingGateQuest(to.district, completed)) return 'quest_needed';
   return null;
 }
 

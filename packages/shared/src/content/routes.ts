@@ -40,8 +40,75 @@ const OSTEPY = 'pustkowie-ostepy';
 const WYDMY = 'pustkowie-wydmy';
 const GOSCINIEC = 'pustkowie-gosciniec';
 const NIEUZYTKI = 'pustkowie-nieuzytki';
+const RYZOWY = 'pustkowie-ryzowe';
 
 const enemies: EnemyInput[] = [
+  // Ryżowy Trakt: smugglers between the manor and Chinatown, levels 8–12
+  lurker(RYZOWY, {
+    id: 'przemytnik-herbaty',
+    name: 'Przemytnik Herbaty',
+    level: 8,
+    weapon: 'kij',
+    at: [28, 34],
+    look: {
+      skin: 1,
+      hair: 'daszek',
+      hairColor: 0,
+      outfit: 'kamizelka',
+      outfitColor: 4,
+      pantsColor: 1,
+    },
+    lines: ['Nic nie widziałeś.', 'Ta paczka nie istnieje. Ty zaraz też.'],
+  }),
+  lurker(RYZOWY, {
+    id: 'cien-z-bambusa',
+    name: 'Cień z Bambusa',
+    level: 9,
+    weapon: 'piesci',
+    at: [68, 62],
+    look: {
+      skin: 1,
+      hair: 'buzz',
+      hairColor: 1,
+      outfit: 'dresowka',
+      outfitColor: 6,
+      pantsColor: 1,
+    },
+    lines: ['Szedłeś za głośno.', 'Bambus wszystko słyszy.'],
+  }),
+  lurker(RYZOWY, {
+    id: 'poborca-z-traktu',
+    name: 'Poborca z Traktu',
+    level: 10,
+    weapon: 'kij',
+    at: [26, 92],
+    look: {
+      skin: 0,
+      hair: 'czapka',
+      hairColor: 4,
+      outfit: 'kurtka',
+      outfitColor: 5,
+      pantsColor: 3,
+    },
+    lines: ['Myto. Za oddychanie.', 'Płacisz albo płaczesz.'],
+  }),
+  lurker(RYZOWY, {
+    id: 'czerwony-baran',
+    name: 'Czerwony Baran',
+    level: 12,
+    weapon: 'piesci',
+    at: [70, 122],
+    look: {
+      skin: 2,
+      hair: 'buzz',
+      hairColor: 0,
+      outfit: 'kamizelka',
+      outfitColor: 0,
+      pantsColor: 1,
+    },
+    lines: ['Tu kończy się ten trakt. Dla ciebie.', 'Rogatki są zamknięte.'],
+    boss: true,
+  }),
   // Leśne Ostępy: the easy road, levels 2–5
   lurker(OSTEPY, {
     id: 'lesny-rabus',
@@ -367,6 +434,19 @@ const FERRYMEN: { name: string; look: BudLookInput }[] = [
     },
   },
 ];
+FERRYMEN.push({
+  name: 'Lin',
+  look: {
+    gender: 'ona',
+    mood: 'wyluzowany',
+    skin: 1,
+    hair: 'kok',
+    hairColor: 1,
+    outfit: 'koszula',
+    outfitColor: 0,
+    pantsColor: 1,
+  },
+});
 const npcs: NpcInput[] = PORTS.map((p, i) => ({
   id: `przewoznik-${p.id.replace('port-', '')}`,
   name: `Przewoźnik ${FERRYMEN[i]!.name}`.slice(0, 24),

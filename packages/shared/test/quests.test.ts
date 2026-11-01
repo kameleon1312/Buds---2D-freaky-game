@@ -1,3 +1,5 @@
+import { DISTRICTS, missingGateQuest } from '../src/districts';
+import { ferryBlocker } from '../src/travel';
 import { describe, expect, it } from 'vitest';
 import {
   CONTENT,
@@ -148,5 +150,74 @@ describe('tutorial island', () => {
     expect(
       contentProblems({ ...CONTENT, quests: [q] }).some((p) => p.includes('unknown enemy')),
     ).toBe(true);
+  });
+});
+
+describe('quests with a twist', () => {
+  it('every city past the first asks for a quest done before it', () => {
+    for (const d of DISTRICTS) {
+      if (d.id === 'miasto-ziomkow' || d.id === 'dzika-puszcza') continue;
+      const gate = (d as { gateQuest?: string }).gateQuest;
+      expect(gate, d.id).toBeDefined();
+      const q = questById(gate!)!;
+      expect(q, d.id).toBeDefined();
+      expect(q.district, d.id).not.toBe(d.id);
+      expect(q.minLevel, d.id).toBeLessThanOrEqual(d.unlockLevel);
+    }
+    expect(missingGateQuest('chinatown', new Set())).toBe('list-do-chinatown');
+    expect(missingGateQuest('chinatown', new Set(['list-do-chinatown']))).toBeNull();
+    expect(missingGateQuest('miasto-ziomkow', new Set())).toBeNull();
+  });
+
+  it('the ferry needs the pass too', () => {
+    expect(ferryBlocker('port-miasto', 'port-chinatown', 9)).toBe('quest_needed');
+    expect(
+      ferryBlocker('port-miasto', 'port-chinatown', 9, new Set(['list-do-chinatown'])),
+    ).toBeNull();
+    expect(ferryBlocker('port-miasto', 'port-chinatown', 8, new Set(['list-do-chinatown']))).toBe(
+      'level_too_low',
+    );
+  });
+
+  it('content problems catch an answer out of range and hidden items with no hint', () => {
+    const q = (steps: unknown[]) => ({
+      ...CONTENT,
+      quests: [{ ...CONTENT.quests[0]!, id: 'zz-test', requires: [], steps }],
+    });
+    const npc = CONTENT.npcs[0]!.id;
+    const ask = {
+      kind: 'ask',
+      npc,
+      text: '?',
+      answers: ['a', 'b'],
+      correct: 3,
+      wrong: 'x',
+      back: 0,
+    };
+    expect(contentProblems(q([ask]) as never).join()).toContain('right answer');
+    const lost = {
+      kind: 'collect',
+      item: 'kokos',
+      label: 'x',
+      spots: [{ x: 1, y: 1 }],
+      hidden: true,
+      back: 0,
+    };
+    expect(contentProblems(q([lost]) as never).join()).toContain('hint');
+  });
+
+  it('a good share of the quests now ask for more than walking and picking up', () => {
+    const twisted = CONTENT.quests.filter(
+      (q) =>
+        q.fragile ||
+        q.steps.some(
+          (s) =>
+            s.kind === 'ask' ||
+            s.kind === 'game' ||
+            ((s.kind === 'reach' || s.kind === 'collect') && s.seconds) ||
+            (s.kind === 'collect' && s.hidden),
+        ),
+    );
+    expect(twisted.length).toBeGreaterThanOrEqual(30);
   });
 });

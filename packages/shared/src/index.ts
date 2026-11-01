@@ -19,6 +19,7 @@ export * from './combat';
 export * from './brawl';
 export * from './loadout';
 export * from './account';
+export * from './explored';
 export * from './skills';
 export * from './rivalry';
 export * from './travel';

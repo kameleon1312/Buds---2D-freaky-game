@@ -157,13 +157,41 @@ export const LOS_KARKOS: {
       xp: 380,
       minLevel: 7,
       requires: ['nowy-na-dzielnicy'],
-      intro: 'Trzy okrążenia wokół ringu, biegiem! Dotknij każdego narożnika placu.',
+      intro:
+        'Trzy okrążenia wokół ringu, biegiem! Dotknij każdego narożnika, a potem wchodzisz ze mną na ring. Nie zaliczysz, nie ma rękawic.',
       done: 'Kondycja jest. Masz moje stare rękawice — zasłużyłeś.',
       rewardItem: 'rekawice-bokserskie',
       steps: [
-        { kind: 'reach', x: 112, y: 57, radius: 1, label: 'Narożnik przy siłowni' },
-        { kind: 'reach', x: 104, y: 52, radius: 1, label: 'Narożnik przy drodze' },
-        { kind: 'reach', x: 114, y: 66, radius: 1, label: 'Narożnik przy beczkach' },
+        { seconds: 18, kind: 'reach', x: 112, y: 57, radius: 1, label: 'Narożnik przy siłowni' },
+        {
+          seconds: 14,
+          back: 1,
+          late: 'Bogdan gwiżdże. Od pierwszego narożnika!',
+          kind: 'reach',
+          x: 104,
+          y: 52,
+          radius: 1,
+          label: 'Narożnik przy drodze',
+        },
+        {
+          seconds: 14,
+          back: 2,
+          late: 'Za wolno! Całe kółko od nowa!',
+          kind: 'reach',
+          x: 114,
+          y: 66,
+          radius: 1,
+          label: 'Narożnik przy beczkach',
+        },
+        {
+          kind: 'game',
+          npc: 'bogdan',
+          skill: 'walka',
+          score: 4,
+          label: 'Sparing z Bogdanem: 4 z 5',
+          text: 'Kondycja to nie wszystko. Na ring. Blokuj, unikaj, kontruj.',
+          wrong: 'W Los Karkos już byś leżał. Jeszcze raz.',
+        },
       ],
     },
     {
@@ -203,6 +231,8 @@ export const LOS_KARKOS: {
       done: 'Dzięki… Nie każdy by pomógł komuś stąd.',
       steps: [
         {
+          seconds: 80,
+          late: 'Kumplowi pogorszyło się. Zbierz apteczki jeszcze raz, szybciej.',
           kind: 'collect',
           item: 'apteczka',
           label: 'Apteczki',
@@ -223,8 +253,9 @@ export const LOS_KARKOS: {
       xp: 320,
       minLevel: 7,
       intro:
-        'Moje skrzynki ze sprzętem utknęły na bazarze. Przynieś trzy, zanim Rysiek je „pożyczy”.',
+        'Moje skrzynki ze sprzętem utknęły na bazarze. Przynieś trzy, zanim Rysiek je pożyczy. Dostaniesz w zęby, to skrzynki znikną i wszystko od początku.',
       done: 'Wszystkie całe. Dobrze mieć kogoś zaufanego.',
+      fragile: 'Rysiek pożyczył skrzynki, gdy leżałeś. Trzeba je znowu znaleźć.',
       steps: [
         {
           kind: 'collect',
@@ -248,9 +279,19 @@ export const LOS_KARKOS: {
       intro:
         'Gang z fabryki coś szykuje. Sprawdź bramę fabryki i most nad kanałem, potem powiedz Ryśkowi, co widziałeś.',
       done: 'Dobra robota. Teraz wiemy, kiedy się ruszą.',
+      fragile: 'Złapali cię przy fabryce. Kos musi zacząć rozpoznanie od nowa.',
       steps: [
         { kind: 'reach', x: 111, y: 74, radius: 1, label: 'Brama fabryki' },
-        { kind: 'reach', x: 61, y: 89, radius: 1, label: 'Most nad kanałem' },
+        {
+          seconds: 30,
+          back: 1,
+          late: 'Zmiana warty. Wróć pod bramę i obejrzyj wszystko jeszcze raz.',
+          kind: 'reach',
+          x: 61,
+          y: 89,
+          radius: 1,
+          label: 'Most nad kanałem',
+        },
         {
           kind: 'talk',
           npc: 'rysiek',

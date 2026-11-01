@@ -1,3 +1,4 @@
+import { buildingById, doorCell, footprint, landStateSchema } from '../src/land';
 import { describe, expect, it } from 'vitest';
 import {
   BUILDINGS,
@@ -342,5 +343,41 @@ describe('walking', () => {
     expect(walkable(l, 0, 22)).toBe(false);
     expect(walkable(l, 2, 2)).toBe(false);
     expect(walkable(l, HALL.x, HALL.y)).toBe(false);
+  });
+});
+
+describe('turning a building', () => {
+  const kind = buildingById('iglica')!;
+  const open = () => ({
+    ...newLand('Testowo', PLOTS[0]!.id, 0),
+    resources: { beton: 9999, stal: 9999, energia: 9999, zywnosc: 9999 },
+    sectors: Array.from({ length: SECTORS * SECTORS }, (_, i) => i),
+  });
+
+  it('turns round its door', () => {
+    expect(footprint(kind, 10, 10, 0)).toEqual({ x0: 8, x1: 12, y0: 7, y1: 10 });
+    expect(footprint(kind, 10, 10, 1)).toEqual({ x0: 10, x1: 13, y0: 8, y1: 12 });
+    expect(footprint(kind, 10, 10, 2)).toEqual({ x0: 8, x1: 12, y0: 10, y1: 13 });
+    expect(footprint(kind, 10, 10, 3)).toEqual({ x0: 7, x1: 10, y0: 8, y1: 12 });
+    expect(doorCell(10, 10, 1)).toEqual([9, 10]);
+    expect(doorCell(10, 10, 3)).toEqual([11, 10]);
+  });
+
+  it('a turned building is saved with its turn and fills the cells it covers', () => {
+    const land = open();
+    expect(placementProblem(land, 'szklarnia', 3, 3, 20, 1)).toBeNull();
+    const built = build(land, 'szklarnia', 3, 3, 0, 1);
+    expect(built).not.toBe('walls_in');
+    const next = built as typeof land;
+    expect(next.buildings.at(-1)!.rot).toBe(1);
+    expect(placementProblem(next, 'szklarnia', 4, 3, 20, 0)).toBe('occupied');
+    expect(landStateSchema.safeParse(next).success).toBe(true);
+  });
+
+  it('a door against the fence is refused', () => {
+    const land = open();
+    // door west at x = 1: the cell in front of it is the fence
+    expect(placementProblem(land, 'szklarnia', 1, 8, 20, 1)).toBe('outside');
+    expect(placementProblem(land, 'szklarnia', 2, 8, 20, 1)).toBeNull();
   });
 });

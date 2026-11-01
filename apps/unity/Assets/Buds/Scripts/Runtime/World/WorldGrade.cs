@@ -36,6 +36,7 @@ namespace Buds.World
                 "pustkowie-wydmy" => "las-palmas",
                 "pustkowie-gosciniec" => "dwor-carski",
                 "pustkowie-nieuzytki" => "los-karkos",
+                "pustkowie-ryzowe" => "chinatown",
                 _ => districtId,
             };
             return districtId switch
@@ -46,6 +47,8 @@ namespace Buds.World
                     { Contrast = 13, Saturation = 14, Exposure = 0.05f, Highlights = Hex("#fff0c2"), Shadows = Hex("#22688c"), Balance = 15, Vignette = 0.22f },
                 "dwor-carski" => new Mood
                     { Contrast = 15, Saturation = 4, Highlights = Hex("#ffe0a0"), Shadows = Hex("#55467c"), Balance = 0, Vignette = 0.28f },
+                "chinatown" => new Mood
+                    { Contrast = 16, Saturation = 10, Highlights = Hex("#ffd8a8"), Shadows = Hex("#5a2f4e"), Balance = -4, Vignette = 0.28f },
                 "los-karkos" => new Mood
                     { Contrast = 19, Saturation = -9, Highlights = Hex("#ffc890"), Shadows = Hex("#4a3a4c"), Balance = -14, Vignette = 0.34f },
                 _ => new Mood

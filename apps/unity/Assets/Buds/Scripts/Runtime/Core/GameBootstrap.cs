@@ -363,7 +363,7 @@ namespace Buds.Core
             var windowOpen = ui.DialogOpen || (panel?.IsOpen ?? false) || (mapScreen?.IsOpen ?? false) ||
                              (trainingScreen?.IsOpen ?? false) || (rivalryScreen?.IsOpen ?? false) ||
                              (creatorScreen?.IsOpen ?? false) || (ferryScreen?.IsOpen ?? false) || (chatScreen?.IsOpen ?? false) ||
-                             (landScreen?.IsOpen ?? false);
+                             (landScreen?.IsOpen ?? false) || (landPlanner?.IsOpen ?? false);
             // knocked out, stunned or flung by a blow: the fight holds the bud (walka.md)
             input.Blocked = windowOpen || CombatLocked;
             // the fight's buttons, the aim, the mouse: every frame, the world never stops for a fight
@@ -460,12 +460,13 @@ namespace Buds.Core
             if (Districts.IsRoute(exit.DistrictId))
             {
                 var far = Districts.Get(Districts.FarEnd(exit.DistrictId, world.Map.Id) ?? "");
-                if (far == null || Districts.CanEnterRoute(exit.DistrictId, world.Map.Id, level) || (Debug.isDebugBuild && far.Open))
+                if (far == null || RouteOpen(exit.DistrictId, world.Map.Id))
                 {
                     _ = Travel(exit.DistrictId, world.Map.Id);
                     return true;
                 }
-                ui.ShowDialog(Districts.NameOf(exit.DistrictId), $"Ta droga prowadzi do: {far.Name}.\n{Districts.ClosedReason(far, level)}");
+                var why = level >= far.UnlockLevel ? PassReason(far) : Districts.ClosedReason(far, level);
+                ui.ShowDialog(Districts.NameOf(exit.DistrictId), $"Ta droga prowadzi do: {far.Name}.\n{why}");
                 return false;
             }
             var district = Districts.Get(exit.DistrictId);
@@ -635,6 +636,7 @@ namespace Buds.Core
             try
             {
                 await Shot("01-spawn.png");
+                if (CommandLine.Has("-buds-plan-demo")) await PlanDemo(Shot);
                 if (CommandLine.Has("-buds-land-demo") && session != null)
                 {
                     await LandDemo(Shot);

@@ -99,5 +99,16 @@ namespace Buds.Tests
             Assert.AreEqual("specjalny", Content.Perk("cios-specjalny").move);
             Assert.IsNotNull(Content.Move("specjalny"));
         }
+
+        [Test]
+        public void OnABoardTheBudAlwaysStandsSideways()
+        {
+            foreach (var f in new[] { Facing.Down, Facing.Up, Facing.Side })
+            {
+                Assert.AreEqual(Facing.Side, Rides.RiderFacing("deskorolka", f));
+                Assert.AreEqual(Facing.Side, Rides.RiderFacing("deskorolka-holo", f));
+            }
+            Assert.AreEqual(Facing.Down, Rides.RiderFacing("rower", Facing.Down), "a bike is ridden facing forward");
+        }
     }
 }

@@ -64,6 +64,16 @@ export const TURFS: readonly Turf[] = [
   { id: 'lk-tor-motocrossowy', district: 'los-karkos', name: 'Tor Motocrossowy', x0: 130, y0: 52, x1: 170, y1: 86 },
   { id: 'lk-port-przemytnikow', district: 'los-karkos', name: 'Port Przemytników', x0: 4, y0: 102, x1: 96, y1: 128 },
   { id: 'lk-ruiny-elektrowni', district: 'los-karkos', name: 'Ruiny Elektrowni', x0: 100, y0: 100, x1: 152, y1: 126 },
+  { id: 'ct-brama-smoka', district: 'chinatown', name: 'Brama Smoka', x0: 56, y0: 0, x1: 72, y1: 20 },
+  { id: 'ct-ulica-lampionow', district: 'chinatown', name: 'Ulica Lampionów', x0: 40, y0: 20, x1: 92, y1: 55 },
+  { id: 'ct-plac-smoka', district: 'chinatown', name: 'Plac Smoka', x0: 42, y0: 56, x1: 86, y1: 76 },
+  { id: 'ct-nocny-targ', district: 'chinatown', name: 'Nocny Targ', x0: 88, y0: 50, x1: 130, y1: 80 },
+  { id: 'ct-uliczki-rzemieslnikow', district: 'chinatown', name: 'Uliczki Rzemieślników', x0: 8, y0: 50, x1: 40, y1: 86 },
+  { id: 'ct-ogrod-pagody', district: 'chinatown', name: 'Ogród Pagody', x0: 44, y0: 78, x1: 110, y1: 110 },
+  { id: 'ct-gaj-bambusowy', district: 'chinatown', name: 'Gaj Bambusowy', x0: 96, y0: 8, x1: 168, y1: 46 },
+  { id: 'ct-wisniowe-wzgorze', district: 'chinatown', name: 'Wiśniowe Wzgórze', x0: 8, y0: 8, x1: 38, y1: 46 },
+  { id: 'ct-stare-magazyny', district: 'chinatown', name: 'Stare Magazyny', x0: 132, y0: 50, x1: 170, y1: 104 },
+  { id: 'ct-port-lampionow', district: 'chinatown', name: 'Port Lampionów', x0: 4, y0: 111, x1: 171, y1: 127 },
 ];
 
 /** Rooms (interiors) by id: the district and the cell of their door, so things inside count for that turf. */
@@ -77,4 +87,6 @@ export const ROOM_DOORS: Readonly<Record<string, readonly [district: string, x: 
   'dwor-carski-urzad': ['dwor-carski', 82, 20],
   'los-karkos-silownia': ['los-karkos', 117, 56],
   'los-karkos-ruina': ['los-karkos', 29, 42],
+  'chinatown-herbaciarnia': ['chinatown', 53, 90],
+  'chinatown-dojo': ['chinatown', 24, 62],
 };

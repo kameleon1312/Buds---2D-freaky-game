@@ -41,11 +41,18 @@ namespace Buds.Core
             return Districts.IsRoute(e.DistrictId) && RouteOpen(e.DistrictId, map.Id);
         }
 
+        /// <summary>Who to see about the pass to a city.</summary>
+        string PassReason(District d)
+        {
+            var q = quests.Content.Quest(d.GateQuest);
+            return Districts.NoPassReason(d, q?.title ?? d.GateQuest, quests.Content.Npc(q?.giver)?.name ?? "");
+        }
+
         /// <summary>The road onto a wasteland is open when the city at its far end is (dev builds walk everywhere).</summary>
         bool RouteOpen(string routeId, string from)
         {
-            if (Districts.CanEnterRoute(routeId, from, level)) return true;
             var far = Districts.Get(Districts.FarEnd(routeId, from) ?? "");
+            if (Districts.CanEnterRoute(routeId, from, level) && Districts.HasPass(far, quests.Completed)) return true;
             return far == null || (Debug.isDebugBuild && far.Open);
         }
 

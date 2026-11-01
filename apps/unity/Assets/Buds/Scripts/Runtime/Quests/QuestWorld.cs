@@ -244,12 +244,17 @@ namespace Buds.Quests
         }
 
         /// <summary>Picks up items near the player's feet; returns how many were collected.</summary>
+        const float HiddenReveal = 3.2f;
+
         public int CollectNear(Vector2 feet)
         {
             var count = 0;
             foreach (var (go, quest, spot) in pickups.ToArray())
             {
-                if (!go || Vector2.Distance(feet, go.transform.position) > PickupRange) continue;
+                if (!go) continue;
+                // what lies hidden shows itself only from close by
+                if (log.CurrentStep(quest) is { hidden: true }) go.SetActive(Vector2.Distance(feet, go.transform.position) < HiddenReveal);
+                if (Vector2.Distance(feet, go.transform.position) > PickupRange) continue;
                 count++;
                 log.Collect(quest, spot); // triggers Refresh, which rebuilds the list
             }

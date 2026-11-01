@@ -76,6 +76,7 @@ describe('districts', () => {
       'Las Palmas',
       'Dwór Carski',
       'Los Karkos',
+      'Chinatown',
     ]);
     const levels = DISTRICTS.map((d) => d.unlockLevel);
     expect([...levels].sort((a, b) => a - b)).toEqual(levels);

@@ -11,6 +11,9 @@ namespace Buds.Core
     public sealed partial class GameBootstrap
     {
         bool handingIn;
+        int questClockShown;
+        /// <summary>The quest whose mini-game is being played (no training XP, no cooldown), and the step's words.</summary>
+        (QuestData quest, StepData step)? questGame;
 
         string SaveKey => "buds.quests." + (session?.Slug ?? "guest");
 
@@ -64,6 +67,17 @@ namespace Buds.Core
         {
             if (quests.Reach(world.Map.Id, cell.x, cell.y)) ui.ShowToast("Cel osiągnięty!");
             if (questWorld.CollectNear(player.transform.position) > 0) ui.ShowToast("Zebrano!", 1.4f);
+            foreach (var late in quests.Tick(Time.deltaTime)) ui.ShowToast(late, 4f);
+            // the tracker shows the clock: whole seconds are enough
+            var second = Mathf.FloorToInt(Time.time);
+            if (second == questClockShown) return;
+            questClockShown = second;
+            foreach (var q in quests.Active)
+                if (quests.TimeLeft(q.id) >= 0)
+                {
+                    UpdateTracker();
+                    break;
+                }
         }
 
         void TalkTo(NpcView npc)
@@ -86,10 +100,18 @@ namespace Buds.Core
                 return;
             }
 
+            if (quests.WaitingAt(n.id) is { } waiting)
+            {
+                if (waiting.step.kind == "ask") AskQuestion(n, waiting.quest, waiting.step);
+                else OfferQuestGame(n, waiting.quest, waiting.step);
+                return;
+            }
+
             var offer = quests.OfferFrom(n.id);
             if (offer != null)
             {
-                ui.ShowChoice(n.name, $"{offer.intro}\n<b>Nagroda: {offer.xp} XP</b>", "Przyjmij", "Później", () =>
+                var prize = quests.Content.Item(offer.rewardItem)?.name;
+                ui.ShowChoice(n.name, $"{offer.intro}\n<b>Nagroda: {offer.xp} XP{(prize != null ? $" + {prize}" : "")}</b>", "Przyjmij", "Później", () =>
                 {
                     quests.Accept(offer.id);
                     ui.ShowToast($"Nowe zadanie: {offer.title}");
@@ -111,6 +133,46 @@ namespace Buds.Core
                 return;
             }
             ui.ShowDialog(n.name, n.lines[UnityEngine.Random.Range(0, n.lines.Length)]);
+        }
+
+        /// <summary>An NPC's question: the right answer moves the quest on, a wrong one sends it back to hear it again.</summary>
+        void AskQuestion(NpcData n, QuestData quest, StepData step)
+        {
+            ui.ShowAnswers(n.name, step.text, step.answers, answer =>
+            {
+                if (quests.Answer(quest.id, answer))
+                {
+                    ui.ShowToast("Dobra odpowiedź!", 2f);
+                    return;
+                }
+                Haptics.Tap(60);
+                ui.ShowDialog(n.name, step.wrong);
+            });
+        }
+
+        /// <summary>A mini-game at an NPC for a quest: what the NPC says, then the game; only its score counts, nothing is sent.</summary>
+        void OfferQuestGame(NpcData n, QuestData quest, StepData step)
+        {
+            ui.ShowChoice(n.name, $"{step.text}\n<b>{step.label}</b>", "Gramy", "Jeszcze nie", () =>
+            {
+                if (trainingScreen == null) return;
+                questGame = (quest, step);
+                activeTraining = null;
+                var skillName = Array.Find(quests.Content.skills, s => s.id == step.skill)?.name ?? step.skill;
+                var spot = new TrainingSpotData { id = "quest-" + quest.id, skill = step.skill, name = n.name, hint = step.text };
+                ui.SetHint(null);
+                trainingScreen.Open(spot, skillName, quests.Content.trainingMaxScore, sheet,
+                    trainedRanks.TryGetValue(step.skill, out var rank) ? rank : 0);
+            }, null);
+        }
+
+        /// <summary>The end of a quest's mini-game: what to say under the score.</summary>
+        string FinishQuestGame(int score)
+        {
+            var (quest, step) = questGame.Value;
+            questGame = null;
+            if (quests.GameScore(quest.id, score)) return "<color=#5d9a12><b>Zaliczone! Zadanie idzie dalej.</b></color>";
+            return $"<color=#bd1c31><b>Potrzeba {step.score} z 5.</b></color> {step.wrong}";
         }
 
         /// <summary>Hands in a finished quest: the server checks it and grants the XP, the game only shows the result.</summary>

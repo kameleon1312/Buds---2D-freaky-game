@@ -1,3 +1,4 @@
+import { CHINATOWN } from './chinatown';
 import { CITY } from './city';
 import { COMMON } from './common';
 import { INTERIOR } from './interior';
@@ -25,6 +26,7 @@ export const ALL_PROPS: Record<string, Prop> = {
   ...TRAINING_PROPS,
   ...PLACES,
   ...DISTRICT,
+  ...CHINATOWN,
   ...LIFE_PROPS,
   ...DRESSING_PROPS,
 };

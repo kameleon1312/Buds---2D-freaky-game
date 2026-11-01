@@ -206,8 +206,37 @@ namespace Buds.Tests
                 Assert.IsTrue(map.IsWalkable(plot.x + outside.x, plot.y + outside.y), $"{plot.id}: the way to the gate is open");
             }
             // a few plots a wasteland, far apart
-            foreach (var route in new[] { "pustkowie-ostepy", "pustkowie-wydmy", "pustkowie-gosciniec", "pustkowie-nieuzytki" })
+            foreach (var route in new[] { "pustkowie-ostepy", "pustkowie-wydmy", "pustkowie-gosciniec", "pustkowie-nieuzytki", "pustkowie-ryzowe" })
                 Assert.AreEqual(4, Content.land.PlotsOn(route).Length, route);
+        }
+
+        [Test]
+        public void ABuildingTurnsRoundItsDoorAndFitsAccordingly()
+        {
+            var kind = new BuildingData { id = "x", w = 5, h = 4 };
+            Assert.AreEqual(new RectInt(8, 7, 5, 4), Land.Footprint(kind, 10, 10, 0));
+            Assert.AreEqual(new RectInt(10, 8, 4, 5), Land.Footprint(kind, 10, 10, 1), "door west: the building lies east of it");
+            Assert.AreEqual(new RectInt(8, 10, 5, 4), Land.Footprint(kind, 10, 10, 2));
+            Assert.AreEqual(new RectInt(7, 8, 4, 5), Land.Footprint(kind, 10, 10, 3));
+            Assert.AreEqual(new Vector2Int(10, 11), Land.DoorCell(10, 10, 0));
+            Assert.AreEqual(new Vector2Int(9, 10), Land.DoorCell(10, 10, 1));
+            Assert.AreEqual(new Vector2Int(10, 9), Land.DoorCell(10, 10, 2));
+            Assert.AreEqual(new Vector2Int(11, 10), Land.DoorCell(10, 10, 3));
+            // the plan keeps the middle where it is when it turns
+            for (var r = 0; r < 4; r++)
+            {
+                var anchor = Land.AnchorForCentre(kind, new Vector2Int(12, 12), r);
+                Assert.AreEqual(new Vector2Int(12, 12), Land.CentreOf(Land.Footprint(kind, anchor.x, anchor.y, r)), $"turn {r}");
+            }
+        }
+
+        [Test]
+        public void NearestFitFindsASpotThatFits()
+        {
+            var land = NewLand(sectors: All);
+            var fit = land.NearestFit("szklarnia", new Vector2Int(1, 1), 9, 0);
+            Assert.IsTrue(fit.HasValue);
+            Assert.IsNull(land.PlanProblem("szklarnia", fit.Value.anchor.x, fit.Value.anchor.y, 9, fit.Value.rot));
         }
     }
 }

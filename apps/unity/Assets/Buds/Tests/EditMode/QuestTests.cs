@@ -201,6 +201,14 @@ namespace Buds.Tests
                         case "reach":
                             Assert.IsTrue(map.InBounds(s.x, s.y), $"{q.id} reach {s.label}");
                             break;
+                        case "ask":
+                            Assert.IsNotNull(content.Npc(s.npc), $"{q.id} asks through {s.npc}");
+                            Assert.Less(s.correct, s.answers.Length, $"{q.id}: the right answer is one of them");
+                            break;
+                        case "game":
+                            Assert.IsNotNull(content.Npc(s.npc), $"{q.id} plays with {s.npc}");
+                            Assert.DoesNotThrow(() => TrainingGames.For(s.skill, 5, 1, 0), $"{q.id}: {s.skill}");
+                            break;
                         case "collect":
                             foreach (var c in s.spots) Assert.IsTrue(map.IsWalkable(c.x, c.y), $"{q.id} {s.item} at ({c.x},{c.y})");
                             Assert.IsNotNull(Resources.Load<Texture2D>("World/item-" + s.item), $"art for item-{s.item}");
@@ -216,6 +224,112 @@ namespace Buds.Tests
                     }
                 }
             }
+        }
+
+        static QuestLog Twisted()
+        {
+            var content = new QuestContent
+            {
+                npcs = new[] { new NpcData { id = "a", name = "A" }, new NpcData { id = "b", name = "B" } },
+                quests = new[]
+                {
+                    new QuestData
+                    {
+                        id = "q", giver = "a", district = "d", requires = new string[0], minLevel = 1, fragile = "Upadek!",
+                        steps = new[]
+                        {
+                            new StepData { kind = "talk", npc = "b", text = "Hasło: fala" },
+                            new StepData { kind = "ask", npc = "a", text = "?", answers = new[] { "x", "fala" }, correct = 1, wrong = "nie", back = 1 },
+                            new StepData { kind = "game", npc = "b", skill = "walka", score = 3, wrong = "za mało" },
+                            new StepData { kind = "reach", x = 1, y = 1, radius = 1, seconds = 10, back = 1, late = "Za późno" },
+                        },
+                    },
+                },
+            };
+            var log = new QuestLog(content);
+            log.Accept("q");
+            return log;
+        }
+
+        [Test]
+        public void AWrongAnswerGoesBackToHearItAgain()
+        {
+            var log = Twisted();
+            log.TalkTo("b");
+            Assert.AreEqual(NpcMarker.TurnIn, log.MarkerFor("a"), "the one asking is marked");
+            Assert.AreEqual("ask", log.WaitingAt("a")?.step.kind);
+            Assert.IsFalse(log.Answer("q", 0));
+            Assert.AreEqual("talk", log.CurrentStep("q").kind);
+            log.TalkTo("b");
+            Assert.IsTrue(log.Answer("q", 1));
+            Assert.AreEqual("game", log.CurrentStep("q").kind);
+        }
+
+        [Test]
+        public void AMiniGameCountsOnlyWithEnoughPoints()
+        {
+            var log = Twisted();
+            log.TalkTo("b");
+            log.Answer("q", 1);
+            Assert.IsFalse(log.GameScore("q", 2));
+            Assert.AreEqual("game", log.CurrentStep("q").kind, "too few points: the same game again");
+            Assert.IsTrue(log.GameScore("q", 3));
+            Assert.AreEqual("reach", log.CurrentStep("q").kind);
+        }
+
+        [Test]
+        public void TooLateGoesBackAndTheClockStartsAfresh()
+        {
+            var log = Twisted();
+            log.TalkTo("b");
+            log.Answer("q", 1);
+            log.GameScore("q", 5);
+            Assert.AreEqual(10, log.TimeLeft("q"), 0.01f);
+            Assert.IsEmpty(log.Tick(4));
+            Assert.AreEqual(6, log.TimeLeft("q"), 0.01f);
+            StringAssert.Contains("6 s", log.Objective("q"));
+            CollectionAssert.AreEqual(new[] { "Za późno" }, log.Tick(7));
+            Assert.AreEqual("game", log.CurrentStep("q").kind);
+            log.GameScore("q", 5);
+            Assert.AreEqual(10, log.TimeLeft("q"), 0.01f, "a new try, a full clock");
+        }
+
+        [Test]
+        public void AKnockoutSendsAFragileQuestBackToItsStart()
+        {
+            var log = Twisted();
+            Assert.IsEmpty(log.KnockedOut(), "nothing to lose yet");
+            log.TalkTo("b");
+            CollectionAssert.AreEqual(new[] { "Upadek!" }, log.KnockedOut());
+            Assert.AreEqual("talk", log.CurrentStep("q").kind);
+        }
+
+        [Test]
+        public void AfterFailingAgainstTheClockTheGiverStartsItAgain()
+        {
+            var content = new QuestContent
+            {
+                npcs = new[] { new NpcData { id = "a", name = "A", district = "d" } },
+                quests = new[]
+                {
+                    new QuestData
+                    {
+                        id = "q", giver = "a", district = "d", requires = new string[0], minLevel = 1,
+                        steps = new[] { new StepData { kind = "reach", x = 1, y = 1, radius = 1, seconds = 10, late = "Za późno" } },
+                    },
+                },
+            };
+            var log = new QuestLog(content);
+            log.Accept("q");
+            log.Tick(11);
+            Assert.AreEqual(NpcMarker.TurnIn, log.MarkerFor("a"));
+            Assert.IsEmpty(log.Tick(100), "no clock until the bud has been back");
+            Assert.IsFalse(log.Reach("d", 1, 1), "and the place doesn't count");
+            StringAssert.Contains("A", log.Objective("q"));
+            Assert.IsNotNull(log.TalkTo("a"));
+            Assert.AreEqual(10, log.TimeLeft("q"), 0.01f);
+            Assert.IsTrue(log.Reach("d", 1, 1));
+            Assert.IsTrue(log.IsReady("q"));
         }
     }
 }

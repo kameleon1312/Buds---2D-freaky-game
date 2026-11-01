@@ -14,6 +14,7 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
   const owned = new Map<string, OwnedItem[]>(); // slug -> granted items
   const quests = new Map<string, Set<string>>(); // slug -> completed quest ids
   const skills = new Map<string, Map<string, number>>(); // slug -> skill -> rank
+  const explored = new Map<string, Map<string, string>>(); // slug -> map -> seen cells (base64)
   const loadouts = new Map<string, Map<string, (string | null)[]>>(); // slug -> weapon -> kit
   const moveRanks = new Map<string, Map<string, number>>(); // slug -> move -> rank
   const caches = new Map<string, Set<string>>(); // slug -> opened cache ids
@@ -95,6 +96,7 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
         owned,
         quests,
         skills,
+        explored,
         loadouts,
         moveRanks,
         caches,
@@ -163,6 +165,24 @@ export function createMemoryStore(now: () => Date = () => new Date()): BudStore 
         id,
         rank,
       }));
+    },
+
+    async explored(slug) {
+      return [...(explored.get(slug) ?? new Map<string, string>())].map(([map, seen]) => ({
+        map,
+        seen,
+      }));
+    },
+
+    async mergeExplored(slug, map, seen) {
+      const mine = explored.get(slug) ?? new Map<string, string>();
+      const added = Buffer.from(seen, 'base64');
+      const had = mine.get(map);
+      if (had) Buffer.from(had, 'base64').forEach((b, i) => (added[i] = (added[i] ?? 0) | b));
+      const merged = added.toString('base64');
+      mine.set(map, merged);
+      explored.set(slug, mine);
+      return merged;
     },
 
     async loadouts(slug) {

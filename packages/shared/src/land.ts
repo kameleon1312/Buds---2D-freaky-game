@@ -48,6 +48,7 @@ export const ROUTE_BONUS: Record<string, ResourceId> = {
   'pustkowie-wydmy': 'beton',
   'pustkowie-gosciniec': 'zywnosc',
   'pustkowie-nieuzytki': 'stal',
+  'pustkowie-ryzowe': 'energia',
 };
 export const BIOME_BONUS = 1.5;
 
@@ -79,13 +80,14 @@ export function plotPrice(route: string): number {
 }
 export const LAND_MIN_LEVEL = 3;
 
-export type DistrictStyle = 'las' | 'tropik' | 'dwor' | 'zlom';
+export type DistrictStyle = 'las' | 'tropik' | 'dwor' | 'zlom' | 'lampion';
 /** The look of the districts on each wasteland, after the land around them (art: tools/world/art/district.ts). */
 export const ROUTE_STYLE: Record<string, DistrictStyle> = {
   'pustkowie-ostepy': 'las',
   'pustkowie-wydmy': 'tropik',
   'pustkowie-gosciniec': 'dwor',
   'pustkowie-nieuzytki': 'zlom',
+  'pustkowie-ryzowe': 'lampion',
 };
 
 /** The three cells of the gate (plot-local) and the cell just inside it, where the way in starts. */
@@ -482,9 +484,11 @@ export const PRODUCER_HOURS = 8;
 export const landBuildingSchema = z.object({
   id: z.number().int().nonnegative(),
   kind: z.enum(buildingIds),
-  /** Plot-local cell of the anchor (the middle of the bottom row). */
+  /** Plot-local cell of the anchor (the middle of the row its door is on). */
   x: z.number().int(),
   y: z.number().int(),
+  /** Quarter turns clockwise, seen from above: where its door looks (left out: 0, south). */
+  rot: z.number().int().min(0).max(3).optional(),
   level: z.number().int().min(1),
   /** When the building (or its last upgrade) is done, ms since epoch. */
   readyAt: z.number(),
@@ -660,19 +664,41 @@ export function collect(
   return { land: { ...land, resources, buildings }, gathered, coins };
 }
 
-export const footprint = (kind: BuildingKind, x: number, y: number) => ({
-  x0: x - (kind.w - 1) / 2,
-  x1: x + (kind.w - 1) / 2,
-  y0: y - kind.h + 1,
-  y1: y,
-});
+/** The way a door looks after these quarter turns: south, west, north, east (plot-local, y down). */
+export const DOOR_DIRS = [
+  [0, 1],
+  [-1, 0],
+  [0, -1],
+  [1, 0],
+] as const;
+
+/** The cells a building covers: it turns round its anchor, the middle of the row its door is on. */
+export const footprint = (kind: BuildingKind, x: number, y: number, rot = 0) => {
+  const side = (kind.w - 1) / 2;
+  switch (rot) {
+    case 1:
+      return { x0: x, x1: x + kind.h - 1, y0: y - side, y1: y + side };
+    case 2:
+      return { x0: x - side, x1: x + side, y0: y, y1: y + kind.h - 1 };
+    case 3:
+      return { x0: x - kind.h + 1, x1: x, y0: y - side, y1: y + side };
+    default:
+      return { x0: x - side, x1: x + side, y0: y - kind.h + 1, y1: y };
+  }
+};
+
+/** The cell in front of a building's door. */
+export const doorCell = (x: number, y: number, rot = 0): [number, number] => {
+  const [dx, dy] = DOOR_DIRS[rot] ?? DOOR_DIRS[0];
+  return [x + dx, y + dy];
+};
 
 /** Cells covered by a district's buildings (plot-local), for placement and walking. */
 function blockedCells(land: LandState, except?: number): Set<number> {
   const out = new Set<number>();
   for (const b of land.buildings) {
     if (b.id === except) continue;
-    const f = footprint(buildingById(b.kind)!, b.x, b.y);
+    const f = footprint(buildingById(b.kind)!, b.x, b.y, b.rot);
     for (let y = f.y0; y <= f.y1; y++)
       for (let x = f.x0; x <= f.x1; x++) out.add(y * PLOT_SIZE + x);
   }
@@ -723,7 +749,10 @@ export function allReachable(land: LandState): boolean {
       queue.push(k);
     }
   }
-  return land.buildings.every((b) => seen.has((b.y + 1) * PLOT_SIZE + b.x));
+  return land.buildings.every((b) => {
+    const [dx, dy] = doorCell(b.x, b.y, b.rot);
+    return seen.has(dy * PLOT_SIZE + dx);
+  });
 }
 
 export type LandProblem =
@@ -761,6 +790,7 @@ export function placementProblem(
   x: number,
   y: number,
   budLevel: number,
+  rot = 0,
 ): LandProblem | null {
   const kind = buildingById(kindId);
   if (!kind) return 'unknown_building';
@@ -769,22 +799,19 @@ export function placementProblem(
   if (count >= (kind.limit[hall - 1] ?? 0)) return 'too_many';
   const first = kind.levels[0]!;
   if (budLevel < first.player) return 'level_too_low';
-  const f = footprint(kind, x, y);
-  // the whole building on cleared land inside the fence, and the cell in front of its door too
+  const f = footprint(kind, x, y, rot);
   if (!Number.isInteger(f.x0)) return 'outside';
-  for (let cy = f.y0; cy <= f.y1 + 1; cy++)
-    for (let cx = f.x0; cx <= f.x1; cx++) {
-      if (cy === f.y1 + 1 && cx !== x) continue;
-      if (!inside(cx, cy) || !claimed(land, cx, cy)) return 'outside';
-    }
+  // the whole building and the cell in front of its door
+  const cells: [number, number][] = [doorCell(x, y, rot)];
+  for (let cy = f.y0; cy <= f.y1; cy++) for (let cx = f.x0; cx <= f.x1; cx++) cells.push([cx, cy]);
+  // on cleared land inside the fence
+  for (const [cx, cy] of cells) if (!inside(cx, cy) || !claimed(land, cx, cy)) return 'outside';
   const blocked = blockedCells(land);
   const gate = gateOf(land);
-  for (let cy = f.y0; cy <= f.y1 + 1; cy++)
-    for (let cx = f.x0; cx <= f.x1; cx++) {
-      if (cy === f.y1 + 1 && cx !== x) continue; // only the cell in front of the door must stay clear below
-      if (inGateClear(gate, cx, cy)) return 'gate';
-      if (blocked.has(cy * PLOT_SIZE + cx)) return 'occupied';
-    }
+  for (const [cx, cy] of cells) {
+    if (inGateClear(gate, cx, cy)) return 'gate';
+    if (blocked.has(cy * PLOT_SIZE + cx)) return 'occupied';
+  }
   if (!canAfford(land.resources, first.cost)) return 'poor';
   return null;
 }
@@ -796,6 +823,7 @@ export function build(
   x: number,
   y: number,
   now: number,
+  rot = 0,
 ): LandState | 'walls_in' {
   const kind = buildingById(kindId)!;
   const first = kind.levels[0]!;
@@ -805,7 +833,16 @@ export function build(
     resources: pay(land.resources, first.cost),
     buildings: [
       ...land.buildings,
-      { id: land.nextId, kind: kindId, x, y, level: 1, readyAt: ready, collectedAt: ready },
+      {
+        id: land.nextId,
+        kind: kindId,
+        x,
+        y,
+        ...(rot ? { rot } : {}),
+        level: 1,
+        readyAt: ready,
+        collectedAt: ready,
+      },
     ],
     nextId: land.nextId + 1,
   };
@@ -1072,6 +1109,7 @@ export const buildRequestSchema = z.object({
   kind: z.enum(buildingIds),
   x: z.number().int().min(0).max(PLOT_SIZE),
   y: z.number().int().min(0).max(PLOT_SIZE),
+  rot: z.number().int().min(0).max(3).optional(),
 });
 export const collectRequestSchema = z.object({ id: z.number().int().nonnegative().optional() });
 export const sellResourceRequestSchema = z.object({
@@ -1133,7 +1171,15 @@ export type DistrictView = {
   name: string;
   sectors: number[];
   clearing: { sector: number; readyAt: number } | null;
-  buildings: { id: number; kind: string; x: number; y: number; level: number; readyAt: number }[];
+  buildings: {
+    id: number;
+    kind: string;
+    x: number;
+    y: number;
+    rot: number;
+    level: number;
+    readyAt: number;
+  }[];
   power: number;
   defence: number;
   rank: string;
@@ -1155,11 +1201,12 @@ export function districtView(
     name: land.name,
     sectors: [...land.sectors],
     clearing: land.clearing,
-    buildings: land.buildings.map(({ id, kind, x, y, level, readyAt }) => ({
+    buildings: land.buildings.map(({ id, kind, x, y, rot, level, readyAt }) => ({
       id,
       kind,
       x,
       y,
+      rot: rot ?? 0,
       level,
       readyAt,
     })),

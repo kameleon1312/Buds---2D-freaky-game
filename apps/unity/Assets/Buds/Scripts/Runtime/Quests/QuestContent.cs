@@ -40,6 +40,21 @@ namespace Buds.Quests
         public string item;
         public string enemy; // duel steps
         public CellData[] spots;
+        /// <summary>Against the clock (reach, collect): seconds from the step's start, 0 = no limit.</summary>
+        public int seconds;
+        /// <summary>Failing (too late, a wrong answer) goes this many steps back.</summary>
+        public int back;
+        public string late;
+        /// <summary>Collect: not on the map, seen only from close by; the hint says where to look.</summary>
+        public bool hidden;
+        public string hint;
+        /// <summary>Ask: the question is <see cref="text"/>, these are the answers, this one is right.</summary>
+        public string[] answers;
+        public int correct;
+        public string wrong;
+        /// <summary>Game: this skill's mini-game at the NPC, at least this score of 5.</summary>
+        public string skill;
+        public int score;
     }
 
     [Serializable]
@@ -55,6 +70,8 @@ namespace Buds.Quests
         public string intro;
         public string done;
         public string rewardItem;
+        /// <summary>Knocked out on this quest: back to its first step, with these words (empty: nothing happens).</summary>
+        public string fragile;
         public StepData[] steps;
     }
 

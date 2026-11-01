@@ -469,7 +469,8 @@ export function Trail({
 
       const p = pointAt(current);
       marker.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
-      setPose(marker, facing, frame);
+      // on the board the bud always stands sideways, whichever way the road runs
+      setPose(marker, riding ? 'side' : facing, frame);
       marker.classList.toggle('is-flipped', flip);
       marker.classList.toggle('is-riding', riding);
       // the walked line lives on its own layer and is redrawn only when it has grown visibly

@@ -118,8 +118,17 @@ Budynki stawia się tylko na wyciętym terenie. Serwer sprawdza też, czy nowy b
 - **Magazyn:** bez centrum logistycznego mieści się po 300 sztuk każdego surowca.
 - **Stawianie:**
   1. Otwórz okno dystryktu (przycisk z panoramą miasta albo B) i w zakładce Budynki wybierz „Postaw”.
-  2. Przed Budem pojawia się duch budynku: zielony, gdy budynek się mieści, czerwony z powodem, gdy nie.
-  3. E stawia budynek, a Esc anuluje.
+  2. Kamera gry unosi się nad działkę (`LandPlanner`, `FollowCamera.Overview`), a HUD ustępuje miejsca; działa to z
+     każdego miejsca na pustkowiu z tą działką. Budynek stoi na ziemi w swojej grafice. Przesuwa się go palcem lub myszą
+     (zawsze co pole) albo strzałkami, obraca co 90° (R) i przenosi przyciskiem „Dopasuj” (F) na najbliższe miejsce,
+     gdzie mieści się idealnie. Każde pole pod budynkiem jest zielone albo czerwone osobno, złote pole to wejście,
+     kropki na ziemi pokazują wszystkie miejsca możliwe przy tym obrocie, a panel mówi, dlaczego się nie da.
+  3. „Postaw” (E) płaci i zaczyna budowę, „Wróć” (Esc) wraca do listy.
+- **Obrót:** `rot` w dokumencie dystryktu (0–3, ćwierć obrotu w prawo; drzwi na południe, zachód, północ, wschód; brak
+  pola = 0, więc stare budynki stoją jak stały). Budynek obraca się wokół kotwicy, czyli środka rzędu z drzwiami
+  (`footprint`, `doorCell`). Kolizje, droga do drzwi i zasięg E liczą się już po obrocie. W świecie zawsze widać
+  przód budynku z `tools/world/art/district.ts`: odbity przy obrocie o 180° i 270°, dopasowany szerokością do
+  obróconego obrysu, z wycieraczką przed prawdziwymi drzwiami.
 
 **Skup** (zakładka Skup) zamienia surowce na monety w paczkach po 10: beton 4, stal 6, energia 3, żywność 3.
 
@@ -212,7 +221,7 @@ następnej rangi.
   - `Quests/DistrictsWorld.cs`:
     - grafika stylu wczytywana po trochu, bez atlasu;
     - dzicz na kawałkach z jednym zderzaczem na kawałek, ekipa przy pracy, kostka i krawężnik, ogrodzenie z bramą;
-    - paliki, tablice, budynki, duch;
+    - paliki, tablice, budynki;
     - jedna działka przebudowywana na klatkę;
   - `UI/LandScreen.cs`: pasek, zakładki Budynki/Teren/Skup/Napady, okno nazwy;
   - `Core/GameBootstrap.Land.cs`: brama, kupno, karta, napad, budowa, wycinka przy krawędzi dziczy;
