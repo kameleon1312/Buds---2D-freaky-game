@@ -179,7 +179,7 @@ namespace Buds.UI
 
         static string HowTo(string kind) => kind switch
         {
-            "boxing" => "A / D: unik w lewo / w prawo (od rękawicy), S: garda na prosty, W albo Spacja: cios, gdy rywal się odsłoni.",
+            "boxing" => "Rób to, co pokazuje tabliczka: unik, garda albo cios. Runda liczy się z celnym ciosem i najwyżej jednym trafieniem.",
             "rhythm" => "A / S / D (albo przyciski), gdy nuta mija linię. Fraza liczy się od 3 z 4 nut; tempo rośnie z rangą Flow.",
             "mural" => "Patrz, zapamiętaj kolory, potem maluj pole po polu: 1–6 kolory, Backspace cofa. Liczy się wierna kopia.",
             "shark" => "A / D albo strzałki (lub przyciski): zjedź z toru płetwy. Fala liczy się, gdy rekin nikogo nie złapie.",
@@ -618,42 +618,74 @@ namespace Buds.UI
         {
             var cx = BoardW / 2;
             const float footY = 128;
-            Picture("Crowd", board, Art("tr-tlum"), new Vector2(cx, BoardH - 70), new Vector2(1120, 190), UiKit.Surface700);
-            Flat("Floor", board, UiKit.Hex("#1f5f8f"), Vector2.zero, new Vector2(BoardW, footY + 20), Vector2.zero);
-            Flat("Apron", board, UiKit.Rep600, new Vector2(0, footY + 14), new Vector2(BoardW, 10), Vector2.zero);
-            // the back ropes between two corner posts
-            Color[] ropes = { UiKit.Alert500, UiKit.Paper100, UiKit.Rep400 };
-            for (var i = 0; i < 3; i++)
-                Flat("Rope", board, ropes[i], new Vector2(170, footY + 70 + i * 34), new Vector2(BoardW - 340, 8), new Vector2(0, 0.5f), 4);
-            Box("PostL", board, UiKit.Surface700, UiKit.RadiusS, new Vector2(170, footY + 10), new Vector2(26, 150), new Vector2(0.5f, 0));
-            Box("PostR", board, UiKit.Surface700, UiKit.RadiusS, new Vector2(BoardW - 170, footY + 10), new Vector2(26, 150), new Vector2(0.5f, 0));
+            const float chin = footY + 168;
+            Picture("Arena", board, Art("tr-arena"), new Vector2(cx, BoardH / 2), new Vector2(BoardW, BoardH));
+            // the lights turn slowly over the ring, flashes go off in the crowd
+            var beamL = Picture("BeamL", board, Art("tr-reflektor"), new Vector2(cx - 260, BoardH), new Vector2(300, 400));
+            var beamR = Picture("BeamR", board, Art("tr-reflektor"), new Vector2(cx + 260, BoardH), new Vector2(300, 400));
+            beamL.rectTransform.pivot = beamR.rectTransform.pivot = new Vector2(0.5f, 1);
+            Move(beamL, new Vector2(cx - 260, BoardH));
+            Move(beamR, new Vector2(cx + 260, BoardH));
+            var flashes = new Image[6];
+            for (var i = 0; i < flashes.Length; i++)
+                flashes[i] = Picture("Flash", board, disc, new Vector2(70 + i * 183, BoardH - 62 - i % 3 * 19), new Vector2(20, 20));
+
+            // what the blow will hit and where to go: on the canvas, right by the bud
+            var danger = Picture("Danger", board, Art("tr-strefa"), Vector2.zero, new Vector2(300, 150));
+            var safe = Picture("Safe", board, Art("tr-strzalka"), Vector2.zero, new Vector2(150, 110));
+
             var foeSheet = SheetOf("bokser-z-ringu");
-            var foe = Standing("Foe", board, foeSheet?.Get(Facing.Down, 0), new Vector2(cx, footY), new Vector2(170, 255));
-            var glove = Art("tr-rekawica");
-            // the partner's gloves: fists towards the bud (down), the one on the screen's right mirrored
-            var foeL = Picture("FoeGloveL", board, glove, Vector2.zero, new Vector2(86, 70));
-            var foeR = Picture("FoeGloveR", board, glove, Vector2.zero, new Vector2(86, 70));
-            var target = Picture("Target", board, UiKit.Ring(64, 8), Vector2.zero, new Vector2(96, 96), UiKit.Gold400);
-            var warn = UiKit.Outlined("Warn", board, "!", 54, UiKit.Alert500);
-            UiKit.Place(warn.rectTransform, Vector2.zero, Vector2.zero, new Vector2(60, 60));
-            var foeBar = UiKit.Bar("FoeBar", board, UiKit.Alert500, out var foeBarRoot);
-            UiKit.Place(foeBarRoot, Vector2.zero, new Vector2(cx, BoardH - 30), new Vector2(320, 22), new Vector2(0.5f, 0.5f));
-            // the bud, seen from behind over its shoulder, its gloves up
-            const float meY = -40;
-            var meHome = cx - 170;
+            var foe = Standing("Foe", board, foeSheet?.Get(Facing.Down, 0), new Vector2(cx, footY), new Vector2(150, 225));
+            var swoosh = Picture("Swoosh", board, Art("tr-luk"), new Vector2(cx, footY + 70), new Vector2(420, 190));
+            var theirs = Art("tr-rekawica");
+            var foeL = Picture("FoeGloveL", board, theirs, Vector2.zero, new Vector2(78, 64));
+            var foeR = Picture("FoeGloveR", board, theirs, Vector2.zero, new Vector2(78, 64));
+            var target = Picture("Target", board, Art("tr-cel"), new Vector2(cx, chin), new Vector2(120, 120));
+
+            // the bud in front of the ring, seen from behind, in its own gloves
+            const float meY = -62;
             var me = UiKit.Rect("Me", board);
-            UiKit.Place(me, Vector2.zero, new Vector2(meHome, meY), Vector2.zero);
-            Standing("Bud", me, Bud(Facing.Up, 0), Vector2.zero, new Vector2(200, 300));
-            var myL = Picture("GloveL", me, glove, Vector2.zero, new Vector2(94, 76));
-            var myR = Picture("GloveR", me, glove, Vector2.zero, new Vector2(94, 76));
+            UiKit.Place(me, Vector2.zero, new Vector2(cx, meY), Vector2.zero);
+            Standing("Bud", me, Bud(Facing.Up, 0), Vector2.zero, new Vector2(170, 255));
+            var mine = Art("tr-rekawica-b");
+            var guardArt = Art("tr-garda");
+            var arrowArt = Art("tr-strzalka");
+            var myL = Picture("GloveL", me, mine, Vector2.zero, new Vector2(84, 68));
+            var myR = Picture("GloveR", me, mine, Vector2.zero, new Vector2(84, 68));
+
+            // the sign says what to do, the same place every time, its bar the time left
+            var sign = UiKit.OutlinedBox("Sign", board, UiKit.Paper100, UiKit.RadiusM);
+            var signRt = (RectTransform)sign.transform.parent;
+            UiKit.Place(signRt, Vector2.zero, new Vector2(150, 178), new Vector2(250, 138));
+            var signIcon = Picture("Icon", sign.transform, Art("tr-strzalka"), new Vector2(125, 100), new Vector2(92, 66));
+            var signText = UiKit.Label("Word", sign.transform, "", 30, UiKit.Ink, true, TextAnchor.MiddleCenter);
+            UiKit.Place(signText.rectTransform, Vector2.zero, new Vector2(125, 44), new Vector2(236, 40));
+            var signBar = UiKit.Bar("Time", sign.transform, UiKit.Alert500, out var signBarRoot);
+            UiKit.Place(signBarRoot, Vector2.zero, new Vector2(125, 16), new Vector2(214, 16), new Vector2(0.5f, 0.5f));
+
+            // the score of the round, under the sign's side, and the rival's strength over the ring
+            var slips = UiKit.Outlined("Slips", board, "", 22);
+            slips.alignment = TextAnchor.MiddleLeft;
+            UiKit.Place(slips.rectTransform, Vector2.zero, new Vector2(28, 26), new Vector2(300, 34), new Vector2(0, 0.5f));
+            var foeBar = UiKit.Bar("FoeBar", board, UiKit.Alert500, out var foeBarRoot);
+            UiKit.Place(foeBarRoot, Vector2.zero, new Vector2(cx, BoardH - 22), new Vector2(300, 22), new Vector2(0.5f, 0.5f));
+            var banner = UiKit.Outlined("Banner", board, "", 50, UiKit.Gold400);
+            banner.alignment = TextAnchor.MiddleCenter;
+            UiKit.Place(banner.rectTransform, Vector2.zero, new Vector2(cx, 130), new Vector2(500, 70));
             var hurt = Flat("Hurt", board, new Color(1, 0.24f, 0.31f, 0), Vector2.zero, new Vector2(BoardW, BoardH), Vector2.zero);
             var seen = new int[g.Moves.Count];
-            float meX = 0, foeHurt = 0, hurtFlash = 0;
+            float meX = 0, foeHurt = 0, hurtFlash = 0, swing = 0, swingSide = 0, bannerLeft = 0;
+            var announced = -1;
+            var scored = 0;
+            var roundsDone = 0;
 
-            Control("Unik", BoxingGame.DodgeLeft, -400, 230, UiKit.Tone.Rep, 180);
-            Control("Garda  [S]", BoxingGame.Guard, -140, 250, UiKit.Tone.Rep);
-            Control("Unik", BoxingGame.DodgeRight, 125, 230, UiKit.Tone.Rep, 0);
-            Control("Cios  [W]", BoxingGame.Punch, 395, 250, UiKit.Tone.Gold);
+            var buttons = new[]
+            {
+                Control("Unik  [A]", BoxingGame.DodgeLeft, -400, 240, UiKit.Tone.Rep, 180),
+                Control("Garda  [S]", BoxingGame.Guard, -135, 250, UiKit.Tone.Rep),
+                Control("Unik  [D]", BoxingGame.DodgeRight, 135, 240, UiKit.Tone.Rep, 0),
+                Control("Cios  [W]", BoxingGame.Punch, 400, 250, UiKit.Tone.Gold),
+            };
             keyDown = kb => Any(kb, true, Key.A, Key.LeftArrow) ? BoxingGame.DodgeLeft
                 : Any(kb, true, Key.S, Key.DownArrow) ? BoxingGame.Guard
                 : Any(kb, true, Key.D, Key.RightArrow) ? BoxingGame.DodgeRight
@@ -671,52 +703,71 @@ namespace Buds.UI
             {
                 var dt = Time.unscaledDeltaTime;
                 var time = Time.unscaledTime;
+                beamL.rectTransform.localEulerAngles = new Vector3(0, 0, -14 + Mathf.Sin(time * 0.5f) * 11);
+                beamR.rectTransform.localEulerAngles = new Vector3(0, 0, 14 + Mathf.Sin(time * 0.6f + 2) * 11);
+                for (var i = 0; i < flashes.Length; i++)
+                {
+                    // a short pop now and then, each on its own beat
+                    var beat = Mathf.Repeat(time * (0.31f + i * 0.07f) + i * 0.37f, 1);
+                    SetAlpha(flashes[i], beat < 0.05f ? 1 - beat / 0.05f : 0);
+                }
+
                 // the bud: dodges sway the whole body, the guard pulls the gloves in front of the face
                 var acting = g.ActionLeft > 0 ? g.Action : -1;
-                meX = Smooth(meX, acting == BoxingGame.DodgeLeft ? -190 : acting == BoxingGame.DodgeRight ? 190 : 0, 18, dt);
-                me.anchoredPosition = new Vector2(meHome + meX, meY + Mathf.Sin(time * 5) * 3);
-                me.localEulerAngles = new Vector3(0, 0, -meX * 0.06f);
+                meX = Smooth(meX, acting == BoxingGame.DodgeLeft ? -250 : acting == BoxingGame.DodgeRight ? 250 : 0, 20, dt);
+                me.anchoredPosition = new Vector2(cx + meX, meY + Mathf.Sin(time * 5) * 3);
+                me.localEulerAngles = new Vector3(0, 0, -meX * 0.04f);
                 if (acting == BoxingGame.Guard)
                 {
-                    PlaceGlove(myL, new Vector2(-32, 196), 90, false, 1.2f);
-                    PlaceGlove(myR, new Vector2(32, 196), 90, true, 1.2f);
+                    PlaceGlove(myL, new Vector2(-28, 176), 90, false, 1.2f);
+                    PlaceGlove(myR, new Vector2(28, 176), 90, true, 1.2f);
                 }
                 else
                 {
-                    PlaceGlove(myL, new Vector2(-76, 150), 70, false, 1);
+                    PlaceGlove(myL, new Vector2(-66, 132), 70, false, 1);
                     // a punch: the right glove flies to the partner's chin
                     var k = acting == BoxingGame.Punch ? Mathf.Sin((1 - g.ActionLeft / BoxingGame.PunchTime) * Mathf.PI) : 0;
-                    var chin = new Vector2(cx, footY + 190) - me.anchoredPosition;
-                    PlaceGlove(myR, Vector2.Lerp(new Vector2(76, 150), chin, k), Mathf.Lerp(110, 90, k), true, Mathf.Lerp(1, 0.6f, k));
+                    var toChin = new Vector2(cx, chin) - me.anchoredPosition;
+                    PlaceGlove(myR, Vector2.Lerp(new Vector2(66, 132), toChin, k), Mathf.Lerp(110, 90, k), true, Mathf.Lerp(1, 0.7f, k));
                 }
+
                 // the partner: bobs, winds up, drops the guard when it opens up, flinches when hit
                 foeHurt = Mathf.Max(0, foeHurt - dt * 3);
                 hurtFlash = Mathf.Max(0, hurtFlash - dt * 2.5f);
+                swing = Mathf.Max(0, swing - dt * 5);
+                bannerLeft = Mathf.Max(0, bannerLeft - dt);
                 var m = g.Coming;
                 var bob = Mathf.Sin(time * 4.5f) * 4;
                 var lean = 0f;
-                Vector2 gl = new(cx - 56, footY + 150), gr = new(cx + 56, footY + 150);
+                Vector2 gl = new(cx - 50, footY + 130), gr = new(cx + 50, footY + 130);
                 float sl = 1, sr = 1;
-                warn.enabled = false;
                 target.enabled = false;
+                danger.enabled = false;
+                safe.enabled = false;
+                sign.transform.parent.gameObject.SetActive(m != null);
+                var need = m?.Need ?? -1;
+                for (var i = 0; i < buttons.Length; i++)
+                    buttons[i].transform.localScale = Vector3.one * (i == need ? 1.07f + 0.04f * Mathf.Sin(time * 14) : 1);
+
                 if (m != null && m.Need != BoxingGame.Punch)
                 {
                     var k = Mathf.Clamp01(1 - (m.Time - g.Clock) / m.Windup);
-                    warn.enabled = true;
-                    warn.rectTransform.localScale = Vector3.one * (1 + 0.25f * Mathf.Sin(time * 20));
+                    UiKit.SetBar(signBar, 1 - k);
                     if (m.Need == BoxingGame.Guard)
                     {
-                        // a straight comes right at the bud
-                        gr = Vector2.Lerp(gr, new Vector2(cx - 60, footY + 110), k);
-                        sr = 1 + k * 1.1f;
-                        Move(warn, new Vector2(cx, footY + 270));
+                        // a straight comes right at the bud: the glove grows
+                        gr = Vector2.Lerp(gr, new Vector2(cx, footY + 60), k * k);
+                        sr = 1 + k * k * 1.5f;
+                        signIcon.sprite = guardArt;
+                        signIcon.rectTransform.localScale = Vector3.one;
+                        signText.text = "GARDA";
                     }
                     else
                     {
-                        // a hook swings in from the side the bud must get away from
+                        // a hook swings in from one side: that half of the canvas is red, the arrow shows the way out
                         var side = m.Need == BoxingGame.DodgeLeft ? 1 : -1;
                         lean = side * 10 * k;
-                        var wind = new Vector2(cx + side * 170, footY + 130);
+                        var wind = new Vector2(cx + side * 170, footY + 120);
                         if (side > 0)
                         {
                             gr = Vector2.Lerp(gr, wind, k);
@@ -727,18 +778,47 @@ namespace Buds.UI
                             gl = Vector2.Lerp(gl, wind, k);
                             sl = 1 + k * 0.7f;
                         }
-                        Move(warn, wind + new Vector2(0, 70));
+                        danger.enabled = true;
+                        SetAlpha(danger, 0.55f + 0.3f * Mathf.Sin(time * 18));
+                        Move(danger, new Vector2(cx + side * 190, 66));
+                        safe.enabled = true;
+                        safe.rectTransform.localScale = new Vector3(-side, 1, 1) * (1 + 0.1f * Mathf.Sin(time * 14));
+                        Move(safe, new Vector2(cx - side * (250 + 12 * Mathf.Sin(time * 14)), 76));
+                        swingSide = side;
+                        signIcon.sprite = arrowArt;
+                        signIcon.rectTransform.localScale = new Vector3(-side, 1, 1);
+                        signText.text = side > 0 ? "UNIK W LEWO" : "UNIK W PRAWO";
                     }
                 }
                 else if (m != null)
                 {
-                    // the guard drops: a gold target on the chin
-                    gl = new Vector2(cx - 80, footY + 90);
-                    gr = new Vector2(cx + 80, footY + 90);
+                    // the guard drops: a gold target on the chin, the time it stays open on the sign
+                    gl = new Vector2(cx - 76, footY + 70);
+                    gr = new Vector2(cx + 76, footY + 70);
                     target.enabled = true;
-                    Move(target, new Vector2(cx, footY + 190));
-                    target.rectTransform.localScale = Vector3.one * (1 + 0.15f * Mathf.Sin(time * 16));
+                    target.rectTransform.localScale = Vector3.one * (1 + 0.12f * Mathf.Sin(time * 16));
+                    UiKit.SetBar(signBar, Mathf.Clamp01((m.Time + m.Open - g.Clock) / m.Open));
+                    signIcon.sprite = mine;
+                    signIcon.rectTransform.localScale = Vector3.one;
+                    signText.text = "CIOS!";
                 }
+                signText.resizeTextForBestFit = true;
+                signText.resizeTextMaxSize = 30;
+
+                // the hook goes through once it is judged: past the bud that got away, into the bud that didn't
+                if (swing > 0)
+                {
+                    var across = new Vector2(cx - swingSide * 180 * (1 - swing), footY + 70);
+                    if (swingSide > 0) gr = across;
+                    else gl = across;
+                }
+                swoosh.enabled = swing > 0;
+                if (swing > 0)
+                {
+                    swoosh.rectTransform.localScale = new Vector3(swingSide, 1, 1);
+                    SetAlpha(swoosh, swing);
+                }
+
                 Move(foe, new Vector2(cx + lean * 3 + foeHurt * 14, footY + bob + foeHurt * 10));
                 foe.rectTransform.localEulerAngles = new Vector3(0, 0, -lean + foeHurt * 12);
                 foe.color = Color.Lerp(Color.white, new Color(1, 0.55f, 0.55f), foeHurt);
@@ -746,6 +826,30 @@ namespace Buds.UI
                 PlaceGlove(foeR, gr + new Vector2(0, bob), -90, true, sr);
                 SetAlpha(hurt, hurtFlash * 0.4f);
                 UiKit.SetBar(foeBar, 1 - g.Counters / (float)Mathf.Max(1, g.Openings));
+                slips.text = $"Trafienia w rundzie: {g.HitsThisRound} / {BoxingGame.HitsAllowed}";
+
+                // every round is announced, and says how it went
+                if (g.Round > roundsDone)
+                {
+                    roundsDone = g.Round;
+                    var counted = g.Score > scored;
+                    scored = g.Score;
+                    Word(counted ? "tr-jest" : "tr-pudlo", new Vector2(cx + 260, BoardH / 2 + 40), 100, 1);
+                }
+                foreach (var next in g.Moves)
+                {
+                    if (next.State != 0) continue;
+                    if (next.Round > announced)
+                    {
+                        announced = next.Round;
+                        banner.text = $"RUNDA {announced + 1}";
+                        bannerLeft = 1.5f;
+                    }
+                    break;
+                }
+                banner.enabled = bannerLeft > 0 && m == null;
+                banner.rectTransform.localScale = Vector3.one * (1 + Mathf.Max(0, bannerLeft - 1.3f) * 2);
+
                 for (var i = 0; i < seen.Length; i++)
                 {
                     var mv = g.Moves[i];
@@ -753,18 +857,24 @@ namespace Buds.UI
                     seen[i] = mv.State;
                     if (mv.Need == BoxingGame.Punch)
                     {
-                        if (mv.State < 0) continue;
-                        Word("Ui/Fx/fx-bam", new Vector2(cx + 150, footY + 170), 110);
-                        Splash(UiKit.Gold400, new Vector2(cx, footY + 190), 10);
+                        if (mv.State < 0)
+                        {
+                            Word("tr-pudlo", new Vector2(cx + 230, chin - 30), 80);
+                            continue;
+                        }
+                        Word("Ui/Fx/fx-bam", new Vector2(cx + 150, footY + 160), 120);
+                        Splash(UiKit.Gold400, new Vector2(cx, chin), 14);
                         foeHurt = 1;
-                        Shake(6);
+                        Shake(8);
+                        continue;
                     }
-                    else if (mv.State > 0)
+                    if (mv.Need != BoxingGame.Guard) swing = 1;
+                    if (mv.State > 0)
                         Word(mv.Need == BoxingGame.Guard ? "tr-blok" : "tr-unik",
-                            new Vector2(meHome + (mv.Need == BoxingGame.DodgeLeft ? -250 : mv.Need == BoxingGame.DodgeRight ? 250 : 0), 120), 92);
+                            new Vector2(cx + (mv.Need == BoxingGame.DodgeLeft ? -250 : mv.Need == BoxingGame.DodgeRight ? 250 : 0), 190), 92);
                     else
                     {
-                        Word("Ui/Fx/fx-pac", new Vector2(meHome + meX, 150), 130);
+                        Word("Ui/Fx/fx-pac", new Vector2(cx + meX, 170), 130);
                         Shake(16);
                         hurtFlash = 1;
                     }

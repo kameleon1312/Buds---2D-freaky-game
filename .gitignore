@@ -27,3 +27,7 @@ apps/unity/Assets/Buds/Resources/Dev.meta
 .DS_Store
 Thumbs.db
 *.log
+
+# local assistant notes
+CLAUDE.md
+.claude/

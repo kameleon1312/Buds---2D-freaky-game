@@ -43,6 +43,12 @@ Przy stanowisku `E` otwiera mini-grę umiejętności (`Quests/TrainingGames.cs` 
 ranga i jakie perki się odblokowały. Jak przy zadaniach: to, czy gracz naprawdę stał przy stanowisku, sprawdzi dopiero
 serwer gry wieloosobowej.
 
+Sparing (Walka, `BoxingGame`): tabliczka z boku ringu i podświetlony przycisk mówią, co zrobić (unik w lewo, unik
+w prawo, garda, cios), czerwona połowa maty pokazuje, gdzie spadnie hak, a strzałka, gdzie uciec. Liczy się
+dowolna odpowiedź w czasie zamachu (ostatnia wygrywa) i poza nim pozycja trzyma się do uderzenia. Zamach trwa od
+1,25 s w pierwszej rundzie do 0,7 s w ostatniej. Runda się liczy z celnym ciosem i najwyżej jednym trafieniem
+(`HitsAllowed`); każdą zapowiada napis „RUNDA n”.
+
 ## Napoje energetyczne (eliksiry)
 
 Sześć napojów (`packages/shared/src/rides-and-drinks.ts`, efekty w `consumables.ts`):

@@ -76,6 +76,62 @@ namespace Buds.Tests
         }
 
         [Test]
+        public void AnAnswerAnyTimeDuringTheWindupCountsAndTheLastOneWins()
+        {
+            var g = new BoxingGame(5, 3);
+            var blow = g.Moves[0];
+            g.Tick(blow.Time - blow.Windup + 0.01f);
+            g.Press(blow.Need == BoxingGame.Guard ? BoxingGame.DodgeLeft : BoxingGame.Guard); // a wrong read
+            g.Press(blow.Need); // and at once the right one, long before the blow lands
+            Assert.Greater(g.ActionLeft, 0.3f, "the pose holds until the blow has passed");
+            g.Tick(blow.Windup);
+            Assert.AreEqual(1, blow.State);
+            Assert.AreEqual(0, g.HitsTaken);
+        }
+
+        /// <summary>Plays one round, letting <paramref name="slips"/> blows through and countering every opening.</summary>
+        static void PlayRound(BoxingGame g, int round, int slips)
+        {
+            foreach (var m in g.Moves)
+            {
+                if (m.Round != round) continue;
+                if (m.Need == BoxingGame.Punch)
+                {
+                    g.Tick(m.Time + 0.05f - g.Clock);
+                    g.Press(BoxingGame.Punch);
+                    continue;
+                }
+                g.Tick(m.Time - 0.1f - g.Clock);
+                if (slips-- <= 0) g.Press(m.Need);
+                g.Tick(0.11f);
+            }
+        }
+
+        [Test]
+        public void ARoundSurvivesOneSlipButNotTwo()
+        {
+            var g = new BoxingGame(5, 1);
+            PlayRound(g, 0, 1);
+            Assert.AreEqual(1, g.Round);
+            Assert.AreEqual(1, g.Score, "one blow taken, the counter landed");
+            var blows = 0;
+            foreach (var m in g.Moves)
+                if (m.Round == 1 && m.Need != BoxingGame.Punch) blows++;
+            Assume.That(blows, Is.GreaterThanOrEqualTo(2));
+            PlayRound(g, 1, 2);
+            Assert.AreEqual(1, g.Score, "two blows taken");
+        }
+
+        [Test]
+        public void EveryBlowLeavesTimeToReadIt([Values(1, 7, 42)] int seed)
+        {
+            var g = new BoxingGame(5, seed);
+            foreach (var m in g.Moves)
+                if (m.Need == BoxingGame.Punch) Assert.GreaterOrEqual(m.Open, 0.7f);
+                else Assert.GreaterOrEqual(m.Windup, 0.7f);
+        }
+
+        [Test]
         public void ACounterLandsOnlyWhileTheGuardIsDown()
         {
             var g = new BoxingGame(5, 3);

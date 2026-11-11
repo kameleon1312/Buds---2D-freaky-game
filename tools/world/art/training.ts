@@ -115,7 +115,7 @@ function ball(): FxArt {
 }
 
 /** A boxing glove, the fist to the right. */
-function glove(): FxArt {
+function glove(tone: [string, string] = [ALERT, ALERT_D], thumbTone = '#ff6b78'): FxArt {
   const mitt =
     'M34 30C34 10 62 6 92 10C124 14 136 40 134 64C132 92 110 106 84 104L48 104C34 104 30 90 32 76Z';
   const thumb = 'M56 70C68 60 92 62 96 74C92 84 70 86 58 82Z';
@@ -125,9 +125,171 @@ function glove(): FxArt {
     body:
       piece(rr(6, 40, 34, 64, 10), [PAPER, '#cfc6b4']) +
       `<path d="M14 56H32M14 72H32M14 88H32" stroke="${INK}" stroke-width="3"/>` +
-      piece(mitt, [ALERT, ALERT_D]) +
-      `<path d="${thumb}" fill="#ff6b78" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>` +
+      piece(mitt, tone) +
+      `<path d="${thumb}" fill="${thumbTone}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>` +
       `<path d="M70 22Q96 18 116 30" stroke="${WHITE}" stroke-width="6" opacity="0.45" stroke-linecap="round" fill="none"/>`,
+  };
+}
+
+/**
+ * The hall behind the sparring: dark stands packed with people, hanging lights, the ring with its corner posts, three
+ * ropes and a canvas running towards the viewer. Everything that moves is drawn over it by the game.
+ */
+function arena(): FxArt {
+  const W = 1090;
+  const H = 366;
+  const r = rng(77);
+  const shirts = [
+    '#3a3d4a',
+    '#4cc7ff',
+    '#ff3d50',
+    '#ffc93c',
+    '#a3e635',
+    '#b45cff',
+    '#f6f2e9',
+    '#ff9a1f',
+  ];
+  let stands = '';
+  // rows of people, smaller and dimmer further up
+  for (let row = 0; row < 4; row++) {
+    const y = 34 + row * 34;
+    const size = 11 + row * 2.5;
+    const dim = 0.2 + row * 0.1;
+    for (let x = -10 + (row % 2) * 12; x < W + 20; x += size * 2.5) {
+      const dy = r() * 5;
+      const shirt = shirts[Math.floor(r() * shirts.length)];
+      const skin = ['#f3c9a6', '#c98d62', '#8a5636', '#f6d5bd'][Math.floor(r() * 4)];
+      stands +=
+        `<g opacity="${n(dim)}"><path d="${rr(x - size, y + size * 0.9 + dy, size * 2, size * 2.4, size * 0.8)}" fill="${shirt}"/>` +
+        `<path d="${circ(x, y + dy, size * 0.9)}" fill="${skin}"/></g>`;
+      // a raised arm here and there
+      if (r() < 0.16)
+        stands += `<path d="M${n(x + size)} ${n(y + size + dy)}L${n(x + size * 1.5)} ${n(y - size * 0.6 + dy)}" stroke="${skin}" stroke-width="${n(size * 0.5)}" stroke-linecap="round" opacity="${n(dim)}"/>`;
+    }
+  }
+  // the truss with its lamps
+  let lamps = '';
+  for (let x = 90; x < W; x += 182)
+    lamps +=
+      `<path d="${rr(x - 20, 8, 40, 20, 5)}" fill="#20222c" stroke="${INK}" stroke-width="3"/>` +
+      `<path d="${rr(x - 13, 22, 26, 8, 3)}" fill="#fff4c4"/>`;
+  const canvas = 'M200 212H890L1170 372H-80Z';
+  const post = (x: number, top: number, bottom: number, w: number, tone: [string, string]) =>
+    piece(rr(x - w / 2, top, w, bottom - top, w * 0.3), tone, 4) +
+    piece(rr(x - w * 0.7, top - w * 0.3, w * 1.4, w * 0.8, w * 0.3), ['#f6f2e9', '#cfc6b4'], 3);
+  const rope = (d: string, color: string, w: number) =>
+    `<path d="${d}" stroke="${INK}" stroke-width="${w + 4}" fill="none" stroke-linecap="round"/><path d="${d}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`;
+  const ropes: [string, number][] = [
+    [ALERT, 0],
+    [PAPER, 1],
+    [REP, 2],
+  ];
+  return {
+    w: W,
+    h: H,
+    body:
+      `<rect width="${W}" height="${H}" fill="#191b26"/>` +
+      stands +
+      // shade over the stands, so the ring stands out against them
+      `<rect y="150" width="${W}" height="70" fill="#121320" opacity="0.72"/>` +
+      `<rect width="${W}" height="30" fill="#14151e"/><rect y="26" width="${W}" height="5" fill="#2c2f3d"/>` +
+      lamps +
+      // the apron and the canvas with its big painted circle
+      `<path d="${canvas}" fill="#2a78b8" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>` +
+      `<path d="M200 212H890L906 222H184Z" fill="#7fc4ee"/>` +
+      `<ellipse cx="545" cy="292" rx="290" ry="58" fill="#3a8ccc"/>` +
+      `<ellipse cx="545" cy="292" rx="290" ry="58" fill="none" stroke="#a9dcff" stroke-width="5" opacity="0.8"/>` +
+      `<ellipse cx="545" cy="292" rx="120" ry="24" fill="none" stroke="#a9dcff" stroke-width="4" opacity="0.6"/>` +
+      `<path d="M-80 372L0 326H1090L1170 372Z" fill="#225f96" opacity="0.7"/>` +
+      // back ropes, the posts, the side ropes running to the viewer
+      ropes
+        .map(([c, i]) => rope(`M214 ${118 + i * 32}Q545 ${124 + i * 32} 876 ${118 + i * 32}`, c, 6))
+        .join('') +
+      post(208, 96, 218, 24, [ALERT, ALERT_D]) +
+      post(882, 96, 218, 24, [REP, REP_D]) +
+      ropes
+        .map(
+          ([c, i]) =>
+            rope(`M208 ${118 + i * 32}L${-40} ${150 + i * 54}`, c, 9) +
+            rope(`M882 ${118 + i * 32}L${W + 40} ${150 + i * 54}`, c, 9),
+        )
+        .join(''),
+  };
+}
+
+/** A soft cone of light, tinted warm; the game turns it slowly over the ring. */
+function lightCone(): FxArt {
+  return {
+    w: 300,
+    h: 400,
+    body:
+      `<path d="M126 0H174L300 400H0Z" fill="#fff6cc" opacity="0.09"/>` +
+      `<path d="M138 0H162L230 400H70Z" fill="#fff6cc" opacity="0.1"/>`,
+  };
+}
+
+/** The half of the canvas a hook will hit: hazard stripes in a rounded red field. */
+function hazard(): FxArt {
+  let stripes = '';
+  for (let x = -150; x < 320; x += 56)
+    stripes += `<path d="M${x} 150L${x + 80} 0H${x + 108}L${x + 28} 150Z" fill="${ALERT_D}"/>`;
+  return {
+    w: 300,
+    h: 150,
+    body:
+      `<clipPath id="hz"><path d="${rr(5, 5, 290, 140, 26)}"/></clipPath>` +
+      `<path d="${rr(5, 5, 290, 140, 26)}" fill="${ALERT}"/><g clip-path="url(#hz)">${stripes}</g>` +
+      `<path d="${rr(5, 5, 290, 140, 26)}" fill="none" stroke="${INK}" stroke-width="6"/>`,
+  };
+}
+
+/** The way out of a hook; points right, the game mirrors it. */
+function exitArrow(): FxArt {
+  return {
+    w: 150,
+    h: 110,
+    body:
+      piece('M8 36H84V8L142 55L84 102V74H8Z', [LIME, LIME_D], 6) +
+      `<path d="M16 44H90" stroke="${WHITE}" stroke-width="5" opacity="0.5" stroke-linecap="round"/>`,
+  };
+}
+
+/** Two gloves up in front of a face: the sign for the guard. */
+function guardSign(): FxArt {
+  const up = (x: number) =>
+    piece(
+      `M${x} 96V42C${x} 18 ${x + 16} 8 ${x + 30} 8C${x + 46} 8 ${x + 58} 22 ${x + 58} 44V96Z`,
+      [REP, REP_D],
+      5,
+    ) + piece(rr(x + 2, 92, 54, 16, 5), [PAPER, '#cfc6b4'], 4);
+  return { w: 150, h: 112, body: up(14) + up(78) };
+}
+
+/** Where to hit: gold rings and sights on the chin. */
+function reticle(): FxArt {
+  const ring = (rad: number, w: number, c: string) =>
+    `<circle cx="70" cy="70" r="${rad}" fill="none" stroke="${c}" stroke-width="${w}"/>`;
+  return {
+    w: 140,
+    h: 140,
+    body:
+      ring(52, 13, INK) +
+      ring(52, 7, GOLD) +
+      ring(22, 11, INK) +
+      ring(22, 5, GOLD) +
+      `<path d="M70 4V30M70 110V136M4 70H30M110 70H136" stroke="${INK}" stroke-width="12" stroke-linecap="round"/>` +
+      `<path d="M70 6V28M70 112V134M6 70H28M112 70H134" stroke="${GOLD}" stroke-width="6" stroke-linecap="round"/>`,
+  };
+}
+
+/** The sweep of a hook through the air; swings from the right, the game mirrors it. */
+function sweep(): FxArt {
+  return {
+    w: 420,
+    h: 190,
+    body:
+      `<path d="M410 40Q210 214 12 74Q200 150 410 40Z" fill="${WHITE}" opacity="0.75" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>` +
+      `<path d="M380 66Q210 170 70 100" fill="none" stroke="${ALERT}" stroke-width="5" opacity="0.8"/>`,
   };
 }
 
@@ -308,6 +470,14 @@ export const TRAINING: Record<string, FxArt> = {
   'tr-kubek': cup(),
   'tr-kulka': ball(),
   'tr-rekawica': glove(),
+  'tr-rekawica-b': glove([REP, REP_D], '#a9e6ff'),
+  'tr-arena': arena(),
+  'tr-reflektor': lightCone(),
+  'tr-strefa': hazard(),
+  'tr-strzalka': exitArrow(),
+  'tr-garda': guardSign(),
+  'tr-cel': reticle(),
+  'tr-luk': sweep(),
   'tr-mikrofon': mic(),
   'tr-glosnik': speaker(),
   'tr-tlum': crowd(11),

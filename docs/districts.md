@@ -60,6 +60,11 @@ Poza NPC z zadaniami każda dzielnica ma mieszkańców bez zadań (`packages/sha
 w plikach dzielnic), z polem `wander`: przechadzają się kilka pól wokół swojego miejsca (`NpcWander` w grze),
 zatrzymują się i odwracają, gdy podejdziesz. NPC z zadaniami zawsze stoją w miejscu (`contentProblems` pilnuje).
 
+Każdy ubiera się jak jego miasto (`packages/shared/src/content/wardrobe.ts`): Las Palmas po plażowemu, Dwór Carski
+w surduty, suknie i cylindry, Los Karkos w kurtki i bandany, Dzika Puszcza we flanele i kapelusze, Chinatown w stroje
+ze stójką i koki ze szpilkami; pustkowie bierze styl miasta, do którego prowadzi. Wybór jest stały dla każdej postaci,
+`ROLES` ubiera zawody (kucharz, ogrodnik, harcerze). Szczegóły w [wyglad.md](wyglad.md).
+
 ## Wspólny układ mapy
 
 - **Rozmiar:** ok. 128 × 96 pól (dzisiejsza mapa startowa ma 48 × 36).
@@ -218,8 +223,15 @@ pokoju, który wychodzi do tej samej dzielnicy.
 
 ## Mapa
 
-`M` albo przycisk „Mapa” pokazuje dzielnicę narysowaną z jej kolorów, z mgłą tam, gdzie Bud jeszcze nie był
-(zapisywaną na urządzeniu), z nazwami miejsc, drzwiami, drogami do innych dzielnic, celami zadań i licznikiem skrytek.
+`M` albo przycisk „Mapa” pokazuje dzielnicę narysowaną szczegółowo (ziemia z zaokrąglonymi rogami, dachy, korony
+drzew), z miękką mgłą tam, gdzie Bud jeszcze nie był, z nazwami miejsc, drzwiami, drogami do innych dzielnic, celami
+zadań, licznikiem skrytek i odkrytych miejsc. Mapę przybliża się od całości do ulic (kółko, dwa palce, `+`/`-`, „Ja”)
+i przeciąga.
+
+Odkryty teren należy do Buda, nie do urządzenia: gra trzyma go na telefonie i wysyła na serwer
+(`packages/shared/src/explored.ts`, `GET /v1/buds/me/explored`, `PUT /v1/buds/me/explored/:map`, tabela
+`bud_explored`, atomowa funkcja `merge_explored`, która tylko dodaje pola). Na innym telefonie z tym samym Budem mapa
+jest od razu odkryta; każdy Bud na koncie ma własną. Gość bez połączenia z serwerem trzyma ją tylko na urządzeniu.
 
 ## Wyspa Startowa (samouczek)
 

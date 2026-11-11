@@ -44,5 +44,13 @@ Każde ubranie jest narysowane w `vector.ts` ze szwami, ściągaczami, kieszenia
 z boku i z tyłu. Po zmianie generatora: `tools/export-guest-sheet.ts` (Bud gościa) i `tools/world/export-quests.ts`
 (mieszkańcy i rywale). Nowe ubranie potrzebuje ikony w `tools/world/art/icons.ts` (sprawdza to `export-quests.ts`).
 
+## Stroje miast
+
+Mieszkańcy i przeciwnicy ubierają się jak ich miasto (`content/wardrobe.ts`, `dressed`, wołane przy składaniu
+`CONTENT`). Ubrania i nakrycia głowy tylko dla nich (`CITY_OUTFITS`: koszula hawajska, bezrękawnik, bluza i suknia
+ze stójką, surdut, suknia balowa; `CITY_HAIR`: słomkowy kapelusz, kapelusz, cylinder, bandana, kwiat we włosach, kok
+ze szpilkami, czapka kucharska) są narysowane w `vector.ts`, ale nie ma ich w katalogu, więc serwer odrzuca wygląd
+gracza, który by je nosił. Twarze są takie same dla wszystkich. Po zmianie: `tools/world/export-quests.ts`.
+
 Kreator na stronie (`Creator.tsx`) pokazuje każdą opcję jako obrazek na tym właśnie Budzie (`BudSprite` z `crop`), ma
 gotowe zestawy, obracanie, losowanie i cofanie. Kreator w grze (`CreatorScreen`) czyta te same listy z `GET /v1/look/options`.

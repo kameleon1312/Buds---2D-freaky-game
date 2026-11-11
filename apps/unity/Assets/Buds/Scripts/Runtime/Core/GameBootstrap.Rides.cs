@@ -168,9 +168,26 @@ namespace Buds.Core
                 var skillName = Array.Find(quests.Content.skills, s => s.id == skill)?.name ?? skill;
                 trainingScreen.Open(spot, skillName, quests.Content.trainingMaxScore, sheet, trainedRanks.TryGetValue(skill, out var rank) ? rank : 0);
                 var shots = 0;
+                var hookShot = false;
+                var counterShot = false;
                 for (var t = 0f; t < 60 && !trainingScreen.Finished; t += Time.deltaTime)
                 {
                     trainingScreen.BotTick(Time.deltaTime);
+                    // the sparring's two other things to read: a hook and an opening
+                    if (trainingScreen.Game is BoxingGame box && box.Coming is { } coming)
+                    {
+                        var hook = coming.Need is BoxingGame.DodgeLeft or BoxingGame.DodgeRight;
+                        if (hook && !hookShot && coming.Time - box.Clock < 0.4f)
+                        {
+                            hookShot = true;
+                            await shot($"t-{skill}-hak.png");
+                        }
+                        else if (coming.Need == BoxingGame.Punch && !counterShot)
+                        {
+                            counterShot = true;
+                            await shot($"t-{skill}-kontra.png");
+                        }
+                    }
                     // one early in the game, one later (another stage of it, harder rounds)
                     if (shots == 0 && t > 3.2f || shots == 1 && trainingScreen.Game.Round >= 3)
                         await shot($"t-{skill}-gra{++shots}.png");

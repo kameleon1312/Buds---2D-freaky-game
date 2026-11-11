@@ -59,6 +59,8 @@ namespace Buds.Quests
     {
         public const int DodgeLeft = 0, Guard = 1, DodgeRight = 2, Punch = 3;
         public const float DodgeTime = 0.42f, GuardTime = 0.45f, PunchTime = 0.22f;
+        /// <summary>A round still counts with this many blows taken, as long as a counter landed.</summary>
+        public const int HitsAllowed = 1;
 
         public sealed class Move
         {
@@ -72,6 +74,8 @@ namespace Buds.Quests
             public int Round;
             /// <summary>0 coming, 1 answered, -1 got through (or the opening was missed).</summary>
             public int State;
+            /// <summary>What the bud chose while the blow was wound up (-1 nothing yet); the last choice counts.</summary>
+            public int Answer = -1;
         }
 
         readonly List<Move> moves = new();
@@ -92,6 +96,8 @@ namespace Buds.Quests
         public int HitsTaken { get; private set; }
         public int Counters { get; private set; }
         public int Openings { get; }
+        /// <summary>Blows taken in the round being fought.</summary>
+        public int HitsThisRound => hits[Math.Min(Round, Rounds - 1)];
 
         public BoxingGame(int rounds = 5, int seed = 0)
         {
@@ -101,12 +107,12 @@ namespace Buds.Quests
             hits = new int[Rounds];
             counters = new int[Rounds];
             var rng = new Random(seed);
-            var t = 1.4f;
+            var t = 2.2f;
             for (var r = 0; r < Rounds; r++)
             {
                 var count = 3 + r / 2;
-                var windup = Math.Max(0.45f, 0.8f - 0.07f * r);
-                var open = Math.Max(0.42f, 0.62f - 0.04f * r);
+                var windup = Math.Max(0.7f, 1.25f - 0.12f * r);
+                var open = Math.Max(0.7f, 1.1f - 0.08f * r);
                 for (var i = 0; i < count; i++)
                 {
                     // every round ends on an opening, another may come after a blow (never two in a row)
@@ -116,19 +122,19 @@ namespace Buds.Quests
                     {
                         m.Need = Punch;
                         m.Time = t + 0.15f;
-                        t = m.Time + open + 0.4f;
+                        t = m.Time + open + 0.5f;
                     }
                     else
                     {
                         m.Need = rng.Next(3);
                         m.Time = t + windup;
-                        t = m.Time + 0.35f + (float)rng.NextDouble() * 0.25f;
+                        t = m.Time + 0.6f + (float)rng.NextDouble() * 0.3f;
                     }
                     moves.Add(m);
                     size[r]++;
                     if (punch) Openings++;
                 }
-                t += 0.9f; // a breath between rounds
+                t += 1.8f; // a breath between rounds, the next one announced
             }
         }
 
@@ -159,7 +165,7 @@ namespace Buds.Quests
                 HitsTaken++;
             }
             if (++judged[m.Round] < size[m.Round]) return;
-            if (hits[m.Round] == 0 && counters[m.Round] > 0) Score++;
+            if (hits[m.Round] <= HitsAllowed && counters[m.Round] > 0) Score++;
             Round = Math.Max(Round, m.Round + 1);
         }
 
@@ -172,7 +178,7 @@ namespace Buds.Quests
             foreach (var m in moves)
             {
                 if (m.State != 0) continue;
-                if (m.Need != Punch && Clock >= m.Time) Judge(m, Action == m.Need);
+                if (m.Need != Punch && Clock >= m.Time) Judge(m, m.Answer == m.Need);
                 else if (m.Need == Punch && Clock > m.Time + m.Open) Judge(m, false);
             }
         }
@@ -180,9 +186,19 @@ namespace Buds.Quests
         /// <summary>0 dodge left, 1 guard, 2 dodge right, 3 punch; one at a time.</summary>
         public void Press(int action)
         {
-            if (Done || ActionLeft > 0 || action < 0 || action > 3) return;
+            if (Done || action < 0 || action > 3) return;
+            // any time while a blow is wound up will do: it is about reading it, not about a hidden moment
+            var blow = Coming;
+            if (blow != null && blow.Need == Punch) blow = null;
+            if (blow != null && action == Punch) return;
             Action = action;
             ActionLeft = action switch { Punch => PunchTime, Guard => GuardTime, _ => DodgeTime };
+            if (blow != null)
+            {
+                blow.Answer = action;
+                // the dodge or guard holds until the blow has passed
+                ActionLeft = Math.Max(ActionLeft, blow.Time - Clock + 0.12f);
+            }
             if (action != Punch) return;
             foreach (var m in moves)
                 if (m.State == 0 && m.Need == Punch && Clock >= m.Time && Clock <= m.Time + m.Open)

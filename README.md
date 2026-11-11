@@ -6,8 +6,8 @@
 
 ### Twój ziomek. Twoje miasto. Twoja legenda.
 
-Mobilne RPG o ziomkach z miasta: stwórz swojego Buda, rozkręć się w pięciu dzielnicach,<br/>
-wygrywaj pojedynki, zbieraj sprzęt i jeźdź po mieście, od deskorolki po quada.
+Mobilne RPG o ziomkach z miasta: stwórz swojego Buda, rozkręć się w sześciu miastach,<br/>
+walcz na ulicy, zbuduj własny dystrykt i jeźdź po świecie, od deskorolki po quada.
 
 <br/>
 
@@ -48,10 +48,12 @@ każde w swoich kolorach. Wygląd rysuje się na bieżąco, więc twój Bud wygl
 </td>
 <td width="50%" valign="top">
 
-**Pięć dzielnic i wyspa**
+**Sześć miast, wyspa i pustkowia**
 Miasto Ziomków ze skateparkiem, stadionem i lunaparkiem, Dzika Puszcza z obozowiskiem, jeziorem i rozbójnikami,
-tropikalne Las Palmas z dżunglą i wodospadem, wytworny Dwór Carski z labiryntem i starym młynem oraz niebezpieczne
-Los Karkos z ringiem, kopalnią i torem motocrossowym. Do tego wnętrza budynków, do których wchodzisz.
+tropikalne Las Palmas z dżunglą i wodospadem, wytworny Dwór Carski z labiryntem i starym młynem, niebezpieczne
+Los Karkos z ringiem i kopalnią oraz Chinatown za Ryżowym Traktem, z lampionami, herbaciarnią i gajem bambusowym.
+Miasta łączą pustkowia z zasadzkami i promy. Każde miasto ma swoich ludzi: hawajskie koszule na plaży, surduty
+i cylindry na dworze, stroje ze stójką w Chinatown.
 
 </td>
 </tr>
@@ -59,15 +61,17 @@ Los Karkos z ringiem, kopalnią i torem motocrossowym. Do tego wnętrza budynkó
 <td valign="top">
 
 **Mieszkańcy i zadania**
-31 mieszkańców, 33 zadania, każde z własną historią: od dostarczania paczek po tropienie śladów w parku. Nagrody
-w doświadczeniu, monetach i przedmiotach.
+98 mieszkańców i 68 zadań z własną historią. Niektóre stawiają opór: pytania o to, co usłyszałeś wcześniej,
+mini-gry, zadania na czas, przedmioty ukryte bez znacznika i misje, które przepadają po nokaucie. Do nowych miast
+wpuszcza dopiero przepustka zdobyta w zadaniu.
 
 </td>
 <td valign="top">
 
-**Pojedynki turowe**
-22 przeciwników z własnym stylem walki. Ruchy zależą od tego, co trzymasz w ręku: kij to zamach i młyniec, procarka
-to strzał i seria, mikrofon to diss i drop. Wygrane dają łup, od zwykłego po legendarny.
+**Walka na ulicy**
+55 przeciwników walczy w czasie rzeczywistym, wprost na mapie. Pięć przycisków, które sam składasz pod broń:
+kij to zamach i młyniec, procarka to strzał i seria, mikrofon to diss i drop. Od poziomu 6 także z innymi graczami
+poza strefami bezpiecznymi. Wygrane dają łup, od zwykłego po legendarny.
 
 </td>
 </tr>
@@ -82,9 +86,9 @@ pancerz, szczęście albo rangę umiejętności. Zakładasz je na sylwetce Buda 
 <td valign="top">
 
 **Umiejętności i trening**
-Flow, Graffiti, Surfing, Spryt, Walka i Instynkt przetrwania. Rozwijasz je punktami z poziomów i treningiem na mapie:
-worek bokserski, scena freestyle, ściana pod graffiti. Rangi 3 i 5 odblokowują wyjątkowe umiejętności, m.in. ciosy
-specjalne w pojedynkach.
+Flow, Graffiti, Surfing, Spryt, Walka i Instynkt przetrwania. Rozwijasz je punktami z poziomów i treningiem na mapie,
+a każdy trening to osobna mini-gra: sparing na ringu, wers na scenie, mural z pamięci, ucieczka przed rekinem,
+kubki ulicznego cwaniaka i ucieczka przed psem. Rangi 3 i 5 odblokowują wyjątkowe umiejętności.
 
 </td>
 </tr>
@@ -107,8 +111,8 @@ Turbo, Siła, Pancerz, Fart, Skupienie i Regeneracja: krótkie wzmocnienia przed
 <td valign="top">
 
 **Skrytki i mapa**
-Po mieście rozsianych jest 27 skrytek, niewidocznych, dopóki nie podejdziesz blisko. Mapa skarbów odkrywa się
-w miarę, jak zwiedzasz.
+43 skrytki, niewidoczne, dopóki nie podejdziesz blisko. Mapa odkrywa się tam, gdzie byłeś, przybliżasz ją od całej
+dzielnicy po pojedyncze ulice, a odkryty teren zapisuje się na koncie, więc czeka na każdym telefonie.
 
 </td>
 <td valign="top">
@@ -116,6 +120,22 @@ w miarę, jak zwiedzasz.
 **Uczciwa gra**
 Monety zarabiasz tylko w grze. Za prawdziwe pieniądze kupisz unikatowy wygląd, np. Motocykl Smok czy Kij Neon, ale
 zawsze z dokładnie tą samą mocą co przedmiot do zdobycia w grze. Portfel nie wygrywa pojedynków.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+**Własny dystrykt**
+Kup działkę na pustkowiu, nazwij swój dystrykt i rozbudowuj go: karczujesz teren, stawiasz budynki z lotu ptaka,
+obracasz je i dopasowujesz do działki. Dystrykt produkuje surowce i płaci czynsz, a sąsiedzi mogą go najechać.
+
+</td>
+<td valign="top">
+
+**Rewiry i ekipy**
+Co tydzień walka o wpływy w każdej strefie miasta: pojedynki, zadania i trening dają wpływ, a władca rewiru zbiera
+daninę. Do tego ekipy, ligi, Bazar i czat z innymi graczami na tej samej mapie.
 
 </td>
 </tr>
@@ -165,8 +185,8 @@ Na komputerze: klawiatura (WASD, E, I, M).
 
 <div align="center">
 
-| 5 dzielnic + wyspa + 4 pustkowia | 85 mieszkańców | 54 zadania | 46 przeciwników | 100+ przedmiotów | 6 pojazdów |
-| :------------------------------: | :------------: | :--------: | :-------------: | :--------------: | :--------: |
+| 6 miast + wyspa + 5 pustkowi | 98 mieszkańców | 68 zadań | 55 przeciwników | 43 skrytki | 100+ przedmiotów | 6 pojazdów |
+| :--------------------------: | :------------: | :------: | :-------------: | :--------: | :--------------: | :--------: |
 
 </div>
 
@@ -179,14 +199,14 @@ Na komputerze: klawiatura (WASD, E, I, M).
 
 <br/>
 
-| Część             | Technologia                                                           |
-| ----------------- | --------------------------------------------------------------------- |
-| `apps/unity`      | Gra: Unity 6.6, URP 2D, kamera 2.5D, Android (iOS w planach)          |
-| `apps/web`        | Strona: Next.js 15 na Vercel (kreator, profil, ranking, konta)        |
-| `apps/api`        | API: Hono na Render (Budy, zadania, pojedynki, sklep, arkusze PNG)    |
-| `packages/shared` | Generator wyglądu Budów, treści gry, zasady walki, schematy zod       |
-| `supabase`        | Baza i konta: migracje z RLS, atomowe funkcje SQL                     |
-| `tools`           | Eksport grafiki, map i treści do Unity, testy migracji, build na tel. |
+| Część             | Technologia                                                            |
+| ----------------- | ---------------------------------------------------------------------- |
+| `apps/unity`      | Gra: Unity 6.6, URP 2D, kamera 2.5D, Android (iOS w planach)           |
+| `apps/web`        | Strona: Next.js 15 na Vercel (kreator, profil, ranking, konta)         |
+| `apps/api`        | API: Hono na Render (Budy, zadania, walka na żywo, sklep, arkusze PNG) |
+| `packages/shared` | Generator wyglądu Budów, treści gry, zasady walki, schematy zod        |
+| `supabase`        | Baza i konta: migracje z RLS, atomowe funkcje SQL                      |
+| `tools`           | Eksport grafiki, map i treści do Unity, testy migracji, build na tel.  |
 
 Wszystko, co ma wartość (XP, monety, przedmioty, wyniki walk), przyznaje wyłącznie serwer. Gra tylko zgłasza zdarzenia.
 
@@ -201,8 +221,10 @@ pnpm phone          # build APK i instalacja na telefonie przez Wi-Fi
 Gra: otwórz `apps/unity` w Unity Hub (Unity 6.6) i uruchom scenę `Assets/Buds/Scenes/Main.unity`.
 
 Więcej: [architektura](docs/architecture.md) · [wdrożenie](docs/deployment.md) · [telefon](docs/telefon.md) ·
-[dzielnice](docs/districts.md) · [zadania](docs/questy.md) · [walka](docs/walka.md) ·
-[ekwipunek](docs/ekwipunek.md) · [umiejętności](docs/umiejetnosci.md) · [plan prac](docs/roadmap.md)
+[dzielnice](docs/districts.md) · [podróże](docs/podroze.md) · [zadania](docs/questy.md) · [walka](docs/walka.md) ·
+[ekwipunek](docs/ekwipunek.md) · [umiejętności](docs/umiejetnosci.md) · [wygląd](docs/wyglad.md) ·
+[dystrykty](docs/dystrykty.md) · [rywalizacja](docs/rywalizacja.md) · [gra wieloosobowa](docs/multiplayer.md) ·
+[konto](docs/konto.md) · [plan prac](docs/roadmap.md)
 
 </details>
 

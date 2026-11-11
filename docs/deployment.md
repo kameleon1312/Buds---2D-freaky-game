@@ -87,10 +87,11 @@ Railway dalej działa jako alternatywa: `apps/api/railway.json` (Config file pat
    ```bash
    pnpm dlx supabase login
    pnpm dlx supabase link --project-ref <ref>   # ref = część adresu https://<ref>.supabase.co, pyta o hasło do bazy
-   pnpm dlx supabase db push                     # wysyła wszystkie migracje z supabase/migrations
+   pnpm dlx supabase db push --remote            # wysyła wszystkie migracje z supabase/migrations do projektu
    ```
 
-   Po każdej nowej migracji w repo wystarczy ponownie `pnpm dlx supabase db push`.
+   Po każdej nowej migracji w repo wystarczy ponownie `pnpm dlx supabase db push --remote` (CLI od wersji 3 bez `--remote` celuje w lokalną bazę w Dockerze) (ostatnia:
+   `20261101000000_explored.sql`, odkryty teren mapy).
 
 3. Klucze (Project Settings):
    - **Data API / API** → Project URL → `SUPABASE_URL` — sam adres `https://<ref>.supabase.co`, **bez** `/rest/v1/`
